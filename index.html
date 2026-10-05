@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2b2d52">
+<title>Juegos para respirar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700&display=swap">
+<style>
+:root{--bg:#2b2d52;--panel:#363a66;--ink:#fbf1e0;--muted:#cbc8e8;--lamp:#ffc77a;--line:#5a609a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(120% 90% at 50% 0%,#4a4a86,var(--bg) 60%);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;display:grid;place-items:center;padding:24px 16px}
+main{width:100%;max-width:720px;display:flex;flex-direction:column;gap:22px}
+h1{font:600 clamp(1.7rem,5vw,2.4rem)/1.1 'Fredoka',system-ui,sans-serif;margin:0}
+p{margin:0;color:var(--muted);line-height:1.55}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+a.card{display:flex;flex-direction:column;gap:8px;padding:20px;border-radius:18px;background:var(--panel);border:1px solid var(--line);color:inherit;text-decoration:none;transition:transform .2s,border-color .2s}
+a.card:hover,a.card:focus-visible{transform:translateY(-3px);border-color:var(--lamp);outline:none}
+a.card b{font:600 1.25rem 'Fredoka',system-ui,sans-serif}
+a.card span{color:var(--muted);font-size:.95rem;line-height:1.45}
+a.card i{font-style:normal;color:var(--lamp);font-weight:700;margin-top:4px}
+small{color:var(--muted);opacity:.8}
+</style>
+</head>
+<body>
+<main>
+  <div><h1>Juegos para respirar</h1><p>Dos juegos tranquilos, sin prisa ni puntaje, para soltar la mente al final del día.</p></div>
+  <div class="grid">
+    <a class="card" href="rio/"><b>Río de Linternas</b><span>Guía una canoa por un río infinito, enciende linternas y descubre lugares mientras cae la noche.</span><i>Jugar →</i></a>
+    <a class="card" href="cabana/"><b>Cabaña del Acantilado</b><span>Limpia y repara poco a poco una cabaña en lo alto de la montaña, de noche y con lámparas.</span><i>Jugar →</i></a>
+  </div>
+  <small>El avance se guarda en el navegador de cada dispositivo. Activa el sonido con auriculares para disfrutarlo mejor.</small>
+</main>
+</body>
+</html>
