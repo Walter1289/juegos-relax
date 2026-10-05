@@ -1,0 +1,17 @@
+{
+  "name": "Juegos para respirar",
+  "short_name": "Respirar",
+  "description": "Juegos tranquilos: Río de Linternas, Cabaña del Acantilado y Río 3D.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#2b2d52",
+  "theme_color": "#2b2d52",
+  "lang": "es",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
