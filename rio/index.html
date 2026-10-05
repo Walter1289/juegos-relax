@@ -74,7 +74,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       <ul>
         <li>Mantén presionado para remar y mueve el dedo hacia donde quieras ir.</li>
         <li>Toca las linternas flotantes con la canoa para encenderlas.</li>
-        <li>En teclado: flechas o A y D para guiar, espacio para remar.</li>
+        <li>Con auriculares el sonido es envolvente: el agua, las campanas y la lluvia suenan desde su lugar.</li>
+      <li>En teclado: flechas o A y D para guiar, espacio para remar.</li>
       </ul>
       <button class="go" id="go" type="button">Tocar para empezar</button>
     </div>
@@ -485,7 +486,7 @@ function fx(dt){
   }
   G.rippleT-=dt;
   if(G.started&&G.rippleT<=0&&G.v>30){G.rippleT=.26;ripple(V.VW/2+G.ox-Math.sin(G.ang)*58,V.cy+Math.cos(G.ang)*58,4,30+G.v*.1,.35)}
-  hudT-=dt;if(hudT<=0){hudT=.25;updateHUD();if(A.ctx)A.setRain(G.rain)}
+  hudT-=dt;if(hudT<=0){hudT=.25;updateHUD();if(A.ctx){A.setRain(G.rain);const kk=lmIndexAt(G.s);A.space(G.ox,halfW(G.s),lmType(kk)===6?lmPos(kk)-G.s:null)}}
 }
 
 /* ===== Interfaz ===== */
@@ -520,15 +521,15 @@ function resetAll(){
 }
 
 /* ===== Reglas ===== */
-function bump(dir,vol){G.bumpT=.7;ripple(V.VW/2+G.ox+dir*20,V.cy,6,40,.5);A.bump(vol||1)}
+function bump(dir,vol){G.bumpT=.7;ripple(V.VW/2+G.ox+dir*20,V.cy,6,40,.5);A.bump(vol||1,dir)}
 function paddleStroke(){
   const side=Math.sin(G.phase+.01)>=0?1:-1;
   const x=V.VW/2+G.ox+Math.cos(G.ang)*side*46,y=V.cy+Math.sin(G.ang)*side*46+20;
-  splash(x,y,false);ripple(x,y,3,28,.55);A.paddle();
+  splash(x,y,false);ripple(x,y,3,28,.55);A.paddle(side);
 }
 function lightLantern(o){
   G.lit.add(o.id);const x=sx(o),y=sy(o);
-  ripple(x,y,6,50,.6);splash(x,y,true);A.next(.15);updateHUD();saveSoon();
+  ripple(x,y,6,50,.6);splash(x,y,true);A.next(.15,(x-(V.VW/2+G.ox))/40,(y-V.cy)/40);updateHUD();saveSoon();
 }
 function update(dt){
   G.clock+=dt;G.hintT+=dt;
@@ -565,7 +566,7 @@ function update(dt){
     }
   }
   const k=lmIndexAt(G.s);
-  if(Math.abs(G.s-lmPos(k))<130&&!G.found.has(k)){G.found.add(k);toast('Descubriste: '+LM[lmType(k)]);A.discover();if(lmType(k)===5&&A.ctx)A.bell(196,A.ctx.currentTime+.3,.1,true);updateHUD();saveSoon()}
+  if(Math.abs(G.s-lmPos(k))<130&&!G.found.has(k)){G.found.add(k);toast('Descubriste: '+LM[lmType(k)]);A.discover();if(lmType(k)===5&&A.ctx)A.bell(196,A.ctx.currentTime+.3,.1,true,-(halfW(G.s)+128+G.ox)/40,-1);updateHUD();saveSoon()}
   if(G.hintT>14)$('#hint').style.opacity=0;
 }
 
@@ -649,35 +650,62 @@ const A={
       const cv=c.createConvolver();cv.buffer=rb;const wet=c.createGain();wet.gain.value=.38;bus.connect(cv);cv.connect(wet);wet.connect(m);
       // agua
       const w=this.noise(),lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=650;
-      const wg=c.createGain();wg.gain.value=.1;
+      const wg=c.createGain();wg.gain.value=.07;
       const lfo=c.createOscillator();lfo.frequency.value=.09;const lg=c.createGain();lg.gain.value=.04;lfo.connect(lg);lg.connect(wg.gain);lfo.start();
       w.connect(lp);lp.connect(wg);wg.connect(m);
       const w2=this.noise(),bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2200;bp.Q.value=.7;
       const g2=c.createGain();g2.gain.value=.02;w2.connect(bp);bp.connect(g2);g2.connect(m);
-      [[520,2,.7,.035],[1250,3,1.3,.022],[2600,4,2.1,.01]].forEach(([f,q,lf,v])=>{
-        const n=this.noise(),b=c.createBiquadFilter();b.type='bandpass';b.frequency.value=f;b.Q.value=q;
-        const gn=c.createGain();gn.gain.value=v;const l=c.createOscillator(),lg=c.createGain();l.frequency.value=lf;lg.gain.value=v*.7;l.connect(lg);lg.connect(gn.gain);l.start();
-        n.connect(b);b.connect(gn);gn.connect(m);
+      // Arroyos en cada orilla (sonido espacial HRTF): suenan más fuerte del lado al que te acercas
+      this.bk={};this.bkx={'-1':-4,'1':4};
+      [-1,1].forEach(side=>{
+        const pn=this.panner(side*4,0,0,2,.6);pn.connect(m);this.bk[side]=pn;
+        [[520,2,.7,.05],[1250,3,1.3,.03],[2600,4,2.1,.014]].forEach(([f,q,lf,v],i)=>{
+          const n=this.noise(Math.random()*1.8),b=c.createBiquadFilter();b.type='bandpass';b.frequency.value=f;b.Q.value=q;
+          const gn=c.createGain();gn.gain.value=v;const l=c.createOscillator(),lg=c.createGain();l.frequency.value=lf*(side>0?1.13:.91);lg.gain.value=v*.7;l.connect(lg);lg.connect(gn.gain);l.start();
+          n.connect(b);b.connect(gn);gn.connect(pn);
+        });
       });
       const blip=()=>{
         if(!this.ctx)return;
-        if(this.ok()&&Math.random()<.7){
+        if(this.ok()&&Math.random()<.75){
+          const side=Math.random()*(Math.abs(this.bkx['-1'])+Math.abs(this.bkx['1']))<Math.abs(this.bkx['1'])?-1:1;
           const t=c.currentTime,o=c.createOscillator(),gn=c.createGain(),f=rnd(450,1100);
+          const pn=this.panner(this.bkx[side],0,rnd(-4,2),2,.6,true);pn.connect(m);
           o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*rnd(1.4,2),t+.07);
-          gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(rnd(.006,.016),t+.012);gn.gain.exponentialRampToValueAtTime(.0001,t+.1);
-          o.connect(gn);gn.connect(m);o.start(t);o.stop(t+.12);
+          gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(rnd(.01,.026),t+.012);gn.gain.exponentialRampToValueAtTime(.0001,t+.1);
+          o.connect(gn);gn.connect(pn);o.start(t);o.stop(t+.12);
         }
         setTimeout(blip,rnd(90,260));
       };blip();
-      const r1=this.noise(),hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=3200;
-      const rg=c.createGain();rg.gain.value=0;r1.connect(hp);hp.connect(rg);rg.connect(m);
-      const r2=this.noise(),lp2=c.createBiquadFilter();lp2.type='bandpass';lp2.frequency.value=1500;lp2.Q.value=.6;
-      const rg2=c.createGain();rg2.gain.value=0;r2.connect(lp2);lp2.connect(rg2);rg2.connect(m);
-      this.rg=rg;this.rg2=rg2;
+      // Cascadita: ruido que se acerca por delante cuando te aproximas al lugar
+      const wn=this.noise(Math.random()*1.5),wh=c.createBiquadFilter();wh.type='highpass';wh.frequency.value=380;
+      const wl=c.createBiquadFilter();wl.type='lowpass';wl.frequency.value=4200;
+      const wgn=c.createGain();wgn.gain.value=0;const wpn=this.panner(0,0,-30,2,.5);
+      wn.connect(wh);wh.connect(wl);wl.connect(wgn);wgn.connect(wpn);wpn.connect(m);this.wfG=wgn;this.wfP=wpn;
+      // Llovizna estéreo: dos canales decorrelacionados + gotas sueltas en posiciones al azar
+      this.rgs=[];
+      [[-.75,3200],[.75,3600]].forEach(([pan,hf])=>{
+        const sp=c.createStereoPanner();sp.pan.value=pan;sp.connect(m);
+        const r1=this.noise(Math.random()*1.8),hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=hf;
+        const rg=c.createGain();rg.gain.value=0;r1.connect(hp);hp.connect(rg);rg.connect(sp);this.rgs.push([rg,.07]);
+        const r2=this.noise(Math.random()*1.8),bp2=c.createBiquadFilter();bp2.type='bandpass';bp2.frequency.value=1500;bp2.Q.value=.6;
+        const rg2=c.createGain();rg2.gain.value=0;r2.connect(bp2);bp2.connect(rg2);rg2.connect(sp);this.rgs.push([rg2,.035]);
+      });
+      this.rainLvl=0;
+      const dropT=()=>{
+        if(!this.ctx)return;
+        if(this.ok()&&this.rainLvl>.2){
+          const t=c.currentTime,o=c.createOscillator(),gn=c.createGain(),pn=this.panner(rnd(-4,4),rnd(0,1),rnd(-4,1),1.5,.7,true);pn.connect(m);
+          o.frequency.setValueAtTime(rnd(1800,3200),t);o.frequency.exponentialRampToValueAtTime(rnd(900,1400),t+.05);
+          gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(.02*this.rainLvl,t+.004);gn.gain.exponentialRampToValueAtTime(.0001,t+.07);
+          o.connect(gn);gn.connect(pn);o.start(t);o.stop(t+.09);
+        }
+        setTimeout(dropT,rnd(70,260));
+      };dropT();
       this.music();
     }catch(e){this.ctx=null}
   },
-  setRain(r){if(!this.rg)return;const t=this.ctx.currentTime;this.rg.gain.setTargetAtTime(r*.07,t,.6);this.rg2.gain.setTargetAtTime(r*.035,t,.6)},
+  setRain(r){if(!this.rgs)return;this.rainLvl=r;const t=this.ctx.currentTime;this.rgs.forEach(([g,v])=>g.gain.setTargetAtTime(r*v,t,.6))},
   ok(){return this.ctx&&this.ctx.state==='running'},
   breathTone(up,dur){
     if(!this.ok())return;const c=this.ctx,t=c.currentTime;
@@ -688,17 +716,37 @@ const A={
       o.connect(gn);gn.connect(this.bus);o.start(t);o.stop(t+dur+.1);
     });
   },
-  noise(){const c=this.ctx,s=c.createBufferSource();s.buffer=this.nbuf;s.loop=true;s.start();return s},
-  pluck(f,vol,when){
-    if(!this.ok())return;const c=this.ctx,t=when||c.currentTime;
+  noise(off){const c=this.ctx,s=c.createBufferSource();s.buffer=this.nbuf;s.loop=true;s.start(0,off||0);return s},
+  panner(x,y,z,ref,roll,now){
+    const p=this.ctx.createPanner();p.panningModel='HRTF';p.distanceModel='inverse';p.refDistance=ref||2;p.rolloffFactor=roll==null?.6:roll;
+    if(p.positionX){p.positionX.value=x;p.positionY.value=y;p.positionZ.value=z}else p.setPosition(x,y,z);
+    return p;
+  },
+  setPos(p,x,y,z){
+    if(p.positionX){const t=this.ctx.currentTime;p.positionX.setTargetAtTime(x,t,.2);p.positionY.setTargetAtTime(y,t,.2);p.positionZ.setTargetAtTime(z,t,.2)}else p.setPosition(x,y,z);
+  },
+  dest(x,z){if(x==null)return this.bus;const p=this.panner(x,0,z==null?-1.5:z,2,.6);p.connect(this.bus);return p},
+  space(ox,hw,dz){
+    if(!this.ctx)return;
+    const L=Math.max(.9,(hw+ox)/40),R=Math.max(.9,(hw-ox)/40);
+    this.bkx['-1']=-L;this.bkx['1']=R;this.setPos(this.bk[-1],-L,0,0);this.setPos(this.bk[1],R,0,0);
+    if(dz==null||dz<-300){this.wfG.gain.setTargetAtTime(0,this.ctx.currentTime,.4)}
+    else{
+      const u=Math.max(0,Math.min(1,1-Math.abs(dz)/1500));
+      this.wfG.gain.setTargetAtTime(.34*Math.pow(u,1.5),this.ctx.currentTime,.4);
+      this.setPos(this.wfP,-ox/40,0,-dz/40);
+    }
+  },
+  pluck(f,vol,when,x,z){
+    if(!this.ok())return;const c=this.ctx,t=when||c.currentTime,d=this.dest(x,z);
     [[1,1],[2,.25],[3.01,.1]].forEach(([k,a],i)=>{
       const o=c.createOscillator(),gn=c.createGain();o.type=i?'sine':'triangle';o.frequency.value=f*k;
       gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(vol*a,t+.01);gn.gain.exponentialRampToValueAtTime(.0001,t+(i?1.1:2));
-      o.connect(gn);gn.connect(this.bus);o.start(t);o.stop(t+2.1);
+      o.connect(gn);gn.connect(d);o.start(t);o.stop(t+2.1);
     });
   },
-  flute(f,t,dur,vol){
-    if(!this.ok())return;const c=this.ctx;
+  flute(f,t,dur,vol,x,z){
+    if(!this.ok())return;const c=this.ctx,d=this.dest(x,z);
     const o=c.createOscillator(),o2=c.createOscillator(),gn=c.createGain(),g2=c.createGain();
     o.type='sine';o2.type='triangle';
     o.frequency.setValueAtTime(f*.96,t);o.frequency.exponentialRampToValueAtTime(f,t+.18);o2.frequency.setValueAtTime(f*2*.96,t);o2.frequency.exponentialRampToValueAtTime(f*2,t+.18);
@@ -707,8 +755,8 @@ const A={
     gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(vol,t+.35);gn.gain.setValueAtTime(vol*.85,t+dur*.7);gn.gain.linearRampToValueAtTime(0,t+dur);
     const s=c.createBufferSource();s.buffer=this.nbuf;s.loop=true;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f*2;bp.Q.value=4;
     const ng=c.createGain();ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(vol*.5,t+.2);ng.gain.linearRampToValueAtTime(0,t+dur);
-    s.connect(bp);bp.connect(ng);ng.connect(this.bus);s.start(t);s.stop(t+dur+.1);
-    gn.connect(this.bus);o.start(t);o2.start(t);o.stop(t+dur+.1);o2.stop(t+dur+.1);
+    s.connect(bp);bp.connect(ng);ng.connect(d);s.start(t);s.stop(t+dur+.1);
+    gn.connect(d);o.start(t);o2.start(t);o.stop(t+dur+.1);o2.stop(t+dur+.1);
   },
   drum(t,vol,p){
     if(!this.ok())return;const c=this.ctx;
@@ -720,30 +768,30 @@ const A={
     const ng=c.createGain();ng.gain.setValueAtTime(vol*.5,t);ng.gain.exponentialRampToValueAtTime(.0001,t+.1);
     s.connect(lp);lp.connect(ng);ng.connect(this.bus);s.start(t,Math.random());s.stop(t+.15);
   },
-  bell(f,t,vol,long){
-    if(!this.ok())return;const c=this.ctx;
+  bell(f,t,vol,long,x,z){
+    if(!this.ok())return;const c=this.ctx,dst=this.dest(x,z);
     [[1,1,1],[2.01,.3,.6],[2.76,.22,.4],[5.4,.08,.2]].forEach(([k,a,d])=>{
       const o=c.createOscillator(),gn=c.createGain();o.type='sine';o.frequency.value=f*k;
       const D=(long?7:3)*d;
       gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(vol*a,t+.005);gn.gain.exponentialRampToValueAtTime(.0001,t+D);
-      o.connect(gn);gn.connect(this.bus);o.start(t);o.stop(t+D+.1);
+      o.connect(gn);gn.connect(dst);o.start(t);o.stop(t+D+.1);
     });
   },
-  next(vol){this.idx=clamp(this.idx+Math.floor(Math.random()*4)-1,3,SC.length-1);this.bell(SC[this.idx]*(Math.random()<.5?1:2),this.ctx?this.ctx.currentTime:0,vol*.9)},
-  paddle(){
-    if(!this.ok())return;const c=this.ctx;
+  next(vol,x,z){this.idx=clamp(this.idx+Math.floor(Math.random()*4)-1,3,SC.length-1);this.bell(SC[this.idx]*(Math.random()<.5?1:2),this.ctx?this.ctx.currentTime:0,vol*.9,false,x,z)},
+  paddle(side){
+    if(!this.ok())return;const c=this.ctx,pn=this.panner((side||0)*1.1,-.3,-.4,1.5,.8);pn.connect(this.master);
     const s=c.createBufferSource();s.buffer=this.nbuf;
     const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=900+Math.random()*500;bp.Q.value=.9;
     const gn=c.createGain(),t=c.currentTime;
     gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(.14,t+.05);gn.gain.exponentialRampToValueAtTime(.0001,t+.4);
-    s.connect(bp);bp.connect(gn);gn.connect(this.master);s.start(t,Math.random());s.stop(t+.45);
+    s.connect(bp);bp.connect(gn);gn.connect(pn);s.start(t,Math.random());s.stop(t+.45);
   },
-  bump(v){
-    if(!this.ok())return;const c=this.ctx,t=c.currentTime;
+  bump(v,dir){
+    if(!this.ok())return;const c=this.ctx,t=c.currentTime,pn=this.panner((dir||0)*1.3,-.3,0,1.5,.8);pn.connect(this.master);
     const o=c.createOscillator(),gn=c.createGain();
     o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(70,t+.2);
     gn.gain.setValueAtTime(.16*v,t);gn.gain.exponentialRampToValueAtTime(.0001,t+.3);
-    o.connect(gn);gn.connect(this.master);o.start(t);o.stop(t+.35);
+    o.connect(gn);gn.connect(pn);o.start(t);o.stop(t+.35);
   },
   discover(){if(!this.ok())return;const t=this.ctx.currentTime;[0,3,5,6].forEach((i,j)=>this.pluck(SC[i],.12,t+j*.2));this.bell(SC[8],t+.9,.07)},
   chirp(t0){
@@ -779,10 +827,10 @@ const A={
       if(!this.ctx)return;
       let t=c.currentTime+.2,tot=0;
       if(this.ok()){
-        const n=2+Math.floor(Math.random()*3);
+        const n=2+Math.floor(Math.random()*3),px=rnd(-3,3);
         for(let i=0;i<n;i++){
           fi=clamp(fi+Math.floor(Math.random()*5)-2,0,7);
-          const d=rnd(1.8,3.4);this.flute(SC[fi],t,d,.06);t+=d*.88;tot+=d*.88;
+          const d=rnd(1.8,3.4);this.flute(SC[fi],t,d,.06,px+rnd(-.3,.3),-2.5);t+=d*.88;tot+=d*.88;
         }
       }
       setTimeout(phrase,(tot+rnd(6,11))*1000);
@@ -792,13 +840,13 @@ const A={
       if(!this.ctx)return;
       if(this.ok()){
         const t=c.currentTime+.05,k=SC[5+Math.floor(Math.random()*5)];
-        this.bell(k,t,.045);if(Math.random()<.5)this.bell(SC[5+Math.floor(Math.random()*5)],t+rnd(.18,.4),.035);
+        this.bell(k,t,.045,false,rnd(-5,5),rnd(-5,-1));if(Math.random()<.5)this.bell(SC[5+Math.floor(Math.random()*5)],t+rnd(.18,.4),.035,false,rnd(-5,5),rnd(-5,-1));
       }
       setTimeout(bells,rnd(3500,8000));
     };setTimeout(bells,2500);
-    const koto=()=>{if(!this.ctx)return;if(this.ok()){const t=c.currentTime+.05;let i=Math.floor(Math.random()*6);for(let j=0;j<3;j++){this.pluck(SC[clamp(i+[0,2,1][j],0,9)],.06,t+j*.28)}}setTimeout(koto,rnd(14000,24000))};setTimeout(koto,9000);
+    const koto=()=>{if(!this.ctx)return;if(this.ok()){const t=c.currentTime+.05;let i=Math.floor(Math.random()*6),kx=rnd(-4,4);for(let j=0;j<3;j++){this.pluck(SC[clamp(i+[0,2,1][j],0,9)],.06,t+j*.28,kx,-2)}}setTimeout(koto,rnd(14000,24000))};setTimeout(koto,9000);
     // campana de templo, muy de vez en cuando
-    const temple=()=>{if(!this.ctx)return;if(this.ok())this.bell(146.83,c.currentTime+.05,.08,true);setTimeout(temple,rnd(35000,55000))};setTimeout(temple,16000);
+    const temple=()=>{if(!this.ctx)return;if(this.ok())this.bell(146.83,c.currentTime+.05,.08,true,rnd(-6,6),-8);setTimeout(temple,rnd(35000,55000))};setTimeout(temple,16000);
     // grillos de noche
     const cr=()=>{if(!this.ctx)return;if(this.ok()&&V.dark>.3){const t=c.currentTime;for(let i=0;i<3;i++)this.chirp(t+i*.11)}setTimeout(cr,1400+Math.random()*3000)};cr();
   },
