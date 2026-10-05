@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2b2d52">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<title>Cabaña 3D · prototipo</title>
+<style>
+:root{--bg:#2b2d52;--panel:rgba(54,58,102,.88);--ink:#fbf1e0;--muted:#cbc8e8;--lamp:#ffc77a;--line:#5a609a}
+[hidden]{display:none!important}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;overflow:hidden;overscroll-behavior:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+#top{position:fixed;left:0;right:0;top:0;padding:max(10px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 8px max(14px,env(safe-area-inset-left));display:flex;gap:10px;align-items:center;flex-wrap:wrap;z-index:5}
+#top>*{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 13px;border-radius:99px;font:600 .85rem/1 system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(6px)}
+#top button{cursor:pointer}
+.bar{flex:1;min-width:120px;max-width:340px;height:10px;padding:0!important;overflow:hidden}
+#fill{height:100%;width:0;background:linear-gradient(90deg,#ffc77a,#f5a3b8)}
+#mats{color:var(--lamp)}
+#panel{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:8px max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,rgba(30,31,62,.92) 30%);overflow-x:auto}
+#chips{display:flex;gap:14px;align-items:flex-start;min-width:max-content}
+.grp{display:flex;gap:6px;align-items:stretch;flex-wrap:nowrap}
+.lab{align-self:center;font:700 .62rem/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);writing-mode:vertical-rl;transform:rotate(180deg)}
+.chip{display:flex;flex-direction:column;gap:3px;text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 11px;border-radius:12px;font:inherit;cursor:pointer;min-width:112px}
+.chip b{font-size:.8rem}.chip small{font-size:.68rem;color:var(--muted)}
+.chip.ready{border-color:var(--lamp);box-shadow:0 0 0 1px var(--lamp) inset}.chip.ready small{color:var(--lamp)}
+.chip.done{opacity:.6}
+.loot{align-self:center;font-size:.72rem;padding:5px 9px;border-radius:99px;background:rgba(255,255,255,.07);color:var(--muted);white-space:nowrap}.loot.on{background:rgba(255,199,122,.2);color:var(--lamp)}
+#hint,#toast{position:fixed;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);padding:9px 16px;border-radius:99px;font-size:.88rem;text-align:center;max-width:92%;z-index:6;pointer-events:none;transition:opacity .6s}
+#hint{bottom:calc(100px + env(safe-area-inset-bottom))}
+#toast{top:62px;opacity:0}#toast.show{opacity:1}
+#breath{position:fixed;inset:0;display:grid;place-items:center;z-index:8;background:rgba(30,31,62,.55);pointer-events:none}
+#bcircle{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,#ffe9c2,#f5a3b8 70%);transform:scale(.7);opacity:.85}
+#btxt{position:absolute;font:600 1.2rem system-ui;color:#2b2d52}
+#start{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:radial-gradient(120% 90% at 50% 0%,rgba(74,74,134,.93),rgba(43,45,82,.97) 65%);z-index:10}
+#start .card{max-width:440px;display:flex;flex-direction:column;gap:13px}
+h1{margin:0;font:600 clamp(1.7rem,6vw,2.3rem)/1.1 system-ui,sans-serif}
+p{margin:0;color:var(--muted);line-height:1.55}
+ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.6}
+#go{align-self:flex-start;background:var(--lamp);color:#3b2a1a;border:0;border-radius:99px;padding:13px 28px;font:700 1rem system-ui,sans-serif;cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="top">
+  <a href="../">← Menú</a>
+  <div class="bar" role="progressbar"><div id="fill"></div></div>
+  <span id="pct">0%</span><span id="mats">Tablas: 0</span>
+  <button id="brt">Respirar</button><button id="snd">Sonido: sí</button><button id="rst">Reiniciar</button>
+</div>
+<div id="hint">Arrastra sobre la suciedad para limpiar · arrastra el fondo para girar · pellizca para acercar</div>
+<div id="toast" role="status"></div>
+<div id="panel"><div id="chips"></div></div>
+<div id="breath" hidden><div id="bcircle"></div><div id="btxt">Inhala</div></div>
+<div id="start">
+  <div class="card">
+    <h1>Cabaña 3D <small style="font-size:.5em;color:var(--lamp)">prototipo</small></h1>
+    <p>Una cabaña de madera y piedra en lo alto de un acantilado, de noche. Límpiala y repárala poco a poco, sin prisa.</p>
+    <ul>
+      <li>Arrastra sobre la suciedad para fregarla y ganar tablas.</li>
+      <li>Toca un objeto limpio (o su botón de abajo) para repararlo.</li>
+      <li>Arrastra el fondo para girar; pellizca o usa la rueda para acercar.</li>
+    </ul>
+    <p>Mejor con auriculares. Tu avance se guarda en este dispositivo.</p>
+    <button id="go">Entrar a la cabaña</button>
+  </div>
+</div>
+<script src="app.js"></script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js").catch(function(){})</script>
+</body>
+</html>

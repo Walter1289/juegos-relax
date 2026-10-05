@@ -1,11 +1,12 @@
 /* Service worker: precarga todo y sirve sin conexión. Sube VERSION para forzar actualización. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'respirar-' + VERSION;
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './rio/', './rio/index.html',
   './cabana/', './cabana/index.html',
   './rio3d/', './rio3d/index.html', './rio3d/app.js',
+  './cabana3d/', './cabana3d/index.html', './cabana3d/app.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
 ];
 self.addEventListener('install', e => {
