@@ -68,16 +68,16 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 <main id="stage">
   <canvas id="game" aria-label="Una canoa baja por un río tranquilo al atardecer"></canvas>
   <div id="toast" role="status"></div>
-  <div id="hint">Mantén presionado para remar. Mueve el dedo o el mouse para guiar.</div>
+  <div id="hint">La corriente te lleva. Mantén presionado y mueve el dedo o el mouse para guiar.</div>
   <div id="start">
     <div class="card">
       <h2>Río de Linternas</h2>
       <p>Una canoa, un río tranquilo y la noche que se acerca. No hay prisa ni final: deja que el agua te lleve.</p>
       <ul>
-        <li>Mantén presionado para remar y mueve el dedo hacia donde quieras ir.</li>
+        <li>La corriente te lleva sola. Mantén presionado y mueve el dedo hacia donde quieras ir.</li>
         <li>Toca las linternas flotantes con la canoa para encenderlas.</li>
         <li>Con auriculares el sonido es envolvente: el agua, las campanas y la lluvia suenan desde su lugar.</li>
-      <li>En teclado: flechas o A y D para guiar, espacio para remar.</li>
+      <li>En teclado: flechas o A y D para guiar.</li>
       </ul>
       <button class="go" id="go" type="button">Tocar para empezar</button>
     </div>
@@ -598,11 +598,11 @@ function lightLantern(o){
 }
 function update(dt){
   G.clock+=dt;G.hintT+=dt;
-  const holding=G.hold||keys.p;
+  const holding=G.hold||keys.l||keys.r;   // solo se mueve el remo al guiar; la corriente hace el avance
   let steer=0;
   if(G.px!=null)steer=clamp((G.px-(V.VW/2+G.ox))/90,-1,1);
   if(keys.l)steer-=1;if(keys.r)steer+=1;steer=clamp(steer,-1,1);
-  G.v+=((holding?100:36)-G.v)*Math.min(1,dt*.9);
+  G.v+=(40-G.v)*Math.min(1,dt*.9);
   G.vx+=(steer*125-G.vx)*Math.min(1,dt*2.2);
   G.ox+=G.vx*dt;
   const lim=halfW(G.s)-36;
@@ -616,7 +616,7 @@ function update(dt){
   const dc=(center(G.s+25)-center(G.s-25))/50;
   G.ang+=((Math.atan(dc)+Math.atan2(G.vx,G.v)*.7)-G.ang)*Math.min(1,dt*3);
   if(holding){
-    const b=Math.floor(G.phase/Math.PI);G.phase+=dt*(1.5+G.v/220);
+    const b=Math.floor(G.phase/Math.PI);G.phase+=dt*1.1;
     if(Math.floor(G.phase/Math.PI)!==b)paddleStroke();
   }
   const lo=Math.floor((G.s-90)/CELL),hi=Math.floor((G.s+90)/CELL);
@@ -648,7 +648,7 @@ function render(){
   for(const r of ripples){g.strokeStyle='rgba(255,255,255,'+(r.a*(1-r.r/r.max))+')';g.lineWidth=2;g.beginPath();g.ellipse(r.x,r.y,r.r,r.r*.55,0,0,7);g.stroke()}
   const cx=V.VW/2+G.ox,cy=V.cy;
   drawWake(g,cx,cy,G.ang,G.v);
-  drawCanoe(g,cx,cy,G.ang,G.phase,G.hold||keys.p,dark/.64);
+  drawCanoe(g,cx,cy,G.ang,G.phase,G.hold||keys.l||keys.r,dark/.64);
   V.lights.push([cx+Math.sin(G.ang)*56,cy-Math.cos(G.ang)*56,150,.9]);
   drawObjs(g,PASS_HIGH);
   drawLandmarksOver(g);
@@ -921,7 +921,7 @@ const A={
 };
 
 /* ===== Controles y arranque ===== */
-$('#go').onclick=()=>{G.started=true;G.hintT=0;$('#start').hidden=true;A.init();toast(G.s>0?'Bienvenido de vuelta al río':'Mantén presionado para remar')};
+$('#go').onclick=()=>{G.started=true;G.hintT=0;$('#start').hidden=true;A.init();toast(G.s>0?'Bienvenido de vuelta al río':'Deja que la corriente te lleve')};
 $('#mute').onclick=e=>{A.mute(!A.muted);e.currentTarget.textContent='Sonido: '+(A.muted?'no':'sí')};
 let resetT=0;
 $('#reset').onclick=e=>{
