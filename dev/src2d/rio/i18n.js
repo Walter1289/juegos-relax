@@ -24,6 +24,11 @@ export function setupI18n(){
     ['Melodía de descubrimiento','Discovery melody','発見のメロディ'],
     ['Puente de madera','Wooden bridge','木の橋'],['Torii sobre el agua','Torii over the water','水上の鳥居'],['Aldea de farolillos','Lantern village','ちょうちんの村'],['Jardín de sakura','Sakura garden','桜の庭'],['Cañaveral de las garzas','Heron reedbed','サギの葦原'],
     ['Templo de la campana','Bell temple','鐘の寺'],['Cascadita de musgo','Mossy waterfall','苔の小さな滝'],['Casa de té','Tea house','茶屋'],['Bosque de bambú','Bamboo forest','竹林'],['Estanque de lotos','Lotus pond','蓮の池'],
+    ['Castillo de la Garza Blanca','White Heron Castle','白鷺城'],
+    ['El dragón anuncia el Castillo de la Garza Blanca','The dragon heralds White Heron Castle','龍が白鷺城の到来を告げています'],
+    ['Rugido del dragón','Dragon roar','龍の咆哮'],['Taiko','Taiko drums','太鼓'],['Tambores del festival','Festival drums','祭りの太鼓'],
+    ['Festival del castillo: los tambores resuenan','Castle festival: the drums echo across the water','城の祭り：太鼓が水面に響きます'],
+    ['Festival del castillo: fuegos artificiales sobre la Garza Blanca','Castle festival: fireworks over the White Heron','城の祭り：白鷺城の夜空に花火が上がります'],
   ]);
   UX.rx([
     [/^Siguiente: (.+) en (\d+) m$/,(m,i,tr)=>i===1?'Next: '+tr(m[1])+' in '+m[2]+' m':'次：'+tr(m[1])+'（あと'+m[2]+' m）'],

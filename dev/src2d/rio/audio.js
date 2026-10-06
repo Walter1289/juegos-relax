@@ -165,17 +165,33 @@ export const A={
     gn.gain.setValueAtTime(.16*v,t);gn.gain.exponentialRampToValueAtTime(.0001,t+.3);
     o.connect(gn);gn.connect(pn);o.start(t);o.stop(t+.35);
   },
-  firework(pan){
-    if(!this.ok())return;const c=this.ctx,t=c.currentTime+.02,d=this.dest(pan,-8);
-    // golpe grave
-    const o=c.createOscillator(),gn=c.createGain();o.type='sine';o.frequency.setValueAtTime(95,t);o.frequency.exponentialRampToValueAtTime(38,t+.35);
-    gn.gain.setValueAtTime(.0001,t);gn.gain.linearRampToValueAtTime(.14,t+.01);gn.gain.exponentialRampToValueAtTime(.0001,t+.7);
+  firework(pan,vol,kind){
+    if(!this.ok())return;const c=this.ctx,t=c.currentTime+.02,v=vol==null?1:vol,d=this.dest(pan,-8);
+    // golpe grave (la «peonía» pega más fuerte; el «sauce» es más suave y larga)
+    const o=c.createOscillator(),gn=c.createGain();o.type='sine';o.frequency.setValueAtTime(95-(kind===1?20:0),t);o.frequency.exponentialRampToValueAtTime(38,t+.35);
+    gn.gain.setValueAtTime(.0001,t);gn.gain.linearRampToValueAtTime(.14*v,t+.01);gn.gain.exponentialRampToValueAtTime(.0001,t+.7);
     o.connect(gn);gn.connect(d);o.start(t);o.stop(t+.75);
     // chisporroteo: ruido agudo en pequeños estallidos que se apagan
     const s=c.createBufferSource();s.buffer=this.nbuf;s.loop=true;const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=3500;
-    const ng=c.createGain();ng.gain.value=0;
-    for(let i=0;i<16;i++){const tt=t+.12+i*.07+Math.random()*.05;ng.gain.setValueAtTime(.03*(1-i/20)*(.5+Math.random()),tt);ng.gain.setTargetAtTime(0,tt,.012)}
-    s.connect(hp);hp.connect(ng);ng.connect(d);s.start(t,Math.random());s.stop(t+1.4);
+    const ng=c.createGain();ng.gain.value=0;const nc=kind===1?26:16;
+    for(let i=0;i<nc;i++){const tt=t+.12+i*(kind===1?.09:.07)+Math.random()*.05;ng.gain.setValueAtTime(.03*v*(1-i/(nc+4))*(.5+Math.random()),tt);ng.gain.setTargetAtTime(0,tt,.012)}
+    s.connect(hp);hp.connect(ng);ng.connect(d);s.start(t,Math.random());s.stop(t+nc*.1+.6);
+  },
+  /* rugido del dragón: gruñido grave (diente de sierra con vibrato, filtro que se abre y cierra), ruido ronco y un golpe sub-grave */
+  roar(){
+    if(!this.ok())return;const c=this.ctx,t=c.currentTime+.03,D=2.4,d=this.dest(-2.6,-3);
+    const lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=4;lp.frequency.setValueAtTime(180,t);lp.frequency.linearRampToValueAtTime(950,t+.7);lp.frequency.exponentialRampToValueAtTime(220,t+D);
+    const out=c.createGain();out.gain.setValueAtTime(.0001,t);out.gain.linearRampToValueAtTime(.26,t+.25);out.gain.setValueAtTime(.26,t+.9);out.gain.exponentialRampToValueAtTime(.0001,t+D);
+    lp.connect(out);out.connect(d);
+    [[72,1],[73.6,.7],[36,.9]].forEach(([f,k],i)=>{
+      const o=c.createOscillator(),g2=c.createGain();o.type=i===2?'sine':'sawtooth';
+      o.frequency.setValueAtTime(f*1.5,t);o.frequency.exponentialRampToValueAtTime(f,t+.5);o.frequency.exponentialRampToValueAtTime(f*.7,t+D);
+      const lf=c.createOscillator(),lg=c.createGain();lf.frequency.value=13+i*2;lg.gain.value=f*.05;lf.connect(lg);lg.connect(o.frequency);lf.start(t);lf.stop(t+D+.1);
+      g2.gain.value=.5*k;o.connect(g2);g2.connect(lp);o.start(t);o.stop(t+D+.1);
+    });
+    const s=c.createBufferSource();s.buffer=this.nbuf;s.loop=true;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=260;bp.Q.value=1.4;
+    const ng=c.createGain();ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.2,t+.3);ng.gain.exponentialRampToValueAtTime(.0001,t+D*.9);
+    s.connect(bp);bp.connect(ng);ng.connect(d);s.start(t,Math.random());s.stop(t+D);
   },
   shoot(){
     if(!this.ok())return;const c=this.ctx,t=c.currentTime,o=c.createOscillator(),gn=c.createGain();o.type='sine';

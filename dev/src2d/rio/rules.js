@@ -53,6 +53,6 @@ export function update(dt){
     }
   }
   const k=lmIndexAt(G.s);
-  if(Math.abs(G.s-lmPos(k))<130&&!G.found.has(k)){G.found.add(k);toast('Descubriste: '+LM[lmType(k)]);A.discover();hap([20,50,20,50,30]);if(lmType(k)===5&&A.ctx){cap('Campana de templo',15000);A.bell(196,A.ctx.currentTime+.3,.1,true,-(halfW(G.s)+128+G.ox)/40,-1)}updateHUD();saveSoon()}
+  if(Math.abs(G.s-lmPos(k))<(lmType(k)===10?240:130)&&!G.found.has(k)){G.found.add(k);toast('Descubriste: '+LM[lmType(k)]);A.discover();hap([20,50,20,50,30]);if(lmType(k)===5&&A.ctx){cap('Campana de templo',15000);A.bell(196,A.ctx.currentTime+.3,.1,true,-(halfW(G.s)+128+G.ox)/40,-1)}updateHUD();saveSoon()}
   if(G.hintT>14)$('#hint').style.opacity=0;
 }

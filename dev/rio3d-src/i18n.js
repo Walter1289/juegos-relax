@@ -15,7 +15,7 @@ const D=[
 ['Dirigir:','Steer:','操作:'],['mantén presionado y mueve el dedo o el ratón a los lados (o usa las flechas A / D).','press and move your finger or mouse sideways (or use the A / D arrow keys).','長押ししたまま指やマウスを左右に動かします（A / D キーも使えます）。'],
 ['Mejor con auriculares: el sonido es espacial.','Best with headphones: the sound is spatial.','ヘッドホン推奨：立体音響です。'],
 ['Entrar al río','Enter the river','川に入る'],['Empezar desde el principio','Start from the beginning','最初から始める'],
-['Puente de madera','Wooden bridge','木の橋'],['Torii sobre el agua','Torii over the water','水上の鳥居'],['Aldea de farolillos','Lantern village','ちょうちんの村'],['Jardín de sakura','Sakura garden','桜の庭'],['Cañaveral de las garzas','Heron reedbed','サギの葦原'],
+['Castillo de la Garza Blanca','White Heron Castle','白鷺城'],['Rugido del dragón','Dragon roar','竜の咆哮'],['El dragón anuncia el Castillo de la Garza Blanca','The dragon heralds White Heron Castle','竜が白鷺城の到来を告げます'],['Puente de madera','Wooden bridge','木の橋'],['Torii sobre el agua','Torii over the water','水上の鳥居'],['Aldea de farolillos','Lantern village','ちょうちんの村'],['Jardín de sakura','Sakura garden','桜の庭'],['Cañaveral de las garzas','Heron reedbed','サギの葦原'],
 ['Templo de la campana','Bell temple','鐘の寺'],['Cascadita de musgo','Mossy waterfall','苔の小さな滝'],['Casa de té','Tea house','茶屋'],['Bosque de bambú','Bamboo forest','竹林'],['Estanque de lotos','Lotus pond','蓮の池'],
 ['Jardín de hortensias','Hydrangea garden','あじさいの庭'],['Jardín de arces','Maple garden','もみじの庭'],['Jardín de ciruelos','Plum garden','梅の庭'],
 ['Primavera','Spring','春'],['Verano','Summer','夏'],['Otoño','Autumn','秋'],['Invierno','Winter','冬'],

@@ -1,10 +1,10 @@
 /* Momentos únicos: festival de linternas con fuegos artificiales (aldea, de noche), aurora (invierno) y pétalos/hojas cayendo. */
 import {A} from '../audio-rio.js';
-import {seasonIdx} from '../season.js';
+import {seasonIdx,SAKURA} from '../season.js';
 import * as THREE from 'three';
 import {clamp} from './util.js';
 import {P} from './state.js';
-import {LMS,lmPos,SE,forestAt,gardenAt} from './world.js';
+import {LMS,lmPos,SE,forestAt,gardenAt,lmType} from './world.js';
 import {glowTex,scene} from './core.js';
 import {env} from './env.js';
 import {encounter} from './fauna.js';
@@ -15,7 +15,7 @@ export const fw=new THREE.Points(fwG,new THREE.PointsMaterial({size:2.6,map:glow
 export const FWC=[[1,.62,.75],[1,.84,.4],[.55,.9,1],[1,.5,.4],[.8,.7,1]],fwB=[];
 for(let i=0;i<FWN;i++)fwB.push({age:9,x:0,y:0,z:0,c:FWC[0],v:new Float32Array(FWP*3)});
 let fwT=0,festOn=false;
-function festNear(ps){const k=Math.round((ps-240)/LMS);for(const q of[k-1,k,k+1])if(q>=0&&q%10===2&&Math.abs(lmPos(q)-ps)<230)return true;return false}
+function festNear(ps){const k=Math.round((ps-240)/LMS);for(const q of[k-1,k,k+1])if(q>=0&&lmType(q)===2&&Math.abs(lmPos(q)-ps)<230)return true;return false}
 function fwLaunch(){
   const b=fwB.find(b=>b.age>=3);if(!b)return;
   b.age=0;b.x=P.px+(Math.random()-.5)*40;b.y=4+Math.random()*5;b.z=P.pz-(55+Math.random()*40);b.c=FWC[(Math.random()*FWC.length)|0];
@@ -44,11 +44,16 @@ const PN=300,petG=new THREE.BufferGeometry(),petP=new Float32Array(PN*3),petS=[]
 for(let i=0;i<PN;i++){petS.push([Math.random()*60-30,Math.random()*12,Math.random()*60-50,Math.random()*6.28]);}
 petG.setAttribute('position',new THREE.BufferAttribute(petP,3));
 const petTex=(()=>{const c=document.createElement('canvas');c.width=c.height=32;const x=c.getContext('2d');x.fillStyle='#fff';x.beginPath();x.ellipse(16,16,12,7,.6,0,6.3);x.fill();const t=new THREE.CanvasTexture(c);return t})();
-const petM=new THREE.PointsMaterial({map:petTex,alphaTest:.3,color:SE.pet.c,size:SE.pet.size,transparent:true,opacity:.85,depthWrite:false});
+const petC=new Float32Array(PN*3),petM=new THREE.PointsMaterial({map:petTex,alphaTest:.3,color:0xffffff,vertexColors:true,size:SE.pet.size,transparent:true,opacity:.85,depthWrite:false});
+let petLast=-1;const petSe=new THREE.Color(SE.pet.c),petPk=new THREE.Color(SAKURA.pet),petTmp=new THREE.Color();
+petG.setAttribute('color',new THREE.BufferAttribute(petC,3));
 const petals=new THREE.Points(petG,petM);petals.frustumCulled=false;scene.add(petals);
 /* pétalos por fotograma */
 export function updatePetals(dt){
   for(let i=0;i<PN;i++){const b=petS[i];b[1]-=dt*SE.pet.fall*(.45+.3*Math.sin(b[3]+P.t));if(b[1]<.2){b[1]=10+Math.random()*3;b[0]=Math.random()*60-30;b[2]=-Math.random()*60}
     petP[i*3]=P.px+b[0]+Math.sin(P.t*.7+b[3])*1.5;petP[i*3+1]=b[1];petP[i*3+2]=P.pz+b[2]+10+Math.cos(P.t*.5+b[3])}
-  {const fo=Math.max(.3*forestAt(-P.pz),gardenAt(-P.pz));petG.setDrawRange(0,Math.round(PN*(SE.pet.base+SE.pet.gain*fo)))}petG.attributes.position.needsUpdate=true;petM.opacity=.85*(1-clamp(env.night,0,1)*.8);
+  /* en el jardín de sakura / castillo caen pétalos ROSAS en todas las estaciones; fuera, los de la estación */
+  {const ga=gardenAt(P.dist||-P.pz),fo=Math.max(.3*forestAt(-P.pz),ga);petG.setDrawRange(0,Math.round(PN*Math.max(SE.pet.base+SE.pet.gain*fo,ga*.85)));
+    if(Math.abs(ga-petLast)>.02||petLast<0){petLast=ga;petTmp.copy(petSe).lerp(petPk,clamp(ga*1.6));for(let i=0;i<PN;i++){petC[i*3]=petTmp.r;petC[i*3+1]=petTmp.g;petC[i*3+2]=petTmp.b}petG.attributes.color.needsUpdate=true;petM.size=SE.pet.size+(.42-SE.pet.size)*clamp(ga*1.6)}}
+  petG.attributes.position.needsUpdate=true;petM.opacity=.85*(1-clamp(env.night,0,1)*.8);
 }

@@ -1,10 +1,11 @@
 /* particles.js — partículas ambientales (ondas, gotas, pétalos, luciérnagas, lluvia) y paso de efectos por fotograma */
 import {rnd} from './util.js';
 import {V,G} from './state.js';
-import {center,halfW,lmIndexAt,lmPos,lmType} from './world.js';
+import {center,halfW,lmIndexAt,lmPos,lmType,nearCastle} from './world.js';
 import {A} from './audio.js';
 import {toast,updateHUD} from './ui.js';
 import {fwStep} from './fireworks.js';
+import {castleStep} from './castle.js';
 
 export const ripples=[],drops=[],petals=[],flies=[],rain=[];
 for(let i=0;i<170;i++)rain.push({x:Math.random()*900,y:Math.random()*900,v:360+Math.random()*160});
@@ -17,7 +18,8 @@ export function fx(dt){
   const sp=G.started?G.v:0;
   for(let i=ripples.length-1;i>=0;i--){const r=ripples[i];r.y+=sp*dt;r.r+=dt*26;if(r.r>=r.max)ripples.splice(i,1)}
   for(let i=drops.length-1;i>=0;i--){const d=drops[i];d.l+=dt;d.vy+=140*dt;d.x+=d.vx*dt;d.y+=d.vy*dt+sp*dt*.5;if(d.l>=d.m)drops.splice(i,1)}
-  if(petals.length<90&&Math.random()<dt*(.8+(G.started&&groveNear()?7:0)))petals.push({x:Math.random()*V.VW,y:-10,ph:Math.random()*6.28,sp:8+Math.random()*10,rot:Math.random()*6});
+  const fest=G.started&&nearCastle(G.s,950);
+  if(petals.length<(fest?150:90)&&Math.random()<dt*(.8+(G.started&&groveNear()?7:0)+(fest?13:0)))petals.push({x:Math.random()*V.VW,y:-10,ph:Math.random()*6.28,sp:8+Math.random()*10,rot:Math.random()*6});
   for(let i=petals.length-1;i>=0;i--){const p=petals[i];p.y+=(sp*.9+p.sp)*dt;p.x+=(Math.sin(G.clock*.9+p.ph)*14+6)*dt;p.rot+=dt;if(p.y>V.VH+20)petals.splice(i,1)}
   if(G.started){
     G.rainT-=dt;
@@ -30,6 +32,6 @@ export function fx(dt){
   }
   G.rippleT-=dt;
   if(G.started&&G.rippleT<=0&&G.v>30){G.rippleT=.26;ripple(V.VW/2+G.ox-Math.sin(G.ang)*58,V.cy+Math.cos(G.ang)*58,4,30+G.v*.1,.35)}
-  fwStep(dt);
+  fwStep(dt);castleStep(dt);
   hudT-=dt;if(hudT<=0){hudT=.25;updateHUD();if(A.ctx){A.setRain(G.rain);const kk=lmIndexAt(G.s);A.space(G.ox,halfW(G.s),lmType(kk)===6?lmPos(kk)-G.s:null)}}
 }

@@ -4,7 +4,7 @@ import {toonGrad,tex} from '../style.js';
 import * as THREE from 'three';
 import {hash,clamp,vn,sm} from './util.js';
 import {P} from './state.js';
-import {hw,cx,tanAng} from './world.js';
+import {hw,cx,tanAng,castleNear} from './world.js';
 import {scene,glowTex,MT} from './core.js';
 import {env} from './env.js';
 import {spawnRipple} from './ripples.js';
@@ -48,8 +48,10 @@ function mkMassif(c,sd){const hv=hash(c,60+sd),R=44+hv*46,Hh=95+hash(c,61+sd)*12
   const g=new THREE.Group(),mesh=new THREE.Mesh(massGeos[(c*2+(sd>0?1:0)+4)%4],massMat.clone());mesh.scale.set(R,Hh,R*(.8+hash(c,64)*.4));mesh.position.y=-30;mesh.rotation.y=hash(c,65)*6;g.add(mesh);
   for(let i=0;i<2;i++){const sp=new THREE.Sprite(massMistMat);sp.scale.set(R*4.5,Hh*.7,1);sp.position.set((i?.4:-.3)*R,Hh*(.18+.2*i),0);sp.renderOrder=2;g.add(sp)}
   g.position.set(cx(s)+sd*lat,0,-s);g.userData={s};return g}
+/* el castillo ocupa la ladera de su lado: sin macizos kársticos encima */
+const massBlocked=(c,sd)=>{const s=c*MC+hash(c,62+sd)*MC*.9,I=castleNear(s);return !!I&&sd===I.side&&Math.abs(s-I.s0)<210};
 export function updateMassifs(ps){const c0=Math.floor((ps-260)/MC),c1=Math.floor((ps+720)/MC);
-  for(let c=c0;c<=c1;c++)for(const sd of[-1,1]){const key=c*2+(sd>0?1:0);let rec=massifs.get(key);if(rec===undefined){rec=hash(c,70+sd)>.18?mkMassif(c,sd):null;massifs.set(key,rec);if(rec)rec.userData.c=c}
+  for(let c=c0;c<=c1;c++)for(const sd of[-1,1]){const key=c*2+(sd>0?1:0);let rec=massifs.get(key);if(rec===undefined){rec=hash(c,70+sd)>.18&&!massBlocked(c,sd)?mkMassif(c,sd):null;massifs.set(key,rec);if(rec)rec.userData.c=c}
     if(rec){rec.userData.c=c;if(!rec.parent)scene.add(rec);
       const d=Math.hypot(rec.position.x-P.px,rec.position.z-P.pz),k=clamp(sm(60,520,d)*.88+.08),mt=rec.children[0].material;
       mt.color.set(0x5d8c82).lerp(_c2.set(0x2f4a52),env.night*.7).lerp(_c.copy(env.hor).lerp(scene.fog.color,.5),k)}}

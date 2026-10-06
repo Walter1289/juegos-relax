@@ -13,6 +13,9 @@ import {save,load} from './save.js';
 import {initControls} from './controls.js';
 import {initCalm} from './calm.js';
 import {setupI18n,startI18n} from './i18n.js';
+import {lmIndexAt,lmPos,lmType} from './world.js';
+import {castleDbg} from './castle.js';
+import {fwInfo} from './fireworks.js';
 
 const PZ=window.PZ,UX=window.UX;
 
@@ -34,7 +37,19 @@ initCalm();
 
 /* Enlace con la pausa compartida y gancho de pruebas */
 PZ.ctx=()=>A.ctx;PZ.started=()=>G.started;
-window.__jr={state:()=>({started:G.started,dist:Math.round(G.s),lamps:G.lit.size,clock:Math.round(G.clock)})};
+window.__jr={
+  state:()=>({started:G.started,dist:Math.round(G.s),lamps:G.lit.size,clock:Math.round(G.clock)}),
+  /* depuración: tp(s) teletransporta la distancia G.s (y centra la canoa); setClock(c) fija la hora (ciclo de 360 s); lmPos/lmType exponen el mundo */
+  tp:s=>{G.s=s;G.ox=0;G.vx=0;return Math.round(G.s)},
+  setClock:c=>{G.clock=c;return G.clock},
+  lmPos,lmType,lmIndexAt,
+  lmFound:()=>[...G.found],
+  typeNear:(r)=>{const k=lmIndexAt(G.s);return Math.abs(G.s-lmPos(k))<(r||600)?lmType(k):-1},
+  /* avanza la simulación n pasos de dt segundos sin dibujar (para capturas con poca velocidad de fotogramas) */
+  step:(n,dt)=>{for(let i=0;i<n;i++){update(dt||.05);fx(dt||.05)}return Math.round(G.s)},
+  render,fw:fwInfo,audio:A,
+  dbg:castleDbg,
+};
 setupI18n();
 PZ.more(document.querySelector('header'),[$('#breath-btn'),$('#mute'),$('#reset'),...UX.btns('btn')]);
 startI18n();   // al final: traduce el DOM actual (incluido el menú «Más» y la pausa) y observa los cambios

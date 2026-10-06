@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {clamp,angD} from './util.js';
 import {P,S} from './state.js';
-import {hw,cx,tanAng} from './world.js';
+import {hw,cx,tanAng,lmType} from './world.js';
 import {MT,scene} from './core.js';
 import {env} from './env.js';
 import {UP} from './props.js';
@@ -147,14 +147,14 @@ export function updateCritters(dt,ps){
       u.qT-=dt;if(u.qT<=0&&dist<12){u.qT=5+Math.random()*9;try{A.quack((b.position.x-P.px)/25)}catch(e){}}
     }else u.spd=0})
   // garzas de la reserva: se espantan y salen volando
-  for(const [k,g] of lmMade){const hp=g.userData.hp;if(!hp||k%10!==4)continue;
+  for(const [k,g] of lmMade){const hp=g.userData.hp;if(!hp||lmType(k)!==4)continue;
     for(const h of hp){const st=h[5];
       if(st.gone>0){st.gone-=dt;if(st.gone>0)continue}
       _hv.set(h[0],h[1],h[2]);g.localToWorld(_hv);const dx=_hv.x-P.px,dz=_hv.z-P.pz,d=Math.hypot(dx,dz);
       if(d<(S.scareT>0?22:13)&&P.t>(st.cd||0)){st.gone=70;st.cd=P.t+4;launchHeron(_hv.x,_hv.y,_hv.z,Math.atan2(dx,-dz)+(Math.random()-.5)*.8)}}}
   // instancias vivas (solo las garzas posadas)
   let n=0;
-  for(const [k,g] of lmMade){const hp=g.userData.hp;if(!hp||k%10!==4)continue;
+  for(const [k,g] of lmMade){const hp=g.userData.hp;if(!hp||lmType(k)!==4)continue;
     for(const h of hp){if(h[5].gone>0||n>=24)continue;_hv.set(h[0],h[1],h[2]);g.localToWorld(_hv);
       _hq.setFromAxisAngle(UP,g.rotation.y+h[3]);_hs.setScalar(h[4]);_hm.compose(_hv,_hq,_hs);liveH.setMatrixAt(n++,_hm)}}
   liveH.count=n;liveH.instanceMatrix.needsUpdate=true;

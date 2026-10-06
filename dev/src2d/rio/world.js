@@ -4,11 +4,15 @@ import {clamp,lerp,H2} from './util.js';
 /* ===== Mundo: el río es una función de la distancia recorrida s ===== */
 export const center=s=>Math.sin(s*.0021)*130+Math.sin(s*.00057+1.3)*190+Math.sin(s*.0061+.4)*32;
 export const halfW=s=>{let w=165+34*Math.sin(s*.0013+2)+14*Math.sin(s*.004);const k=lmIndexAt(s);if(lmType(k)===9){const u=Math.max(0,1-Math.abs(s-lmPos(k))/750);w+=95*u*u*(3-2*u)}return w};
-export const LM=['Puente de madera','Torii sobre el agua','Aldea de farolillos','Jardín de sakura','Cañaveral de las garzas','Templo de la campana','Cascadita de musgo','Casa de té','Bosque de bambú','Estanque de lotos'];
+export const LM=['Puente de madera','Torii sobre el agua','Aldea de farolillos','Jardín de sakura','Cañaveral de las garzas','Templo de la campana','Cascadita de musgo','Casa de té','Bosque de bambú','Estanque de lotos','Castillo de la Garza Blanca'];
 export const LM_GAP=4000,LM_OFF=2000;
 export const lmIndexAt=s=>Math.round((s-LM_OFF)/LM_GAP);
 export const lmPos=k=>LM_OFF+k*LM_GAP;
-export const lmType=k=>((k%10)+10)%10;
+/* Ciclo de 11 lugares: el jardín de sakura (3) es el penúltimo y el castillo (10) el último; el río es infinito y el ciclo se repite */
+export const LM_ORDER=[0,1,2,4,5,6,7,8,9,3,10],LM_N=LM_ORDER.length,CASTLE=10;
+export const lmType=k=>LM_ORDER[((k%LM_N)+LM_N)%LM_N];
+/* Cerca del castillo (festival) a menos de r unidades del centro del lugar */
+export const nearCastle=(s,r)=>{const k=lmIndexAt(s);return lmType(k)===CASTLE&&Math.abs(s-lmPos(k))<(r||900)};
 /* Objetos de cada celda de 100 px de río, generados siempre igual a partir de su número */
 export const CELL=100;
 const cache=new Map();
@@ -17,7 +21,7 @@ export function genCell(c){
   a=[];
   const R=i=>H2(c,i),base=c*CELL,mid=base+CELL/2,hw=halfW(mid);
   const k=lmIndexAt(mid),near=Math.abs(mid-lmPos(k))<520,type=lmType(k);
-  const grove=near&&type===3,marsh=near&&type===4,bamb=near&&type===8,lotus=near&&type===9;
+  const castle=type===CASTLE&&Math.abs(mid-lmPos(k))<1000,grove=near&&type===3,marsh=near&&type===4,bamb=near&&type===8,lotus=near&&type===9;
   for(let j=0;j<5;j++)a.push({t:'streak',s:base+R(40+j)*CELL,off:(R(45+j)*2-1)*(hw-20),len:10+R(50+j)*18});
   if(R(1)<.55)a.push({t:'lantern',s:base+R(2)*CELL,off:(R(3)*2-1)*(hw-60),id:c+':l'});
   if(R(4)<.5){const n=2+Math.floor(R(5)*4);for(let j=0;j<n;j++)a.push({t:'pad',s:base+R(6+j)*CELL,off:(R(10+j)*2-1)*(hw-40),r:10+R(14+j)*9,sd:R(20+j)})}
@@ -35,6 +39,7 @@ export function genCell(c){
       else if(bamb&&kind>.2){t='bamboo';extra=8+e*190}
       else if(grove&&kind>.45){t='sakura';extra=60+e*420}
       else if(kind>.94){t='post';extra=16+e*10}
+      else if(castle&&kind>.7){t='sakura';extra=70+e*330}
       else if(kind>.82){t=grove?'sakura':'tree';extra=60+e*460}
       else if(kind>.7){t='bamboo';extra=30+e*300}
       else if(kind>.55){t='reed';extra=-6+e*18}

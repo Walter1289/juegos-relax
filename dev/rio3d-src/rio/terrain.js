@@ -1,8 +1,8 @@
 /* Terreno en streaming: reconstruye la malla y las instancias por ventana (generador por filas) alrededor del jugador. */
 import * as THREE from 'three';
 import {vn,hash,sm} from './util.js';
-import {COLS,ROWS,DX,DZ,bambooAt,gardenAt,forestAt,H,cx,hw,SE,clearAt,BLOCK} from './world.js';
-import {tmp,cBed,cG1,cG2,cSand,cHi,cTop,cBam,cSeasG,cGold,cGold2,MAXT,V3,Q,UP,S3,M4,crownM,trunkM,BLOS,BRD,umbM,UMB,pineM,PINE,bushM,BBLOS,BUSH,bambM,BAMB,bleafM,BLEAF,reedM,REED,padM,lotM,tPos,tCol,tGeo} from './props.js';
+import {COLS,ROWS,DX,DZ,bambooAt,gardenAt,forestAt,H,cx,hw,SE,clearAt,castleClear,castleMask,BLOCK} from './world.js';
+import {tmp,cBed,cG1,cG2,cSand,cHi,cTop,cBam,cSeasG,cGold,cGold2,cPetal,cGravel,MAXT,V3,Q,UP,S3,M4,crownM,trunkM,BLOS,SBLOS,SBBLOS,BRD,umbM,UMB,pineM,PINE,bushM,BBLOS,BUSH,bambM,BAMB,bleafM,BLEAF,reedM,REED,padM,lotM,tPos,tCol,tGeo} from './props.js';
 let anchor={a:1e9,b:1e9};
 const tPosS=new Float32Array(COLS*ROWS*3),tColS=new Float32Array(COLS*ROWS*3),STG=new Map();
 function stg(mesh){let s=STG.get(mesh);if(!s){const n=mesh.instanceMatrix.array.length;s={m:new Float32Array(n),c:new Float32Array(n/16*3)};STG.set(mesh,s)}return s}
@@ -24,21 +24,24 @@ function* rebuild(ax,as){
         tmp.copy(cG1).lerp(cG2,n);
         tmp.lerp(cSand,1-sm(.5,3.5,d));
         tmp.lerp(cHi,sm(6,13,y)*.8);tmp.lerp(cTop,sm(13,24,y));if(bam>0)tmp.lerp(cBam,bam*sm(0,5,d)*.65);if(SE.gk)tmp.lerp(cSeasG,SE.gk*sm(.4,3,d)*(1-bam*.6));
+        if(ga>.05){const pk=vn(x*.11+3,s*.11+7);if(pk>.5)tmp.lerp(cPetal,ga*sm(.5,.8,pk)*.42*sm(.4,3,d))}
+        {const cm=castleMask(x,s);if(cm>0)tmp.lerp(cGravel,cm*.9)}
         {const gn=vn(x*.03+50,s*.03+20);const gk=sm(.5,.72,gn)*sm(.4,2.5,d)*(1-sm(9,26,d));if(gk>0)tmp.lerp(vn(x*.2,s*.2)>.5?cGold:cGold2,gk*.85)}
       }
       tColS[o]=tmp.r+j2;tColS[o+1]=tmp.g+j2;tColS[o+2]=tmp.b+j2;
       // árboles
-      if(d>5&&y<17&&np<MAXT&&!clearAt(s,d)){
+      if(d>5&&y<17&&np<MAXT&&!clearAt(s,d)&&!castleClear(x,s)){
         const r=hash(x*3.1,s*1.7);
         const dens=.05*(.5+vn(x*.03+9,s*.03))*(d<34?.75:1)+(d<36?(.05+.09*fo)*(1-d/44):0)*(.6+.8*vn(x*.07,s*.07))+(d<60?ga*.11*(1-d/70):0);
         if(r<dens*(1-bam*.92)){
           const ox=(hash(x,s)-.5)*DX*.9,oz=(hash(s,x)-.5)*DZ*.9,sc=.8+hash(x+4,s+1)*.9;
           V3.set(x+ox,H(x+ox,s+oz)-.1,-(s+oz));
           Q.setFromAxisAngle(UP,hash(s,x)*6.28);
-          const blossom=d<60&&hash(x*.7,s*.3)<(.04+ga*.95);
+          const hb=hash(x*.7,s*.3),blossom=d<60&&hb<(.04+ga*.95);
           if(blossom){
             S3.set(sc,sc,sc);M4.compose(V3,Q,S3);stM(crownM,nc,M4);stM(trunkM,nc,M4);
-            stC(crownM,nc,tmp.set(BLOS[(hash(x,s+3)*4)|0]));nc++;
+            /* jardín de sakura y cerezos del castillo: SIEMPRE rosados, sea cual sea la estación */
+            stC(crownM,nc,tmp.set((hb<ga*.95?SBLOS:BLOS)[(hash(x,s+3)*4)|0]));nc++;
           }else if(hash(x*1.1,s*1.7)<.3){
             S3.set(sc*1.05,sc*(.9+hash(s,5)*.5),sc*1.05);M4.compose(V3,Q,S3);stM(crownM,nc,M4);stM(trunkM,nc,M4);stC(crownM,nc,tmp.set(BRD[(hash(x,s+7)*BRD.length)|0]));nc++;
           }else if(hash(x*1.9,s*.8)>.55&&nu<400){
@@ -53,10 +56,10 @@ function* rebuild(ax,as){
     }
   }
   for(let j=0;j<ROWS;j++){if(j%5===0)yield;const s=s0+j*DZ,ga=gardenAt(s),bam=bambooAt(s);
-    for(let i=0;i<COLS;i+=1){const x=x0+i*DX,d=Math.abs(x-cx(s))-hw(s);if(d<2.2||d>55||nb>=1700||clearAt(s,d))continue;const y=H(x,s);if(y>15)continue;
+    for(let i=0;i<COLS;i+=1){const x=x0+i*DX,d=Math.abs(x-cx(s))-hw(s);if(d<2.2||d>55||nb>=1700||clearAt(s,d)||castleClear(x,s))continue;const y=H(x,s);if(y>15)continue;
       const r=hash(x*2.3+1,s*1.3);if(r>(.05+ga*.2)*(1-bam*.8))continue;
       const ox=(hash(x,s+9)-.5)*DX,oz=(hash(s,x+9)-.5)*DZ,sc=.7+hash(x+8,s)*.9+ga*.3;V3.set(x+ox,H(x+ox,s+oz)-.1,-(s+oz));Q.setFromAxisAngle(UP,hash(s,x)*6.28);S3.set(sc*1.2,sc,sc*1.1);M4.compose(V3,Q,S3);
-      stM(bushM,nb,M4);stC(bushM,nb,tmp.set(ga>.25&&hash(x,s+5)<.55?BBLOS[(hash(x,s)*4)|0]:BUSH[(hash(s,x+2)*4)|0]));nb++}}
+      stM(bushM,nb,M4);stC(bushM,nb,tmp.set(ga>.25&&hash(x,s+5)<.55?SBBLOS[(hash(x,s)*4)|0]:BUSH[(hash(s,x+2)*4)|0]));nb++}}
   for(let j=0;j<ROWS;j++){if(j%5===0)yield;const s=s0+j*DZ,bam=bambooAt(s);if(bam<.02)continue;
     for(let i=0;i<COLS;i++){const x=x0+i*DX,c0=cx(s),d=Math.abs(x-c0)-hw(s);if(d<.3||d>26||nk>=1990)continue;
       for(let q=0;q<2;q++){if(hash(x*3.7+q*5,s*2.9+q)>bam*(1.05-d*.012))continue;

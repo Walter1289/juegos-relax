@@ -8,7 +8,7 @@ import '../pause.js';
 import {tr,initI18n} from '../i18n.js';
 import {el,hash} from './util.js';
 import {P,S,goAt} from './state.js';
-import {lmPos,LMS,cx,hw} from './world.js';
+import {lmPos,LMS,cx,hw,lmType} from './world.js';
 import {scene,R,cam,canvas} from './core.js';
 import {applyEnv,water,env,todName} from './env.js';
 import {swayU} from './props.js';
@@ -47,7 +47,7 @@ function frame(now,manual){
   updatePaddles();
   updateCharacter(dt);
   updateCamera(dt,bob);
-  cineStep(dt);
+  cineStep(dt);if(window.__fc)window.__fc();
   // mundo
   if(S.started&&!X.photo)S.tod=(S.tod+dt/900)%1;
   applyEnv(P.px,P.pz);weather(dt,s);
@@ -68,9 +68,9 @@ function frame(now,manual){
   if(!manual)X.render();
 }
 /* ---------- enlace con los extras (calidad, modo foto, diario con fotos, ajustes) ---------- */
-const X=initExtras({R,scene,cam,canvas,el,toast,P,LM,lmFound,lmPos,LMS,mkLantern,cx,hw,A,hash,spawnRipple,SEAS,seasonIdx,
+const X=initExtras({R,scene,cam,canvas,el,toast,P,LM,lmFound,lmPos,LMS,mkLantern,cx,hw,lmType,A,hash,spawnRipple,SEAS,seasonIdx,
   started:()=>S.started,getTod:()=>S.tod,setTod:v=>{S.tod=v},todName,getCount:()=>S.count,setCount:v=>{S.count=v;try{localStorage.setItem('rio3d-lant',String(v))}catch(e){}el('n').textContent=v},
-  glowK:()=>S.glowK,restart:()=>{S.cine=null;S.cineW=0;try{localStorage.removeItem('rio3d-pos')}catch(e){}goAt(0);P.v=2.6;P.dist=0;P.pitch=0;S.savedS=0;toast('De vuelta al inicio del río')},setCam,getCam:()=>S.camMode,savePos,nearLM:ps=>{const k=Math.round((ps-240)/LMS);for(const kk of[k,k-1,k+1])if(Math.abs(lmPos(kk)-ps)<130&&kk>=0)return LM[kk%10];return ''}});
+  glowK:()=>S.glowK,restart:()=>{S.cine=null;S.cineW=0;try{localStorage.removeItem('rio3d-pos')}catch(e){}goAt(0);P.v=2.6;P.dist=0;P.pitch=0;S.savedS=0;toast('De vuelta al inicio del río')},setCam,getCam:()=>S.camMode,savePos,nearLM:ps=>{const k=Math.round((ps-240)/LMS);for(const kk of[k,k-1,k+1])if(Math.abs(lmPos(kk)-ps)<130&&kk>=0)return LM[lmType(kk)];return ''}});
 S.X=X;
 el('n').textContent=S.count;
 PZ.ctx=()=>A.ctx;PZ.started=()=>S.started;

@@ -110,9 +110,11 @@ const DRAW={
   sakura:(g,o,x,y)=>{
     const r=o.r;
     g.fillStyle='rgba(70,40,60,.18)';g.beginPath();g.ellipse(x+10,y+12,r*1.05,r*.85,0,0,7);g.fill();
-    g.fillStyle='#ee9fb8';circ(g,x,y,r);g.fill();
-    g.fillStyle='#f4b6c8';circ(g,x-r*.2,y-r*.2,r*.8);g.fill();
-    g.fillStyle='#fbd6e1';circ(g,x-r*.35,y-r*.35,r*.5);g.fill();
+    // de noche el rosa se vuelve más vivo para que el jardín siga leyéndose rosado bajo la oscuridad
+    const n=clamp(V.dark/.64,0,1),mx=(a,b)=>Math.round(a+(b-a)*n);
+    g.fillStyle='rgb('+mx(238,255)+','+mx(159,128)+','+mx(184,182)+')';circ(g,x,y,r);g.fill();
+    g.fillStyle='rgb('+mx(244,255)+','+mx(182,160)+','+mx(200,200)+')';circ(g,x-r*.2,y-r*.2,r*.8);g.fill();
+    g.fillStyle='rgb('+mx(251,255)+','+mx(214,196)+','+mx(225,220)+')';circ(g,x-r*.35,y-r*.35,r*.5);g.fill();
     g.fillStyle='rgba(255,240,245,.85)';
     for(let i=0;i<6;i++){const a=i*2.1+o.sd*9;circ(g,x+Math.cos(a)*r*.6,y+Math.sin(a)*r*.6,2.2);g.fill()}
   },

@@ -182,7 +182,7 @@ export function initExtras(C){
 
   /* ---------- 3. diario con fotos propias ---------- */
   const snapKey=t=>'rio3d-snap-'+t,haveSnap=new Set();
-  for(let t=0;t<10;t++)if(ls.get(snapKey(t),null))haveSnap.add(t);
+  for(let t=0;t<LM.length;t++)if(ls.get(snapKey(t),null))haveSnap.add(t);
   X.hasSnap=t=>haveSnap.has(t);
   X.snap=function(t){
     X.want=()=>{const w=420,h=Math.round(w*canvas.height/canvas.width),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(canvas,0,0,w,h);
@@ -192,7 +192,7 @@ export function initExtras(C){
   const fmtD=s=>{if(!s)return '';const d=new Date(s+'T12:00:00');return d.toLocaleDateString(lang(),{day:'numeric',month:'short'})};
   const modal=(html)=>{const m=document.createElement('div');m.className='xp xm';m.innerHTML='<div><button class="close">Cerrar</button>'+html+'</div>';m.onclick=e=>{if(e.target===m||e.target.classList.contains('close'))m.remove()};document.body.appendChild(m);return m};
   diaryB.onclick=()=>{
-    const left=readLeft(),per=new Array(10).fill(0);left.forEach(l=>{const k=Math.round((l.s-240)/LMS);per[((k%10)+10)%10]++});
+    const left=readLeft(),per=new Array(LM.length).fill(0);left.forEach(l=>{const k=Math.round((l.s-240)/LMS);per[C.lmType(k)]++});
     const best=+ls.get('rio3d-pos','0');
     let h='<h2>Diario del río</h2><p style="margin:0 0 12px;color:var(--muted)">'+lmFound.size+'/'+LM.length+' lugares · '+SE.name+' · llegaste hasta '+best+' m · linternas soltadas: '+left.length+'</p><div class="xgrid">';
     LM.forEach((n,i)=>{const f=lmFound.has(i),img=f&&ls.get(snapKey(i),null);

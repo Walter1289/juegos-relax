@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {hash,clamp} from './util.js';
 import {COLS,ROWS,SE} from './world.js';
+import {SAKURA} from '../season.js';
 import {scene} from './core.js';
 /* ---------- terreno por ventana, siempre alineado a una malla fija ---------- */
 export const tPos=new Float32Array(COLS*ROWS*3),tCol=new Float32Array(COLS*ROWS*3);
@@ -13,7 +14,7 @@ tGeo.setAttribute('position',new THREE.BufferAttribute(tPos,3));tGeo.setAttribut
  for(let j=0;j<ROWS-1;j++)for(let i=0;i<COLS-1;i++){const a=j*COLS+i,b=a+1,c=a+COLS,d=c+1;idx.set([a,b,c,b,d,c],k);k+=6}
  tGeo.setIndex(new THREE.BufferAttribute(idx,1))}
 const terrain=new THREE.Mesh(tGeo,new THREE.MeshToonMaterial({vertexColors:true,gradientMap:toonGrad}));terrain.frustumCulled=false;scene.add(terrain);
-export const cSand=new THREE.Color('#eadcb9'),cG1=new THREE.Color('#b6dca3'),cG2=new THREE.Color('#8fc79b'),cHi=new THREE.Color('#bdd6c8'),cTop=new THREE.Color('#d3cce9'),cBed=new THREE.Color('#c8d6c0'),cGold=new THREE.Color('#d9b45f'),cGold2=new THREE.Color('#c8964a'),tmp=new THREE.Color();
+export const cSand=new THREE.Color('#eadcb9'),cG1=new THREE.Color('#b6dca3'),cG2=new THREE.Color('#8fc79b'),cHi=new THREE.Color('#bdd6c8'),cTop=new THREE.Color('#d3cce9'),cBed=new THREE.Color('#c8d6c0'),cGold=new THREE.Color('#d9b45f'),cGold2=new THREE.Color('#c8964a'),cPetal=new THREE.Color('#f6c9d8'),cGravel=new THREE.Color('#d9d2bf'),tmp=new THREE.Color();
 /* árboles, nenúfares y flores: instancias reconstruidas junto con el terreno */
 export const MAXT=1900;
 function shadeGeo(g,uvs,lo,hi){g=g.index?g.toNonIndexed():g;const uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*uvs[0],uv.getY(i)*uvs[1]);
@@ -50,7 +51,7 @@ export const umbM=new THREE.InstancedMesh(umbGeo,new THREE.MeshToonMaterial({gra
 export const UMB=['#5d7a64','#4f6b5c','#6a8a6e','#566f5d'],REED=['#ffffff','#f0e0b0','#e6c98a','#d6b070'];
 export const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),V3=new THREE.Vector3(),S3=new THREE.Vector3(),UP=new THREE.Vector3(0,1,0);
 export const cSeasG=new THREE.Color(SE.gnd);
-export const PINE=SE.pine,BLOS=SE.blos;
+export const PINE=SE.pine,BLOS=SE.blos,SBLOS=SAKURA.blos,SBBLOS=SAKURA.bblos;
 export const bushM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1).scale(1,.72,1).translate(0,.45,0),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,map:tex('leaf')}),1700);bushM.frustumCulled=false;scene.add(bushM);
 export const BUSH=['#6fa383','#7fb592','#5f957a','#8cc09a'],BBLOS=SE.bblos;
 const bambGeo=(()=>{const g=new THREE.CylinderGeometry(.11,.15,1,5,8,true).translate(0,.5,0).toNonIndexed();const p=g.attributes.position,c=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){const y=p.getY(i),k=(Math.round(y*8)%3===0)?.68:1;c[i*3]=k;c[i*3+1]=k;c[i*3+2]=k*.95}g.setAttribute('color',new THREE.BufferAttribute(c,3));g.deleteAttribute('uv');g.computeVertexNormals();return g})();

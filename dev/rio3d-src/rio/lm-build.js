@@ -2,16 +2,19 @@
 import {tex,toonGrad} from '../style.js';
 import * as THREE from 'three';
 import {hash} from './util.js';
-import {lmPos,tanAng,hw,cx,H,SE} from './world.js';
+import {lmPos,tanAng,hw,cx,H,lmType} from './world.js';
+import {SAKURA} from '../season.js';
+import {castleJob} from './castle.js';
 import {MT,spr,glowTex} from './core.js';
 import {bladeGeo,reedM,V3,Q,UP,S3,M4,tmp,REED} from './props.js';
 import {optimizeLM,bx,gl,cyl,roof,signs,mkHeron,tourou,torii,pagoda,fallMat,kanjiTex} from './lm-parts.js';
-export function buildLM(k){return optimizeLM(buildLM0(k))}
+/* el castillo se construye por trozos (g.userData.job); landmarks.js lo termina y lo optimiza */
+export function buildLM(k){const g=buildLM0(k);return g.userData.job?g:optimizeLM(g)}
 function buildLM0(k){
-  const s=lmPos(k),a=tanAng(s),type=k%10,g=new THREE.Group(),hwv=hw(s),side=type===6?1:(hash(k,9)>.5?1:-1);
+  const s=lmPos(k),a=tanAng(s),type=lmType(k),g=new THREE.Group(),hwv=hw(s),side=type===6?1:(hash(k,9)>.5?1:-1);
   g.position.set(cx(s),0,-s);g.rotation.y=-a;
   const gy=(lx,lz)=>{const th=-a;return H(cx(s)+lx*Math.cos(th)+lz*Math.sin(th),s-(-lx*Math.sin(th)+lz*Math.cos(th)))};
-  const red=0xc9674f,wood=0xb0876c,dark=0x7a5a4c,pink=SE.lm3c,green=0x7fb08a;
+  const red=0xc9674f,wood=0xb0876c,dark=0x7a5a4c,pink=SAKURA.c,green=0x7fb08a;
   if(type===0){const W2=hwv*2+12,n=18,red2=0xb5473a,stone=0x9d9c9a;
     const deckY=t=>3.4+1.7*(1-t*t);
     for(let i=0;i<n;i++){const t=(i+.5)/n*2-1,x=t*W2/2,y=deckY(t);const d=bx(g,W2/n+.4,.34,4.2,wood,x,y,0,{map:tex('plank')});d.rotation.z=-t*.4;
@@ -61,8 +64,16 @@ function buildLM0(k){
     // arco de bienvenida con faroles sobre el río
     for(const sd of[-1,1])cyl(g,.25,.3,6.5,0xb5473a,sd*(hwv-.5),2.6,-34,8);
     bx(g,hwv*2,.4,.5,0xb5473a,0,5.8,-34);gl(g,0xffc77a,4,-hwv*.5,5.2,-34,.9);gl(g,0xffc77a,4,hwv*.5,5.2,-34,.9);gl(g,0xffc77a,4,0,5.2,-34,.9)}
-  else if(type===3){for(let i=0;i<9;i++){const lx=side*(hwv+5+hash(k,i)*10),lz=(i-4)*4.5+hash(k,i+20)*2,y=gy(lx,lz),h=new THREE.Group();h.position.set(lx,y,lz);g.add(h);
-      cyl(h,.25,.4,3.4,0x7a5a4c,0,1.7,0,6);const c=new THREE.Mesh(new THREE.IcosahedronGeometry(2.6+hash(k,i+40),1),MT(pink));c.scale.y=.8;c.position.y=4.4;h.add(c)}}
+  else if(type===3){
+    /* Jardín de sakura: cerezos rosados en flor en TODAS las estaciones, alfombra de pétalos, linternas y nobori 桜 */
+    signs(g,gy,hwv,'桜',false,'#d98aa6');
+    for(let i=0;i<14;i++){const lx=side*(hwv+4.5+hash(k,i)*15),lz=(i-6.5)*4.1+hash(k,i+20)*2.4,y=gy(lx,lz),h=new THREE.Group(),sc=.9+hash(k,i+60)*.5;h.position.set(lx,y,lz);g.add(h);
+      cyl(h,.26*sc,.44*sc,3.4*sc,0x6f4f43,0,1.7*sc,0,6);const br=cyl(h,.14*sc,.2*sc,2.2*sc,0x6f4f43,.7*sc,3.6*sc,0,5);br.rotation.z=-.7;
+      for(const [px,py,pz,r,c] of[[0,4.5,0,2.7,pink],[1.7,4.0,.6,1.9,SAKURA.c2],[-1.5,4.2,-.8,2.1,pink],[.4,5.5,-.4,1.6,0xf8c9d6]]){const cr=new THREE.Mesh(new THREE.IcosahedronGeometry(r*sc*(.92+hash(k,i+px*7)*.2),1),MT(c));cr.scale.y=.78;cr.position.set(px*sc,py*sc,pz*sc);h.add(cr)}
+      const pc=new THREE.Mesh(new THREE.CircleGeometry(2.6*sc,9).rotateX(-Math.PI/2),MT(0xf6c9d8,{side:THREE.DoubleSide}));pc.position.set(hash(k,i+9)*1.5-.7,.07,hash(k,i+19)*1.5-.7);h.add(pc);
+      if(i%3===0)gl(h,0xffb6cb,7,0,4.6*sc,0,.22)}
+    for(const sd2 of[-1,1]){const t=tourou(g,gy,side*(hwv+3.4),sd2*10+2,1.1);t.position.y=gy(side*(hwv+3.4),sd2*10+2)}
+    const bn=bx(g,3.2,.28,.9,0xb5473a,side*(hwv+7.5),gy(side*(hwv+7.5),-3)+.55,-3);bx(g,3.2,.7,.12,0xb5473a,side*(hwv+7.5),gy(side*(hwv+7.5),-3)+1,-3.5);void bn}
   else if(type===4){
     signs(g,gy,hwv,'鷺',false,'#5f8aa8');
     const NR=900,rm=new THREE.InstancedMesh(bladeGeo,reedM.material,NR);rm.frustumCulled=false;let nr2=0;
@@ -112,6 +123,7 @@ function buildLM0(k){
   else if(type===8){signs(g,gy,hwv,'竹林',false,'#4f8a5a');
     for(const sd of[-1,1])for(let i=0;i<6;i++)tourou(g,gy,sd*(hwv+3+hash(k,i)*2.5),-45+i*18+hash(k,i+3)*4);
     for(let i=0;i<12;i++){const sd=i%2?1:-1,lx=sd*(hwv+4+hash(k,i)*12),lz=(hash(k,i+20)-.5)*110;const m2=new THREE.Mesh(new THREE.PlaneGeometry(3.6,22),new THREE.MeshBasicMaterial({map:glowTex,color:0xfff0b0,transparent:true,opacity:.14,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));m2.position.set(lx,gy(lx,lz)+10,lz);m2.rotation.set(0,hash(k,i+9)*3,sd*.25);g.add(m2)}}
+  else if(type===10)g.userData.job=castleJob(g,k,{gy,hwv,side,s,a})
   else{for(let i=0;i<46;i++){const lx=(hash(k,i)-.5)*hwv*1.5,lz=(hash(k,i+40)-.5)*34;
       const p=new THREE.Mesh(new THREE.CircleGeometry(.8+hash(k,i+7)*.5,10).rotateX(-Math.PI/2),MT(0x7fbf8a,{side:THREE.DoubleSide}));p.position.set(lx,.05,lz);g.add(p);
       if(i%4===0){const f=new THREE.Mesh(new THREE.IcosahedronGeometry(.34,0),MT(0xf5a4bd,{emissive:0x8a3a50}));f.scale.y=1.2;f.position.set(lx,.3,lz);g.add(f);gl(g,0xff9fc0,1.8,lx,.5,lz,.35)}}}

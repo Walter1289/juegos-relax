@@ -1,14 +1,16 @@
-/* places.js — los diez lugares del río: elementos bajo la canoa (sombras, muelles, garzas) y sobre ella (puente, torii, casas) */
+/* places.js — los once lugares del río: elementos bajo la canoa (sombras, muelles, garzas) y sobre ella (puente, torii, casas) */
 import {hash,circ,rr,line,poly} from './util.js';
 import {V} from './state.js';
-import {center,halfW,lmIndexAt,lmPos,lmType} from './world.js';
+import {center,halfW,lmIndexAt,lmPos,lmType,CASTLE} from './world.js';
+import {drawCastleUnder,drawCastleTop} from './castle.js';
 
 /* Lugares: se dibujan por debajo (sombras, muelle, garzas) y por encima de la canoa (puente, torii, casas) */
 function lmEach(fn){
-  const lo=lmIndexAt(V.sc+V.cy-V.VH-300)-1,hi=lmIndexAt(V.sc+V.cy+300)+1;
+  const lo=lmIndexAt(V.sc+V.cy-V.VH-1000)-1,hi=lmIndexAt(V.sc+V.cy+300)+1;
   for(let k=lo;k<=hi;k++){
-    const s0=lmPos(k),y0=V.cy-(s0-V.sc);
-    if(y0<-260||y0>V.VH+260)continue;
+    const s0=lmPos(k),y0=V.cy-(s0-V.sc),ty=lmType(k);
+    if(ty===CASTLE){if(y0<-900||y0>V.VH+1000)continue}   // el castillo y el dragón se extienden ~1000 unidades de río
+    else if(y0<-260||y0>V.VH+260)continue;
     fn(k,lmType(k),y0,V.VW/2+center(s0)-V.cs0,halfW(s0),s0);
   }
 }
@@ -21,7 +23,8 @@ function heron(g,x,y,dir){
   g.fillStyle='#e8a54a';poly(g,[[x+dir*11,y-16],[x+dir*18,y-14],[x+dir*11,y-14]]);g.fill();
 }
 export function drawLandmarksUnder(g){
-  lmEach((k,type,y0,X0,hw)=>{
+  lmEach((k,type,y0,X0,hw,s0)=>{
+    if(type===CASTLE)drawCastleUnder(g,k,s0,y0);
     if(type===0){g.fillStyle='rgba(10,40,60,.28)';g.fillRect(X0-hw,y0-24,2*hw,64)}
     if(type===1){
       g.fillStyle='rgba(10,40,60,.22)';
@@ -133,4 +136,8 @@ export function drawLandmarksOver(g){
       }
     }
   });
+}
+/* Castillo y dragón: pasada superior, tras el horizonte (las torres se recortan contra el cielo) */
+export function drawLandmarksTop(g){
+  lmEach((k,type,y0,X0,hw,s0)=>{if(type===CASTLE)drawCastleTop(g,k,s0,y0)});
 }

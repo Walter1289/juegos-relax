@@ -5,7 +5,7 @@ import {g,lctx,lightC,DPR} from './canvas.js';
 import {sky,center} from './world.js';
 import {drawTerrain} from './terrain.js';
 import {drawObjs,PASS_LOW,PASS_WATER,PASS_HIGH} from './objects.js';
-import {drawLandmarksUnder,drawLandmarksOver} from './places.js';
+import {drawLandmarksUnder,drawLandmarksOver,drawLandmarksTop} from './places.js';
 import {drawWake,drawCanoe} from './canoe.js';
 import {drawHorizon} from './horizon.js';
 import {ripples,drops,petals,flies,rain} from './particles.js';
@@ -27,6 +27,7 @@ export function render(){
   drawObjs(g,PASS_HIGH);
   drawLandmarksOver(g);
   drawHorizon(g,sk);
+  drawLandmarksTop(g);
   for(const p of petals){g.save();g.translate(p.x,p.y);g.rotate(p.rot);g.fillStyle='rgba(250,200,215,.85)';g.beginPath();g.ellipse(0,0,4,2.2,0,0,7);g.fill();g.restore()}
   if(G.rain>.03){
     g.strokeStyle='rgba(205,222,250,'+(.4*G.rain)+')';g.lineWidth=1.1;g.beginPath();
