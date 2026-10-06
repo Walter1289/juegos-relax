@@ -2629,8 +2629,14 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     ["mapa", "pared", "Mapa de la monta\xF1a", 2],
     ["mojon", "roca", "Moj\xF3n de piedras", 2],
     ["farolpiedra", "roca", "Farol de piedra", 3],
-    ["floresroca", "roca", "Flores de roca", 2]
-  ].map(([id, kind, name, cost]) => ({ id, kind, name, cost }));
+    ["floresroca", "roca", "Flores de roca", 2],
+    /* objetos del río: se desbloquean al cumplir el encargo del lugar (quinto valor = tipo de lugar) */
+    ["farolpuente", "colgante", "Linterna del puente", 0, 0],
+    ["petalos", "pared", "Rama de sakura", 0, 3],
+    ["campanatemplo", "colgante", "Campana del templo", 0, 5],
+    ["frasco", "suelo", "Frasco de agua de cascada", 0, 6],
+    ["lotocuenco", "suelo", "Cuenco de loto", 0, 9]
+  ].map(([id, kind, name, cost, gate]) => ({ id, kind, name, cost, gate }));
   var VN = {
     gato: { name: "Un gato", gift: "banquito", notes: ["Este gato no es de nadie, pero se sienta justo donde Mara dejaba su silla.", "Ronronea cuando la l\xE1mpara est\xE1 encendida. Dicen que Mara hac\xEDa lo mismo."] },
     zorro: { name: "Un zorro", gift: "mojon", notes: ["Un zorro curioso olfatea tus escalones. Alguien le dejaba pan aqu\xED cada tarde.", "Deja una piedra pulida junto a la puerta. Parece un regalo."] },
@@ -2671,6 +2677,12 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       ["Guitarra", "Guitar", "\u30AE\u30BF\u30FC"],
       ["Estantito con frascos", "Little shelf with jars", "\u74F6\u3092\u4E26\u3079\u305F\u5C0F\u3055\u306A\u68DA"],
       ["Mapa de la monta\xF1a", "Mountain map", "\u5C71\u306E\u5730\u56F3"],
+      ["Linterna del puente", "Bridge lantern", "\u6A4B\u306E\u30E9\u30F3\u30BF\u30F3"],
+      ["Rama de sakura", "Sakura branch", "\u685C\u306E\u679D"],
+      ["Campana del templo", "Temple bell", "\u5BFA\u306E\u9418"],
+      ["Frasco de agua de cascada", "Waterfall water jar", "\u6EDD\u306E\u6C34\u306E\u74F6"],
+      ["Cuenco de loto", "Lotus bowl", "\u84EE\u306E\u9262"],
+      ["Del r\xEDo", "From the river", "\u5DDD\u304B\u3089"],
       ["Moj\xF3n de piedras", "Stone cairn", "\u77F3\u7A4D\u307F"],
       ["Farol de piedra", "Stone lantern", "\u77F3\u706F\u7C60"],
       ["Flores de roca", "Rock flowers", "\u5CA9\u306E\u82B1"],
@@ -2968,6 +2980,84 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         line(g2, fx, y, fx + a, y - h);
         C(g2, fx + a, y - h, 3.6, ["#f2b6c8", "#fff0a0", "#a6c8ff"][(i + 4) % 3]);
       }
+    } },
+    /* objetos del río (gratis al cumplir su encargo) */
+    { id: "farolpuente", kind: "colgante", name: "Linterna del puente", cost: 0, gate: 0, glow: [0, 34, 70, 0.5, "255,190,110"], draw(g2, x, y, t) {
+      const a = sw(t, 1.1, 0.05);
+      g2.save();
+      g2.translate(x, y);
+      g2.rotate(a);
+      g2.strokeStyle = "rgba(60,45,40,.85)";
+      g2.lineWidth = 1.4;
+      line(g2, 0, -6, 0, 10);
+      R(g2, -9, 10, 18, 5, 2, "#5a4132");
+      R(g2, -8, 15, 16, 22, 7, "rgba(255,214,150,.95)");
+      R(g2, -9, 37, 18, 4, 2, "#5a4132");
+      g2.restore();
+    } },
+    { id: "petalos", kind: "pared", name: "Rama de sakura", cost: 0, gate: 3, draw(g2, x, y, t) {
+      g2.strokeStyle = "#6b4d3a";
+      g2.lineWidth = 4;
+      g2.lineCap = "round";
+      g2.beginPath();
+      g2.moveTo(x - 26, y + 14);
+      g2.quadraticCurveTo(x - 4, y + 4, x + 24, y - 14);
+      g2.stroke();
+      for (let i = 0; i < 7; i++) {
+        const fx = x - 20 + i * 7, fy = y + 10 - i * 3.8 + (i % 2 ? -8 : 6);
+        C(g2, fx + sw(t, 0.8 + i * 0.1, 1.2), fy, 5, i % 2 ? "#f6b9cb" : "#f9d2de");
+        C(g2, fx + sw(t, 0.8 + i * 0.1, 1.2), fy, 1.6, "#e48ba6");
+      }
+    } },
+    { id: "campanatemplo", kind: "colgante", name: "Campana del templo", cost: 0, gate: 5, draw(g2, x, y, t) {
+      const a = sw(t, 0.9, 0.07);
+      g2.save();
+      g2.translate(x, y);
+      g2.rotate(a);
+      g2.strokeStyle = "rgba(60,45,40,.85)";
+      g2.lineWidth = 2;
+      line(g2, 0, -6, 0, 8);
+      R(g2, -5, 6, 10, 6, 2, "#6b4d3a");
+      g2.fillStyle = "#b98a3f";
+      g2.beginPath();
+      g2.moveTo(-9, 38);
+      g2.quadraticCurveTo(-11, 16, 0, 12);
+      g2.quadraticCurveTo(11, 16, 9, 38);
+      g2.closePath();
+      g2.fill();
+      g2.strokeStyle = "rgba(255,220,150,.6)";
+      g2.lineWidth = 1.4;
+      line(g2, -8, 26, 8, 26);
+      C(g2, 0, 41, 2.4, "#6b4d3a");
+      g2.restore();
+    } },
+    { id: "frasco", kind: "suelo", name: "Frasco de agua de cascada", cost: 0, gate: 6, glow: [0, -22, 60, 0.3, "160,220,255"], draw(g2, x, y, t) {
+      R(g2, x - 12, y - 34, 24, 34, 6, "rgba(190,225,240,.55)");
+      R(g2, x - 10, y - 22, 20, 20, 5, "rgba(110,190,235,.75)");
+      R(g2, x - 6, y - 40, 12, 7, 2, "#8b6a50");
+      g2.strokeStyle = "rgba(255,255,255,.7)";
+      g2.lineWidth = 1.6;
+      line(g2, x - 6, y - 28, x - 6, y - 12);
+      C(g2, x + sw(t, 1.3, 3), y - 14 + sw(t, 1.7, 2), 1.8, "rgba(255,255,255,.8)");
+    } },
+    { id: "lotocuenco", kind: "suelo", name: "Cuenco de loto", cost: 0, gate: 9, draw(g2, x, y, t) {
+      g2.fillStyle = "#5f7f8f";
+      g2.beginPath();
+      g2.moveTo(x - 20, y - 16);
+      g2.quadraticCurveTo(x, y + 2, x + 20, y - 16);
+      g2.closePath();
+      g2.fill();
+      g2.fillStyle = "rgba(120,190,215,.8)";
+      g2.beginPath();
+      g2.ellipse(x, y - 16, 20, 4, 0, 0, 7);
+      g2.fill();
+      for (let i = -2; i <= 2; i++) {
+        g2.fillStyle = i % 2 ? "#f6b9cb" : "#f9d2de";
+        g2.beginPath();
+        g2.ellipse(x + i * 4.5, y - 24 - (2 - Math.abs(i)) * 2.5 + sw(t, 1, 0.5), 3.2, 9, i * 0.3, 0, 7);
+        g2.fill();
+      }
+      C(g2, x, y - 20, 3, "#f2d27a");
     } }
   ];
   var decorOf = (id) => DECOR.find((d) => d.id === id);
@@ -3324,8 +3414,8 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         refreshPanel();
         scheduleSave();
       }, ""));
-      DECOR.filter((d) => d.kind === s.kind).forEach((d) => {
-        const own = !!state.own[d.id], here = state.decor[s.id] === d.id;
+      DECOR.filter((d) => d.kind === s.kind && (d.gate == null || tasksDone()[d.gate])).forEach((d) => {
+        const own = !!state.own[d.id] || d.gate != null, here = state.decor[s.id] === d.id;
         if (here) return;
         const b = mkb(own ? d.name : d.name + " \xB7 " + d.cost, () => place(s, d), own ? "done" : (state.mem || 0) >= d.cost ? "ready" : "locked");
         b.title = own ? T2("Colocar") : T2("Comprar con recuerdos");

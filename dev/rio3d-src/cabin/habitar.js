@@ -8,6 +8,7 @@ import {state,save} from './state.js';
 import {toast} from './ui.js';
 import {burst,puff} from './fx.js';
 import {DM,VN,addHabTexts} from '../habdata.js';
+import {tasksDone} from '../tasks.js';
 import {lettersSection,newLetters,addStoryTexts,addSeasonTexts,seasonNow,cycleSeason,seasonLabel,SEAS_COL} from '../story.js';
 
 /* ---------- espacios (x, y, z) ---------- */
@@ -46,6 +47,11 @@ const BUILD={
   farolpiedra(){const g=new THREE.Group(),c='#8a8896';cyl(.4,.45,.18,c,0,.09,0,g,6);cyl(.1,.12,.9,c,0,.6,0,g,6);cyl(.35,.3,.14,c,0,1.1,0,g,6);bx(.5,.5,.5,c,0,1.4,0,g);bx(.26,.3,.52,'#ffe1a0',0,1.4,0,g).material=new THREE.MeshBasicMaterial({color:0xffe1a0});bx(.52,.3,.26,'#ffe1a0',0,1.4,0,g).material=new THREE.MeshBasicMaterial({color:0xffe1a0});const r=M(new THREE.ConeGeometry(.5,.4,4),c);r.position.y=1.85;r.rotation.y=Math.PI/4;g.add(r);glow(g,0xffbe6e,3.4,0,1.4,0,.5);return g},
   floresroca(){const g=new THREE.Group(),fl=[];for(let i=-4;i<=4;i++){const b=new THREE.Group();b.position.set(i*.17,0,Math.sin(i)*.15);const h=.4+Math.abs(i%3)*.18;cyl(.012,.012,h,'#6a9a6e',0,h/2,0,b,3);sph(.07,['#f2b6c8','#fff0a0','#a6c8ff'][(i+4)%3],0,h,0,1,1,1,b);g.add(b);fl.push([b,i])}g.userData.anim=t=>{fl.forEach(([b,i])=>{b.rotation.z=Math.sin(t*1.1+i*.7)*.06})};return g},
 };
+BUILD.farolpuente=function(){const g=new THREE.Group(),b=new THREE.Group();g.add(b);cyl(.012,.012,.4,'#4a3a32',0,-.2,0,b,3);cyl(.16,.16,.05,'#5a4132',0,-.45,0,b);const l=sph(.2,0xffd696,0,-.72,0,1,1.4,1,b);l.material=new THREE.MeshBasicMaterial({color:0xffd696});cyl(.16,.16,.05,'#5a4132',0,-1.05,0,b);glow(b,0xffb86b,2.6,0,-.72,0,.5);g.userData.anim=t=>{b.rotation.z=Math.sin(t*1.1)*.06};return g};
+BUILD.petalos=function(){const g=new THREE.Group(),br=bx(1.1,.07,.07,'#6b4d3a',0,0,0,g);br.rotation.z=.4;const fl=[];for(let i=0;i<7;i++){const x=-.45+i*.15,y=-.18+i*.13+((i%2)?.1:-.05),p=sph(.09,i%2?'#f6b9cb':'#f9d2de',x,y,.05,1,1,.7,g);fl.push([p,i])}return g};
+BUILD.campanatemplo=function(){const g=new THREE.Group(),b=new THREE.Group();g.add(b);cyl(.012,.012,.35,'#4a3a32',0,-.17,0,b,3);bx(.2,.1,.2,'#6b4d3a',0,-.4,0,b);cyl(.2,.34,.6,'#b98a3f',0,-.78,0,b,10);cyl(.35,.35,.04,'#8a6228',0,-1.1,0,b,10);sph(.06,'#6b4d3a',0,-1.1,0,1,1,1,b);g.userData.anim=t=>{b.rotation.z=Math.sin(t*.9)*.08};return g};
+BUILD.frasco=function(){const g=new THREE.Group();const j=cyl(.22,.22,.55,'#bee1eb',0,.28,0,g,10);j.material=new THREE.MeshBasicMaterial({color:0xbee1eb,transparent:true,opacity:.5});const w=cyl(.19,.19,.34,'#6eb8e8',0,.2,0,g,10);w.material=new THREE.MeshBasicMaterial({color:0x6eb8e8,transparent:true,opacity:.75});cyl(.12,.12,.1,'#8b6a50',0,.62,0,g,8);glow(g,0xa0dcff,1.6,0,.3,0,.3);return g};
+BUILD.lotocuenco=function(){const g=new THREE.Group();const c=cyl(.34,.2,.22,'#5f7f8f',0,.12,0,g,12);const w=cyl(.3,.3,.02,'#78bed7',0,.22,0,g,12);w.material=new THREE.MeshBasicMaterial({color:0x78bed7});const fl=[];for(let i=-2;i<=2;i++){const p=sph(.1,i%2?'#f6b9cb':'#f9d2de',i*.09,.38+(2-Math.abs(i))*.03,0,.8,1.5,.8,g);p.rotation.z=-i*.25;fl.push(p)}sph(.05,'#f2d27a',0,.3,0,1,1,1,g);g.userData.anim=t=>{g.rotation.y=Math.sin(t*.3)*.1};return g};
 /* visitantes: gato negro, zorro, búho, mariposa lunar */
 const VBUILD={
   gato(){const g=new THREE.Group();sph(.4,'#3a3548',0,.3,0,1.3,.75,.9,g);sph(.25,'#3a3548',.5,.52,0,1,1,1,g);for(const z of[-.12,.12]){const e=M(new THREE.ConeGeometry(.07,.16,4),'#3a3548');e.position.set(.5,.78,z);g.add(e);const ey=sph(.03,'#ffe27a',.72,.55,z*.8,1,1,1,g);ey.material=new THREE.MeshBasicMaterial({color:0xffe27a})}const tl=M(new THREE.TorusGeometry(.3,.06,6,12,4),'#3a3548');tl.position.set(-.42,.18,.2);tl.rotation.x=1.5;g.add(tl);g.userData.anim=t=>{tl.rotation.z=Math.sin(t*2)*.3};return g},
@@ -150,7 +156,7 @@ function refreshPanel(){
   if(!s){const e=document.createElement('span');e.className='loot';e.style.alignSelf='center';e.textContent='Toca un círculo de la cabaña para decorar ese lugar.';g2.appendChild(e)}
   else{const l=document.createElement('span');l.className='lab';l.textContent=s.n;g2.appendChild(l);
     if(state.decor[s.id])g2.appendChild(mkb('Quitar',()=>{delete state.decor[s.id];refreshModels();refreshPanel();save()},''));
-    DM.filter(d=>d.kind===s.kind&&state.decor[s.id]!==d.id).forEach(d=>{const own=!!state.own[d.id];
+    DM.filter(d=>d.kind===s.kind&&state.decor[s.id]!==d.id&&(d.gate==null||tasksDone()[d.gate])).forEach(d=>{const own=!!state.own[d.id]||d.gate!=null;
       g2.appendChild(mkb(own?d.name:d.name+' · '+d.cost,()=>place(s,d),own?'done':((state.mem||0)>=d.cost?'ready':'locked')))})}
   H.panel.appendChild(g2);
 }

@@ -4,7 +4,9 @@ export const DM=[
   ['campanilla','colgante','Campanilla de viento',3],['atrapa','colgante','Atrapasueños',3],['estrellas','colgante','Móvil de estrellas',4],['farolillos','colgante','Farolillos de papel',3],
   ['reloj','pared','Reloj de pared',3],['guitarra','pared','Guitarra',4],['estantito','pared','Estantito con frascos',3],['mapa','pared','Mapa de la montaña',2],
   ['mojon','roca','Mojón de piedras',2],['farolpiedra','roca','Farol de piedra',3],['floresroca','roca','Flores de roca',2],
-].map(([id,kind,name,cost])=>({id,kind,name,cost}));
+  /* objetos del río: se desbloquean al cumplir el encargo del lugar (quinto valor = tipo de lugar) */
+  ['farolpuente','colgante','Linterna del puente',0,0],['petalos','pared','Rama de sakura',0,3],['campanatemplo','colgante','Campana del templo',0,5],['frasco','suelo','Frasco de agua de cascada',0,6],['lotocuenco','suelo','Cuenco de loto',0,9],
+].map(([id,kind,name,cost,gate])=>({id,kind,name,cost,gate}));
 export const VN={
   gato:{name:'Un gato',gift:'banquito',notes:['Este gato no es de nadie, pero se sienta justo donde Mara dejaba su silla.','Ronronea cuando la lámpara está encendida. Dicen que Mara hacía lo mismo.']},
   zorro:{name:'Un zorro',gift:'mojon',notes:['Un zorro curioso olfatea tus escalones. Alguien le dejaba pan aquí cada tarde.','Deja una piedra pulida junto a la puerta. Parece un regalo.']},
@@ -20,6 +22,7 @@ export function addHabTexts(ux){
     ['Helecho en maceta','Potted fern','鉢植えのシダ'],['Lavanda','Lavender','ラベンダー'],['Farol de papel','Paper lantern','紙ちょうちん'],['Tetera humeante','Steaming teapot','湯気の立つ急須'],['Banquito con manta','Stool with blanket','ブランケットのスツール'],['Libros con vela','Books with a candle','ろうそくと本'],
     ['Campanilla de viento','Wind chime','風鈴'],['Atrapasueños','Dreamcatcher','ドリームキャッチャー'],['Móvil de estrellas','Star mobile','星のモビール'],['Farolillos de papel','Paper lanterns','紙のランタン'],
     ['Reloj de pared','Wall clock','壁掛け時計'],['Guitarra','Guitar','ギター'],['Estantito con frascos','Little shelf with jars','瓶を並べた小さな棚'],['Mapa de la montaña','Mountain map','山の地図'],
+    ['Linterna del puente','Bridge lantern','橋のランタン'],['Rama de sakura','Sakura branch','桜の枝'],['Campana del templo','Temple bell','寺の鐘'],['Frasco de agua de cascada','Waterfall water jar','滝の水の瓶'],['Cuenco de loto','Lotus bowl','蓮の鉢'],['Del río','From the river','川から'],
     ['Mojón de piedras','Stone cairn','石積み'],['Farol de piedra','Stone lantern','石灯籠'],['Flores de roca','Rock flowers','岩の花'],
     ['Llega un visitante','A visitor arrives','訪問者が来ました'],['Campanilla de viento','Wind chime','風鈴'],['Tetera','Teapot','急須'],
     ['Preparas té. El vapor sube despacio. Qué calma.','You make tea. The steam rises slowly. How calming.','お茶をいれます。湯気がゆっくり昇ります。落ち着きますね。'],

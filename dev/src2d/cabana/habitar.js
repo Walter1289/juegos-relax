@@ -7,6 +7,7 @@ import {burst} from './fx.js';
 import {A} from './audio.js';
 import {scheduleSave} from './persist.js';
 import {seasonNow,cycleSeason,seasonLabel,SEAS_COL} from '../../rio3d-src/story.js';
+import {tasksDone} from '../../rio3d-src/tasks.js';
 import {lettersSection,newLetters} from '../../rio3d-src/story.js';
 import {VN} from '../../rio3d-src/habdata.js';
 export {addHabTexts} from '../../rio3d-src/habdata.js';
@@ -43,6 +44,12 @@ export const DECOR=[
   {id:'mojon',kind:'roca',name:'Mojón de piedras',cost:2,draw(g,x,y,t){for(const [dy,w,c] of[[0,30,'#7d7b86'],[-14,22,'#8d8b97'],[-26,15,'#9a98a4'],[-35,9,'#a8a6b2']]){g.fillStyle=c;g.beginPath();g.ellipse(x,y+dy-6,w/2,7,0,0,7);g.fill()}}},
   {id:'farolpiedra',kind:'roca',name:'Farol de piedra',cost:3,glow:[0,-38,80,.5,'255,190,110'],draw(g,x,y,t){const c='#8a8896';R(g,x-14,y-6,28,6,2,c);R(g,x-5,y-30,10,24,2,c);R(g,x-16,y-36,32,7,2,c);R(g,x-10,y-54,20,18,2,c);R(g,x-6,y-50,12,10,2,'rgba(255,225,160,.95)');g.fillStyle=c;g.beginPath();g.moveTo(x-18,y-54);g.lineTo(x,y-68);g.lineTo(x+18,y-54);g.closePath();g.fill()}},
   {id:'floresroca',kind:'roca',name:'Flores de roca',cost:2,draw(g,x,y,t){for(let i=-4;i<=4;i++){const fx=x+i*7,a=sw(t,1+i*.2,2),h=14+Math.abs(i%3)*6;g.strokeStyle='#6a9a6e';g.lineWidth=2;line(g,fx,y,fx+a,y-h);C(g,fx+a,y-h,3.6,['#f2b6c8','#fff0a0','#a6c8ff'][(i+4)%3])}}},
+  /* objetos del río (gratis al cumplir su encargo) */
+  {id:'farolpuente',kind:'colgante',name:'Linterna del puente',cost:0,gate:0,glow:[0,34,70,.5,'255,190,110'],draw(g,x,y,t){const a=sw(t,1.1,.05);g.save();g.translate(x,y);g.rotate(a);g.strokeStyle='rgba(60,45,40,.85)';g.lineWidth=1.4;line(g,0,-6,0,10);R(g,-9,10,18,5,2,'#5a4132');R(g,-8,15,16,22,7,'rgba(255,214,150,.95)');R(g,-9,37,18,4,2,'#5a4132');g.restore()}},
+  {id:'petalos',kind:'pared',name:'Rama de sakura',cost:0,gate:3,draw(g,x,y,t){g.strokeStyle='#6b4d3a';g.lineWidth=4;g.lineCap='round';g.beginPath();g.moveTo(x-26,y+14);g.quadraticCurveTo(x-4,y+4,x+24,y-14);g.stroke();for(let i=0;i<7;i++){const fx=x-20+i*7,fy=y+10-i*3.8+((i%2)?-8:6);C(g,fx+sw(t,.8+i*.1,1.2),fy,5,i%2?'#f6b9cb':'#f9d2de');C(g,fx+sw(t,.8+i*.1,1.2),fy,1.6,'#e48ba6')}}},
+  {id:'campanatemplo',kind:'colgante',name:'Campana del templo',cost:0,gate:5,draw(g,x,y,t){const a=sw(t,.9,.07);g.save();g.translate(x,y);g.rotate(a);g.strokeStyle='rgba(60,45,40,.85)';g.lineWidth=2;line(g,0,-6,0,8);R(g,-5,6,10,6,2,'#6b4d3a');g.fillStyle='#b98a3f';g.beginPath();g.moveTo(-9,38);g.quadraticCurveTo(-11,16,0,12);g.quadraticCurveTo(11,16,9,38);g.closePath();g.fill();g.strokeStyle='rgba(255,220,150,.6)';g.lineWidth=1.4;line(g,-8,26,8,26);C(g,0,41,2.4,'#6b4d3a');g.restore()}},
+  {id:'frasco',kind:'suelo',name:'Frasco de agua de cascada',cost:0,gate:6,glow:[0,-22,60,.3,'160,220,255'],draw(g,x,y,t){R(g,x-12,y-34,24,34,6,'rgba(190,225,240,.55)');R(g,x-10,y-22,20,20,5,'rgba(110,190,235,.75)');R(g,x-6,y-40,12,7,2,'#8b6a50');g.strokeStyle='rgba(255,255,255,.7)';g.lineWidth=1.6;line(g,x-6,y-28,x-6,y-12);C(g,x+sw(t,1.3,3),y-14+sw(t,1.7,2),1.8,'rgba(255,255,255,.8)')}},
+  {id:'lotocuenco',kind:'suelo',name:'Cuenco de loto',cost:0,gate:9,draw(g,x,y,t){g.fillStyle='#5f7f8f';g.beginPath();g.moveTo(x-20,y-16);g.quadraticCurveTo(x,y+2,x+20,y-16);g.closePath();g.fill();g.fillStyle='rgba(120,190,215,.8)';g.beginPath();g.ellipse(x,y-16,20,4,0,0,7);g.fill();for(let i=-2;i<=2;i++){g.fillStyle=i%2?'#f6b9cb':'#f9d2de';g.beginPath();g.ellipse(x+i*4.5,y-24-(2-Math.abs(i))*2.5+sw(t,1,.5),3.2,9,i*.3,0,7);g.fill()}C(g,x,y-20,3,'#f2d27a')}},
 ];
 export const decorOf=id=>DECOR.find(d=>d.id===id);
 const slotOf=id=>SLOTS.find(s=>s.id===id);
@@ -151,8 +158,8 @@ export function refreshPanel(){
     const l2=document.createElement('span');l2.className='lab';l2.textContent=T(s.n);g2.appendChild(l2);
     const cur=state.decor[s.id];
     if(cur)g2.appendChild(mkb('Quitar',()=>{delete state.decor[s.id];refreshPanel();scheduleSave()},''));
-    DECOR.filter(d=>d.kind===s.kind).forEach(d=>{
-      const own=!!state.own[d.id],here=state.decor[s.id]===d.id;
+    DECOR.filter(d=>d.kind===s.kind&&(d.gate==null||tasksDone()[d.gate])).forEach(d=>{
+      const own=!!state.own[d.id]||d.gate!=null,here=state.decor[s.id]===d.id;
       if(here)return;
       const b=mkb(own?d.name:d.name+' · '+d.cost,()=>place(s,d),own?'done':((state.mem||0)>=d.cost?'ready':'locked'));
       b.title=own?T('Colocar'):T('Comprar con recuerdos');g2.appendChild(b)});
