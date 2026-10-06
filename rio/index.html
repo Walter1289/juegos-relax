@@ -3402,6 +3402,14 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     const k = lmIndexAt(G.s);
     if (Math.abs(G.s - lmPos(k)) < (lmType(k) === 10 ? 240 : 130) && !G.found.has(k)) {
       G.found.add(k);
+      try {
+        const ky = "rio-found-types", a = JSON.parse(localStorage.getItem(ky) || "[]"), t = lmType(k);
+        if (!a.includes(t)) {
+          a.push(t);
+          localStorage.setItem(ky, JSON.stringify(a));
+        }
+      } catch (e) {
+      }
       toast("Descubriste: " + LM[lmType(k)]);
       A.discover();
       hap([20, 50, 20, 50, 30]);

@@ -3,7 +3,7 @@ import {W,H,DPR,mk,$} from './util.js';
 import {buildBackground} from './background.js';
 
 export const KEY='cabana-acantilado-v2',OLD_KEY='cabana-acantilado-v1',CLEAN_MIN=.55;
-export const state={repaired:{},spent:0,done:false,best:0,decor:{},own:{},mem:0,notes:[],vis:{}};
+export const state={repaired:{},spent:0,done:false,best:0,decor:{},own:{},mem:0,notes:[],vis:{},ltr:{}};
 export const DW=W/2,DH=H/2;
 export const dirt=mk(DW,DH),dctx=dirt.getContext('2d',{willReadFrequently:true});
 export const grimeC=mk(DW,DH);

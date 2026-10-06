@@ -441,7 +441,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     UX3.pinkSrc = (c, k) => {
       let b = c._pink;
       if (!b) {
-        const sr = c.sampleRate, L = Math.floor(sr * 12), tl = Math.floor(sr * 1.5), n = L + tl, d = new Float32Array(n);
+        const sr = c.sampleRate, L2 = Math.floor(sr * 12), tl = Math.floor(sr * 1.5), n = L2 + tl, d = new Float32Array(n);
         let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
         for (let i = 0; i < n; i++) {
           const w = Math.random() * 2 - 1;
@@ -454,12 +454,12 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.2215 * 0.5;
           b6 = w * 0.115926;
         }
-        b = c.createBuffer(1, L, sr);
+        b = c.createBuffer(1, L2, sr);
         const o = b.getChannelData(0);
-        for (let i = 0; i < L; i++) o[i] = d[i];
+        for (let i = 0; i < L2; i++) o[i] = d[i];
         for (let i = 0; i < tl; i++) {
           const a = i / tl * Math.PI / 2;
-          o[i] = d[i] * Math.sin(a) + d[L + i] * Math.cos(a);
+          o[i] = d[i] * Math.sin(a) + d[L2 + i] * Math.cos(a);
         }
         c._pink = b;
       }
@@ -719,14 +719,14 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       g2.closePath();
       g2.fill();
     };
-    [[560, "#6a6fb0", 90, 0.55], [620, "#5c63a8", 120, 0.7], [680, "#4f579f", 150, 0.85]].forEach(([base2, col, hh, al], L) => {
+    [[560, "#6a6fb0", 90, 0.55], [620, "#5c63a8", 120, 0.7], [680, "#4f579f", 150, 0.85]].forEach(([base2, col, hh, al], L2) => {
       g2.fillStyle = col;
       g2.globalAlpha = al;
       poly(g2, [[300, 720], [420, base2 + 60], [540, base2 + 20], [680, base2 + 50], [820, base2], [960, base2 + 30], [960, 720]]);
       g2.fill();
       for (let x = 330 + R2() * 20; x < W + 20; x += 16 + R2() * 14) {
         const hh2 = hh * (0.5 + R2() * 0.6);
-        pine(x, base2 + 40 + L * 30 + R2() * 20, hh2, col);
+        pine(x, base2 + 40 + L2 * 30 + R2() * 20, hh2, col);
       }
       g2.globalAlpha = 1;
       const mg = g2.createLinearGradient(0, base2 - 40, 0, base2 + 90);
@@ -889,7 +889,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   var KEY = "cabana-acantilado-v2";
   var OLD_KEY = "cabana-acantilado-v1";
   var CLEAN_MIN = 0.55;
-  var state = { repaired: {}, spent: 0, done: false, best: 0, decor: {}, own: {}, mem: 0, notes: [], vis: {} };
+  var state = { repaired: {}, spent: 0, done: false, best: 0, decor: {}, own: {}, mem: 0, notes: [], vis: {}, ltr: {} };
   var DW = W / 2;
   var DH = H / 2;
   var dirt = mk(DW, DH);
@@ -1162,7 +1162,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   // src2d/cabana/persist.js
   function save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ r: state.repaired, s: state.spent, d: state.done, b: state.best, dc: state.decor, ow: state.own, me: state.mem, nt: state.notes, vv: state.vis, t: Date.now(), img: dirt.toDataURL("image/png") }));
+      localStorage.setItem(KEY, JSON.stringify({ r: state.repaired, s: state.spent, d: state.done, b: state.best, dc: state.decor, ow: state.own, me: state.mem, nt: state.notes, vv: state.vis, lt: state.ltr, t: Date.now(), img: dirt.toDataURL("image/png") }));
     } catch (e) {
     }
   }
@@ -1190,6 +1190,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     state.mem = o.me || 0;
     state.notes = o.nt || [];
     state.vis = o.vv || {};
+    state.ltr = o.lt || {};
     rt.sceneDirty = true;
     const finish = () => {
       if (o.t && (() => {
@@ -1818,6 +1819,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     state.mem = 0;
     state.notes = [];
     state.vis = {};
+    state.ltr = {};
     rt.sceneDirty = true;
     makeGrime();
     ITEMS.forEach((o) => o.flash = 0);
@@ -2317,6 +2319,115 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     drawStrings(g2, !!S.luces);
   }
 
+  // rio3d-src/story.js
+  var LKEY = "rio-found-types";
+  var L = [
+    // [lugar(es), es, en, ja]
+    ["Puente de madera", "Dej\xE9 la caba\xF1a al amanecer. El primer puente cruje igual que mi escalera: me dio confianza.", "I left the cabin at dawn. The first bridge creaks just like my stairs, and that made me brave.", "\u591C\u660E\u3051\u306B\u5C0F\u5C4B\u3092\u51FA\u307E\u3057\u305F\u3002\u6700\u521D\u306E\u6A4B\u306F\u79C1\u306E\u968E\u6BB5\u3068\u540C\u3058\u3088\u3046\u306B\u304D\u3057\u3093\u3067\u3001\u52C7\u6C17\u3092\u304F\u308C\u307E\u3057\u305F\u3002"],
+    ["Torii sobre el agua", "Pas\xE9 bajo un portal que flota. Ped\xED un deseo en voz baja: que la caba\xF1a nunca se quede sola.", "I drifted under a gate that floats. I whispered a wish: that the cabin is never left alone.", "\u6C34\u306B\u6D6E\u304B\u3076\u9580\u3092\u304F\u3050\u308A\u3001\u5C0F\u3055\u306A\u58F0\u3067\u9858\u3044\u307E\u3057\u305F\u3002\u5C0F\u5C4B\u304C\u3072\u3068\u308A\u307C\u3063\u3061\u306B\u306A\u308A\u307E\u305B\u3093\u3088\u3046\u306B\u3002"],
+    ["Aldea de farolillos", "Una aldea entera enciende farolillos para recibir a quien llega. Por primera vez no me sent\xED de paso.", "A whole village lights lanterns for whoever arrives. For once I did not feel like I was just passing through.", "\u6751\u3058\u3085\u3046\u304C\u3001\u8A2A\u308C\u308B\u4EBA\u306E\u305F\u3081\u306B\u63D0\u706F\u3092\u3068\u3082\u3057\u307E\u3059\u3002\u521D\u3081\u3066\u300C\u901A\u308A\u3059\u304C\u308A\u300D\u3068\u611F\u3058\u307E\u305B\u3093\u3067\u3057\u305F\u3002"],
+    ["Jard\xEDn de sakura", "Los cerezos sueltan p\xE9talos como si el aire tuviera memoria. Guard\xE9 uno para ti, entre las p\xE1ginas del mapa.", "The cherry trees let go of petals as if the air had a memory. I saved one for you between the map pages.", "\u685C\u306F\u3001\u7A7A\u6C17\u304C\u8A18\u61B6\u3092\u6301\u3063\u3066\u3044\u308B\u304B\u306E\u3088\u3046\u306B\u82B1\u3073\u3089\u3092\u6563\u3089\u3057\u307E\u3059\u3002\u5730\u56F3\u306E\u9593\u306B\u4E00\u679A\u3001\u3042\u306A\u305F\u306E\u305F\u3081\u306B\u631F\u307F\u307E\u3057\u305F\u3002"],
+    ["Ca\xF1averal de las garzas", "Las garzas pescan sin prisa. Aprend\xED de ellas que esperar tambi\xE9n es avanzar.", "The herons fish without hurry. They taught me that waiting is also a way of moving forward.", "\u30B5\u30AE\u306F\u6025\u304C\u305A\u9B5A\u3092\u5F85\u3061\u307E\u3059\u3002\u5F85\u3064\u3053\u3068\u3082\u524D\u306B\u9032\u3080\u3053\u3068\u3060\u3068\u6559\u308F\u308A\u307E\u3057\u305F\u3002"],
+    ["Templo de la campana", "La campana suena una vez y el r\xEDo entero se acomoda. Quise que la oyeras desde tu balc\xF3n.", "The bell rings once and the whole river settles. I wanted you to hear it from your balcony.", "\u9418\u304C\u3072\u3068\u3064\u9CF4\u308B\u3068\u3001\u5DDD\u305C\u3093\u305F\u3044\u304C\u9759\u307E\u308A\u307E\u3059\u3002\u3042\u306A\u305F\u306E\u30D0\u30EB\u30B3\u30CB\u30FC\u304B\u3089\u3082\u805E\u3053\u3048\u305F\u3089\u3044\u3044\u306E\u306B\u3002"],
+    ["Cascadita de musgo", "Una cascada peque\xF1ita, verde de tan callada. Me qued\xE9 una tarde entera y no extra\xF1\xE9 nada.", "A tiny waterfall, green with quiet. I stayed a whole afternoon and missed nothing.", "\u9759\u3051\u3055\u3067\u7DD1\u306B\u67D3\u307E\u3063\u305F\u5C0F\u3055\u306A\u6EDD\u3002\u5348\u5F8C\u3044\u3063\u3071\u3044\u904E\u3054\u3057\u3066\u3001\u4F55\u3082\u604B\u3057\u304F\u306A\u308A\u307E\u305B\u3093\u3067\u3057\u305F\u3002"],
+    ["Casa de t\xE9", "Me sirvieron t\xE9 sin preguntar nada. Dej\xE9 encima de la mesa tu receta, por si quieres hacerla en la caba\xF1a.", "They served me tea without asking a thing. I left your recipe on the table, in case you want to make it at the cabin.", "\u4F55\u3082\u805E\u304B\u305A\u306B\u304A\u8336\u3092\u51FA\u3057\u3066\u304F\u308C\u307E\u3057\u305F\u3002\u5C0F\u5C4B\u3067\u3082\u4F5C\u308C\u308B\u3088\u3046\u3001\u30EC\u30B7\u30D4\u3092\u673A\u306B\u6B8B\u3057\u307E\u3057\u305F\u3002"],
+    ["Bosque de bamb\xFA", "El bamb\xFA canta cuando sopla el viento. Pens\xE9 en tu campanilla y sonre\xED sola.", "The bamboo sings when the wind blows. I thought of your wind chime and smiled to myself.", "\u98A8\u304C\u5439\u304F\u3068\u7AF9\u304C\u6B4C\u3044\u307E\u3059\u3002\u3042\u306A\u305F\u306E\u98A8\u9234\u3092\u601D\u3044\u51FA\u3057\u3066\u3001\u3072\u3068\u308A\u3067\u5FAE\u7B11\u307F\u307E\u3057\u305F\u3002"],
+    ["Estanque de lotos", "Un estanque de lotos que se abre de noche. Todo lo que empieza despacio merece su tiempo.", "A lotus pond that opens at night. Everything that begins slowly deserves its time.", "\u591C\u306B\u958B\u304F\u84EE\u306E\u6C60\u3002\u3086\u3063\u304F\u308A\u59CB\u307E\u308B\u3082\u306E\u306B\u306F\u3001\u305D\u308C\u3060\u3051\u306E\u6642\u9593\u304C\u5FC5\u8981\u3067\u3059\u3002"],
+    ["Castillo de la Garza Blanca", "Llegu\xE9. El castillo brilla igual que las luces de tu terraza. No hac\xEDa falta llegar tan lejos para entenderlo: mi casa siempre fue la caba\xF1a. Cu\xEDdala a tu gusto; ya es tuya.", "I made it. The castle glows just like the lights on your deck. I did not need to come this far to understand it: my home was always the cabin. Keep it your way; it is yours now.", "\u305F\u3069\u308A\u7740\u304D\u307E\u3057\u305F\u3002\u57CE\u306F\u3001\u3042\u306A\u305F\u306E\u30C6\u30E9\u30B9\u306E\u706F\u308A\u3068\u540C\u3058\u3088\u3046\u306B\u8F1D\u3044\u3066\u3044\u307E\u3059\u3002\u3053\u3053\u307E\u3067\u6765\u306A\u304F\u3066\u3082\u5206\u304B\u3063\u305F\u306F\u305A\u3067\u3059\u3002\u79C1\u306E\u5BB6\u306F\u3044\u3064\u3082\u5C0F\u5C4B\u3067\u3057\u305F\u3002\u597D\u304D\u306A\u3088\u3046\u306B\u5B88\u3063\u3066\u304F\u3060\u3055\u3044\u3002\u3082\u3046\u3042\u306A\u305F\u306E\u3082\u306E\u3067\u3059\u3002"]
+  ];
+  var LM_ES = L.map((x) => x[0]);
+  var LETTERS = L.map((x) => x[1]);
+  var foundTypes = () => {
+    const s = /* @__PURE__ */ new Set();
+    for (const k of ["rio3d-found", LKEY]) {
+      try {
+        JSON.parse(localStorage.getItem(k) || "[]").forEach((i) => s.add(i));
+      } catch (e) {
+      }
+    }
+    return s;
+  };
+  function addStoryTexts(ux) {
+    ux.add(L.map((x) => [x[1], x[2], x[3]]));
+    ux.add([["Puente de madera", "Wooden bridge", "\u6728\u306E\u6A4B"], ["Torii sobre el agua", "Torii over the water", "\u6C34\u4E0A\u306E\u9CE5\u5C45"], ["Aldea de farolillos", "Lantern village", "\u3061\u3087\u3046\u3061\u3093\u306E\u6751"], ["Jard\xEDn de sakura", "Sakura garden", "\u685C\u306E\u5EAD"], ["Ca\xF1averal de las garzas", "Heron reedbed", "\u30B5\u30AE\u306E\u8466\u539F"], ["Templo de la campana", "Bell temple", "\u9418\u306E\u5BFA"], ["Cascadita de musgo", "Mossy waterfall", "\u82D4\u306E\u5C0F\u3055\u306A\u6EDD"], ["Casa de t\xE9", "Tea house", "\u8336\u5C4B"], ["Bosque de bamb\xFA", "Bamboo forest", "\u7AF9\u6797"], ["Estanque de lotos", "Lotus pond", "\u84EE\u306E\u6C60"], ["Castillo de la Garza Blanca", "White Heron Castle", "\u767D\u9DFA\u57CE"], ["Cartas de Mara", "Mara\u2019s letters", "\u30DE\u30E9\u306E\u624B\u7D19"], ["Carta sin abrir", "Unopened letter", "\u672A\u958B\u5C01\u306E\u624B\u7D19"], ["Desc\xFAbrelo en el r\xEDo para leerla", "Discover it on the river to read it", "\u5DDD\u3067\u898B\u3064\u3051\u308B\u3068\u8AAD\u3081\u307E\u3059"], ["Abrir carta", "Open letter", "\u624B\u7D19\u3092\u958B\u304F"], ["Notas de visitantes", "Visitor notes", "\u8A2A\u554F\u8005\u306E\u30E1\u30E2"], ["Mara te dej\xF3 una carta", "Mara left you a letter", "\u30DE\u30E9\u304C\u624B\u7D19\u3092\u6B8B\u3057\u307E\u3057\u305F"], ["Carta de Mara", "Letter from Mara", "\u30DE\u30E9\u306E\u624B\u7D19"], ["Una carta nueva te espera en el diario", "A new letter waits in the diary", "\u65E5\u8A18\u306B\u65B0\u3057\u3044\u624B\u7D19\u304C\u5C4A\u3044\u3066\u3044\u307E\u3059"]]);
+    ux.rx([[/^Carta sin abrir · (.+)$/, (m, ix, tr) => tr("Carta sin abrir") + " \xB7 " + tr(m[1])]]);
+  }
+  function lettersSection(box, state2, tr, addMem2, save2) {
+    const f = foundTypes();
+    state2.ltr = state2.ltr || {};
+    let fresh = 0;
+    const h = document.createElement("h3");
+    h.style.cssText = "margin:12px 0 8px;font:600 .95rem system-ui";
+    h.textContent = tr("Cartas de Mara");
+    box.appendChild(h);
+    LETTERS.forEach((t, i) => {
+      const p = document.createElement("p");
+      p.style.margin = "0 0 10px";
+      const sp = (x) => {
+        const e = document.createElement("span");
+        e.textContent = x;
+        p.appendChild(e);
+      };
+      sp("\u2709 ");
+      if (f.has(i)) {
+        if (!state2.ltr[i]) {
+          state2.ltr[i] = 1;
+          fresh++;
+        }
+        sp(tr(t));
+        p.style.color = "#ffe9b8";
+      } else {
+        sp(tr("Carta sin abrir"));
+        sp(" \xB7 ");
+        sp(tr(LM_ES[i]));
+        p.style.opacity = ".55";
+      }
+      box.appendChild(p);
+    });
+    if (fresh) {
+      addMem2(3 * fresh);
+      save2();
+    }
+    return fresh;
+  }
+  var newLetters = (state2) => {
+    const f = foundTypes();
+    let n = 0;
+    f.forEach((i) => {
+      if (i >= 0 && i < LETTERS.length && !(state2.ltr || {})[i]) n++;
+    });
+    return n;
+  };
+  var SEAS = ["Primavera", "Verano", "Oto\xF1o", "Invierno"];
+  var SK = "cab-season";
+  var MODES = ["auto", "0", "1", "2", "3"];
+  var seasonMode = () => {
+    try {
+      return localStorage.getItem(SK) || "auto";
+    } catch (e) {
+      return "auto";
+    }
+  };
+  var seasonNow = () => {
+    const m = seasonMode();
+    if (m !== "auto") return +m;
+    const mo = (/* @__PURE__ */ new Date()).getMonth();
+    return mo >= 2 && mo <= 4 ? 0 : mo >= 5 && mo <= 7 ? 1 : mo >= 8 && mo <= 10 ? 2 : 3;
+  };
+  var cycleSeason = () => {
+    const n = MODES[(MODES.indexOf(seasonMode()) + 1) % 5];
+    try {
+      localStorage.setItem(SK, n);
+    } catch (e) {
+    }
+    return n;
+  };
+  var seasonLabel = () => "Estaci\xF3n: " + (seasonMode() === "auto" ? "Auto" : SEAS[+seasonMode()]);
+  var SEAS_COL = [[255, 182, 200], [255, 222, 140], [232, 140, 70], [240, 246, 255]];
+  function addSeasonTexts(ux) {
+    ux.add([["Estaci\xF3n: Auto", "Season: Auto", "\u5B63\u7BC0: \u304A\u307E\u304B\u305B"], ["Estaci\xF3n: Primavera", "Season: Spring", "\u5B63\u7BC0: \u6625"], ["Estaci\xF3n: Verano", "Season: Summer", "\u5B63\u7BC0: \u590F"], ["Estaci\xF3n: Oto\xF1o", "Season: Autumn", "\u5B63\u7BC0: \u79CB"], ["Estaci\xF3n: Invierno", "Season: Winter", "\u5B63\u7BC0: \u51AC"]]);
+  }
+
   // rio3d-src/habdata.js
   var DM = [
     ["helecho", "suelo", "Helecho en maceta", 2],
@@ -2517,10 +2628,10 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       g2.lineWidth = 1.4;
       R(g2, x - 14, y, 28, 5, 2, "#7b5742");
       for (let i = -2; i <= 2; i++) {
-        const a = sw(t, 1.6 + i * 0.2, 0.12), L = 22 + Math.abs(i) * -3 + (i % 2 ? 8 : 0), bx = x + i * 6 + a * L;
-        line(g2, x + i * 6, y + 4, bx, y + 4 + L);
+        const a = sw(t, 1.6 + i * 0.2, 0.12), L2 = 22 + Math.abs(i) * -3 + (i % 2 ? 8 : 0), bx = x + i * 6 + a * L2;
+        line(g2, x + i * 6, y + 4, bx, y + 4 + L2);
         g2.fillStyle = "#d9c27a";
-        R(g2, bx - 2, y + L, 4, 14 + (i % 2 ? 4 : 0), 2, "#e0cd8a");
+        R(g2, bx - 2, y + L2, 4, 14 + (i % 2 ? 4 : 0), 2, "#e0cd8a");
       }
     } },
     { id: "atrapa", kind: "colgante", name: "Atrapasue\xF1os", cost: 3, draw(g2, x, y, t) {
@@ -2901,6 +3012,30 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       g2.globalAlpha = 1;
     }
     drawVisitor(g2, t);
+    seasonFx(g2, t);
+  }
+  var SP = [];
+  var spT = 0;
+  function seasonFx(g2, t) {
+    const dt = Math.min(0.1, Math.max(0, t - spT));
+    spT = t;
+    const se = seasonNow(), c = SEAS_COL[se];
+    if (!SP.length) for (let i = 0; i < 34; i++) SP.push({ x: Math.random() * W, y: Math.random() * H, ph: Math.random() * 6.3, r: 1.5 + Math.random() * 2.5 });
+    g2.save();
+    for (const p of SP) {
+      const vy = se === 1 ? -14 : se === 3 ? 22 : se === 2 ? 30 : 26;
+      p.y += vy * dt;
+      p.x += Math.sin(t * 0.7 + p.ph) * 14 * dt + (se === 3 ? 0 : 6 * dt);
+      if (p.y > H + 8) p.y = -8;
+      if (p.y < -8) p.y = H + 8;
+      if (p.x > W + 8) p.x = -8;
+      g2.fillStyle = "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (se === 1 ? 0.35 + 0.25 * Math.sin(t * 2 + p.ph) : 0.6) + ")";
+      g2.beginPath();
+      if (se === 0 || se === 2) g2.ellipse(p.x, p.y, p.r * 1.6, p.r * 0.9, t * 0.8 + p.ph, 0, 6.283);
+      else g2.arc(p.x, p.y, p.r * (se === 3 ? 1.3 : 1), 0, 6.283);
+      g2.fill();
+    }
+    g2.restore();
   }
   var decorGlows = () => {
     const o = [];
@@ -2982,6 +3117,10 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     rb("te", "Preparar t\xE9", doTe, rit.te);
     rb("riego", "Regar plantas", doRiego, rit.riego);
     top.appendChild(mkb("Diario de la caba\xF1a", () => showDiary(), ""));
+    top.appendChild(mkb(seasonLabel(), () => {
+      cycleSeason();
+      refreshPanel();
+    }, ""));
     panel.appendChild(top);
     const s = sel_ && slotOf(sel_);
     const g2 = document.createElement("div");
@@ -3053,6 +3192,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       p.textContent = "\xB7 " + T(n);
       b.appendChild(p);
     });
+    lettersSection(b, state, T, addMem, scheduleSave);
     const c = mkb("Cerrar", () => m.remove(), "");
     b.appendChild(c);
     m.appendChild(b);
@@ -3082,6 +3222,9 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     setInterval(() => {
       if (habOn && !document.hidden && (rit.te.cd > 0 || rit.riego.cd > 0)) refreshPanel();
     }, 1e3);
+    setTimeout(() => {
+      if (unlocked() && newLetters(state) > 0) toast("Una carta nueva te espera en el diario");
+    }, 4e3);
     let was = unlocked();
     setInterval(() => {
       const u = unlocked();
@@ -3597,6 +3740,8 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   initI18n();
   var UX2 = window.UX;
   addHabTexts(UX2);
+  addStoryTexts(UX2);
+  addSeasonTexts(UX2);
   document.title = UX2.tr("Caba\xF1a del Acantilado");
   PZ2.more(document.querySelector("header"), [$("#breath-btn"), $("#mute"), $("#reset"), ...UX2.btns("btn", { wear: true })]);
   initHabitar();
