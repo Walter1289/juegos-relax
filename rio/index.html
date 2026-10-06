@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#2b2d52">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<meta charset="utf-8">
 <title>Río de Linternas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -90,6 +91,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 
 <script>
 const $=s=>document.querySelector(s);
+/* UX (idioma, subtítulos, háptica) se define más abajo; estos atajos toleran que aún no exista */
+const cap=(k,gap)=>{try{window.UX&&UX.cap(k,gap)}catch(e){}};
+const hap=p=>{try{window.UX&&UX.hap(p)}catch(e){}};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const lerp=(a,b,t)=>a+(b-a)*t;
 const hash=n=>{const s=Math.sin(n*127.1+311.7)*43758.5453;return s-Math.floor(s)};
@@ -533,6 +537,66 @@ for(let i=0;i<170;i++)rain.push({x:Math.random()*900,y:Math.random()*900,v:360+M
 for(let i=0;i<26;i++)flies.push({x:Math.random(),y:Math.random(),ph:Math.random()*6.28});
 const ripple=(x,y,r0,max,a)=>ripples.push({x,y,r:r0,max,a});
 const splash=(x,y,warm)=>{for(let i=0;i<(warm?10:6);i++)drops.push({x,y,vx:(Math.random()-.5)*(warm?90:60),vy:-Math.random()*(warm?80:50),l:0,m:.5+Math.random()*.4,warm})};
+/* ===== Festival de linternas: fuegos artificiales de noche junto a la aldea y estrella fugaz ===== */
+const FW={bursts:[],t:2,star:null,starT:25,seen:false};
+try{FW.seen=localStorage.getItem('rio-de-linternas-fw')==='1'}catch(e){}
+const FW_COLS=[[255,150,190],[255,205,110],[120,235,215]];   // rosa, dorado, aguamarina
+const FW_MAX=7;                                              // ráfagas simultáneas máximas
+function festivalOn(){const k=lmIndexAt(G.s);return G.started&&V.dark>.4&&lmType(k)===2&&Math.abs(G.s-lmPos(k))<650}
+function fwLaunch(){
+  const col=FW_COLS[Math.floor(Math.random()*3)],hh=Math.max(96,V.VH*.15),n=44,p=new Float32Array(n*4);
+  for(let i=0;i<n;i++){const a=i/n*6.283+(Math.random()-.5)*.12,v=(95+Math.random()*100)*(i%2?1:.6);p[i*4+2]=Math.cos(a)*v;p[i*4+3]=Math.sin(a)*v}
+  const x=V.VW*(.12+Math.random()*.76);
+  FW.bursts.push({x,y:hh*.35+Math.random()*(V.VH*.42-hh*.35),x0:x+(Math.random()-.5)*60,y0:V.VH*.62,t:0,rise:.55+Math.random()*.3,life:2.3,fill:'rgb('+col+')',p,boom:false});
+}
+function fwStep(dt){
+  const B=FW.bursts;
+  if(festivalOn()){
+    if(!FW.seen){FW.seen=true;try{localStorage.setItem('rio-de-linternas-fw','1')}catch(e){}toast('Festival de linternas: la aldea celebra esta noche')}
+    FW.t-=dt;
+    if(FW.t<=0){FW.t=.6+Math.random()*1.3;const n=Math.random()<.4?2:1;for(let i=0;i<n&&B.length<FW_MAX;i++)fwLaunch()}
+  }
+  for(let i=B.length-1;i>=0;i--){
+    const b=B[i];b.t+=dt;
+    if(!b.boom&&b.t>=b.rise){b.boom=true;A.firework((b.x/V.VW-.5)*8);cap('Fuegos artificiales',12000);hap(8)}
+    if(!b.boom)continue;
+    if(b.t-b.rise>b.life){B.splice(i,1);continue}
+    const dr=Math.exp(-1.7*dt),p=b.p;
+    for(let j=0;j<p.length;j+=4){p[j+2]*=dr;p[j+3]=p[j+3]*dr+55*dt;p[j]+=p[j+2]*dt;p[j+1]+=p[j+3]*dt}
+  }
+  // estrella fugaz ocasional en el horizonte nocturno
+  if(FW.star){FW.star.t+=dt;if(FW.star.t>.9)FW.star=null}
+  else if(G.started){
+    FW.starT-=dt;
+    if(FW.starT<=0&&V.dark>.4){FW.starT=30+Math.random()*40;FW.star={x:V.VW*(.5+Math.random()*.45),y:Math.max(96,V.VH*.15)*(.12+Math.random()*.4),t:0};cap('Estrella fugaz',20000);A.shoot()}
+  }
+}
+function drawFW(g){
+  const B=FW.bursts,st=FW.star;if(!B.length&&!st)return;
+  g.save();g.globalCompositeOperation='lighter';
+  for(const b of B){
+    g.fillStyle=b.fill;
+    if(!b.boom){
+      const u=b.t/b.rise,x=lerp(b.x0,b.x,u),y=lerp(b.y0,b.y,1-(1-u)*(1-u));
+      g.globalAlpha=.85;g.fillRect(x-1.2,y-1.2,2.4,2.4);g.globalAlpha=.3;g.fillRect(x-.7,y,1.4,16);continue;
+    }
+    const e=b.t-b.rise,fade=clamp(1-e/b.life,0,1),p=b.p;
+    if(e<.25){g.globalAlpha=(1-e/.25)*.45;circ(g,b.x,b.y,24+e*90);g.fill()}
+    for(let j=0;j<p.length;j+=4){
+      const tw=.7+.3*Math.sin(e*14+j),a=Math.pow(fade,1.3)*tw;
+      g.globalAlpha=a*.28;g.fillRect(b.x+p[j]-4,b.y+p[j+1]-4,8,8);
+      g.globalAlpha=a;g.fillRect(b.x+p[j]-1.7,b.y+p[j+1]-1.7,3.4,3.4);
+      g.globalAlpha=a*.35;g.fillRect(b.x+p[j]-p[j+2]*.04-1,b.y+p[j+1]-p[j+3]*.04-1,2,2);
+    }
+  }
+  if(st){
+    const u=st.t/.9,x=st.x-340*st.t,y=st.y+90*st.t,a=Math.sin(Math.PI*u);
+    g.globalAlpha=a*.8;g.strokeStyle='rgb(255,250,230)';g.lineWidth=1.6;g.lineCap='round';
+    g.beginPath();g.moveTo(x,y);g.lineTo(x+60,y-16);g.stroke();
+    g.globalAlpha=a;g.fillStyle='rgb(255,252,240)';circ(g,x,y,1.8);g.fill();
+  }
+  g.restore();
+}
 let hudT=0;
 function groveNear(){const k=lmIndexAt(G.s);return lmType(k)===3&&Math.abs(G.s-lmPos(k))<520}
 function fx(dt){
@@ -552,6 +616,7 @@ function fx(dt){
   }
   G.rippleT-=dt;
   if(G.started&&G.rippleT<=0&&G.v>30){G.rippleT=.26;ripple(V.VW/2+G.ox-Math.sin(G.ang)*58,V.cy+Math.cos(G.ang)*58,4,30+G.v*.1,.35)}
+  fwStep(dt);
   hudT-=dt;if(hudT<=0){hudT=.25;updateHUD();if(A.ctx){A.setRain(G.rain);const kk=lmIndexAt(G.s);A.space(G.ox,halfW(G.s),lmType(kk)===6?lmPos(kk)-G.s:null)}}
 }
 
@@ -560,13 +625,15 @@ let toastT=0;
 function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),3200)}
 const chipEls=LM.map(n=>{const e=document.createElement('span');e.className='chip';e.textContent=n;$('#chips').appendChild(e);return e});
 const fmt=m=>m>=1000?(m/1000).toFixed(2)+' km':Math.floor(m)+' m';
+const hudC={};   // evita reescribir el DOM si el texto no cambió (también ahorra trabajo al traductor)
+function setT(id,v){if(hudC[id]!==v){hudC[id]=v;$(id).textContent=v}}
 function updateHUD(){
-  $('#dist').textContent=fmt(G.s/10);$('#lamps').textContent=G.lit.size;
+  setT('#dist',fmt(G.s/10));setT('#lamps',String(G.lit.size));
   const found=new Set([...G.found].map(lmType));
-  $('#places').textContent=found.size+'/'+LM.length;
+  setT('#places',found.size+'/'+LM.length);
   chipEls.forEach((e,i)=>e.classList.toggle('on',found.has(i)));
   const k=Math.ceil((G.s+30-LM_OFF)/LM_GAP),d=Math.max(0,Math.round((lmPos(k)-G.s)/100)*10);
-  $('#next').textContent='Siguiente: '+LM[lmType(k)]+' en '+d+' m';
+  setT('#next','Siguiente: '+LM[lmType(k)]+' en '+d+' m');
 }
 
 /* ===== Guardado local ===== */
@@ -587,7 +654,7 @@ function resetAll(){
 }
 
 /* ===== Reglas ===== */
-function bump(dir,vol){G.bumpT=.7;ripple(V.VW/2+G.ox+dir*20,V.cy,6,40,.5);A.bump(vol||1,dir)}
+function bump(dir,vol){G.bumpT=.7;hap(vol&&vol<1?10:16);ripple(V.VW/2+G.ox+dir*20,V.cy,6,40,.5);A.bump(vol||1,dir)}
 function paddleStroke(){
   const side=Math.sin(G.phase+.01)>=0?1:-1;
   const x=V.VW/2+G.ox+Math.cos(G.ang)*side*46,y=V.cy+Math.sin(G.ang)*side*46+20;
@@ -595,7 +662,7 @@ function paddleStroke(){
 }
 function lightLantern(o){
   G.lit.add(o.id);const x=sx(o),y=sy(o);
-  ripple(x,y,6,50,.6);splash(x,y,true);A.next(.15,(x-(V.VW/2+G.ox))/40,(y-V.cy)/40);updateHUD();saveSoon();
+  ripple(x,y,6,50,.6);splash(x,y,true);A.next(.15,(x-(V.VW/2+G.ox))/40,(y-V.cy)/40);hap([10,40,14]);cap('Nota de linterna');updateHUD();saveSoon();
 }
 function update(dt){
   G.clock+=dt;G.hintT+=dt;
@@ -632,7 +699,7 @@ function update(dt){
     }
   }
   const k=lmIndexAt(G.s);
-  if(Math.abs(G.s-lmPos(k))<130&&!G.found.has(k)){G.found.add(k);toast('Descubriste: '+LM[lmType(k)]);A.discover();if(lmType(k)===5&&A.ctx)A.bell(196,A.ctx.currentTime+.3,.1,true,-(halfW(G.s)+128+G.ox)/40,-1);updateHUD();saveSoon()}
+  if(Math.abs(G.s-lmPos(k))<130&&!G.found.has(k)){G.found.add(k);toast('Descubriste: '+LM[lmType(k)]);A.discover();hap([20,50,20,50,30]);if(lmType(k)===5&&A.ctx){cap('Campana de templo',15000);A.bell(196,A.ctx.currentTime+.3,.1,true,-(halfW(G.s)+128+G.ox)/40,-1)}updateHUD();saveSoon()}
   if(G.hintT>14)$('#hint').style.opacity=0;
 }
 
@@ -692,6 +759,7 @@ function render(){
     }
     g.restore();
   }
+  drawFW(g);
   const t=sk.tint;
   g.fillStyle='rgba('+(t[0]|0)+','+(t[1]|0)+','+(t[2]|0)+','+t[3]+')';g.fillRect(0,0,V.VW,V.VH);
   if(G.rain>.03){g.fillStyle='rgba(70,88,120,'+(.16*G.rain)+')';g.fillRect(0,0,V.VW,V.VH)}
@@ -773,7 +841,7 @@ const A={
       this.music();
     }catch(e){this.ctx=null}
   },
-  setRain(r){if(!this.rgs)return;this.rainLvl=r;const t=this.ctx.currentTime;this.rgs.forEach(([g,v])=>g.gain.setTargetAtTime(r*v,t,.6))},
+  setRain(r){if(!this.rgs)return;this.rainLvl=r;if(r>.35&&this.ok())cap('Lluvia suave',25000);const t=this.ctx.currentTime;this.rgs.forEach(([g,v])=>g.gain.setTargetAtTime(r*v,t,.6))},
   ok(){return this.ctx&&this.ctx.state==='running'},
   breathTone(up,dur){
     if(!this.ok())return;const c=this.ctx,t=c.currentTime;
@@ -801,6 +869,7 @@ const A={
     if(dz==null||dz<-300){this.wfG.gain.setTargetAtTime(0,this.ctx.currentTime,.4)}
     else{
       const u=Math.max(0,Math.min(1,1-Math.abs(dz)/1500));
+      if(u>.3&&this.ok())cap('Cascada cercana',25000);
       this.wfG.gain.setTargetAtTime(.34*Math.pow(u,1.5),this.ctx.currentTime,.4);
       this.setPos(this.wfP,-ox/40,0,-dz/40);
     }
@@ -855,21 +924,82 @@ const A={
     s.connect(bp);bp.connect(gn);gn.connect(pn);s.start(t,Math.random());s.stop(t+.45);
   },
   bump(v,dir){
-    if(!this.ok())return;const c=this.ctx,t=c.currentTime,pn=this.panner((dir||0)*1.3,-.3,0,1.5,.8);pn.connect(this.master);
+    if(!this.ok())return;cap('Golpe suave de la canoa',5000);const c=this.ctx,t=c.currentTime,pn=this.panner((dir||0)*1.3,-.3,0,1.5,.8);pn.connect(this.master);
     const o=c.createOscillator(),gn=c.createGain();
     o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(70,t+.2);
     gn.gain.setValueAtTime(.16*v,t);gn.gain.exponentialRampToValueAtTime(.0001,t+.3);
     o.connect(gn);gn.connect(pn);o.start(t);o.stop(t+.35);
   },
-  discover(){if(!this.ok())return;const t=this.ctx.currentTime;[0,3,5,6].forEach((i,j)=>this.pluck(SC[i],.12,t+j*.2));this.bell(SC[8],t+.9,.07)},
+  firework(pan){
+    if(!this.ok())return;const c=this.ctx,t=c.currentTime+.02,d=this.dest(pan,-8);
+    // golpe grave
+    const o=c.createOscillator(),gn=c.createGain();o.type='sine';o.frequency.setValueAtTime(95,t);o.frequency.exponentialRampToValueAtTime(38,t+.35);
+    gn.gain.setValueAtTime(.0001,t);gn.gain.linearRampToValueAtTime(.14,t+.01);gn.gain.exponentialRampToValueAtTime(.0001,t+.7);
+    o.connect(gn);gn.connect(d);o.start(t);o.stop(t+.75);
+    // chisporroteo: ruido agudo en pequeños estallidos que se apagan
+    const s=c.createBufferSource();s.buffer=this.nbuf;s.loop=true;const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=3500;
+    const ng=c.createGain();ng.gain.value=0;
+    for(let i=0;i<16;i++){const tt=t+.12+i*.07+Math.random()*.05;ng.gain.setValueAtTime(.03*(1-i/20)*(.5+Math.random()),tt);ng.gain.setTargetAtTime(0,tt,.012)}
+    s.connect(hp);hp.connect(ng);ng.connect(d);s.start(t,Math.random());s.stop(t+1.4);
+  },
+  shoot(){
+    if(!this.ok())return;const c=this.ctx,t=c.currentTime,o=c.createOscillator(),gn=c.createGain();o.type='sine';
+    o.frequency.setValueAtTime(2600,t);o.frequency.exponentialRampToValueAtTime(900,t+.8);
+    gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(.008,t+.2);gn.gain.linearRampToValueAtTime(0,t+.85);
+    o.connect(gn);gn.connect(this.bus);o.start(t);o.stop(t+.9);
+  },
+  discover(){if(!this.ok())return;cap('Melodía de descubrimiento',4000);const t=this.ctx.currentTime;[0,3,5,6].forEach((i,j)=>this.pluck(SC[i],.12,t+j*.2));this.bell(SC[8],t+.9,.07)},
   chirp(t0){
     const c=this.ctx,o=c.createOscillator(),gn=c.createGain();
     o.frequency.value=4300+Math.random()*200;
     gn.gain.setValueAtTime(0,t0);gn.gain.linearRampToValueAtTime(.012,t0+.01);gn.gain.linearRampToValueAtTime(0,t0+.06);
     o.connect(gn);gn.connect(this.master);o.start(t0);o.stop(t0+.08);
   },
+  /* Capa lenta tipo pad: acordes de la escala hirajoshi en re (D3 + {0,2,3,7,8}) que cambian cada ~15 s.
+     La hora del juego (día brillante / noche grave y cerrada) y el lugar cercano modulan el acorde y el filtro. */
+  pad(){
+    const c=this.ctx,D3=146.83,HI=[0,2,3,7,8];
+    const fr=d=>D3*Math.pow(2,(HI[((d%5)+5)%5]+12*Math.floor(d/5))/12);   // grado de la escala -> Hz
+    const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=700;lp.Q.value=.5;
+    const out=c.createGain();out.gain.value=0;lp.connect(out);out.connect(this.bus);
+    out.gain.setTargetAtTime(.04,c.currentTime,5);   // entra muy despacio
+    const V4=[];
+    for(let i=0;i<4;i++){
+      const vg=c.createGain();vg.gain.value=.25;vg.connect(lp);
+      const os=[['sine',0,.7],['triangle',5,.3]].map(([ty,cents,k])=>{
+        const o=c.createOscillator(),g2=c.createGain();o.type=ty;o.detune.value=cents*(i%2?1:-1);o.frequency.value=fr(i*2);g2.gain.value=k;o.connect(g2);g2.connect(vg);o.start();return o;
+      });
+      V4.push(os);
+    }
+    let lastRoot=-1,lastKey='',lastT=-99,roots=[0,1,3];
+    const tick=()=>{
+      if(!this.ctx)return;
+      if(this.ok()){
+        const t=c.currentTime,night=clamp((V.dark-.15)/.4,0,1),bright=1-night;   // 0 = día, 1 = noche cerrada
+        const k=lmIndexAt(G.s),near=Math.abs(G.s-lmPos(k))<800,ty=near?lmType(k):-1;
+        const key=ty+(night>.5?'n':'d');
+        let cut=lerp(1500,420,night),vol=.04,mood='';
+        if(ty===5){cut*=.6;mood='templo'}else if(ty===6){cut*=1.5;vol=.036;mood='cascada'}else if(ty===8){cut*=.9;mood='bambu'}else if(ty===3||ty===7){cut*=1.15;mood='calido'}
+        lp.frequency.setTargetAtTime(cut,t,3);out.gain.setTargetAtTime(vol,t,4);
+        if(key!==lastKey||t-lastT>=15){
+          lastKey=key;lastT=t;
+          let r;do r=roots[Math.floor(Math.random()*roots.length)];while(r===lastRoot&&roots.length>1);lastRoot=r;
+          let ds;
+          if(mood==='templo')ds=[-5,0,3,-2];                       // grave y solemne: re - la, con la octava baja
+          else if(mood==='cascada')ds=[5,8,10,13];                  // aire: una octava arriba
+          else if(mood==='bambu'){const q=(Math.random()<.5)?0:3;ds=[q,q+3,q+5,q+8]}   // quintas huecas (re-la, la-mi)
+          else if(mood==='calido')ds=[2,4,7,9];                     // voz alta y cálida
+          else ds=night>.5?[r-5,r,r+2,r+4]:[r,r+2,r+4,r+5];         // noche más grave, día más brillante
+          ds.forEach((d,i)=>V4[i].forEach(o=>o.frequency.setTargetAtTime(fr(d),t,2.2)));
+          this.padMood=mood||'base';this.padDeg=ds;
+        }
+      }
+      setTimeout(tick,2500);
+    };tick();
+  },
   music(){
     const c=this.ctx;
+    this.pad();
     // bordón grave y suave
     [[73.42,.03],[110,.02],[146.83,.012]].forEach(([f,v],i)=>{
       const o=c.createOscillator(),gn=c.createGain(),l=c.createOscillator(),lg=c.createGain();
@@ -883,7 +1013,7 @@ const A={
       if(this.ok()){
         const t=c.currentTime+.05,p=step%8,rest=((step>>3)%4)===3;
         if(!rest){
-          if(p===0)this.drum(t,.34,1);else if(p===3)this.drum(t,.12,1.35);else if(p===5)this.drum(t,.16,1.15);else if(p===6&&Math.random()<.4)this.drum(t,.09,1.45);
+          if(p===0){this.drum(t,.34,1);cap('Tambor lejano',20000)}else if(p===3)this.drum(t,.12,1.35);else if(p===5)this.drum(t,.16,1.15);else if(p===6&&Math.random()<.4)this.drum(t,.09,1.45);
         }else if(p===0)this.drum(t,.12,.9);
         step++;
       }
@@ -895,7 +1025,7 @@ const A={
       if(!this.ctx)return;
       let t=c.currentTime+.2,tot=0;
       if(this.ok()){
-        const n=2+Math.floor(Math.random()*3),px=rnd(-3,3);
+        cap('Flauta shakuhachi',12000);const n=2+Math.floor(Math.random()*3),px=rnd(-3,3);
         for(let i=0;i<n;i++){
           fi=clamp(fi+Math.floor(Math.random()*5)-2,0,7);
           const d=rnd(1.8,3.4);this.flute(SC[fi],t,d,.06,px+rnd(-.3,.3),-2.5);t+=d*.88;tot+=d*.88;
@@ -907,16 +1037,16 @@ const A={
     const bells=()=>{
       if(!this.ctx)return;
       if(this.ok()){
-        const t=c.currentTime+.05,k=SC[5+Math.floor(Math.random()*5)];
+        const t=c.currentTime+.05,k=SC[5+Math.floor(Math.random()*5)];cap('Campanillas',12000);
         this.bell(k,t,.045,false,rnd(-5,5),rnd(-5,-1));if(Math.random()<.5)this.bell(SC[5+Math.floor(Math.random()*5)],t+rnd(.18,.4),.035,false,rnd(-5,5),rnd(-5,-1));
       }
       setTimeout(bells,rnd(3500,8000));
     };setTimeout(bells,2500);
-    const koto=()=>{if(!this.ctx)return;if(this.ok()){const t=c.currentTime+.05;let i=Math.floor(Math.random()*6),kx=rnd(-4,4);for(let j=0;j<3;j++){this.pluck(SC[clamp(i+[0,2,1][j],0,9)],.06,t+j*.28,kx,-2)}}setTimeout(koto,rnd(14000,24000))};setTimeout(koto,9000);
+    const koto=()=>{if(!this.ctx)return;if(this.ok()){cap('Koto',12000);const t=c.currentTime+.05;let i=Math.floor(Math.random()*6),kx=rnd(-4,4);for(let j=0;j<3;j++){this.pluck(SC[clamp(i+[0,2,1][j],0,9)],.06,t+j*.28,kx,-2)}}setTimeout(koto,rnd(14000,24000))};setTimeout(koto,9000);
     // campana de templo, muy de vez en cuando
-    const temple=()=>{if(!this.ctx)return;if(this.ok())this.bell(146.83,c.currentTime+.05,.08,true,rnd(-6,6),-8);setTimeout(temple,rnd(35000,55000))};setTimeout(temple,16000);
+    const temple=()=>{if(!this.ctx)return;if(this.ok()){cap('Campana de templo',15000);this.bell(146.83,c.currentTime+.05,.08,true,rnd(-6,6),-8)}setTimeout(temple,rnd(35000,55000))};setTimeout(temple,16000);
     // grillos de noche
-    const cr=()=>{if(!this.ctx)return;if(this.ok()&&V.dark>.3){const t=c.currentTime;for(let i=0;i<3;i++)this.chirp(t+i*.11)}setTimeout(cr,1400+Math.random()*3000)};cr();
+    const cr=()=>{if(!this.ctx)return;if(this.ok()&&V.dark>.3){cap('Grillos',30000);const t=c.currentTime;for(let i=0;i<3;i++)this.chirp(t+i*.11)}setTimeout(cr,1400+Math.random()*3000)};cr();
   },
   mute(on){this.muted=on;if(this.master)this.master.gain.setTargetAtTime(on?0:.6,this.ctx.currentTime,.05)}
 };
@@ -1025,8 +1155,117 @@ requestAnimationFrame(frame);
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&PZ.started()&&!PZ.on)PZ.set(true)});
   document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-pz]');if(b)PZ.toggle()});
 })();
+/*UX-BEGIN*/
+/* UX compartido (juegos 2D y Cabaña 3D): idioma es/en/ja, subtítulos de ambiente, háptica y modo una mano.
+   Comparte las claves de almacenamiento con Río 3D: rio3d-lang, rio3d-subs, rio3d-hap, rio3d-hand. */
+(function(){
+  if(window.UX)return;
+  const K=['es','en','ja'],NM={es:'Español',en:'English',ja:'日本語'};
+  const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  let LG=ls.get('rio3d-lang','es');if(!K.includes(LG))LG='es';
+  const ix=LG==='en'?1:2,MAP=new Map(),RX=[];
+  const UX=window.UX={lang:LG,onLang:null,
+    add(rows){rows.forEach(r=>MAP.set(r[0],r))},
+    rx(list){list.forEach(r=>RX.push(r))},
+    tr(s){
+      if(LG==='es'||typeof s!=='string')return s;
+      const t=s.trim();if(!t)return s;
+      const r=MAP.get(t);if(r)return s.replace(t,r[ix]);
+      for(const [re,f] of RX){const m=t.match(re);if(m)return s.replace(t,f(m,LG==='en'?1:2,UX.tr))}
+      return s;
+    },
+    init(){
+      if(LG==='es')return;
+      document.documentElement.lang=LG;
+      const walk=n=>{
+        if(n.nodeType===3){const v=UX.tr(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v;return}
+        if(n.nodeType!==1||n.tagName==='SCRIPT'||n.tagName==='STYLE')return;
+        const al=n.getAttribute&&n.getAttribute('aria-label');if(al){const v=UX.tr(al);if(v!==al)n.setAttribute('aria-label',v)}
+        const tt=n.getAttribute&&n.getAttribute('title');if(tt){const v=UX.tr(tt);if(v!==tt)n.setAttribute('title',v)}
+        n.childNodes.forEach(walk);
+      };
+      walk(document.body);
+      new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')walk(m.target);else m.addedNodes.forEach(walk)}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+    },
+    /* háptica suave: vibración del navegador donde exista (iPadOS no la expone a las webs) */
+    hap(p){
+      if(ls.get('rio3d-hap','1')==='0')return;
+      try{
+        if(navigator.vibrate){navigator.vibrate(p);return}
+        if(!UX._sw){const l=document.createElement('label');l.style.cssText='position:fixed;left:-99px;top:0;opacity:0;pointer-events:none';const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');l.appendChild(i);document.body.appendChild(l);UX._sw=l}
+        UX._sw.click();
+      }catch(e){}
+    },
+    subsOn:()=>ls.get('rio3d-subs','0')==='1',
+    /* subtítulo de ambiente: UX.cap('Campanillas'); gap = ms mínimos entre repeticiones de la misma clave */
+    cap(k,gap){
+      if(!UX.subsOn())return;
+      const n=performance.now(),l=UX._cl||(UX._cl={});if(l[k]&&n-l[k]<(gap||9000))return;l[k]=n;
+      let e=document.getElementById('uxcap');
+      if(!e){e=document.createElement('div');e.id='uxcap';e.setAttribute('aria-live','polite');e.style.cssText='position:fixed;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 50px));transform:translateX(-50%);background:rgba(20,22,48,.84);color:#fbf1e0;padding:6px 14px;border-radius:8px;font:600 .86rem system-ui,sans-serif;opacity:0;transition:opacity .4s;z-index:20;pointer-events:none;max-width:86%;text-align:center';document.body.appendChild(e)}
+      e.textContent='['+UX.tr(k)+']';e.style.opacity=1;clearTimeout(UX._ct);UX._ct=setTimeout(()=>e.style.opacity=0,2600);
+    },
+    /* botones de ajustes para el menú «Más». opts.hand=true añade el modo una mano (clases hand-r / hand-l en body). */
+    btns(cls,opts){
+      opts=opts||{};const mk=(id,f)=>{const b=document.createElement('button');b.type='button';b.id=id;b.className=cls||'';b.onclick=f;return b};
+      const out=[];
+      const lb=mk('uxLang',()=>{const n=K[(K.indexOf(LG)+1)%3];ls.set('rio3d-lang',n);try{UX.onLang&&UX.onLang()}catch(e){}location.reload()});
+      lb.textContent=(LG==='en'?'Language: ':LG==='ja'?'言語: ':'Idioma: ')+NM[LG];out.push(lb);
+      const sb=mk('uxSubs',()=>{ls.set('rio3d-subs',UX.subsOn()?'0':'1');sb.textContent=UX.subsOn()?'Subtítulos: sí':'Subtítulos: no'});
+      sb.textContent=UX.subsOn()?'Subtítulos: sí':'Subtítulos: no';out.push(sb);
+      const hb=mk('uxHap',()=>{const on=ls.get('rio3d-hap','1')==='1';ls.set('rio3d-hap',on?'0':'1');hb.textContent=on?'Vibración: no':'Vibración: sí';if(!on)UX.hap(15)});
+      hb.textContent=ls.get('rio3d-hap','1')==='1'?'Vibración: sí':'Vibración: no';out.push(hb);
+      if(opts.hand){
+        const names={'0':'Una mano: no',r:'Una mano: derecha',l:'Una mano: izquierda'},seq=['0','r','l'];
+        const apply=v=>{document.body.classList.remove('hand-r','hand-l');if(v!=='0')document.body.classList.add('hand-'+v)};
+        let cur=ls.get('rio3d-hand','0');if(!names[cur])cur='0';apply(cur);
+        const hd=mk('uxHand',()=>{cur=seq[(seq.indexOf(cur)+1)%3];ls.set('rio3d-hand',cur);apply(cur);hd.textContent=names[cur]});
+        hd.textContent=names[cur];out.push(hd);
+      }
+      return out;
+    }
+  };
+  UX.add([
+    ['Pausa','Pause','一時停止'],['Continuar','Resume','再開'],['Más','More','その他'],['Respirar','Breathe','呼吸'],['Sonido: sí','Sound: on','音: オン'],['Sonido: no','Sound: off','音: オフ'],['Reiniciar','Restart','最初から'],
+    ['En pausa','Paused','一時停止中'],['Respira con calma.','Breathe calmly.','ゆっくり呼吸しましょう。'],['Todo seguirá aquí cuando vuelvas.','Everything will be here when you return.','戻ってくるまで、すべてそのままです。'],
+    ['Subtítulos: sí','Captions: on','字幕: オン'],['Subtítulos: no','Captions: off','字幕: オフ'],['Vibración: sí','Vibration: on','振動: オン'],['Vibración: no','Vibration: off','振動: オフ'],
+    ['Una mano: no','One hand: off','片手: オフ'],['Una mano: derecha','One hand: right','片手: 右'],['Una mano: izquierda','One hand: left','片手: 左'],
+    ['Flauta shakuhachi','Shakuhachi flute','尺八'],['Campanillas','Wind chimes','鈴の音'],['Koto','Koto','琴'],['Campana de templo','Temple bell','寺の鐘'],['Tambor lejano','Distant drum','遠くの太鼓'],
+    ['Cuac de pato','Duck quack','カモの鳴き声'],['Aleteo de garza','Heron wingbeats','サギの羽ばたき'],['Golpe suave de la canoa','Soft knock on the canoe','カヌーが軽くぶつかる音'],['Salpicadura','Splash','水しぶき'],['Fuegos artificiales','Fireworks','花火'],['Nota de linterna','Lantern note','ランタンの音'],['Cascada cercana','Waterfall nearby','近くの滝の音'],['Lluvia suave','Soft rain','やさしい雨音'],
+    ['Viento','Wind','風'],['Grillos','Crickets','コオロギ'],['Fregado','Scrubbing','こする音'],['Madera que cruje','Creaking wood','きしむ木の音'],['Estrella fugaz','Shooting star','流れ星'],
+  ]);
+})();
+
+/*UX-END*/
 PZ.ctx=()=>A.ctx;PZ.started=()=>G.started;
-PZ.more(document.querySelector('header'),[$('#breath-btn'),$('#mute'),$('#reset')]);
+/* ===== Idiomas (es/en/ja): el texto fuente es español y se traduce al vuelo por diccionario ===== */
+UX.add([
+  ['Río de Linternas','River of Lanterns','ランタンの川'],['Distancia','Distance','距離'],['Linternas','Lanterns','ランタン'],['Lugares','Places','場所'],['Diario','Journal','日記'],['Detener','Stop','やめる'],
+  ['Una canoa baja por un río tranquilo al atardecer','A canoe drifts down a quiet river at dusk','夕暮れの静かな川をカヌーが下っていきます'],
+  ['La corriente te lleva. Mantén presionado y mueve el dedo o el mouse para guiar.','The current carries you. Press and hold, then move your finger or mouse to steer.','流れが運んでくれます。長押ししたまま指かマウスを動かして操作します。'],
+  ['Una canoa, un río tranquilo y la noche que se acerca. No hay prisa ni final: deja que el agua te lleve.','A canoe, a quiet river and the night drawing near. There is no rush and no end: let the water carry you.','カヌーと静かな川、そして近づいてくる夜。急ぐ必要も終わりもありません。水の流れに身をまかせましょう。'],
+  ['La corriente te lleva sola. Mantén presionado y mueve el dedo hacia donde quieras ir.','The current carries you on its own. Press and hold, then move your finger where you want to go.','流れが自然に運んでくれます。長押しして、行きたい方向へ指を動かしてください。'],
+  ['Toca las linternas flotantes con la canoa para encenderlas.','Touch the floating lanterns with your canoe to light them.','浮かんでいるランタンにカヌーで触れると、火が灯ります。'],
+  ['Con auriculares el sonido es envolvente: el agua, las campanas y la lluvia suenan desde su lugar.','With headphones the sound is immersive: the water, the bells and the rain come from where they are.','ヘッドホンなら立体音響で楽しめます。水、鐘、雨の音がそれぞれの場所から聞こえます。'],
+  ['En teclado: flechas o A y D para guiar.','On a keyboard: arrow keys or A and D to steer.','キーボードでは、矢印キーまたは A と D で操作します。'],
+  ['Tocar para empezar','Tap to start','タップして始める'],
+  ['El río vuelve a empezar','The river begins again','川が最初から始まります'],['Bienvenido de vuelta al río','Welcome back to the river','おかえりなさい、川へ'],['Deja que la corriente te lleve','Let the current carry you','流れに身をまかせましょう'],
+  ['Llevas un buen rato. Toma agua, suelta los hombros y respira hondo. El juego te espera.','You have been playing for a while. Drink some water, relax your shoulders and take a deep breath. The game will wait for you.','しばらく遊んでいますね。水を飲んで、肩の力を抜いて、深呼吸しましょう。ゲームは待っています。'],
+  ['Empieza una llovizna suave','A soft drizzle begins','やさしい霧雨が降りはじめました'],
+  ['Festival de linternas: la aldea celebra esta noche','Lantern festival: the village celebrates tonight','ランタン祭り：今夜、村がお祝いしています'],
+  ['¿Seguro? Se borra el avance','Sure? Your progress will be erased','本当によいですか？進行状況が消えます'],
+  ['Prepárate…','Get ready…','準備して…'],['Inhala por la nariz','Breathe in through your nose','鼻からゆっくり吸って'],['Sostén un momento','Hold for a moment','少し止めて'],['Exhala despacio','Breathe out slowly','ゆっくり吐いて'],['Gracias por respirar','Thank you for breathing','呼吸にお付き合いありがとう'],
+  ['Melodía de descubrimiento','Discovery melody','発見のメロディ'],
+  ['Puente de madera','Wooden bridge','木の橋'],['Torii sobre el agua','Torii over the water','水上の鳥居'],['Aldea de farolillos','Lantern village','ちょうちんの村'],['Jardín de sakura','Sakura garden','桜の庭'],['Cañaveral de las garzas','Heron reedbed','サギの葦原'],
+  ['Templo de la campana','Bell temple','鐘の寺'],['Cascadita de musgo','Mossy waterfall','苔の小さな滝'],['Casa de té','Tea house','茶屋'],['Bosque de bambú','Bamboo forest','竹林'],['Estanque de lotos','Lotus pond','蓮の池'],
+]);
+UX.rx([
+  [/^Siguiente: (.+) en (\d+) m$/,(m,i,tr)=>i===1?'Next: '+tr(m[1])+' in '+m[2]+' m':'次：'+tr(m[1])+'（あと'+m[2]+' m）'],
+  [/^Descubriste: (.+)$/,(m,i,tr)=>i===1?'You discovered: '+tr(m[1]):'発見：'+tr(m[1])],
+]);
+document.title=UX.tr(document.title);
+PZ.more(document.querySelector('header'),[$('#breath-btn'),$('#mute'),$('#reset'),...UX.btns('btn')]);
+UX.init();   // al final: traduce el DOM actual (incluido el menú «Más» y la pausa) y observa los cambios
 </script>
 
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js").catch(function(){})</script>

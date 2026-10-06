@@ -97,6 +97,10 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
 <script>
 const W=960,H=720,DPR=Math.min(window.devicePixelRatio||1,2);
 const $=s=>document.querySelector(s);
+/* Ayudas de UX (idioma, subtítulos, háptica). window.UX se define en el segundo <script>, así que se usa de forma perezosa. */
+const uTr=s=>window.UX?UX.tr(s):s;
+const uCap=(k,g)=>{try{window.UX&&UX.cap(k,g)}catch(e){}};
+const uHap=p=>{try{window.UX&&UX.hap(p)}catch(e){}};
 const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const lerp=(a,b,t)=>a+(b-a)*t;
@@ -514,7 +518,7 @@ function updateUI(){
   $('#mats').textContent='Tablas: '+Math.max(0,avail());
   ITEMS.forEach(o=>{const s=status(o),b=chipEls[o.id];b.className='chip '+s.k;b.lastChild.textContent=s.t});
 }
-function checkDone(){if(!state.done&&progress()>=.995){state.done=true;toast('Tu cabaña está lista. Buen trabajo.');save()}}
+function checkDone(){if(!state.done&&progress()>=.995){state.done=true;toast('Tu cabaña está lista. Buen trabajo.');uHap([20,80,20,80,40]);save();celebrate()}}
 function attempt(o){
   if(state.repaired[o.id]){toast(o.name+' ya está reparado');return}
   const s=status(o);
@@ -526,7 +530,7 @@ function attempt(o){
   }
   state.spent+=o.cost;state.repaired[o.id]=true;sceneDirty=true;
   const r0=o.rects[0];burst(r0[0]+r0[2]/2,r0[1]+r0[3]/2);
-  A.chime(((o.rects[0][0]+o.rects[0][2]/2)/W-.5)*8);A.rain(!!state.repaired.techo);toast(o.name+' reparado. Ganaste: '+o.reward[0]);
+  A.chime(((o.rects[0][0]+o.rects[0][2]/2)/W-.5)*8);A.rain(!!state.repaired.techo);uHap([12,60,12]);uCap('Campanita de reparación',1500);toast(o.name+' reparado. Ganaste: '+o.reward[0]);
   updateUI();updateLoot();checkDone();save();
 }
 
@@ -545,7 +549,7 @@ function load(cb){
 function resetAll(){
   try{localStorage.removeItem(KEY);localStorage.removeItem(OLD_KEY)}catch(e){}
   state.repaired={};state.spent=0;state.done=false;state.best=0;sceneDirty=true;
-  makeGrime();ITEMS.forEach(o=>o.flash=0);measure();updateUI();updateLoot();A.rain(false);toast('Cabaña reiniciada');
+  makeGrime();ITEMS.forEach(o=>o.flash=0);measure();updateUI();updateLoot();A.rain(false);try{localStorage.removeItem(CELEB_KEY)}catch(e){}celeb=null;toast('Cabaña reiniciada');
 }
 
 /* ===== Deterioro por abandono: la suciedad vuelve por zonas, empezando por el piso ===== */
@@ -632,12 +636,13 @@ function render(t){
     if(p.k===0){g.fillStyle='rgba(200,230,255,'+(.8*a)+')';g.beginPath();g.arc(p.x,p.y,p.r,0,7);g.fill()}
     else{g.globalCompositeOperation='lighter';g.fillStyle='rgba(255,205,120,'+a+')';g.beginPath();g.arc(p.x,p.y,p.r,0,7);g.fill();g.globalCompositeOperation='source-over'}
   });
+  drawMoments(t);
   const pulse=.5+.5*Math.sin(t*3);
   if(started&&!state.repaired.piso&&(cur.items.piso||0)<.3){
     g.setLineDash([10,8]);g.lineWidth=3;g.strokeStyle='rgba(255,240,200,'+(.35+.4*pulse)+')';
     rr(g,215,495,690,72,12);g.stroke();g.setLineDash([]);
-    g.fillStyle='rgba(255,240,200,.9)';g.font='700 18px Nunito,sans-serif';g.textAlign='center';
-    g.fillText('Empieza limpiando el piso',560,488);g.textAlign='start';
+    g.fillStyle='rgba(255,240,200,.9)';g.font='700 18px Nunito,"Hiragino Sans","Noto Sans JP",sans-serif';g.textAlign='center';
+    g.fillText(hintTxt(),560,488);g.textAlign='start';
   }
   ITEMS.forEach(o=>{
     const s=status(o),f2=o.flash||0;
@@ -646,30 +651,105 @@ function render(t){
     o.rects.forEach(r=>{rr(g,r[0],r[1],r[2],r[3],14);g.stroke()});
   });
 }
+/* ===== Momentos únicos: estrella fugaz ocasional y celebración al terminar la cabaña ===== */
+const CELEB_KEY='cabana-acantilado-celebrada';
+let celeb=null,star=null,nextStar=0,glowSpr=null,lantSpr=null;
+const hintTxt=()=>uTr('Empieza limpiando el piso');
+/* Sprites pequeños prerenderizados: así la celebración sólo hace drawImage por fotograma */
+function sprites(){
+  if(glowSpr)return;
+  glowSpr=mk(40,40);let c=glowSpr.getContext('2d'),gr=c.createRadialGradient(20,20,0,20,20,20);
+  gr.addColorStop(0,'rgba(255,240,150,1)');gr.addColorStop(1,'rgba(255,240,150,0)');c.fillStyle=gr;c.fillRect(0,0,40,40);
+  lantSpr=mk(64,80);c=lantSpr.getContext('2d');
+  gr=c.createRadialGradient(32,38,2,32,38,32);gr.addColorStop(0,'rgba(255,190,100,.75)');gr.addColorStop(1,'rgba(255,170,70,0)');c.fillStyle=gr;c.fillRect(0,0,64,80);
+  c.fillStyle='#ffd48a';rr(c,24,24,16,24,5);c.fill();
+  c.fillStyle='#fff3cf';rr(c,28,29,8,14,3);c.fill();
+  c.fillStyle='#b9805a';c.fillRect(25,22,14,3);c.fillRect(25,47,14,3);
+}
+/* Celebra una sola vez por cabaña terminada (se guarda en localStorage; «Reiniciar» lo borra) */
+function celebrate(){
+  try{if(localStorage.getItem(CELEB_KEY)==='1')return}catch(e){}
+  try{localStorage.setItem(CELEB_KEY,'1')}catch(e){}
+  sprites();
+  celeb={t:0,spawn:0,n:0,ls:[],ff:Array.from({length:12},()=>({x:rnd(640,940),y:rnd(300,520),p:rnd(0,6.28)}))};
+  uCap('Farolillos al cielo',1000);
+  if(A.ctx&&A.ctx.state==='running')[0,2,3,7].forEach((st,i)=>A.bell(293.66*Math.pow(2,st/12),A.ctx.currentTime+.1+i*.45,.045,i%2?2:-1,-2));
+}
+window.__celebrar=()=>{try{localStorage.removeItem(CELEB_KEY)}catch(e){}celebrate()};
+function updateMoments(dt,t){
+  if(started){
+    if(!nextStar)nextStar=t+rnd(25,50);
+    if(!star&&t>nextStar){
+      nextStar=t+rnd(45,100);
+      star={t:0,x:rnd(560,920),y:rnd(14,50),vx:-rnd(260,340),vy:rnd(40,70)};
+      uCap('Estrella fugaz');
+      if(A.ctx&&A.ctx.state==='running')A.note(2349.3,A.ctx.currentTime+.02,1.2,.012,'sine',star.x/W*6-3,-3);
+    }
+  }
+  if(star){star.t+=dt;if(star.t>1.1)star=null}
+  if(celeb){
+    celeb.t+=dt;
+    if(celeb.n<14){
+      celeb.spawn-=dt;
+      if(celeb.spawn<=0){
+        celeb.spawn=rnd(.7,1.1);celeb.n++;
+        celeb.ls.push({x:rnd(780,900),y:rnd(430,470),vy:-rnd(28,40),ph:rnd(0,6.28),s:rnd(.7,1.1),l:0});
+        if(celeb.n%3===1&&A.ctx&&A.ctx.state==='running')A.bell([587.33,659.25,698.46,880][celeb.n%4],A.ctx.currentTime+.05,.03,2,-2);
+      }
+    }
+    for(let i=celeb.ls.length-1;i>=0;i--){const q=celeb.ls[i];q.l+=dt;q.y+=q.vy*dt;if(q.y<-60)celeb.ls.splice(i,1)}
+    if(celeb.t>50&&!celeb.ls.length)celeb=null;
+  }
+}
+function drawMoments(t){
+  g.globalCompositeOperation='lighter';
+  if(star){
+    const u=star.t/1.1,a=Math.sin(Math.PI*u)*.9,hx=star.x+star.vx*star.t,hy=star.y+star.vy*star.t,tx=hx-star.vx*.14,ty=hy-star.vy*.14;
+    const gr=g.createLinearGradient(tx,ty,hx,hy);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(1,'rgba(255,255,255,'+a+')');
+    g.strokeStyle=gr;g.lineWidth=2;g.lineCap='round';line(g,tx,ty,hx,hy);g.lineCap='butt';
+    g.fillStyle='rgba(255,250,230,'+a+')';g.beginPath();g.arc(hx,hy,2,0,7);g.fill();
+  }
+  if(celeb&&glowSpr){
+    const fa=Math.min(1,celeb.t/3)*Math.max(0,1-(celeb.t-20)/30);
+    if(fa>.01)celeb.ff.forEach(f=>{
+      const x=f.x+Math.sin(t*.6+f.p)*30,y=f.y+Math.cos(t*.5+f.p*1.3)*20;
+      g.globalAlpha=fa*(.35+.55*Math.max(0,Math.sin(t*1.8+f.p)));g.drawImage(glowSpr,x-9,y-9,18,18);
+    });
+    celeb.ls.forEach(q=>{
+      const x=q.x+Math.sin(q.l*.7+q.ph)*14,fl=.9+.1*Math.sin(t*5+q.ph);
+      g.globalAlpha=Math.min(1,q.l/1.2)*Math.min(1,(q.y+60)/160)*fl;
+      g.drawImage(lantSpr,x-32*q.s,q.y-40*q.s,64*q.s,80*q.s);
+    });
+    g.globalAlpha=1;
+  }
+  g.globalCompositeOperation='source-over';
+}
 let lastMeasure=0;
 function update(dt,t){
   const T={tab:1,lamp:state.repaired.lampara&&state.repaired.panel?1:0,moon:state.repaired.ventana?1:0,str:state.repaired.luces?1:0,nich:state.repaired.nichos?1:0};
   for(const k in T)lit[k]=lerp(lit[k],T[k],Math.min(1,dt*2.2));
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.l+=dt;if(p.l>=p.m){parts.splice(i,1);continue}p.vy+=(p.k?60:260)*dt;p.x+=p.vx*dt;p.y+=p.vy*dt}
   ITEMS.forEach(o=>{if(o.flash>0)o.flash=Math.max(0,o.flash-dt*1.2)});
+  updateMoments(dt,t);
   if(dirtyFlag&&t-lastMeasure>.35){lastMeasure=t;dirtyFlag=false;measure();updateUI();if(started)checkDone()}
 }
 let last=0;
 function frame(ms){if(window.PZ&&PZ.on){last=ms/1000;requestAnimationFrame(frame);return}const t=ms/1000,dt=Math.min(.05,t-last);last=t;update(dt,t);render(t);requestAnimationFrame(frame)}
 
 /* ===== Entrada: arrastrar limpia, tocar repara ===== */
-let drawing=false,lx=0,ly=0,sx=0,sy=0,st=0,moved=0;
+let scrubHap=0,drawing=false,lx=0,ly=0,sx=0,sy=0,st=0,moved=0;
 function pt(e){const r=canvas.getBoundingClientRect();return [(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H]}
 canvas.addEventListener('pointerdown',e=>{
   if(!started)return;e.preventDefault();canvas.setPointerCapture(e.pointerId);
   drawing=true;[lx,ly]=pt(e);sx=lx;sy=ly;st=performance.now();moved=0;
   stamp(lx,ly);spray(lx,ly,0,0);dirtyFlag=true;A.level(.05);A.scrubPos(lx/W,ly/H);
+  uCap('Fregado',7000);{const n=performance.now();if(n-scrubHap>2500){scrubHap=n;uHap(5)}}
 });
 canvas.addEventListener('pointermove',e=>{
   if(!drawing)return;e.preventDefault();
   const [x,y]=pt(e),d=Math.hypot(x-lx,y-ly);moved+=d;
   stampLine(lx,ly,x,y);if(parts.length<400)spray(x,y,x-lx,y-ly);
-  lx=x;ly=y;dirtyFlag=true;A.level(Math.min(.12,.04+d*.004));A.scrubPos(lx/W,ly/H);
+  lx=x;ly=y;dirtyFlag=true;A.level(Math.min(.12,.04+d*.004));A.scrubPos(lx/W,ly/H);uCap('Fregado',7000);
 });
 function endDraw(cancel){
   if(!drawing)return;drawing=false;A.level(0);
@@ -719,6 +799,7 @@ const A={
       const cgn=c.createGain();cgn.gain.value=.05;const cp=this.panner(6,-1,-8,3,.3);cp.connect(m);cty.connect(cb);cb.connect(cgn);cgn.connect(cp);
       this.rain(!!state.repaired.techo);
       this.loop();
+      this.pad();
     }catch(e){this.ctx=null}
   },
   panner(x,y,z,ref,roll){
@@ -788,24 +869,57 @@ const A={
       if(c.state==='running'){
         const n=2+Math.floor(Math.random()*3),px=R(-3,3);
         for(let i=0;i<n;i++){fi=Math.max(0,Math.min(7,fi+Math.floor(Math.random()*5)-2));const d=R(1.8,3.4);this.flute(sc[fi],t,d,.05,px+R(-.3,.3),-2.5);t+=d*.88;tot+=d*.88}
+        uCap('Flauta shakuhachi',25000);
       }
       setTimeout(phrase,(tot+R(7,12))*1000);
     };setTimeout(phrase,4000);
     const koto=()=>{
       if(!this.ctx)return;
-      if(c.state==='running'){const t=c.currentTime+.05;let i=Math.floor(Math.random()*6),kx=R(-4,4);for(let j=0;j<3;j++)this.note(sc[Math.min(9,i+[0,2,1][j])],t+j*.3,2.4,.05,'triangle',kx,-2)}
+      if(c.state==='running'){const t=c.currentTime+.05;let i=Math.floor(Math.random()*6),kx=R(-4,4);for(let j=0;j<3;j++)this.note(sc[Math.min(9,i+[0,2,1][j])],t+j*.3,2.4,.05,'triangle',kx,-2);uCap('Koto',25000)}
       setTimeout(koto,R(9000,16000));
     };setTimeout(koto,7000);
     const bells=()=>{
       if(!this.ctx)return;
-      if(c.state==='running')this.bell(sc[5+Math.floor(Math.random()*5)],c.currentTime+.05,.04,R(-5,5),R(-5,-1));
+      if(c.state==='running'){this.bell(sc[5+Math.floor(Math.random()*5)],c.currentTime+.05,.04,R(-5,5),R(-5,-1));uCap('Campanillas',25000)}
       setTimeout(bells,R(4000,9000));
     };setTimeout(bells,3000);
-    const k=()=>{if(!this.ctx)return;if(c.state==='running'){const t=c.currentTime;const pn=this.panner(R(-6,6),R(-.5,1),R(-5,3),2,.6);pn.connect(this.master);for(let i=0;i<3;i++)this.chirp(t+i*.11,pn)}setTimeout(k,1800+Math.random()*3500)};
+    const k=()=>{if(!this.ctx)return;if(c.state==='running'){const t=c.currentTime;const pn=this.panner(R(-6,6),R(-.5,1),R(-5,3),2,.6);pn.connect(this.master);for(let i=0;i<3;i++)this.chirp(t+i*.11,pn);uCap('Grillos',20000)}setTimeout(k,1800+Math.random()*3500)};
     k();
+    // ambiente continuo (viento, lluvia sobre el techo): subtítulo ocasional
+    setInterval(()=>{if(!this.ctx||c.state!=='running')return;uCap('Viento',45000);if(state.repaired.techo)uCap('Lluvia suave',45000)},9000);
+  },
+  /* Capa lenta tipo pad: acordes hirajoshi en re (0,2,3,7,8 sobre D3). Cada ~15 s cambia de acorde y cada 5 s se adapta al avance:
+     cabaña sucia = una octava más grave y filtro cerrado; más reparada = más cálido, brillante y con voz alta; techo reparado = voz de brillo extra. */
+  pad(){
+    const c=this.ctx,D3=146.83,SC=[0,2,3,7,8];
+    const out=c.createGain();out.gain.value=.04;
+    const fl=c.createBiquadFilter();fl.type='lowpass';fl.frequency.value=300;fl.Q.value=.4;
+    const snd=c.createGain();snd.gain.value=.35;
+    fl.connect(out);out.connect(this.master);out.connect(snd);snd.connect(this.echo);
+    const vs=[['sine',-3],['triangle',4],['sine',-5],['triangle',3],['sine',5]].map(([ty,d])=>{
+      const o=c.createOscillator(),gn=c.createGain();o.type=ty;o.detune.value=d;o.frequency.value=D3;gn.gain.value=0;o.connect(gn);gn.connect(fl);o.start();return {o,gn};
+    });
+    const deg=i=>{const n=SC.length,k=((i%n)+n)%n,oc=Math.floor(i/n);return D3*Math.pow(2,(SC[k]+12*oc)/12)};
+    let root=0,n=0;
+    const tune=tc=>{
+      if(c.state!=='running')return;
+      const t=c.currentTime,p=Math.max(0,Math.min(1,progress())),sm=p*p*(3-2*p),roofed=!!state.repaired.techo;
+      const base=root+(p<.35?-5:0);
+      const fr=[deg(base),deg(base+2),deg(base+4),deg(base+(p>.7?7:5)),deg(base+6)];
+      const gs=[.5,.3+.15*sm,.28,.42*sm,roofed?.26:0];
+      vs.forEach((v,i)=>{v.o.frequency.setTargetAtTime(fr[i],t,tc);v.gn.gain.setTargetAtTime(gs[i],t,tc)});
+      fl.frequency.setTargetAtTime(280+2300*sm,t,tc);
+    };
+    tune(2.5);
+    setInterval(()=>{
+      if(!this.ctx||c.state!=='running')return;
+      const ch=++n%3===0;
+      if(ch){root=(root+1+Math.floor(Math.random()*4))%5;uCap('Acorde suave',60000)}
+      tune(ch?3.5:4);
+    },5000);
   },
   level(v){if(this.cleanG)this.cleanG.gain.setTargetAtTime(v,this.ctx.currentTime,.06)},
-  rain(on){if(this.rainGs)this.rainGs.forEach(g=>g.gain.setTargetAtTime(on?.035:0,this.ctx.currentTime,.8))},
+  rain(on){if(this.rainGs)this.rainGs.forEach(g=>g.gain.setTargetAtTime(on?.035:0,this.ctx.currentTime,.8));if(on)uCap('Lluvia suave',45000)},
   chime(x){
     if(!this.ctx)return;const t=this.ctx.currentTime,px=x==null?0:x;
     this.note(659.25,t,1.4,.09,'sine',px,-1.5);this.note(880,t+.12,1.8,.09,'sine',px,-1.5);this.note(1318.5,t+.26,2,.05,'sine',px,-1.5);
@@ -815,7 +929,7 @@ const A={
 document.addEventListener('visibilitychange',()=>{const c=A.ctx;if(!c)return;if(document.hidden)c.suspend();else if(!PZ.on)c.resume()});
 
 /* ===== Controles y arranque ===== */
-$('#go').onclick=()=>{started=true;$('#start').hidden=true;A.init();toast(pendingMsg||'Empieza limpiando el piso. Arrastra para lavar.');pendingMsg=''};
+$('#go').onclick=()=>{started=true;$('#start').hidden=true;A.init();if(state.done)celebrate();toast(pendingMsg||'Empieza limpiando el piso. Arrastra para lavar.');pendingMsg=''};
 $('#mute').onclick=e=>{A.mute(!A.muted);e.currentTarget.textContent='Sonido: '+(A.muted?'no':'sí')};
 let resetT=0;
 $('#reset').onclick=e=>{
@@ -909,8 +1023,162 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&started)sa
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&PZ.started()&&!PZ.on)PZ.set(true)});
   document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-pz]');if(b)PZ.toggle()});
 })();
+/*UX-BEGIN*/
+/* UX compartido (juegos 2D y Cabaña 3D): idioma es/en/ja, subtítulos de ambiente, háptica y modo una mano.
+   Comparte las claves de almacenamiento con Río 3D: rio3d-lang, rio3d-subs, rio3d-hap, rio3d-hand. */
+(function(){
+  if(window.UX)return;
+  const K=['es','en','ja'],NM={es:'Español',en:'English',ja:'日本語'};
+  const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  let LG=ls.get('rio3d-lang','es');if(!K.includes(LG))LG='es';
+  const ix=LG==='en'?1:2,MAP=new Map(),RX=[];
+  const UX=window.UX={lang:LG,onLang:null,
+    add(rows){rows.forEach(r=>MAP.set(r[0],r))},
+    rx(list){list.forEach(r=>RX.push(r))},
+    tr(s){
+      if(LG==='es'||typeof s!=='string')return s;
+      const t=s.trim();if(!t)return s;
+      const r=MAP.get(t);if(r)return s.replace(t,r[ix]);
+      for(const [re,f] of RX){const m=t.match(re);if(m)return s.replace(t,f(m,LG==='en'?1:2,UX.tr))}
+      return s;
+    },
+    init(){
+      if(LG==='es')return;
+      document.documentElement.lang=LG;
+      const walk=n=>{
+        if(n.nodeType===3){const v=UX.tr(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v;return}
+        if(n.nodeType!==1||n.tagName==='SCRIPT'||n.tagName==='STYLE')return;
+        const al=n.getAttribute&&n.getAttribute('aria-label');if(al){const v=UX.tr(al);if(v!==al)n.setAttribute('aria-label',v)}
+        const tt=n.getAttribute&&n.getAttribute('title');if(tt){const v=UX.tr(tt);if(v!==tt)n.setAttribute('title',v)}
+        n.childNodes.forEach(walk);
+      };
+      walk(document.body);
+      new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')walk(m.target);else m.addedNodes.forEach(walk)}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+    },
+    /* háptica suave: vibración del navegador donde exista (iPadOS no la expone a las webs) */
+    hap(p){
+      if(ls.get('rio3d-hap','1')==='0')return;
+      try{
+        if(navigator.vibrate){navigator.vibrate(p);return}
+        if(!UX._sw){const l=document.createElement('label');l.style.cssText='position:fixed;left:-99px;top:0;opacity:0;pointer-events:none';const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');l.appendChild(i);document.body.appendChild(l);UX._sw=l}
+        UX._sw.click();
+      }catch(e){}
+    },
+    subsOn:()=>ls.get('rio3d-subs','0')==='1',
+    /* subtítulo de ambiente: UX.cap('Campanillas'); gap = ms mínimos entre repeticiones de la misma clave */
+    cap(k,gap){
+      if(!UX.subsOn())return;
+      const n=performance.now(),l=UX._cl||(UX._cl={});if(l[k]&&n-l[k]<(gap||9000))return;l[k]=n;
+      let e=document.getElementById('uxcap');
+      if(!e){e=document.createElement('div');e.id='uxcap';e.setAttribute('aria-live','polite');e.style.cssText='position:fixed;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 50px));transform:translateX(-50%);background:rgba(20,22,48,.84);color:#fbf1e0;padding:6px 14px;border-radius:8px;font:600 .86rem system-ui,sans-serif;opacity:0;transition:opacity .4s;z-index:20;pointer-events:none;max-width:86%;text-align:center';document.body.appendChild(e)}
+      e.textContent='['+UX.tr(k)+']';e.style.opacity=1;clearTimeout(UX._ct);UX._ct=setTimeout(()=>e.style.opacity=0,2600);
+    },
+    /* botones de ajustes para el menú «Más». opts.hand=true añade el modo una mano (clases hand-r / hand-l en body). */
+    btns(cls,opts){
+      opts=opts||{};const mk=(id,f)=>{const b=document.createElement('button');b.type='button';b.id=id;b.className=cls||'';b.onclick=f;return b};
+      const out=[];
+      const lb=mk('uxLang',()=>{const n=K[(K.indexOf(LG)+1)%3];ls.set('rio3d-lang',n);try{UX.onLang&&UX.onLang()}catch(e){}location.reload()});
+      lb.textContent=(LG==='en'?'Language: ':LG==='ja'?'言語: ':'Idioma: ')+NM[LG];out.push(lb);
+      const sb=mk('uxSubs',()=>{ls.set('rio3d-subs',UX.subsOn()?'0':'1');sb.textContent=UX.subsOn()?'Subtítulos: sí':'Subtítulos: no'});
+      sb.textContent=UX.subsOn()?'Subtítulos: sí':'Subtítulos: no';out.push(sb);
+      const hb=mk('uxHap',()=>{const on=ls.get('rio3d-hap','1')==='1';ls.set('rio3d-hap',on?'0':'1');hb.textContent=on?'Vibración: no':'Vibración: sí';if(!on)UX.hap(15)});
+      hb.textContent=ls.get('rio3d-hap','1')==='1'?'Vibración: sí':'Vibración: no';out.push(hb);
+      if(opts.hand){
+        const names={'0':'Una mano: no',r:'Una mano: derecha',l:'Una mano: izquierda'},seq=['0','r','l'];
+        const apply=v=>{document.body.classList.remove('hand-r','hand-l');if(v!=='0')document.body.classList.add('hand-'+v)};
+        let cur=ls.get('rio3d-hand','0');if(!names[cur])cur='0';apply(cur);
+        const hd=mk('uxHand',()=>{cur=seq[(seq.indexOf(cur)+1)%3];ls.set('rio3d-hand',cur);apply(cur);hd.textContent=names[cur]});
+        hd.textContent=names[cur];out.push(hd);
+      }
+      return out;
+    }
+  };
+  UX.add([
+    ['Pausa','Pause','一時停止'],['Continuar','Resume','再開'],['Más','More','その他'],['Respirar','Breathe','呼吸'],['Sonido: sí','Sound: on','音: オン'],['Sonido: no','Sound: off','音: オフ'],['Reiniciar','Restart','最初から'],
+    ['En pausa','Paused','一時停止中'],['Respira con calma.','Breathe calmly.','ゆっくり呼吸しましょう。'],['Todo seguirá aquí cuando vuelvas.','Everything will be here when you return.','戻ってくるまで、すべてそのままです。'],
+    ['Subtítulos: sí','Captions: on','字幕: オン'],['Subtítulos: no','Captions: off','字幕: オフ'],['Vibración: sí','Vibration: on','振動: オン'],['Vibración: no','Vibration: off','振動: オフ'],
+    ['Una mano: no','One hand: off','片手: オフ'],['Una mano: derecha','One hand: right','片手: 右'],['Una mano: izquierda','One hand: left','片手: 左'],
+    ['Flauta shakuhachi','Shakuhachi flute','尺八'],['Campanillas','Wind chimes','鈴の音'],['Koto','Koto','琴'],['Campana de templo','Temple bell','寺の鐘'],['Tambor lejano','Distant drum','遠くの太鼓'],
+    ['Cuac de pato','Duck quack','カモの鳴き声'],['Aleteo de garza','Heron wingbeats','サギの羽ばたき'],['Golpe suave de la canoa','Soft knock on the canoe','カヌーが軽くぶつかる音'],['Salpicadura','Splash','水しぶき'],['Fuegos artificiales','Fireworks','花火'],['Nota de linterna','Lantern note','ランタンの音'],['Cascada cercana','Waterfall nearby','近くの滝の音'],['Lluvia suave','Soft rain','やさしい雨音'],
+    ['Viento','Wind','風'],['Grillos','Crickets','コオロギ'],['Fregado','Scrubbing','こする音'],['Madera que cruje','Creaking wood','きしむ木の音'],['Estrella fugaz','Shooting star','流れ星'],
+  ]);
+})();
+
+/*UX-END*/
 PZ.ctx=()=>A.ctx;PZ.started=()=>started;
-PZ.more(document.querySelector('header'),[$('#breath-btn'),$('#mute'),$('#reset')]);
+/* ===== Idiomas es/en/ja: diccionario por texto exacto del juego (el texto fuente sigue en español) ===== */
+UX.add([
+  ['Cabaña del Acantilado','Cliffside Cabin','崖の上の小屋'],
+  ['Una cabaña olvidada en lo alto de la montaña. Límpiala, repárala y enciende sus luces, sin prisa.','A forgotten cabin high up the mountain. Clean it, repair it and light its lamps, with no rush.','山の高みに忘れられた小屋。急がず、掃除して、直して、明かりをともしましょう。'],
+  ['Arrastra el dedo o el mouse para lavar la suciedad.','Drag your finger or mouse to wash away the grime.','指やマウスをなぞって、汚れを洗い流しましょう。'],
+  ['Al limpiar ganas tablas. Toca un objeto ya limpio para repararlo.','Cleaning earns you planks. Tap a clean object to repair it.','掃除すると板材が手に入ります。きれいになった物をタップして修理しましょう。'],
+  ['Con auriculares el sonido es envolvente: el agua, las campanas y la lluvia suenan desde su lugar.','With headphones the sound is immersive: water, bells and rain come from where they are.','ヘッドホンなら立体的な音響です。水や鐘、雨の音がそれぞれの場所から聞こえます。'],
+  ['El avance se guarda en este dispositivo.','Your progress is saved on this device.','進行状況はこの端末に保存されます。'],
+  ['Tocar para empezar','Tap to start','タップしてはじめる'],
+  ['Progreso de la cabaña','Cabin progress','小屋の進み具合'],
+  ['Cabaña en un acantilado, de noche','A cabin on a cliff, at night','夜の崖の上の小屋'],
+  ['Empieza limpiando el piso. Arrastra para lavar.','Start by cleaning the floor. Drag to wash.','まず床を掃除しましょう。なぞって洗います。'],
+  ['Empieza limpiando el piso','Start by cleaning the floor','まず床を掃除しましょう'],
+  ['Esencial','Essential','必須'],['Funcional','Functional','機能'],['Decoración','Decoration','飾り'],
+  ['Colección','Collection','コレクション'],
+  ['Vacía. Cada reparación te da un objeto.','Empty. Every repair gives you an item.','空っぽです。修理するたびにアイテムが手に入ります。'],
+  ['Reparado','Repaired','修理済み'],
+  ['Limpia más esa zona antes de repararla','Clean that area some more before repairing it','修理する前に、その場所をもう少し掃除しましょう'],
+  ['Tu cabaña está lista. Buen trabajo.','Your cabin is ready. Nice work.','小屋が完成しました。よくできました。'],
+  ['Cabaña reiniciada','Cabin restarted','小屋をリセットしました'],
+  ['Menos de 2 h: aún no se ensucia','Less than 2 h: it does not get dirty yet','2時間未満: まだ汚れません'],
+  ['Llevas un buen rato. Toma agua, suelta los hombros y respira hondo. El juego te espera.','You have been playing a while. Drink some water, relax your shoulders and breathe deeply. The game will wait.','ずいぶん遊びましたね。水を飲んで、肩の力を抜いて、深呼吸しましょう。ゲームは待っていてくれます。'],
+  ['Detener','Stop','止める'],['Prepárate…','Get ready…','準備して…'],['Gracias por respirar','Thanks for breathing','呼吸してくれてありがとう'],
+  ['Inhala por la nariz','Breathe in through your nose','鼻から息を吸って'],['Sostén un momento','Hold for a moment','少し止めて'],['Exhala despacio','Breathe out slowly','ゆっくり息を吐いて'],
+  ['¿Seguro? Se borra el avance','Sure? Your progress will be erased','本当に？進行状況が消えます'],
+  // subtítulos de ambiente
+  ['Campanita de reparación','Repair chime','修理の鈴の音'],['Acorde suave','Soft chord','やわらかな和音'],['Farolillos al cielo','Lanterns rising','ランタンが空へ'],
+  // zonas del deterioro por abandono
+  ['el piso','the floor','床'],['la terraza y la escalera','the terrace and the stairs','テラスと階段'],['el interior','the interior','室内'],['el techo y los nichos','the roof and the niches','屋根と壁のくぼみ'],
+]);
+/* Objetos reparables (nombre, y minúsculas porque nameOf() las usa dentro de frases) y recompensas con su efecto */
+[
+  ['Piso','Floor','床'],['Escalera','Stairs','階段'],['Barandal','Railing','手すり'],['Techo','Roof','屋根'],['Panel solar','Solar panel','ソーラーパネル'],['Ventana','Window','窓'],
+  ['Librero','Bookcase','本棚'],['Cama','Bed','ベッド'],['Lámpara del techo','Ceiling lamp','天井ランプ'],['Luces de cuerda','String lights','ストリングライト'],['Cuadro','Picture','絵'],['Plantas','Plants','観葉植物'],['Nichos de pared','Wall niches','壁のくぼみ'],
+].forEach(r=>UX.add([r,[r[0].toLowerCase(),r[1].toLowerCase(),r[2]]]));
+UX.add([
+  ['Cepillo ancho','Wide brush','幅広ブラシ'],['Limpias con un cepillo más grande','You scrub with a bigger brush','より大きなブラシで掃除できます'],
+  ['Mochila de herramientas','Tool backpack','道具リュック'],['Ganas 10% más de tablas al limpiar','You earn 10% more planks when cleaning','掃除で板材が10%多く手に入ります'],
+  ['Farol de mano','Hand lantern','手持ちランタン'],['Ilumina el área mientras limpias','Lights the area while you clean','掃除中にまわりを照らします'],
+  ['Cubeta de lluvia','Rain bucket','雨水バケツ'],['Suena lluvia suave sobre el techo','Soft rain sounds on the roof','屋根にやさしい雨音が響きます'],
+  ['Batería solar','Solar battery','ソーラーバッテリー'],['Energía guardada para la noche','Energy stored for the night','夜のために電力をためておきます'],
+  ['Cortinas de lino','Linen curtains','麻のカーテン'],['Entra la luz de la luna','Moonlight comes in','月明かりが差し込みます'],
+  ['Novela de montaña','Mountain novel','山の小説'],['Un libro para las noches','A book for the nights','夜のための一冊'],
+  ['Manta tejida','Woven blanket','編みの毛布'],['Para las noches frías','For cold nights','寒い夜のために'],
+  ['Foco cálido','Warm bulb','あたたかい電球'],['Una luz amplia sobre la cama','A wide light over the bed','ベッドの上を広く照らす光'],
+  ['Bombillas de colores','Colored bulbs','カラー電球'],['Las luces se vuelven de colores','The lights turn colorful','明かりがカラフルになります'],
+  ['Pincel de acuarela','Watercolor brush','水彩筆'],['Un recuerdo de la montaña','A memory of the mountain','山の思い出'],
+  ['Semillas de lavanda','Lavender seeds','ラベンダーの種'],['Huele a campo','Smells like the countryside','野原の香りがします'],
+  ['Luciérnagas en frasco','Fireflies in a jar','瓶の中のホタル'],['Más luciérnagas afuera','More fireflies outside','外のホタルが増えます'],
+]);
+/* Textos con números o nombres interpolados */
+{
+  const lst=(a,ix,tr)=>a.split(', ').map(tr).join(ix===1?', ':'、');
+  UX.rx([
+    [/^Tablas: (\d+)$/,(m,ix)=>ix===1?'Planks: '+m[1]:'板材: '+m[1]],
+    [/^Listo · (\d+) tablas$/,(m,ix)=>ix===1?'Ready · '+m[1]+' planks':'準備OK · 板材'+m[1]+'枚'],
+    [/^Limpia la zona · (\d+)%$/,(m,ix)=>(ix===1?'Clean the area · ':'場所を掃除 · ')+m[1]+'%'],
+    [/^Faltan (\d+) tablas$/,(m,ix)=>ix===1?'Need '+m[1]+' more planks':'あと板材'+m[1]+'枚'],
+    [/^Faltan (\d+) tablas\. Sigue limpiando\.$/,(m,ix)=>ix===1?'Need '+m[1]+' more planks. Keep cleaning.':'あと板材'+m[1]+'枚。掃除を続けましょう。'],
+    [/^Necesita: (.+)$/,(m,ix,tr)=>(ix===1?'Needs: ':'必要: ')+lst(m[1],ix,tr)],
+    [/^Primero repara: (.+)$/,(m,ix,tr)=>(ix===1?'Repair first: ':'先に修理: ')+lst(m[1],ix,tr)],
+    [/^(.+) ya está reparado$/,(m,ix,tr)=>ix===1?'Already repaired: '+tr(m[1]):tr(m[1])+'はすでに修理済みです'],
+    [/^(.+) reparado\. Ganaste: (.+)$/,(m,ix,tr)=>ix===1?tr(m[1])+' repaired. You got: '+tr(m[2]):tr(m[1])+'を修理しました。入手: '+tr(m[2])],
+    [/^La cabaña estuvo sola (\d+) (h|días) y se ensució, empezando por el piso(?:\.| hasta (.+)\.)$/,(m,ix,tr)=>{
+      const u=ix===1?(m[2]==='h'?' h':' days'):(m[2]==='h'?'時間':'日間'),z=m[3]?tr(m[3]):'';
+      return ix===1?'The cabin was alone for '+m[1]+u+' and got dirty, starting with the floor'+(z?' and spreading to '+z:'')+'.'
+        :'小屋は'+m[1]+u+'のあいだ留守になり、床から汚れはじめました'+(z?'。'+z+'まで広がっています':'')+'。';
+    }],
+  ]);
+}
+document.title=UX.tr('Cabaña del Acantilado');
+PZ.more(document.querySelector('header'),[$('#breath-btn'),$('#mute'),$('#reset'),...UX.btns('btn')]);
+UX.init();
 </script>
 
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js").catch(function(){})</script>

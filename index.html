@@ -27,6 +27,7 @@ a.card b{font:600 1.25rem 'Fredoka',system-ui,sans-serif}
 a.card span{color:var(--muted);font-size:.95rem;line-height:1.45}
 a.card i{font-style:normal;color:var(--lamp);font-weight:700;margin-top:4px}
 small{color:var(--muted);opacity:.8}
+#lg button{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:99px;padding:8px 16px;font:700 .85rem Nunito,system-ui,sans-serif;cursor:pointer}
 </style>
 </head>
 <body>
@@ -36,11 +37,107 @@ small{color:var(--muted);opacity:.8}
     <a class="card" href="rio/"><b>Río de Linternas</b><span>Guía una canoa por un río infinito, enciende linternas y descubre lugares mientras cae la noche.</span><i>Jugar →</i></a>
     <a class="card" href="cabana/"><b>Cabaña del Acantilado</b><span>Limpia y repara poco a poco una cabaña en lo alto de la montaña, de noche y con lámparas.</span><i>Jugar →</i></a>
     <a class="card" href="rio3d/"><b>Río 3D</b><span>Baja por un río de niebla en primera o tercera persona: puentes, aldeas, peces, lluvia y linternas flotando. Mejor con auriculares.</span><i>Jugar →</i></a>
-    <a class="card" href="cabana3d/"><b>Cabaña 3D <em style="font-style:normal;font-size:.7em;color:var(--lamp)">prototipo</em></b><span>La cabaña del acantilado en tres dimensiones: gira alrededor, friega la suciedad y repárala con luces, humo y lluvia.</span><i>Jugar →</i></a>
+    <a class="card" href="cabana3d/"><b>Cabaña 3D</b><span>La cabaña del acantilado en tres dimensiones: gira alrededor, friega la suciedad y repárala con luces, humo y lluvia.</span><i>Jugar →</i></a>
   </div>
   <small id="inst" hidden></small>
+  <div id="lg"></div>
   <small>El avance se guarda en el navegador de cada dispositivo. Activa el sonido con auriculares para disfrutarlo mejor.</small>
 </main>
+<script>
+/* UX compartido (juegos 2D y Cabaña 3D): idioma es/en/ja, subtítulos de ambiente, háptica y modo una mano.
+   Comparte las claves de almacenamiento con Río 3D: rio3d-lang, rio3d-subs, rio3d-hap, rio3d-hand. */
+(function(){
+  if(window.UX)return;
+  const K=['es','en','ja'],NM={es:'Español',en:'English',ja:'日本語'};
+  const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  let LG=ls.get('rio3d-lang','es');if(!K.includes(LG))LG='es';
+  const ix=LG==='en'?1:2,MAP=new Map(),RX=[];
+  const UX=window.UX={lang:LG,onLang:null,
+    add(rows){rows.forEach(r=>MAP.set(r[0],r))},
+    rx(list){list.forEach(r=>RX.push(r))},
+    tr(s){
+      if(LG==='es'||typeof s!=='string')return s;
+      const t=s.trim();if(!t)return s;
+      const r=MAP.get(t);if(r)return s.replace(t,r[ix]);
+      for(const [re,f] of RX){const m=t.match(re);if(m)return s.replace(t,f(m,LG==='en'?1:2,UX.tr))}
+      return s;
+    },
+    init(){
+      if(LG==='es')return;
+      document.documentElement.lang=LG;
+      const walk=n=>{
+        if(n.nodeType===3){const v=UX.tr(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v;return}
+        if(n.nodeType!==1||n.tagName==='SCRIPT'||n.tagName==='STYLE')return;
+        const al=n.getAttribute&&n.getAttribute('aria-label');if(al){const v=UX.tr(al);if(v!==al)n.setAttribute('aria-label',v)}
+        const tt=n.getAttribute&&n.getAttribute('title');if(tt){const v=UX.tr(tt);if(v!==tt)n.setAttribute('title',v)}
+        n.childNodes.forEach(walk);
+      };
+      walk(document.body);
+      new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')walk(m.target);else m.addedNodes.forEach(walk)}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+    },
+    /* háptica suave: vibración del navegador donde exista (iPadOS no la expone a las webs) */
+    hap(p){
+      if(ls.get('rio3d-hap','1')==='0')return;
+      try{
+        if(navigator.vibrate){navigator.vibrate(p);return}
+        if(!UX._sw){const l=document.createElement('label');l.style.cssText='position:fixed;left:-99px;top:0;opacity:0;pointer-events:none';const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');l.appendChild(i);document.body.appendChild(l);UX._sw=l}
+        UX._sw.click();
+      }catch(e){}
+    },
+    subsOn:()=>ls.get('rio3d-subs','0')==='1',
+    /* subtítulo de ambiente: UX.cap('Campanillas'); gap = ms mínimos entre repeticiones de la misma clave */
+    cap(k,gap){
+      if(!UX.subsOn())return;
+      const n=performance.now(),l=UX._cl||(UX._cl={});if(l[k]&&n-l[k]<(gap||9000))return;l[k]=n;
+      let e=document.getElementById('uxcap');
+      if(!e){e=document.createElement('div');e.id='uxcap';e.setAttribute('aria-live','polite');e.style.cssText='position:fixed;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 50px));transform:translateX(-50%);background:rgba(20,22,48,.84);color:#fbf1e0;padding:6px 14px;border-radius:8px;font:600 .86rem system-ui,sans-serif;opacity:0;transition:opacity .4s;z-index:20;pointer-events:none;max-width:86%;text-align:center';document.body.appendChild(e)}
+      e.textContent='['+UX.tr(k)+']';e.style.opacity=1;clearTimeout(UX._ct);UX._ct=setTimeout(()=>e.style.opacity=0,2600);
+    },
+    /* botones de ajustes para el menú «Más». opts.hand=true añade el modo una mano (clases hand-r / hand-l en body). */
+    btns(cls,opts){
+      opts=opts||{};const mk=(id,f)=>{const b=document.createElement('button');b.type='button';b.id=id;b.className=cls||'';b.onclick=f;return b};
+      const out=[];
+      const lb=mk('uxLang',()=>{const n=K[(K.indexOf(LG)+1)%3];ls.set('rio3d-lang',n);try{UX.onLang&&UX.onLang()}catch(e){}location.reload()});
+      lb.textContent=(LG==='en'?'Language: ':LG==='ja'?'言語: ':'Idioma: ')+NM[LG];out.push(lb);
+      const sb=mk('uxSubs',()=>{ls.set('rio3d-subs',UX.subsOn()?'0':'1');sb.textContent=UX.subsOn()?'Subtítulos: sí':'Subtítulos: no'});
+      sb.textContent=UX.subsOn()?'Subtítulos: sí':'Subtítulos: no';out.push(sb);
+      const hb=mk('uxHap',()=>{const on=ls.get('rio3d-hap','1')==='1';ls.set('rio3d-hap',on?'0':'1');hb.textContent=on?'Vibración: no':'Vibración: sí';if(!on)UX.hap(15)});
+      hb.textContent=ls.get('rio3d-hap','1')==='1'?'Vibración: sí':'Vibración: no';out.push(hb);
+      if(opts.hand){
+        const names={'0':'Una mano: no',r:'Una mano: derecha',l:'Una mano: izquierda'},seq=['0','r','l'];
+        const apply=v=>{document.body.classList.remove('hand-r','hand-l');if(v!=='0')document.body.classList.add('hand-'+v)};
+        let cur=ls.get('rio3d-hand','0');if(!names[cur])cur='0';apply(cur);
+        const hd=mk('uxHand',()=>{cur=seq[(seq.indexOf(cur)+1)%3];ls.set('rio3d-hand',cur);apply(cur);hd.textContent=names[cur]});
+        hd.textContent=names[cur];out.push(hd);
+      }
+      return out;
+    }
+  };
+  UX.add([
+    ['Pausa','Pause','一時停止'],['Continuar','Resume','再開'],['Más','More','その他'],['Respirar','Breathe','呼吸'],['Sonido: sí','Sound: on','音: オン'],['Sonido: no','Sound: off','音: オフ'],['Reiniciar','Restart','最初から'],
+    ['En pausa','Paused','一時停止中'],['Respira con calma.','Breathe calmly.','ゆっくり呼吸しましょう。'],['Todo seguirá aquí cuando vuelvas.','Everything will be here when you return.','戻ってくるまで、すべてそのままです。'],
+    ['Subtítulos: sí','Captions: on','字幕: オン'],['Subtítulos: no','Captions: off','字幕: オフ'],['Vibración: sí','Vibration: on','振動: オン'],['Vibración: no','Vibration: off','振動: オフ'],
+    ['Una mano: no','One hand: off','片手: オフ'],['Una mano: derecha','One hand: right','片手: 右'],['Una mano: izquierda','One hand: left','片手: 左'],
+    ['Flauta shakuhachi','Shakuhachi flute','尺八'],['Campanillas','Wind chimes','鈴の音'],['Koto','Koto','琴'],['Campana de templo','Temple bell','寺の鐘'],['Tambor lejano','Distant drum','遠くの太鼓'],
+    ['Cuac de pato','Duck quack','カモの鳴き声'],['Aleteo de garza','Heron wingbeats','サギの羽ばたき'],['Golpe suave de la canoa','Soft knock on the canoe','カヌーが軽くぶつかる音'],['Salpicadura','Splash','水しぶき'],['Fuegos artificiales','Fireworks','花火'],['Nota de linterna','Lantern note','ランタンの音'],['Cascada cercana','Waterfall nearby','近くの滝の音'],['Lluvia suave','Soft rain','やさしい雨音'],
+    ['Viento','Wind','風'],['Grillos','Crickets','コオロギ'],['Fregado','Scrubbing','こする音'],['Madera que cruje','Creaking wood','きしむ木の音'],['Estrella fugaz','Shooting star','流れ星'],
+  ]);
+})();
+
+UX.add([
+['Juegos para respirar','Games to breathe','深呼吸のためのゲーム'],
+['Cuatro juegos tranquilos, sin prisa ni puntaje, para soltar la mente al final del día.','Four calm games, with no rush and no score, to let your mind unwind at the end of the day.','急ぐことも得点もない、静かな4つのゲーム。一日の終わりに心をほどきましょう。'],
+['Río de Linternas','Lantern River','ランタンの川'],['Guía una canoa por un río infinito, enciende linternas y descubre lugares mientras cae la noche.','Steer a canoe down an endless river, light lanterns and discover places as night falls.','終わりのない川でカヌーを進め、ランタンを灯して、夜が来る中で場所を見つけましょう。'],
+['Cabaña del Acantilado','Cliffside Cabin','崖の上の小屋'],['Limpia y repara poco a poco una cabaña en lo alto de la montaña, de noche y con lámparas.','Slowly clean and repair a cabin high on the mountain, at night and by lamplight.','山の上の小屋を、夜のランプの灯りのもと、少しずつ掃除して直しましょう。'],
+['Río 3D','River 3D','川 3D'],['Baja por un río de niebla en primera o tercera persona: puentes, aldeas, peces, lluvia y linternas flotando. Mejor con auriculares.','Drift down a misty river in first or third person: bridges, villages, fish, rain and floating lanterns. Best with headphones.','霧の川を一人称・三人称で下ります。橋、村、魚、雨、浮かぶランタン。ヘッドホン推奨。'],
+['Cabaña 3D','Cabin 3D','小屋 3D'],['La cabaña del acantilado en tres dimensiones: gira alrededor, friega la suciedad y repárala con luces, humo y lluvia.','The cliffside cabin in three dimensions: orbit around it, scrub the dirt and repair it with lights, smoke and rain.','崖の上の小屋を3Dで。ぐるりと見回し、汚れをこすり、光や煙や雨とともに直しましょう。'],
+['Jugar →','Play →','遊ぶ →'],
+['El avance se guarda en el navegador de cada dispositivo. Activa el sonido con auriculares para disfrutarlo mejor.','Progress is saved in each device\u2019s browser. Turn on the sound and use headphones for a better experience.','進行状況は各端末のブラウザに保存されます。音を出して、ヘッドホンで楽しんでください。'],
+['Listo para usarse sin conexión. Para instalarlo: en el menú del navegador elige «Añadir a pantalla de inicio» o «Instalar».','Ready to use offline. To install: in the browser menu choose \u201cAdd to Home Screen\u201d or \u201cInstall\u201d.','オフラインで使えます。インストールするには、ブラウザのメニューから「ホーム画面に追加」または「インストール」を選んでください。'],
+]);
+{const b=UX.btns('')[0];document.getElementById('lg').appendChild(b)}
+UX.init();
+</script>
 <script>
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(r=>{
   navigator.serviceWorker.ready.then(()=>{const i=document.getElementById('inst');i.hidden=false;i.textContent='Listo para usarse sin conexión. Para instalarlo: en el menú del navegador elige «Añadir a pantalla de inicio» o «Instalar».'})}).catch(()=>{});

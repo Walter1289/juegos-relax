@@ -42,6 +42,25 @@ h1{margin:0;font:600 clamp(1.7rem,6vw,2.3rem)/1.1 system-ui,sans-serif}
 p{margin:0;color:var(--muted);line-height:1.55}
 ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.6}
 #go{align-self:flex-start;background:var(--lamp);color:#3b2a1a;border:0;border-radius:99px;padding:13px 28px;font:700 1rem system-ui,sans-serif;cursor:pointer}
+#top button,#top a,.chip{min-height:44px}
+#top>*{display:inline-flex;align-items:center}
+.bar{display:block!important;min-height:0!important;height:10px}
+#pzMore button{min-height:44px}
+/* modo una mano (body.hand-r / body.hand-l): barra superior, vista y sugerencia bajan a la zona del pulgar, sobre la lista de reparaciones */
+body.hand-r #top,body.hand-l #top{top:auto;bottom:calc(var(--ph,90px) + 4px);padding-top:6px;padding-bottom:6px;justify-content:flex-end;pointer-events:none}
+body.hand-r #top>*,body.hand-l #top>*{pointer-events:auto}
+body.hand-l #top{flex-direction:row-reverse}
+body.hand-r .bar,body.hand-l .bar{flex:0 1 110px;min-width:60px}
+body.hand-r #camctl,body.hand-l #camctl{top:auto!important;bottom:calc(var(--ph,90px) + 64px)!important;flex-direction:row!important}
+body.hand-r #camctl{right:max(10px,env(safe-area-inset-right))!important;left:auto!important}
+body.hand-l #camctl{left:max(10px,env(safe-area-inset-left))!important;right:auto!important;flex-direction:row-reverse!important}
+body.hand-r #pzMore,body.hand-l #pzMore{top:auto!important;bottom:calc(var(--ph,90px) + 64px)}
+body.hand-l #pzMore{left:8px;right:auto!important}
+body.hand-r #nextb,body.hand-l #nextb{top:auto!important;bottom:calc(var(--ph,90px) + 118px)!important;transform:none!important}
+body.hand-r #nextb{right:max(10px,env(safe-area-inset-right))!important;left:auto!important}
+body.hand-l #nextb{left:max(10px,env(safe-area-inset-left))!important;right:auto!important}
+body.hand-r #hint,body.hand-l #hint{bottom:auto;top:max(12px,env(safe-area-inset-top));max-width:70%}
+body.hand-r #toast,body.hand-l #toast{top:max(64px,calc(env(safe-area-inset-top) + 52px))}
 </style>
 </head>
 <body>
