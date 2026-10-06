@@ -6,6 +6,7 @@ import {measure} from './dirt.js';
 import {updateUI} from './ui.js';
 import {checkDone} from './actions.js';
 import {render} from './render.js';
+import {updateHab} from './habitar.js';
 
 let lastMeasure=0;
 export function update(dt,t){
@@ -13,6 +14,7 @@ export function update(dt,t){
   updateParts(dt);
   ITEMS.forEach(o=>{if(o.flash>0)o.flash=Math.max(0,o.flash-dt*1.2)});
   updateMoments(dt,t);
+  updateHab(dt,t);
   if(rt.dirty&&t-lastMeasure>.35){lastMeasure=t;rt.dirty=false;measure();updateUI();if(rt.started)checkDone()}
 }
 let last=0;

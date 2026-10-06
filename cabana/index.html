@@ -40,6 +40,8 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
 .card p,.card li{margin:0;color:var(--muted);line-height:1.5}
 .card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 .go{background:var(--lamp);color:#2a1a08;border:0;border-radius:12px;padding:12px 18px;font-weight:800;font-size:1rem;cursor:pointer}
+#hab{display:flex;flex-direction:column;gap:6px;max-height:30vh;overflow-y:auto}
+.chip:disabled{opacity:.55;cursor:default}
 #chips{display:flex;flex-direction:column;gap:6px;max-height:30vh;overflow-y:auto}
 .grp{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .lab{font:700 .68rem var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:6.2rem}
@@ -351,14 +353,14 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           UX3.api.setVol(seq[(i + 1) % 3]);
           vb.textContent = vt();
         });
-        const vt = () => T("Volumen: ", "Volume: ", "\u97F3\u91CF: ") + Math.round(UX3.api.vol() * 100) + " %";
+        const vt = () => T2("Volumen: ", "Volume: ", "\u97F3\u91CF: ") + Math.round(UX3.api.vol() * 100) + " %";
         vb.textContent = vt();
         out.push(vb);
         const tb = mk2("uxSoft", () => {
           UX3.api.setSoft(!UX3.api.soft());
           tb.textContent = tt();
         });
-        const tt = () => UX3.api.soft() ? T("Tono suave: s\xED", "Soft tone: on", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30F3") : T("Tono suave: no", "Soft tone: off", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30D5");
+        const tt = () => UX3.api.soft() ? T2("Tono suave: s\xED", "Soft tone: on", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30F3") : T2("Tono suave: no", "Soft tone: off", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30D5");
         tb.textContent = tt();
         out.push(tb);
         const sl = mk2("uxSleep", () => {
@@ -366,7 +368,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           UX3.api.sleep(seq[(seq.indexOf(UX3.api.sleepMin()) + 1) % 4]);
           sl.textContent = st();
         });
-        const st = () => UX3.api.sleepMin() ? T("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX3.api.sleepMin() + " min" : T("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
+        const st = () => UX3.api.sleepMin() ? T2("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX3.api.sleepMin() + " min" : T2("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
         sl.textContent = st();
         UX3._sb = () => {
           sl.textContent = st();
@@ -377,7 +379,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
             ls.set("ux-wear", ls.get("ux-wear", "0") === "1" ? "0" : "1");
             wb.textContent = wt();
           });
-          const wt = () => ls.get("ux-wear", "0") === "1" ? T("Desgaste por ausencia: s\xED", "Wear while away: on", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30F3") : T("Desgaste por ausencia: no", "Wear while away: off", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30D5");
+          const wt = () => ls.get("ux-wear", "0") === "1" ? T2("Desgaste por ausencia: s\xED", "Wear while away: on", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30F3") : T2("Desgaste por ausencia: no", "Wear while away: off", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30D5");
           wb.textContent = wt();
           out.push(wb);
         }
@@ -404,13 +406,13 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           };
           return x;
         };
-        b.appendChild(mk2(T("Cancelar", "Cancel", "\u30AD\u30E3\u30F3\u30BB\u30EB")));
-        b.appendChild(mk2(T("S\xED, reiniciar", "Yes, restart", "\u306F\u3044\u3001\u6700\u521D\u304B\u3089"), ok));
+        b.appendChild(mk2(T2("Cancelar", "Cancel", "\u30AD\u30E3\u30F3\u30BB\u30EB")));
+        b.appendChild(mk2(T2("S\xED, reiniciar", "Yes, restart", "\u306F\u3044\u3001\u6700\u521D\u304B\u3089"), ok));
         d.appendChild(b);
         document.body.appendChild(d);
       }
     };
-    const T = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
+    const T2 = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
     const W2 = { vol: ls.get("ux-vol", "1"), soft: ls.get("ux-soft", "0") === "1", k: 1, nodes: [], end: 0, min: 0, ov: null };
     UX3.quiet = false;
     const apply = () => {
@@ -545,7 +547,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
             e.style.cssText = "position:fixed;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 60px));transform:translateX(-50%);max-width:min(88vw,420px);text-align:center;background:rgba(20,22,48,.88);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:14px/1.4 system-ui,sans-serif;z-index:28;pointer-events:none;transition:opacity .8s;opacity:0";
             document.body.appendChild(e);
           }
-          e.textContent = T("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
+          e.textContent = T2("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
           e.style.opacity = 1;
           clearTimeout(UX3._rt);
           UX3._rt = setTimeout(() => e.style.opacity = 0, 7e3);
@@ -656,7 +658,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     const c = mk(W * DPR, H * DPR), g2 = c.getContext("2d");
     g2.scale(DPR, DPR);
     let a = 7;
-    const R = () => {
+    const R2 = () => {
       a = a * 16807 % 2147483647;
       return a / 2147483647;
     };
@@ -667,10 +669,10 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     g2.fillStyle = s;
     g2.fillRect(0, 0, W, H);
     for (let i = 0; i < 170; i++) {
-      g2.globalAlpha = 0.3 + R() * 0.7;
+      g2.globalAlpha = 0.3 + R2() * 0.7;
       g2.fillStyle = "#fff";
       g2.beginPath();
-      g2.arc(R() * W, R() * H * 0.62, R() * 1.4 + 0.3, 0, 7);
+      g2.arc(R2() * W, R2() * H * 0.62, R2() * 1.4 + 0.3, 0, 7);
       g2.fill();
     }
     g2.globalAlpha = 1;
@@ -684,7 +686,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     g2.arc(830, 105, 30, 0, 7);
     g2.fill();
     for (let i = 0; i < 7; i++) {
-      const cx = R() * W, cy = 60 + R() * 220, w = 120 + R() * 160;
+      const cx = R2() * W, cy = 60 + R2() * 220, w = 120 + R2() * 160;
       const cg2 = g2.createRadialGradient(cx, cy, 5, cx, cy, w);
       cg2.addColorStop(0, "rgba(190,180,225,.34)");
       cg2.addColorStop(1, "rgba(190,180,225,0)");
@@ -722,9 +724,9 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       g2.globalAlpha = al;
       poly(g2, [[300, 720], [420, base2 + 60], [540, base2 + 20], [680, base2 + 50], [820, base2], [960, base2 + 30], [960, 720]]);
       g2.fill();
-      for (let x = 330 + R() * 20; x < W + 20; x += 16 + R() * 14) {
-        const hh2 = hh * (0.5 + R() * 0.6);
-        pine(x, base2 + 40 + L * 30 + R() * 20, hh2, col);
+      for (let x = 330 + R2() * 20; x < W + 20; x += 16 + R2() * 14) {
+        const hh2 = hh * (0.5 + R2() * 0.6);
+        pine(x, base2 + 40 + L * 30 + R2() * 20, hh2, col);
       }
       g2.globalAlpha = 1;
       const mg = g2.createLinearGradient(0, base2 - 40, 0, base2 + 90);
@@ -746,7 +748,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     g2.clip();
     g2.lineWidth = 2;
     for (let i = 0; i < 16; i++) {
-      const y = i * 46 + R() * 10;
+      const y = i * 46 + R2() * 10;
       g2.strokeStyle = "rgba(255,255,255,.05)";
       g2.beginPath();
       g2.moveTo(0, y);
@@ -754,9 +756,9 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       g2.stroke();
     }
     for (let i = 0; i < 14; i++) {
-      const x = R() * 700, y = R() * 700;
+      const x = R2() * 700, y = R2() * 700;
       g2.strokeStyle = "rgba(0,0,0,.25)";
-      line(g2, x, y, x + R() * 40 - 20, y + 30 + R() * 50);
+      line(g2, x, y, x + R2() * 40 - 20, y + 30 + R2() * 50);
     }
     let sh = g2.createLinearGradient(0, 400, 0, 720);
     sh.addColorStop(0, "rgba(0,0,0,0)");
@@ -887,7 +889,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   var KEY = "cabana-acantilado-v2";
   var OLD_KEY = "cabana-acantilado-v1";
   var CLEAN_MIN = 0.55;
-  var state = { repaired: {}, spent: 0, done: false, best: 0 };
+  var state = { repaired: {}, spent: 0, done: false, best: 0, decor: {}, own: {}, mem: 0, notes: [], vis: {} };
   var DW = W / 2;
   var DH = H / 2;
   var dirt = mk(DW, DH);
@@ -1160,7 +1162,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   // src2d/cabana/persist.js
   function save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ r: state.repaired, s: state.spent, d: state.done, b: state.best, t: Date.now(), img: dirt.toDataURL("image/png") }));
+      localStorage.setItem(KEY, JSON.stringify({ r: state.repaired, s: state.spent, d: state.done, b: state.best, dc: state.decor, ow: state.own, me: state.mem, nt: state.notes, vv: state.vis, t: Date.now(), img: dirt.toDataURL("image/png") }));
     } catch (e) {
     }
   }
@@ -1183,6 +1185,11 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     state.spent = o.s || 0;
     state.done = !!o.d;
     state.best = o.b || 0;
+    state.decor = o.dc || {};
+    state.own = o.ow || {};
+    state.mem = o.me || 0;
+    state.notes = o.nt || [];
+    state.vis = o.vv || {};
     rt.sceneDirty = true;
     const finish = () => {
       if (o.t && (() => {
@@ -1216,9 +1223,9 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     init() {
       if (this.ctx) return;
       try {
-        const C = window.AudioContext || window.webkitAudioContext;
-        if (!C) return;
-        const c = new C();
+        const C2 = window.AudioContext || window.webkitAudioContext;
+        if (!C2) return;
+        const c = new C2();
         this.ctx = c;
         const m = c.createGain();
         m.gain.value = this.muted ? 0 : 0.55;
@@ -1462,7 +1469,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       const c = this.ctx;
       if (!c) return;
       const sc = [293.66, 329.63, 349.23, 440, 466.16, 587.33, 659.25, 698.46, 880, 932.33];
-      const R = (a, b) => a + Math.random() * (b - a);
+      const R2 = (a, b) => a + Math.random() * (b - a);
       [[73.42, 0.026], [110, 0.016], [146.83, 0.01]].forEach(([f, v], i) => {
         const o = c.createOscillator(), gn = c.createGain(), l = c.createOscillator(), lg = c.createGain();
         o.type = "sine";
@@ -1482,44 +1489,44 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         if (!this.ctx) return;
         let t = c.currentTime + 0.2, tot = 0;
         if (c.state === "running") {
-          const n = 2 + Math.floor(Math.random() * 3), px = R(-3, 3);
+          const n = 2 + Math.floor(Math.random() * 3), px = R2(-3, 3);
           for (let i = 0; i < n; i++) {
             fi = Math.max(0, Math.min(7, fi + Math.floor(Math.random() * 5) - 2));
-            const d = R(1.8, 3.4);
-            this.flute(sc[fi], t, d, 0.05, px + R(-0.3, 0.3), -2.5);
+            const d = R2(1.8, 3.4);
+            this.flute(sc[fi], t, d, 0.05, px + R2(-0.3, 0.3), -2.5);
             t += d * 0.88;
             tot += d * 0.88;
           }
           uCap("Flauta shakuhachi", 25e3);
         }
-        setTimeout(phrase, (tot + R(7, 12)) * 1e3);
+        setTimeout(phrase, (tot + R2(7, 12)) * 1e3);
       };
       setTimeout(phrase, 4e3);
       const koto = () => {
         if (!this.ctx) return;
         if (c.state === "running") {
           const t = c.currentTime + 0.05;
-          let i = Math.floor(Math.random() * 6), kx = R(-4, 4);
+          let i = Math.floor(Math.random() * 6), kx = R2(-4, 4);
           for (let j = 0; j < 3; j++) this.note(sc[Math.min(9, i + [0, 2, 1][j])], t + j * 0.3, 2.4, 0.05, "triangle", kx, -2);
           uCap("Koto", 25e3);
         }
-        setTimeout(koto, R(9e3, 16e3));
+        setTimeout(koto, R2(9e3, 16e3));
       };
       setTimeout(koto, 7e3);
       const bells = () => {
         if (!this.ctx) return;
         if (c.state === "running") {
-          this.bell(sc[5 + Math.floor(Math.random() * 5)], c.currentTime + 0.05, 0.04, R(-5, 5), R(-5, -1));
+          this.bell(sc[5 + Math.floor(Math.random() * 5)], c.currentTime + 0.05, 0.04, R2(-5, 5), R2(-5, -1));
           uCap("Campanillas", 25e3);
         }
-        setTimeout(bells, R(4e3, 9e3));
+        setTimeout(bells, R2(4e3, 9e3));
       };
       setTimeout(bells, 3e3);
       const k = () => {
         if (!this.ctx) return;
         if (c.state === "running") {
           const t = c.currentTime;
-          const pn = this.panner(R(-6, 6), R(-0.5, 1), R(-5, 3), 2, 0.6);
+          const pn = this.panner(R2(-6, 6), R2(-0.5, 1), R2(-5, 3), 2, 0.6);
           pn.connect(this.master);
           for (let i = 0; i < 3; i++) this.chirp(t + i * 0.11, pn);
           uCap("Grillos", 2e4);
@@ -1742,8 +1749,8 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     celeb = null;
   }
   function updateLights(dt) {
-    const T = { tab: 1, lamp: state.repaired.lampara && state.repaired.panel ? 1 : 0, moon: state.repaired.ventana ? 1 : 0, str: state.repaired.luces ? 1 : 0, nich: state.repaired.nichos ? 1 : 0 };
-    for (const k in T) lit[k] = lerp(lit[k], T[k], Math.min(1, dt * 2.2));
+    const T2 = { tab: 1, lamp: state.repaired.lampara && state.repaired.panel ? 1 : 0, moon: state.repaired.ventana ? 1 : 0, str: state.repaired.luces ? 1 : 0, nich: state.repaired.nichos ? 1 : 0 };
+    for (const k in T2) lit[k] = lerp(lit[k], T2[k], Math.min(1, dt * 2.2));
   }
   function updateParts(dt) {
     for (let i = parts.length - 1; i >= 0; i--) {
@@ -1806,6 +1813,11 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     state.spent = 0;
     state.done = false;
     state.best = 0;
+    state.decor = {};
+    state.own = {};
+    state.mem = 0;
+    state.notes = [];
+    state.vis = {};
     rt.sceneDirty = true;
     makeGrime();
     ITEMS.forEach((o) => o.flash = 0);
@@ -2305,6 +2317,787 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     drawStrings(g2, !!S.luces);
   }
 
+  // rio3d-src/habdata.js
+  var DM = [
+    ["helecho", "suelo", "Helecho en maceta", 2],
+    ["lavanda", "suelo", "Lavanda", 2],
+    ["farolpapel", "suelo", "Farol de papel", 3],
+    ["tetera", "suelo", "Tetera humeante", 3],
+    ["banquito", "suelo", "Banquito con manta", 4],
+    ["libros", "suelo", "Libros con vela", 4],
+    ["campanilla", "colgante", "Campanilla de viento", 3],
+    ["atrapa", "colgante", "Atrapasue\xF1os", 3],
+    ["estrellas", "colgante", "M\xF3vil de estrellas", 4],
+    ["farolillos", "colgante", "Farolillos de papel", 3],
+    ["reloj", "pared", "Reloj de pared", 3],
+    ["guitarra", "pared", "Guitarra", 4],
+    ["estantito", "pared", "Estantito con frascos", 3],
+    ["mapa", "pared", "Mapa de la monta\xF1a", 2],
+    ["mojon", "roca", "Moj\xF3n de piedras", 2],
+    ["farolpiedra", "roca", "Farol de piedra", 3],
+    ["floresroca", "roca", "Flores de roca", 2]
+  ].map(([id, kind, name, cost]) => ({ id, kind, name, cost }));
+  var VN = {
+    gato: { name: "Un gato", gift: "banquito", notes: ["Este gato no es de nadie, pero se sienta justo donde Mara dejaba su silla.", "Ronronea cuando la l\xE1mpara est\xE1 encendida. Dicen que Mara hac\xEDa lo mismo."] },
+    zorro: { name: "Un zorro", gift: "mojon", notes: ["Un zorro curioso olfatea tus escalones. Alguien le dejaba pan aqu\xED cada tarde.", "Deja una piedra pulida junto a la puerta. Parece un regalo."] },
+    buho: { name: "Un b\xFAho", gift: "reloj", notes: ["El b\xFAho vigila el barandal. Mara lo llamaba \xABel capataz\xBB.", "Ulula suave. Del otro lado de la monta\xF1a, otro le responde."] },
+    mariposa: { name: "Una mariposa lunar", gift: "lavanda", notes: ["Una mariposa lunar descansa en tu caba\xF1a. Solo vuelan de noche, como los mapas de Mara.", "Sus alas dibujan l\xEDneas parecidas a un mapa de la monta\xF1a."] }
+  };
+  function addHabTexts(ux) {
+    const P = [
+      ["Habitar", "Settle in", "\u66AE\u3089\u3059"],
+      ["Volver a reparar", "Back to repairs", "\u4FEE\u7406\u306B\u3082\u3069\u308B"],
+      ["Recuerdos", "Keepsakes", "\u601D\u3044\u51FA"],
+      ["Preparar t\xE9", "Make tea", "\u304A\u8336\u3092\u3044\u308C\u308B"],
+      ["Regar plantas", "Water plants", "\u690D\u7269\u306B\u6C34\u3092\u3084\u308B"],
+      ["Diario de la caba\xF1a", "Cabin journal", "\u5C0F\u5C4B\u306E\u65E5\u8A18"],
+      ["Toca un c\xEDrculo de la caba\xF1a para decorar ese lugar.", "Tap a circle in the cabin to decorate that spot.", "\u5C0F\u5C4B\u306E\u4E38\u3092\u30BF\u30C3\u30D7\u3057\u3066\u3001\u305D\u306E\u5834\u6240\u3092\u98FE\u308A\u307E\u3057\u3087\u3046\u3002"],
+      ["Quitar", "Remove", "\u306F\u305A\u3059"],
+      ["Colocar", "Place", "\u7F6E\u304F"],
+      ["Comprar con recuerdos", "Buy with keepsakes", "\u601D\u3044\u51FA\u3067\u8CB7\u3046"],
+      ["Cerrar", "Close", "\u9589\u3058\u308B"],
+      ["A\xFAn vac\xEDo. Los visitantes dejan notas sobre quien vivi\xF3 aqu\xED.", "Still empty. Visitors leave notes about whoever lived here.", "\u307E\u3060\u7A7A\u3063\u307D\u3067\u3059\u3002\u8A2A\u308C\u305F\u751F\u304D\u7269\u304C\u3001\u3053\u3053\u306B\u4F4F\u3093\u3067\u3044\u305F\u4EBA\u306E\u8A71\u3092\u6B8B\u3057\u3066\u304F\u308C\u307E\u3059\u3002"],
+      ["Porche", "Porch", "\u30DD\u30FC\u30C1"],
+      ["Junto a la ventana", "By the window", "\u7A93\u306E\u305D\u3070"],
+      ["Porche, junto al barandal", "Porch, by the railing", "\u30DD\u30FC\u30C1\u306E\u624B\u3059\u308A\u306E\u305D\u3070"],
+      ["Alero", "Eaves", "\u8ED2\u4E0B"],
+      ["Pared", "Wall", "\u58C1"],
+      ["Mirador de roca", "Rock lookout", "\u5CA9\u306E\u5C55\u671B\u53F0"],
+      ["Helecho en maceta", "Potted fern", "\u9262\u690D\u3048\u306E\u30B7\u30C0"],
+      ["Lavanda", "Lavender", "\u30E9\u30D9\u30F3\u30C0\u30FC"],
+      ["Farol de papel", "Paper lantern", "\u7D19\u3061\u3087\u3046\u3061\u3093"],
+      ["Tetera humeante", "Steaming teapot", "\u6E6F\u6C17\u306E\u7ACB\u3064\u6025\u9808"],
+      ["Banquito con manta", "Stool with blanket", "\u30D6\u30E9\u30F3\u30B1\u30C3\u30C8\u306E\u30B9\u30C4\u30FC\u30EB"],
+      ["Libros con vela", "Books with a candle", "\u308D\u3046\u305D\u304F\u3068\u672C"],
+      ["Campanilla de viento", "Wind chime", "\u98A8\u9234"],
+      ["Atrapasue\xF1os", "Dreamcatcher", "\u30C9\u30EA\u30FC\u30E0\u30AD\u30E3\u30C3\u30C1\u30E3\u30FC"],
+      ["M\xF3vil de estrellas", "Star mobile", "\u661F\u306E\u30E2\u30D3\u30FC\u30EB"],
+      ["Farolillos de papel", "Paper lanterns", "\u7D19\u306E\u30E9\u30F3\u30BF\u30F3"],
+      ["Reloj de pared", "Wall clock", "\u58C1\u639B\u3051\u6642\u8A08"],
+      ["Guitarra", "Guitar", "\u30AE\u30BF\u30FC"],
+      ["Estantito con frascos", "Little shelf with jars", "\u74F6\u3092\u4E26\u3079\u305F\u5C0F\u3055\u306A\u68DA"],
+      ["Mapa de la monta\xF1a", "Mountain map", "\u5C71\u306E\u5730\u56F3"],
+      ["Moj\xF3n de piedras", "Stone cairn", "\u77F3\u7A4D\u307F"],
+      ["Farol de piedra", "Stone lantern", "\u77F3\u706F\u7C60"],
+      ["Flores de roca", "Rock flowers", "\u5CA9\u306E\u82B1"],
+      ["Llega un visitante", "A visitor arrives", "\u8A2A\u554F\u8005\u304C\u6765\u307E\u3057\u305F"],
+      ["Campanilla de viento", "Wind chime", "\u98A8\u9234"],
+      ["Tetera", "Teapot", "\u6025\u9808"],
+      ["Preparas t\xE9. El vapor sube despacio. Qu\xE9 calma.", "You make tea. The steam rises slowly. How calming.", "\u304A\u8336\u3092\u3044\u308C\u307E\u3059\u3002\u6E6F\u6C17\u304C\u3086\u3063\u304F\u308A\u6607\u308A\u307E\u3059\u3002\u843D\u3061\u7740\u304D\u307E\u3059\u306D\u3002"],
+      ["Primero repara las plantas", "Repair the plants first", "\u5148\u306B\u690D\u7269\u3092\u76F4\u3057\u307E\u3057\u3087\u3046"],
+      ["Riegas las plantas. Huelen a campo.", "You water the plants. They smell like the countryside.", "\u690D\u7269\u306B\u6C34\u3092\u3084\u308A\u307E\u3059\u3002\u91CE\u539F\u306E\u9999\u308A\u304C\u3057\u307E\u3059\u3002"],
+      ["Te dej\xF3: ", "He left you: ", "\u8D08\u308A\u7269: "],
+      ["La caba\xF1a ya se puede habitar: toca \xABHabitar\xBB", "The cabin is ready to live in: tap \u201CSettle in\u201D", "\u5C0F\u5C4B\u306B\u66AE\u3089\u305B\u308B\u3088\u3046\u306B\u306A\u308A\u307E\u3057\u305F\u3002\u300C\u66AE\u3089\u3059\u300D\u3092\u30BF\u30C3\u30D7"],
+      ["Este gato no es de nadie, pero se sienta justo donde Mara dejaba su silla.", "This cat belongs to no one, but sits right where Mara used to leave her chair.", "\u3053\u306E\u732B\u306F\u8AB0\u306E\u3082\u306E\u3067\u3082\u3042\u308A\u307E\u305B\u3093\u304C\u3001\u30DE\u30E9\u304C\u6905\u5B50\u3092\u7F6E\u3044\u3066\u3044\u305F\u5834\u6240\u306B\u3061\u3087\u3053\u3093\u3068\u5EA7\u308A\u307E\u3059\u3002"],
+      ["Ronronea cuando la l\xE1mpara est\xE1 encendida. Dicen que Mara hac\xEDa lo mismo.", "It purrs when the lamp is on. They say Mara did the same.", "\u30E9\u30F3\u30D7\u304C\u3068\u3082\u308B\u3068\u5589\u3092\u9CF4\u3089\u3057\u307E\u3059\u3002\u30DE\u30E9\u3082\u305D\u3046\u3060\u3063\u305F\u305D\u3046\u3067\u3059\u3002"],
+      ["Un zorro curioso olfatea tus escalones. Alguien le dejaba pan aqu\xED cada tarde.", "A curious fox sniffs at your steps. Someone used to leave it bread here every evening.", "\u597D\u5947\u5FC3\u65FA\u76DB\u306A\u30AD\u30C4\u30CD\u304C\u968E\u6BB5\u306E\u306B\u304A\u3044\u3092\u304B\u304E\u307E\u3059\u3002\u6BCE\u5915\u3001\u8AB0\u304B\u304C\u3053\u3053\u306B\u30D1\u30F3\u3092\u7F6E\u3044\u3066\u3044\u307E\u3057\u305F\u3002"],
+      ["Deja una piedra pulida junto a la puerta. Parece un regalo.", "It leaves a polished stone by the door. It looks like a gift.", "\u6238\u53E3\u306B\u307F\u304C\u304B\u308C\u305F\u77F3\u3092\u7F6E\u3044\u3066\u3044\u304D\u307E\u3057\u305F\u3002\u8D08\u308A\u7269\u306E\u3088\u3046\u3067\u3059\u3002"],
+      ["El b\xFAho vigila el barandal. Mara lo llamaba \xABel capataz\xBB.", "The owl watches over the railing. Mara called him \u201Cthe foreman\u201D.", "\u30D5\u30AF\u30ED\u30A6\u304C\u624B\u3059\u308A\u3092\u898B\u5F35\u3063\u3066\u3044\u307E\u3059\u3002\u30DE\u30E9\u306F\u300C\u73FE\u5834\u76E3\u7763\u300D\u3068\u547C\u3093\u3067\u3044\u307E\u3057\u305F\u3002"],
+      ["Ulula suave. Del otro lado de la monta\xF1a, otro le responde.", "It hoots softly. From the far side of the mountain, another answers.", "\u3084\u3055\u3057\u304F\u9CF4\u304F\u3068\u3001\u5C71\u306E\u5411\u3053\u3046\u304B\u3089\u3082\u3046\u4E00\u7FBD\u304C\u7B54\u3048\u307E\u3059\u3002"],
+      ["Una mariposa lunar descansa en tu caba\xF1a. Solo vuelan de noche, como los mapas de Mara.", "A luna moth rests in your cabin. They only fly at night, like Mara\u2019s maps.", "\u30AA\u30CA\u30AC\u30DF\u30BA\u30A2\u30AA\u304C\u5C0F\u5C4B\u3067\u4F11\u3093\u3067\u3044\u307E\u3059\u3002\u591C\u306B\u3057\u304B\u98DB\u3070\u306A\u3044\u3001\u30DE\u30E9\u306E\u5730\u56F3\u306E\u3088\u3046\u306A\u86FE\u3067\u3059\u3002"],
+      ["Sus alas dibujan l\xEDneas parecidas a un mapa de la monta\xF1a.", "Its wings trace lines like a map of the mountain.", "\u305D\u306E\u7FBD\u306E\u6A21\u69D8\u306F\u3001\u5C71\u306E\u5730\u56F3\u306E\u3088\u3046\u3067\u3059\u3002"],
+      ["Te faltan ", "You are short by ", "\u8DB3\u308A\u307E\u305B\u3093: "],
+      ["Un visitante deja una nota: ", "A visitor leaves a note: ", "\u8A2A\u554F\u8005\u304C\u30E1\u30E2\u3092\u6B8B\u3057\u307E\u3057\u305F: "]
+    ];
+    ux.add(P);
+    ux.rx([
+      [/^(.+) · (\d+)$/, (m, ix, tr) => tr(m[1]) + " \xB7 " + m[2]],
+      [/^Recuerdos: (\d+)$/, (m, ix) => (ix === 1 ? "Keepsakes: " : "\u601D\u3044\u51FA: ") + m[1]],
+      [/^(.+) · (\d+) s$/, (m, ix, tr) => tr(m[1]) + " \xB7 " + m[2] + " s"],
+      [/^(.+) colocado$/, (m, ix, tr) => ix === 1 ? tr(m[1]) + " placed" : tr(m[1]) + "\u3092\u7F6E\u304D\u307E\u3057\u305F"],
+      [/^Te faltan (\d+) recuerdos\. Prepara té o espera visitas\.$/, (m, ix) => ix === 1 ? "You need " + m[1] + " more keepsakes. Make tea or wait for visitors." : "\u601D\u3044\u51FA\u304C\u3042\u3068" + m[1] + "\u500B\u5FC5\u8981\u3067\u3059\u3002\u304A\u8336\u3092\u3044\u308C\u308B\u304B\u3001\u8A2A\u554F\u8005\u3092\u5F85\u3061\u307E\u3057\u3087\u3046\u3002"],
+      [/^(.+) · Te dejó: (.+)$/, (m, ix, tr) => tr(m[1]) + " \xB7 " + (ix === 1 ? "He left you: " : "\u8D08\u308A\u7269: ") + tr(m[2])]
+    ]);
+  }
+
+  // src2d/cabana/habitar.js
+  var SLOTS = [
+    { id: "porcheI", kind: "suelo", x: 251, y: 540, n: "Porche" },
+    { id: "interior", kind: "suelo", x: 648, y: 520, n: "Junto a la ventana" },
+    { id: "porcheD", kind: "suelo", x: 823, y: 536, n: "Porche, junto al barandal" },
+    { id: "alero", kind: "colgante", x: 783, y: 282, n: "Alero" },
+    { id: "pared", kind: "pared", x: 557, y: 396, n: "Pared" },
+    { id: "roca", kind: "roca", x: 130, y: 612, n: "Mirador de roca" }
+  ];
+  var R = (g2, x, y, w, h, r, c) => {
+    g2.fillStyle = c;
+    rr(g2, x, y, w, h, r);
+    g2.fill();
+  };
+  var C = (g2, x, y, r, c) => {
+    g2.fillStyle = c;
+    g2.beginPath();
+    g2.arc(x, y, r, 0, 7);
+    g2.fill();
+  };
+  var sw = (t, k, a) => Math.sin(t * k) * a;
+  var DECOR = [
+    { id: "helecho", kind: "suelo", name: "Helecho en maceta", cost: 2, draw(g2, x, y, t) {
+      R(g2, x - 14, y - 22, 28, 22, 4, "#9a5b44");
+      R(g2, x - 16, y - 26, 32, 7, 3, "#b06c52");
+      g2.strokeStyle = "#6fae78";
+      g2.lineWidth = 4;
+      g2.lineCap = "round";
+      for (let i = -3; i <= 3; i++) {
+        g2.beginPath();
+        g2.moveTo(x, y - 26);
+        g2.quadraticCurveTo(x + i * 9 + sw(t, 0.8 + i * 0.1, 2), y - 48 - Math.abs(i) * -2, x + i * 15 + sw(t, 0.9, 3), y - 36 + Math.abs(i) * 5);
+        g2.stroke();
+      }
+      g2.lineCap = "butt";
+    } },
+    { id: "lavanda", kind: "suelo", name: "Lavanda", cost: 2, draw(g2, x, y, t) {
+      R(g2, x - 12, y - 18, 24, 18, 4, "#7d6a8f");
+      g2.lineWidth = 2.4;
+      for (let i = -3; i <= 3; i++) {
+        const tx = x + i * 5 + sw(t, 0.9 + i * 0.13, 2), ty = y - 54 - Math.abs(i) * 2;
+        g2.strokeStyle = "#6a9a6e";
+        g2.beginPath();
+        g2.moveTo(x + i * 3, y - 18);
+        g2.lineTo(tx, ty);
+        g2.stroke();
+        for (let j = 0; j < 4; j++) C(g2, tx + (j % 2 ? 1 : -1), ty + j * 3.5, 2.6, j % 2 ? "#b79ae0" : "#9e7fd0");
+      }
+    } },
+    { id: "farolpapel", kind: "suelo", name: "Farol de papel", cost: 3, glow: [0, -34, 70, 0.5, "255,190,110"], draw(g2, x, y, t) {
+      R(g2, x - 2, y - 24, 4, 24, 1, "#5a4132");
+      R(g2, x - 12, y - 60, 24, 34, 10, "rgba(255,226,170,.95)");
+      g2.strokeStyle = "rgba(150,90,50,.5)";
+      g2.lineWidth = 1.4;
+      for (let i = -1; i <= 1; i++) line(g2, x + i * 6, y - 58, x + i * 6, y - 28);
+      R(g2, x - 9, y - 64, 18, 5, 2, "#5a4132");
+      R(g2, x - 9, y - 27, 18, 4, 2, "#5a4132");
+    } },
+    { id: "tetera", kind: "suelo", name: "Tetera humeante", cost: 3, draw(g2, x, y, t) {
+      R(g2, x - 22, y - 26, 44, 5, 2, "#7b5742");
+      R(g2, x - 18, y - 21, 5, 21, 1, "#6a4a38");
+      R(g2, x + 13, y - 21, 5, 21, 1, "#6a4a38");
+      g2.fillStyle = "#4f6f8a";
+      g2.beginPath();
+      g2.ellipse(x, y - 38, 13, 11, 0, 0, 7);
+      g2.fill();
+      R(g2, x - 5, y - 52, 10, 5, 2, "#3f5a72");
+      g2.strokeStyle = "#4f6f8a";
+      g2.lineWidth = 3;
+      g2.beginPath();
+      g2.moveTo(x + 11, y - 40);
+      g2.quadraticCurveTo(x + 24, y - 48, x + 20, y - 34);
+      g2.stroke();
+      g2.beginPath();
+      g2.arc(x - 17, y - 40, 7, Math.PI * 0.5, Math.PI * 1.5);
+      g2.stroke();
+      for (let i = 0; i < 4; i++) {
+        const ph = (t * 0.35 + i / 4) % 1;
+        g2.globalAlpha = 0.4 * (1 - ph);
+        C(g2, x + 22 + sw(t, 2 + i, 3) * ph, y - 44 - ph * 34, 3 + ph * 6, "#eee8f6");
+      }
+      g2.globalAlpha = 1;
+    } },
+    { id: "banquito", kind: "suelo", name: "Banquito con manta", cost: 4, draw(g2, x, y, t) {
+      R(g2, x - 20, y - 26, 40, 8, 3, "#8b6a50");
+      for (const s of [-1, 1]) R(g2, x + s * 14 - 2, y - 18, 4, 18, 1, "#6b4d3a");
+      R(g2, x - 18, y - 35, 36, 11, 5, "#c0746e");
+      g2.strokeStyle = "#e7b9a8";
+      g2.lineWidth = 2;
+      for (let i = -1; i <= 1; i++) line(g2, x + i * 10, y - 34, x + i * 10, y - 25);
+    } },
+    { id: "libros", kind: "suelo", name: "Libros con vela", cost: 4, glow: [4, -52, 64, 0.45, "255,180,90"], draw(g2, x, y, t) {
+      R(g2, x - 20, y - 12, 40, 12, 2, "#b0769c");
+      R(g2, x - 17, y - 22, 36, 10, 2, "#6498b9");
+      R(g2, x - 19, y - 32, 34, 10, 2, "#cfb67c");
+      R(g2, x + 2, y - 46, 8, 14, 2, "#f0e6cf");
+      const f = 1 + sw(t, 11, 0.12) + sw(t, 23, 0.06);
+      g2.fillStyle = "#ffd27a";
+      g2.beginPath();
+      g2.ellipse(x + 6, y - 51, 3.2 * f, 6 * f, 0, 0, 7);
+      g2.fill();
+    } },
+    { id: "campanilla", kind: "colgante", name: "Campanilla de viento", cost: 3, draw(g2, x, y, t) {
+      g2.strokeStyle = "rgba(235,225,200,.9)";
+      g2.lineWidth = 1.4;
+      R(g2, x - 14, y, 28, 5, 2, "#7b5742");
+      for (let i = -2; i <= 2; i++) {
+        const a = sw(t, 1.6 + i * 0.2, 0.12), L = 22 + Math.abs(i) * -3 + (i % 2 ? 8 : 0), bx = x + i * 6 + a * L;
+        line(g2, x + i * 6, y + 4, bx, y + 4 + L);
+        g2.fillStyle = "#d9c27a";
+        R(g2, bx - 2, y + L, 4, 14 + (i % 2 ? 4 : 0), 2, "#e0cd8a");
+      }
+    } },
+    { id: "atrapa", kind: "colgante", name: "Atrapasue\xF1os", cost: 3, draw(g2, x, y, t) {
+      const a = sw(t, 0.9, 0.05);
+      g2.save();
+      g2.translate(x, y);
+      g2.rotate(a);
+      g2.strokeStyle = "#d8c19a";
+      g2.lineWidth = 3;
+      g2.beginPath();
+      g2.arc(0, 22, 17, 0, 7);
+      g2.stroke();
+      g2.lineWidth = 1.2;
+      g2.strokeStyle = "rgba(240,230,210,.85)";
+      for (let i = 0; i < 8; i++) {
+        const q = i / 8 * 6.283;
+        line(g2, Math.cos(q) * 16, 22 + Math.sin(q) * 16, Math.cos(q + 2.4) * 10, 22 + Math.sin(q + 2.4) * 10);
+      }
+      for (const [fx, c] of [[-9, "#c97d68"], [0, "#6498b9"], [9, "#cfb67c"]]) {
+        g2.strokeStyle = "#e8dcc0";
+        line(g2, fx, 38, fx, 52);
+        R(g2, fx - 2, 50, 4, 14, 2, c);
+      }
+      g2.restore();
+      line(g2, x, y - 6, x, y + 5);
+    } },
+    { id: "estrellas", kind: "colgante", name: "M\xF3vil de estrellas", cost: 4, glow: [0, 40, 80, 0.28, "255,230,150"], draw(g2, x, y, t) {
+      g2.strokeStyle = "rgba(235,225,200,.8)";
+      g2.lineWidth = 1.3;
+      line(g2, x, y - 6, x, y + 4);
+      [[-18, 18], [16, 30], [0, 48]].forEach(([dx, dy], i) => {
+        const sx = x + dx + sw(t, 1.1 + i * 0.3, 3);
+        line(g2, x, y + 4, sx, y + dy);
+        g2.fillStyle = "#ffe9a0";
+        g2.beginPath();
+        for (let k = 0; k < 10; k++) {
+          const r = k % 2 ? 5 : 11, a = k / 10 * 6.283 - 1.57;
+          g2.lineTo(sx + Math.cos(a) * r, y + dy + 8 + Math.sin(a) * r);
+        }
+        g2.closePath();
+        g2.fill();
+      });
+    } },
+    { id: "farolillos", kind: "colgante", name: "Farolillos de papel", cost: 3, glow: [0, 38, 80, 0.4, "255,150,100"], draw(g2, x, y, t) {
+      g2.strokeStyle = "rgba(60,45,40,.8)";
+      g2.lineWidth = 1.4;
+      line(g2, x - 24, y, x + 24, y + 6);
+      [[-18, "#e0655a"], [0, "#f0a24f"], [18, "#e0655a"]].forEach(([dx, c], i) => {
+        const lx = x + dx + sw(t, 1.2 + i * 0.4, 1.5);
+        line(g2, lx, y + 3, lx, y + 14);
+        g2.fillStyle = c;
+        g2.beginPath();
+        g2.ellipse(lx, y + 26, 8, 12, 0, 0, 7);
+        g2.fill();
+        R(g2, lx - 5, y + 13, 10, 3, 1, "#4a3a32");
+      });
+    } },
+    { id: "reloj", kind: "pared", name: "Reloj de pared", cost: 3, draw(g2, x, y, t) {
+      C(g2, x, y, 20, "#6b4d3a");
+      C(g2, x, y, 16.5, "#f1e6cc");
+      g2.strokeStyle = "#3d2e26";
+      g2.lineWidth = 2;
+      const d = /* @__PURE__ */ new Date(), mh = d.getMinutes() / 60 * 6.283, hh = (d.getHours() % 12 + d.getMinutes() / 60) / 12 * 6.283;
+      line(g2, x, y, x + Math.sin(mh) * 13, y - Math.cos(mh) * 13);
+      g2.lineWidth = 3;
+      line(g2, x, y, x + Math.sin(hh) * 8, y - Math.cos(hh) * 8);
+      for (let i = 0; i < 12; i++) {
+        const q = i / 12 * 6.283;
+        line(g2, x + Math.sin(q) * 13.5, y - Math.cos(q) * 13.5, x + Math.sin(q) * 15.5, y - Math.cos(q) * 15.5);
+      }
+    } },
+    { id: "guitarra", kind: "pared", name: "Guitarra", cost: 4, draw(g2, x, y, t) {
+      g2.save();
+      g2.translate(x, y);
+      g2.rotate(-0.35);
+      g2.fillStyle = "#b9793f";
+      g2.beginPath();
+      g2.ellipse(0, 14, 16, 19, 0, 0, 7);
+      g2.fill();
+      g2.beginPath();
+      g2.ellipse(0, -6, 11, 13, 0, 0, 7);
+      g2.fill();
+      C(g2, 0, 12, 6, "#4a3326");
+      R(g2, -3, -52, 6, 48, 2, "#6b4d3a");
+      R(g2, -5, -60, 10, 10, 2, "#4a3326");
+      g2.strokeStyle = "rgba(240,230,210,.7)";
+      g2.lineWidth = 1;
+      line(g2, 0, -48, 0, 14);
+      g2.restore();
+    } },
+    { id: "estantito", kind: "pared", name: "Estantito con frascos", cost: 3, glow: [0, -8, 50, 0.25, "255,235,150"], draw(g2, x, y, t) {
+      R(g2, x - 32, y + 8, 64, 6, 2, "#7b5742");
+      R(g2, x - 24, y - 14, 14, 22, 4, "rgba(190,225,235,.7)");
+      R(g2, x - 8, y - 8, 13, 16, 4, "rgba(230,200,150,.8)");
+      for (let i = 0; i < 3; i++) C(g2, x - 17 + sw(t, 0.7 + i, 1), y - 3 + i * 3, 2, "#fff2a0");
+      g2.strokeStyle = "#6fae78";
+      g2.lineWidth = 3;
+      g2.beginPath();
+      g2.moveTo(x + 18, y + 8);
+      g2.quadraticCurveTo(x + 14, y - 6, x + 24, y - 12);
+      g2.moveTo(x + 18, y + 8);
+      g2.quadraticCurveTo(x + 26, y - 2, x + 12, y - 16);
+      g2.stroke();
+    } },
+    { id: "mapa", kind: "pared", name: "Mapa de la monta\xF1a", cost: 2, draw(g2, x, y, t) {
+      R(g2, x - 26, y - 20, 52, 40, 3, "#e6d3a6");
+      g2.strokeStyle = "#8d6b44";
+      g2.lineWidth = 1.2;
+      g2.beginPath();
+      g2.moveTo(x - 20, y + 8);
+      g2.lineTo(x - 8, y - 6);
+      g2.lineTo(x, y + 2);
+      g2.lineTo(x + 10, y - 12);
+      g2.lineTo(x + 20, y + 8);
+      g2.stroke();
+      g2.setLineDash([3, 3]);
+      line(g2, x - 18, y + 14, x + 4, y + 10);
+      g2.setLineDash([]);
+      C(g2, x + 4, y + 10, 2.4, "#c0463a");
+      R(g2, x - 27, y - 22, 54, 4, 2, "#6b4d3a");
+      R(g2, x - 27, y + 18, 54, 4, 2, "#6b4d3a");
+    } },
+    { id: "mojon", kind: "roca", name: "Moj\xF3n de piedras", cost: 2, draw(g2, x, y, t) {
+      for (const [dy, w, c] of [[0, 30, "#7d7b86"], [-14, 22, "#8d8b97"], [-26, 15, "#9a98a4"], [-35, 9, "#a8a6b2"]]) {
+        g2.fillStyle = c;
+        g2.beginPath();
+        g2.ellipse(x, y + dy - 6, w / 2, 7, 0, 0, 7);
+        g2.fill();
+      }
+    } },
+    { id: "farolpiedra", kind: "roca", name: "Farol de piedra", cost: 3, glow: [0, -38, 80, 0.5, "255,190,110"], draw(g2, x, y, t) {
+      const c = "#8a8896";
+      R(g2, x - 14, y - 6, 28, 6, 2, c);
+      R(g2, x - 5, y - 30, 10, 24, 2, c);
+      R(g2, x - 16, y - 36, 32, 7, 2, c);
+      R(g2, x - 10, y - 54, 20, 18, 2, c);
+      R(g2, x - 6, y - 50, 12, 10, 2, "rgba(255,225,160,.95)");
+      g2.fillStyle = c;
+      g2.beginPath();
+      g2.moveTo(x - 18, y - 54);
+      g2.lineTo(x, y - 68);
+      g2.lineTo(x + 18, y - 54);
+      g2.closePath();
+      g2.fill();
+    } },
+    { id: "floresroca", kind: "roca", name: "Flores de roca", cost: 2, draw(g2, x, y, t) {
+      for (let i = -4; i <= 4; i++) {
+        const fx = x + i * 7, a = sw(t, 1 + i * 0.2, 2), h = 14 + Math.abs(i % 3) * 6;
+        g2.strokeStyle = "#6a9a6e";
+        g2.lineWidth = 2;
+        line(g2, fx, y, fx + a, y - h);
+        C(g2, fx + a, y - h, 3.6, ["#f2b6c8", "#fff0a0", "#a6c8ff"][(i + 4) % 3]);
+      }
+    } }
+  ];
+  var decorOf = (id) => DECOR.find((d) => d.id === id);
+  var slotOf = (id) => SLOTS.find((s) => s.id === id);
+  var unlocked = () => !!state.repaired.techo;
+  var placedAt = (sid) => decorOf(state.decor[sid]);
+  var POS = { gato: [251, 540], zorro: [130, 612], buho: [872, 432], mariposa: [648, 470] };
+  var VIS = {};
+  for (const k in VN) VIS[k] = { name: VN[k].name, x: POS[k][0], y: POS[k][1], gift: VN[k].gift, notes: VN[k].notes };
+  var vis = { cur: null, next: 25, t: 0 };
+  function spawn() {
+    const ks = Object.keys(VIS), k = ks[Math.random() * ks.length | 0];
+    if (vis.cur || k === vis.last) return;
+    vis.last = k;
+    vis.cur = { k, t: 0, life: 50, state: 0, x: VIS[k].x, y: VIS[k].y };
+    uCap("Llega un visitante", 3e4);
+    try {
+      A.chime((VIS[k].x / W - 0.5) * 8);
+    } catch (e) {
+    }
+  }
+  function drawVisitor(g2, t) {
+    const v = vis.cur;
+    if (!v) return;
+    const k = v.k, a = Math.min(1, v.t / 1.5, (v.life - v.t) / 1.5);
+    if (a <= 0) return;
+    g2.save();
+    g2.globalAlpha = a;
+    const x = v.x, y = v.y;
+    if (k === "gato") {
+      g2.fillStyle = "#3a3548";
+      g2.beginPath();
+      g2.ellipse(x, y - 12, 13, 11, 0, 0, 7);
+      g2.fill();
+      g2.beginPath();
+      g2.arc(x + 9, y - 26, 8, 0, 7);
+      g2.fill();
+      for (const s of [-1, 1]) {
+        g2.beginPath();
+        g2.moveTo(x + 9 + s * 7, y - 30);
+        g2.lineTo(x + 9 + s * 5, y - 40);
+        g2.lineTo(x + 9 + s * 1, y - 32);
+        g2.fill();
+      }
+      g2.strokeStyle = "#3a3548";
+      g2.lineWidth = 5;
+      g2.lineCap = "round";
+      g2.beginPath();
+      g2.moveTo(x - 10, y - 6);
+      g2.quadraticCurveTo(x - 30, y - 2 + sw(t, 2, 4), x - 26, y - 18 + sw(t, 2, 6));
+      g2.stroke();
+      g2.lineCap = "butt";
+      C(g2, x + 7, y - 27, 1.6, "#ffe27a");
+      C(g2, x + 12, y - 27, 1.6, "#ffe27a");
+    } else if (k === "zorro") {
+      g2.fillStyle = "#c7703a";
+      g2.beginPath();
+      g2.ellipse(x, y - 14, 17, 11, 0, 0, 7);
+      g2.fill();
+      g2.beginPath();
+      g2.ellipse(x + 17, y - 22, 9, 7, 0, 0, 7);
+      g2.fill();
+      g2.beginPath();
+      g2.moveTo(x + 14, y - 27);
+      g2.lineTo(x + 13, y - 38);
+      g2.lineTo(x + 20, y - 29);
+      g2.fill();
+      g2.fillStyle = "#fff2e0";
+      g2.beginPath();
+      g2.ellipse(x + 23, y - 20, 4, 3, 0, 0, 7);
+      g2.fill();
+      g2.fillStyle = "#c7703a";
+      g2.beginPath();
+      g2.moveTo(x - 14, y - 12);
+      g2.quadraticCurveTo(x - 40, y - 4 + sw(t, 1.5, 3), x - 34, y - 28);
+      g2.quadraticCurveTo(x - 24, y - 18, x - 14, y - 18);
+      g2.fill();
+      C(g2, x + 20, y - 24, 1.5, "#2a2030");
+    } else if (k === "buho") {
+      g2.fillStyle = "#8a7560";
+      g2.beginPath();
+      g2.ellipse(x, y - 18, 12, 18, 0, 0, 7);
+      g2.fill();
+      g2.fillStyle = "#e8dcc4";
+      g2.beginPath();
+      g2.ellipse(x, y - 14, 7, 11, 0, 0, 7);
+      g2.fill();
+      C(g2, x - 5, y - 27, 4.4, "#fff1b0");
+      C(g2, x + 5, y - 27, 4.4, "#fff1b0");
+      C(g2, x - 5, y - 27, 1.8, "#2a2030");
+      C(g2, x + 5, y - 27, 1.8, "#2a2030");
+      g2.fillStyle = "#8a7560";
+      g2.beginPath();
+      g2.moveTo(x - 9, y - 34);
+      g2.lineTo(x - 6, y - 42);
+      g2.lineTo(x - 3, y - 34);
+      g2.moveTo(x + 9, y - 34);
+      g2.lineTo(x + 6, y - 42);
+      g2.lineTo(x + 3, y - 34);
+      g2.fill();
+    } else {
+      const bx = x + sw(t, 0.6, 26), by = y + sw(t, 0.9, 14), fl = Math.abs(Math.sin(t * 5));
+      g2.fillStyle = "rgba(190,235,200,.9)";
+      g2.beginPath();
+      g2.ellipse(bx - 7 * fl, by, 8 * fl + 1, 10, -0.4, 0, 7);
+      g2.fill();
+      g2.beginPath();
+      g2.ellipse(bx + 7 * fl, by, 8 * fl + 1, 10, 0.4, 0, 7);
+      g2.fill();
+      C(g2, bx, by, 2, "#3a3a50");
+    }
+    if (v.state === 0) {
+      const p = 0.5 + 0.5 * Math.sin(t * 3);
+      g2.globalAlpha = a * (0.4 + 0.4 * p);
+      g2.strokeStyle = "rgba(255,230,160,1)";
+      g2.lineWidth = 2;
+      g2.setLineDash([5, 5]);
+      g2.beginPath();
+      g2.arc(x + (k === "mariposa" ? sw(t, 0.6, 26) : 0), y - 18 + (k === "mariposa" ? sw(t, 0.9, 14) : 0), 30, 0, 7);
+      g2.stroke();
+      g2.setLineDash([]);
+    }
+    g2.restore();
+  }
+  function visitorTap(px, py) {
+    const v = vis.cur;
+    if (!v || v.state) return false;
+    const bx = v.k === "mariposa" ? v.x + sw(vis.t, 0.6, 26) : v.x, by = (v.k === "mariposa" ? v.y + sw(vis.t, 0.9, 14) : v.y) - 18;
+    if (Math.hypot(px - bx, py - by) > 40) return false;
+    const V = VIS[v.k], n = state.vis[v.k] || 0;
+    state.vis[v.k] = n + 1;
+    v.state = 1;
+    v.t = Math.max(v.t, v.life - 3.5);
+    const note = V.notes[n % V.notes.length];
+    if (!state.notes.includes(note)) state.notes.push(note);
+    addMem(2);
+    let msg = note;
+    if (n === 0 && V.gift && !state.own[V.gift]) {
+      state.own[V.gift] = true;
+      msg += " \xB7 Te dej\xF3: " + decorOf(V.gift).name;
+    }
+    toast(msg);
+    burst(bx, by);
+    uHap([10, 50, 10]);
+    try {
+      A.chime((bx / W - 0.5) * 8);
+    } catch (e) {
+    }
+    refreshPanel();
+    scheduleSave();
+    return true;
+  }
+  function addMem(n) {
+    state.mem = (state.mem || 0) + n;
+    refreshPanel();
+  }
+  var rit = { te: { cd: 0, anim: 0 }, riego: { cd: 0 } };
+  var CD = 90;
+  function doTe() {
+    if (rit.te.cd > 0) return;
+    rit.te.cd = CD;
+    rit.te.anim = 7;
+    addMem(1);
+    toast("Preparas t\xE9. El vapor sube despacio. Qu\xE9 calma.");
+    uCap("Tetera", 2e4);
+    try {
+      A.chime(-2);
+    } catch (e) {
+    }
+    uHap([8, 40, 8]);
+    scheduleSave();
+  }
+  function doRiego() {
+    if (rit.riego.cd > 0) return;
+    if (!state.repaired.plantas) {
+      toast("Primero repara las plantas");
+      return;
+    }
+    rit.riego.cd = CD;
+    addMem(1);
+    burst(768, 480);
+    burst(420, 545);
+    toast("Riegas las plantas. Huelen a campo.");
+    uHap([8, 40, 8]);
+    scheduleSave();
+  }
+  var wc = 12;
+  function updateHab(dt, t) {
+    vis.t = t;
+    if (rit.te.cd > 0) rit.te.cd = Math.max(0, rit.te.cd - dt);
+    if (rit.riego.cd > 0) rit.riego.cd = Math.max(0, rit.riego.cd - dt);
+    if (rit.te.anim > 0) rit.te.anim -= dt;
+    if (!rt.started || !unlocked()) return;
+    if (vis.cur) {
+      vis.cur.t += dt;
+      if (vis.cur.t >= vis.cur.life) vis.cur = null;
+    } else {
+      vis.next -= dt;
+      if (vis.next <= 0) {
+        vis.next = 80 + Math.random() * 70;
+        spawn();
+      }
+    }
+    wc -= dt;
+    if (wc <= 0) {
+      wc = 24 + Math.random() * 20;
+      if (Object.values(state.decor).includes("campanilla")) {
+        uCap("Campanilla de viento", 2e4);
+        try {
+          A.chime(2.5);
+        } catch (e) {
+        }
+      }
+    }
+  }
+  function drawDecor(g2, t) {
+    for (const s of SLOTS) {
+      const d = placedAt(s.id);
+      if (d) d.draw(g2, s.x, s.y, t);
+    }
+    if (rit.te.anim > 0) {
+      const a = Math.min(1, rit.te.anim);
+      g2.globalAlpha = a;
+      DECOR[3].draw(g2, 251, 540, t);
+      g2.globalAlpha = 1;
+    }
+    drawVisitor(g2, t);
+  }
+  var decorGlows = () => {
+    const o = [];
+    for (const s of SLOTS) {
+      const d = placedAt(s.id);
+      if (d && d.glow) {
+        const [dx, dy, r, a, c] = d.glow;
+        o.push([s.x + dx, s.y + dy, r, a, c]);
+      }
+    }
+    return o;
+  };
+  var habOn = false;
+  function drawHabRings(g2, t) {
+    if (!habOn) return;
+    const p = 0.5 + 0.5 * Math.sin(t * 2.6);
+    for (const s of SLOTS) {
+      const sel = sel_ === s.id;
+      g2.lineWidth = sel ? 3.5 : 2.5;
+      g2.setLineDash([7, 6]);
+      g2.strokeStyle = "rgba(255,236,190," + (sel ? 0.95 : 0.35 + 0.35 * p) + ")";
+      g2.beginPath();
+      g2.arc(s.x, s.y - (s.kind === "suelo" || s.kind === "roca" ? 26 : s.kind === "colgante" ? -26 : 0), 36, 0, 7);
+      g2.stroke();
+      g2.setLineDash([]);
+    }
+  }
+  var sel_ = null;
+  function habPointer(px, py) {
+    if (visitorTap(px, py)) return true;
+    if (!habOn) return false;
+    for (const s of SLOTS) {
+      const cy = s.y - (s.kind === "suelo" || s.kind === "roca" ? 26 : s.kind === "colgante" ? -26 : 0);
+      if (Math.hypot(px - s.x, py - cy) < 42) {
+        sel_ = s.id;
+        refreshPanel();
+        return true;
+      }
+    }
+    sel_ = null;
+    refreshPanel();
+    return false;
+  }
+  var panel;
+  var btn;
+  var T = (s) => uTr(s);
+  function mkb(txt, fn, cls, dis) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip " + (cls || "");
+    b.textContent = T(txt);
+    if (dis) b.disabled = true;
+    b.onclick = fn;
+    return b;
+  }
+  function refreshPanel() {
+    if (!panel) return;
+    if (btn) {
+      btn.hidden = !unlocked();
+      btn.textContent = T(habOn ? "Volver a reparar" : "Habitar");
+    }
+    if (!habOn) {
+      panel.style.display = "none";
+      return;
+    }
+    panel.style.display = "flex";
+    panel.textContent = "";
+    const top = document.createElement("div");
+    top.className = "grp";
+    const lab = document.createElement("span");
+    lab.className = "lab";
+    lab.textContent = T("Recuerdos") + ": " + (state.mem || 0);
+    top.appendChild(lab);
+    const rb = (id, txt, fn, r) => {
+      const b = mkb(txt, fn, "", r.cd > 0);
+      if (r.cd > 0) b.textContent = T(txt) + " \xB7 " + Math.ceil(r.cd) + " s";
+      top.appendChild(b);
+    };
+    rb("te", "Preparar t\xE9", doTe, rit.te);
+    rb("riego", "Regar plantas", doRiego, rit.riego);
+    top.appendChild(mkb("Diario de la caba\xF1a", () => showDiary(), ""));
+    panel.appendChild(top);
+    const s = sel_ && slotOf(sel_);
+    const g2 = document.createElement("div");
+    g2.className = "grp";
+    if (!s) {
+      const e = document.createElement("span");
+      e.className = "loot";
+      e.textContent = T("Toca un c\xEDrculo de la caba\xF1a para decorar ese lugar.");
+      g2.appendChild(e);
+    } else {
+      const l2 = document.createElement("span");
+      l2.className = "lab";
+      l2.textContent = T(s.n);
+      g2.appendChild(l2);
+      const cur2 = state.decor[s.id];
+      if (cur2) g2.appendChild(mkb("Quitar", () => {
+        delete state.decor[s.id];
+        refreshPanel();
+        scheduleSave();
+      }, ""));
+      DECOR.filter((d) => d.kind === s.kind).forEach((d) => {
+        const own = !!state.own[d.id], here = state.decor[s.id] === d.id;
+        if (here) return;
+        const b = mkb(own ? d.name : d.name + " \xB7 " + d.cost, () => place(s, d), own ? "done" : (state.mem || 0) >= d.cost ? "ready" : "locked");
+        b.title = own ? T("Colocar") : T("Comprar con recuerdos");
+        g2.appendChild(b);
+      });
+    }
+    panel.appendChild(g2);
+  }
+  function place(s, d) {
+    if (!state.own[d.id]) {
+      if ((state.mem || 0) < d.cost) {
+        toast("Te faltan " + (d.cost - (state.mem || 0)) + " recuerdos. Prepara t\xE9 o espera visitas.");
+        return;
+      }
+      state.mem -= d.cost;
+      state.own[d.id] = true;
+    }
+    for (const k of Object.keys(state.decor)) if (state.decor[k] === d.id) delete state.decor[k];
+    state.decor[s.id] = d.id;
+    burst(s.x, s.y - 30);
+    try {
+      A.chime((s.x / W - 0.5) * 8);
+    } catch (e) {
+    }
+    uHap([10, 40, 10]);
+    toast(d.name + " colocado");
+    refreshPanel();
+    scheduleSave();
+  }
+  function showDiary() {
+    const m = document.createElement("div");
+    m.style.cssText = "position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(20,22,48,.6)";
+    const b = document.createElement("div");
+    b.style.cssText = "background:#363a66;color:#fbf1e0;border:1px solid #5a609a;border-radius:16px;padding:18px 20px;max-width:min(88vw,420px);max-height:70vh;overflow:auto;font:15px/1.45 var(--f-body,system-ui)";
+    const h = document.createElement("h2");
+    h.style.cssText = "margin:0 0 10px;font:600 1.1rem var(--f-display,system-ui)";
+    h.textContent = T("Diario de la caba\xF1a");
+    b.appendChild(h);
+    if (!state.notes.length) {
+      const p = document.createElement("p");
+      p.textContent = T("A\xFAn vac\xEDo. Los visitantes dejan notas sobre quien vivi\xF3 aqu\xED.");
+      b.appendChild(p);
+    }
+    state.notes.forEach((n) => {
+      const p = document.createElement("p");
+      p.style.margin = "0 0 10px";
+      p.textContent = "\xB7 " + T(n);
+      b.appendChild(p);
+    });
+    const c = mkb("Cerrar", () => m.remove(), "");
+    b.appendChild(c);
+    m.appendChild(b);
+    m.onclick = (e) => {
+      if (e.target === m) m.remove();
+    };
+    document.body.appendChild(m);
+  }
+  function initHabitar() {
+    btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn";
+    btn.id = "habBtn";
+    btn.hidden = true;
+    btn.textContent = "Habitar";
+    $("#mats").after(btn);
+    panel = document.createElement("div");
+    panel.id = "hab";
+    panel.style.display = "none";
+    $("#chips").after(panel);
+    btn.onclick = () => {
+      habOn = !habOn;
+      sel_ = null;
+      $("#chips").style.display = habOn ? "none" : "";
+      refreshPanel();
+    };
+    setInterval(() => {
+      if (habOn && !document.hidden && (rit.te.cd > 0 || rit.riego.cd > 0)) refreshPanel();
+    }, 1e3);
+    let was = unlocked();
+    setInterval(() => {
+      const u = unlocked();
+      if (u !== was) {
+        was = u;
+        refreshPanel();
+        if (u) toast("La caba\xF1a ya se puede habitar: toca \xABHabitar\xBB");
+      }
+    }, 1500);
+    window.__habd = { vis, spawn, place, DECOR, SLOTS, state, rit, show: (on) => {
+      habOn = on;
+      refreshPanel();
+    } };
+    refreshPanel();
+  }
+
   // src2d/cabana/render.js
   var hintTxt = () => uTr("Empieza limpiando el piso");
   function render(t) {
@@ -2337,6 +3130,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       }
       g.globalAlpha = 1;
     }
+    drawDecor(g, t);
     for (let i = 0; i < 4; i++) {
       const x = (t * (5 + i * 2) + i * 260) % 1300 - 200, y = 520 + i * 58;
       const mg = g.createRadialGradient(x, y, 0, x, y, 170);
@@ -2360,6 +3154,8 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     const lg = state.repaired.techo ? 0.8 * fl : 0;
     const holes = [[236, 300, 120, lg], [763, 300, 120, lg], [849, 458, 230, fl * lit.tab], [505, 340, 270, lit.lamp], [690, 366, 200, 0.35 * lit.moon]];
     BULBS.forEach((b) => holes.push([b.x, b.y, 80, 0.55 * lit.str]));
+    const DG = decorGlows();
+    DG.forEach(([x, y, r, a]) => holes.push([x, y, r * 1.6, a * (0.8 + 0.2 * fl)]));
     if (lit.nich > 0.01) HEX.forEach(([x, y]) => holes.push([x, y, 150, 0.7 * lit.nich]));
     if (pointer.drawing && state.repaired.barandal) holes.push([pointer.lx, pointer.ly, 150, 0.75]);
     holes.forEach(([x, y, r, a]) => {
@@ -2378,6 +3174,13 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       if (a <= 5e-3) return;
       const gr = g.createRadialGradient(x, y, 0, x, y, r);
       gr.addColorStop(0, "rgba(" + c + "," + a + ")");
+      gr.addColorStop(1, "rgba(" + c + ",0)");
+      g.fillStyle = gr;
+      g.fillRect(x - r, y - r, r * 2, r * 2);
+    });
+    DG.forEach(([x, y, r, a, c]) => {
+      const gr = g.createRadialGradient(x, y, 0, x, y, r);
+      gr.addColorStop(0, "rgba(" + c + "," + a * 0.5 * fl + ")");
       gr.addColorStop(1, "rgba(" + c + ",0)");
       g.fillStyle = gr;
       g.fillRect(x - r, y - r, r * 2, r * 2);
@@ -2416,6 +3219,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       }
     });
     drawMoments(t);
+    drawHabRings(g, t);
     const pulse = 0.5 + 0.5 * Math.sin(t * 3);
     if (rt.started && !state.repaired.piso && (cur.items.piso || 0) < 0.3) {
       g.setLineDash([10, 8]);
@@ -2451,6 +3255,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       if (o.flash > 0) o.flash = Math.max(0, o.flash - dt * 1.2);
     });
     updateMoments(dt, t);
+    updateHab(dt, t);
     if (rt.dirty && t - lastMeasure > 0.35) {
       lastMeasure = t;
       rt.dirty = false;
@@ -2483,6 +3288,10 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     canvas.addEventListener("pointerdown", (e) => {
       if (!rt.started) return;
       e.preventDefault();
+      {
+        const [qx, qy] = pt(e);
+        if (habPointer(qx, qy)) return;
+      }
       canvas.setPointerCapture(e.pointerId);
       pointer.drawing = true;
       [pointer.lx, pointer.ly] = pt(e);
@@ -2543,13 +3352,13 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
 
   // src2d/cabana/calm.js
   function initCalm() {
-    const el = document.getElementById("breath"), orb = el.querySelector(".orb"), lab = el.querySelector("span"), btn = document.getElementById("breath-btn");
+    const el = document.getElementById("breath"), orb = el.querySelector(".orb"), lab = el.querySelector("span"), btn2 = document.getElementById("breath-btn");
     let run = false, t0 = 0, raf = 0, lastKey = -1;
     const IN = 4, HOLD = 1, OUT = 6, CYC = IN + HOLD + OUT, N = 5;
     function stop(msg) {
       run = false;
       cancelAnimationFrame(raf);
-      btn.textContent = "Respirar";
+      btn2.textContent = "Respirar";
       if (msg) {
         lab.textContent = msg;
         orb.style.transform = "scale(.7)";
@@ -2589,7 +3398,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       }
       raf = requestAnimationFrame(tick);
     }
-    btn.onclick = () => {
+    btn2.onclick = () => {
       if (run) {
         stop();
         return;
@@ -2598,7 +3407,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       lastKey = -1;
       el.hidden = false;
       lab.textContent = "Prep\xE1rate\u2026";
-      btn.textContent = "Detener";
+      btn2.textContent = "Detener";
       if (A.ctx && A.ctx.state === "suspended") A.ctx.resume();
       t0 = performance.now();
       raf = requestAnimationFrame(tick);
@@ -2787,8 +3596,10 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   };
   initI18n();
   var UX2 = window.UX;
+  addHabTexts(UX2);
   document.title = UX2.tr("Caba\xF1a del Acantilado");
   PZ2.more(document.querySelector("header"), [$("#breath-btn"), $("#mute"), $("#reset"), ...UX2.btns("btn", { wear: true })]);
+  initHabitar();
   UX2.init();
 })();
 

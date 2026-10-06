@@ -7,12 +7,13 @@ import {spray,parts} from './fx.js';
 import {A} from './audio.js';
 import {attempt} from './actions.js';
 import {scheduleSave} from './persist.js';
+import {habPointer} from './habitar.js';
 
 export function initInput(){
   let scrubHap=0,sx=0,sy=0,st=0,moved=0;
   function pt(e){const r=canvas.getBoundingClientRect();return [(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H]}
   canvas.addEventListener('pointerdown',e=>{
-    if(!rt.started)return;e.preventDefault();canvas.setPointerCapture(e.pointerId);
+    if(!rt.started)return;e.preventDefault();{const [qx,qy]=pt(e);if(habPointer(qx,qy))return}canvas.setPointerCapture(e.pointerId);
     pointer.drawing=true;[pointer.lx,pointer.ly]=pt(e);sx=pointer.lx;sy=pointer.ly;st=performance.now();moved=0;
     stamp(pointer.lx,pointer.ly);spray(pointer.lx,pointer.ly,0,0);rt.dirty=true;A.level(.05);A.scrubPos(pointer.lx/W,pointer.ly/H);
     uCap('Fregado',7000);{const n=performance.now();if(n-scrubHap>2500){scrubHap=n;uHap(5)}}

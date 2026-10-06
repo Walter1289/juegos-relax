@@ -20,6 +20,7 @@ import {toast,buildChips,updateLoot,updateUI,makeNext,updateNext,bindHud,trackPa
 import {cat,makeCat,catStep} from './cat.js';
 import {makeRing,bindInput,isIdle,handStep,pick} from './input.js';
 import {attempt,askReset} from './actions.js';
+import {initHabitar,habStep,resetHab,addHabTexts} from './habitar.js';
 import {star,fest,initSpecial,shootStar,starStep,startFest,festStep,fl2} from './special.js';
 
 /* ---- construcción de la escena (el orden fija la secuencia de Math.random y de materiales) ---- */
@@ -50,6 +51,7 @@ el('go').onclick=()=>{try{A.init();A.resume();A.rain(RT.rainOn);A.setMood(progre
 bindKeys();
 initSpecial();
 makeWin();
+addHabTexts(UX);initHabitar();window.__habReset=resetHab;
 
 /* ================= bucle ================= */
 let last=performance.now(),hudT=0,perfAcc=0,perfN=0,slowN=0,pr=Math.min(devicePixelRatio||1,1.5);
@@ -64,7 +66,7 @@ function frame(now){
   camStep(dt,isIdle());
   lightStep(dt);handStep(dt);
   ambientStep(dt,progress(),!!state.repaired.nichos);
-  worldStep(dt);partsStep(dt);catStep(dt,RT.T);
+  worldStep(dt);partsStep(dt);catStep(dt,RT.T);habStep(dt,RT.T);
   // refresco periódico de la interfaz y del ánimo del audio
   hudT-=dt;if(hudT<=0){hudT=.5;updateUI();updateNext();A.setMood(progress(),1)}
   A.update(-3,1,RT.T);

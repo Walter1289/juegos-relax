@@ -5,6 +5,7 @@ import {state,cur,rt,pointer,g,dirt,lightC,lctx,sctx,sceneC,bgC,DW,DH} from './s
 import {drawScene,BULBS} from './scene.js';
 import {status,progress} from './rules.js';
 import {lit,FF,parts,drawMoments} from './fx.js';
+import {drawDecor,decorGlows,drawHabRings} from './habitar.js';
 
 const hintTxt=()=>uTr('Empieza limpiando el piso');
 export function render(t){
@@ -17,6 +18,7 @@ export function render(t){
   g.strokeStyle='rgba(60,50,80,.3)';g.lineWidth=1.5;for(let y=162;y<214;y+=13)line(g,296,y,324,y);
   if(state.repaired.techo){for(let i=0;i<9;i++){const ph=((t*.09+i/9)%1),x=310+Math.sin(t*.7+i*1.7)*10*ph+ph*34,y=146-ph*120,r=7+ph*20;
     g.globalAlpha=.34*(1-ph);g.fillStyle='#e6e0f2';g.beginPath();g.arc(x,y,r,0,7);g.fill()}g.globalAlpha=1}
+  drawDecor(g,t);
   // neblina que deriva
   for(let i=0;i<4;i++){const x=((t*(5+i*2)+i*260)%1300)-200,y=520+i*58;
     const mg=g.createRadialGradient(x,y,0,x,y,170);mg.addColorStop(0,'rgba(215,210,240,.20)');mg.addColorStop(1,'rgba(215,210,240,0)');
@@ -27,6 +29,7 @@ export function render(t){
   const fl=.92+.05*Math.sin(t*9)+.03*Math.sin(t*23);
   const lg=state.repaired.techo?.8*fl:0;const holes=[[236,300,120,lg],[763,300,120,lg],[849,458,230,fl*lit.tab],[505,340,270,lit.lamp],[690,366,200,.35*lit.moon]];
   BULBS.forEach(b=>holes.push([b.x,b.y,80,.55*lit.str]));
+  const DG=decorGlows();DG.forEach(([x,y,r,a])=>holes.push([x,y,r*1.6,a*(.8+.2*fl)]));
   if(lit.nich>.01)HEX.forEach(([x,y])=>holes.push([x,y,150,.7*lit.nich]));
   if(pointer.drawing&&state.repaired.barandal)holes.push([pointer.lx,pointer.ly,150,.75]);
   holes.forEach(([x,y,r,a])=>{
@@ -40,6 +43,7 @@ export function render(t){
     if(a<=.005)return;
     const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba('+c+','+a+')');gr.addColorStop(1,'rgba('+c+',0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);
   });
+  DG.forEach(([x,y,r,a,c])=>{const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba('+c+','+(a*.5*fl)+')');gr.addColorStop(1,'rgba('+c+',0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)});
   if(lit.str>.02)BULBS.forEach(b=>{const gr=g.createRadialGradient(b.x,b.y,0,b.x,b.y,16);gr.addColorStop(0,'rgba(255,200,110,'+.5*lit.str+')');gr.addColorStop(1,'rgba(255,200,110,0)');g.fillStyle=gr;g.fillRect(b.x-16,b.y-16,32,32)});
   const nf=Math.min(FF.length,Math.floor(progress()*14)+(state.done?3:0)+(state.repaired.nichos?4:0));
   for(let i=0;i<nf;i++){
@@ -53,6 +57,7 @@ export function render(t){
     else{g.globalCompositeOperation='lighter';g.fillStyle='rgba(255,205,120,'+a+')';g.beginPath();g.arc(p.x,p.y,p.r,0,7);g.fill();g.globalCompositeOperation='source-over'}
   });
   drawMoments(t);
+  drawHabRings(g,t);
   const pulse=.5+.5*Math.sin(t*3);
   if(rt.started&&!state.repaired.piso&&(cur.items.piso||0)<.3){
     g.setLineDash([10,8]);g.lineWidth=3;g.strokeStyle='rgba(255,240,200,'+(.35+.4*pulse)+')';

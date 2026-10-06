@@ -14,6 +14,7 @@ import {frame} from './loop.js';
 import {initInput} from './input.js';
 import {initCalm} from './calm.js';
 import {initI18n} from './i18n.js';
+import {initHabitar,addHabTexts} from './habitar.js';
 
 /* ===== Controles y arranque ===== */
 buildChips(attempt);
@@ -47,6 +48,8 @@ window.__envejecer=h=>{age(h);measure();updateUI();toast(rt.pendingMsg||'Menos d
 /* Idiomas es/en/ja, título y menú «Más» (breath, sonido, reiniciar y ajustes de UX) */
 initI18n();
 const UX=window.UX;
+addHabTexts(UX);
 document.title=UX.tr('Cabaña del Acantilado');
 PZ.more(document.querySelector('header'),[$('#breath-btn'),$('#mute'),$('#reset'),...UX.btns('btn',{wear:true})]);
+initHabitar();
 UX.init();

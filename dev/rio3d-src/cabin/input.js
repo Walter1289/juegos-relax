@@ -12,11 +12,13 @@ import {cat,petCat} from './cat.js';
 import {attempt} from './actions.js';
 import {updateUI} from './ui.js';
 import {LT} from './lights.js';
+import {habGroups,habTap} from './habitar.js';
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
-const itemGroups=()=>Object.values(IT).map(i=>i.g).concat([cat]);
+const itemGroups=()=>Object.values(IT).map(i=>i.g).concat([cat],habGroups());
 // objeto bajo el puntero (reparable, gato o nada) y el punto 3D tocado
 export function pick(e){
   const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);
+  {const hm=habGroups();if(hm.length){const hh=ray.intersectObjects(hm,true);for(const h of hh){let o=h.object;while(o&&!o.userData.itemId)o=o.parent;if(o&&String(o.userData.itemId).startsWith('slot:'))return{id:o.userData.itemId,point:h.point}}}}
   const hits=ray.intersectObjects(itemGroups().concat(occl),true);
   for(const h of hits){if(!vis(h.object))continue;let o=h.object;while(o&&!o.userData.itemId)o=o.parent;
     return o?{id:o.userData.itemId,point:h.point}:{id:null,point:h.point}}
@@ -65,7 +67,7 @@ canvas.addEventListener('pointermove',e=>{
 });
 const up=e=>{
   if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);A.scrub(0);scrubPt=null;ring.style.opacity=0;
-  if(down&&down.moved<8&&performance.now()-down.t<450&&down.id&&mode!=='pinch'){if(down.id==='gato'){petCat();}const o=itemById(down.id);if(o)attempt(o);}
+  if(down&&down.moved<8&&performance.now()-down.t<450&&down.id&&mode!=='pinch'){if(habTap(down.id)){}else if(down.id==='gato'){petCat();}const o=itemById(down.id);if(o)attempt(o);}
   if(ptrs.size===0){down=null;mode=null}
 };
 canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
