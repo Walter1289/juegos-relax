@@ -10,16 +10,16 @@ export const A={
     try{
       const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
       const c=new C();this.ctx=c;
-      const m=c.createGain();m.gain.value=this.muted?0:.55;m.connect(c.destination);this.master=m;
+      const m=c.createGain();m.gain.value=this.muted?0:.55;window.UX?UX.out(c,m):m.connect(c.destination);this.master=m;
       const nb=c.createBuffer(1,c.sampleRate*2,c.sampleRate),nd=nb.getChannelData(0);
       for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
       this.nb=nb;
-      const noise=(off)=>{const s=c.createBufferSource();s.buffer=nb;s.loop=true;s.start(0,off||0);return s};
-      const w=noise(),wf=c.createBiquadFilter();wf.type='bandpass';wf.frequency.value=420;wf.Q.value=.6;
+      const noise=(off,k)=>{if(k&&window.UX&&UX.pinkSrc){const g=UX.pinkSrc(c,k);g.start(0,(off||0)*3);return g}const s=c.createBufferSource();s.buffer=nb;s.loop=true;s.start(0,off||0);return s};
+      const w=noise(0,.71),wf=c.createBiquadFilter();wf.type='bandpass';wf.frequency.value=420;wf.Q.value=.6;
       const wg=c.createGain();wg.gain.value=.10;
       const lfo=c.createOscillator();lfo.frequency.value=.07;const lg=c.createGain();lg.gain.value=.06;lfo.connect(lg);lg.connect(wg.gain);lfo.start();
       w.connect(wf);wf.connect(wg);wg.connect(m);
-      const n2=noise(),hf=c.createBiquadFilter();hf.type='highpass';hf.frequency.value=1800;
+      const n2=noise(0,2.69),hf=c.createBiquadFilter();hf.type='highpass';hf.frequency.value=1800;
       const cg=c.createGain();cg.gain.value=0;const sp=this.panner(0,0,-2,2,.4);sp.connect(m);this.scrubP=sp;n2.connect(hf);hf.connect(cg);cg.connect(sp);this.cleanG=cg;
       const dl=c.createDelay(1);dl.delayTime.value=.42;const fb=c.createGain();fb.gain.value=.38;
       const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1800;
@@ -30,10 +30,10 @@ export const A={
         const rg=c.createGain();rg.gain.value=0;const rp=this.panner(px,2,-.5,2,.4);rp.connect(m);n3.connect(rf);rf.connect(rg);rg.connect(rp);this.rainGs.push(rg);
       });
       // viento afuera (a la derecha) y rumor lejano de la ciudad (abajo a la derecha)
-      const wnd=noise(Math.random()*1.8),wb=c.createBiquadFilter();wb.type='bandpass';wb.frequency.value=380;wb.Q.value=.8;
+      const wnd=noise(Math.random()*1.8,.65),wb=c.createBiquadFilter();wb.type='bandpass';wb.frequency.value=380;wb.Q.value=.8;
       const wgn=c.createGain();wgn.gain.value=.05;const wl2=c.createOscillator(),wlg=c.createGain();wl2.frequency.value=.08;wlg.gain.value=.04;wl2.connect(wlg);wlg.connect(wgn.gain);wl2.start();
       const wp=this.panner(5,0,-1,2,.5);wp.connect(m);wnd.connect(wb);wb.connect(wgn);wgn.connect(wp);
-      const cty=noise(Math.random()*1.8),cb=c.createBiquadFilter();cb.type='lowpass';cb.frequency.value=260;
+      const cty=noise(Math.random()*1.8,.25),cb=c.createBiquadFilter();cb.type='lowpass';cb.frequency.value=260;
       const cgn=c.createGain();cgn.gain.value=.05;const cp=this.panner(6,-1,-8,3,.3);cp.connect(m);cty.connect(cb);cb.connect(cgn);cgn.connect(cp);
       this.rain(!!state.repaired.techo);
       this.loop();
@@ -142,11 +142,11 @@ export const A={
     const tune=tc=>{
       if(c.state!=='running')return;
       const t=c.currentTime,p=Math.max(0,Math.min(1,progress())),sm=p*p*(3-2*p),roofed=!!state.repaired.techo;
-      const base=root+(p<.35?-5:0);
+      const base=root;
       const fr=[deg(base),deg(base+2),deg(base+4),deg(base+(p>.7?7:5)),deg(base+6)];
       const gs=[.5,.3+.15*sm,.28,.42*sm,roofed?.26:0];
       vs.forEach((v,i)=>{v.o.frequency.setTargetAtTime(fr[i],t,tc);v.gn.gain.setTargetAtTime(gs[i],t,tc)});
-      fl.frequency.setTargetAtTime(280+2300*sm,t,tc);
+      fl.frequency.setTargetAtTime(480+2100*sm,t,tc);
     };
     tune(2.5);
     setInterval(()=>{

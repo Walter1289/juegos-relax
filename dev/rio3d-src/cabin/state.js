@@ -24,7 +24,7 @@ export function load(notify){
   if(!o)return;
   state.repaired=o.r||{};state.spent=o.s||0;state.best=o.b||0;state.done=!!o.d;
   Object.values(IT).forEach(it=>{const a=(o.bl||{})[it.id];if(a)it.blobs.forEach((m,i)=>{if(a[i]!=null)m.userData.s=a[i]})});
-  const h=o.t?(Date.now()-o.t)/36e5:0;let reached=null;
+  const wear=(()=>{try{return localStorage.getItem('ux-wear')==='1'}catch(e){return false}})(),h=(o.t&&wear)?(Date.now()-o.t)/36e5:0;let reached=null;
   ZONES.forEach(([ids,from,to,n])=>{const k=clamp((h-from)/(to-from));if(k>0){ids.forEach(id=>IT[id].blobs.forEach(m=>{m.userData.s=Math.max(m.userData.s,k*.9)}));reached=n}});
   Object.values(IT).forEach(it=>it.blobs.forEach(refreshBlob));
   if(reached)setTimeout(()=>notify('Mientras no estabas, la humedad volvió a ensuciar '+reached),1500);

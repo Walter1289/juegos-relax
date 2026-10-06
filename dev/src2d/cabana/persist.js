@@ -9,6 +9,6 @@ export function load(cb){
   try{o=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(OLD_KEY)||'null')}catch(e){}
   if(!o){cb();return}
   state.repaired=o.r||{};state.spent=o.s||0;state.done=!!o.d;state.best=o.b||0;rt.sceneDirty=true;
-  const finish=()=>{if(o.t)age(Math.max(0,(Date.now()-o.t)/36e5));cb()};
+  const finish=()=>{if(o.t&&(()=>{try{return localStorage.getItem('ux-wear')==='1'}catch(e){return false}})())age(Math.max(0,(Date.now()-o.t)/36e5));cb()};
   if(o.img){const im=new Image();im.onload=()=>{dctx.clearRect(0,0,DW,DH);dctx.drawImage(im,0,0);finish()};im.onerror=finish;im.src=o.img}else finish();
 }

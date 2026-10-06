@@ -24,6 +24,5 @@ export function attempt(o){
 }
 // botón de reinicio: confirma, borra el guardado y repone la suciedad
 export function askReset(){
-  if(!confirm(UX.tr('¿Reiniciar la cabaña desde cero?')))return;
-  resetState();updateUI();updateLoot();toast('Cabaña reiniciada');
+  UX.ask('¿Reiniciar la cabaña desde cero?',()=>{resetState();updateUI();updateLoot();toast('Cabaña reiniciada')});
 }

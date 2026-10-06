@@ -48,5 +48,5 @@ window.__envejecer=h=>{age(h);measure();updateUI();toast(rt.pendingMsg||'Menos d
 initI18n();
 const UX=window.UX;
 document.title=UX.tr('Cabaña del Acantilado');
-PZ.more(document.querySelector('header'),[$('#breath-btn'),$('#mute'),$('#reset'),...UX.btns('btn')]);
+PZ.more(document.querySelector('header'),[$('#breath-btn'),$('#mute'),$('#reset'),...UX.btns('btn',{wear:true})]);
 UX.init();

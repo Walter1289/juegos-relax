@@ -94,7 +94,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   // rio3d-src/pause.js
   (function() {
     if (window.PZ) return;
-    const PZ2 = window.PZ = { on: false, ctx: () => null, started: () => true };
+    const PZ3 = window.PZ = { on: false, ctx: () => null, started: () => true };
     const st = document.createElement("style");
     st.textContent = "#pz{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(24,26,56,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:#fbf1e0;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px}#pz[hidden]{display:none}#pz .c{display:flex;flex-direction:column;gap:12px;align-items:center}#pz h2{margin:0;font:600 1.7rem system-ui}#pz p{margin:0;color:#cbc8e8;line-height:1.5}#pz button{background:#ffc77a;color:#3b2a1a;border:0;border-radius:99px;padding:13px 32px;font:700 1rem system-ui;cursor:pointer}";
     document.head.appendChild(st);
@@ -104,14 +104,14 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     d.innerHTML = '<div class="c"><h2>En pausa</h2><p>Respira con calma.<br>Todo seguir\xE1 aqu\xED cuando vuelvas.</p><button type="button" id="pzGo">Continuar</button></div>';
     const mount = () => document.body.appendChild(d);
     document.body ? mount() : addEventListener("DOMContentLoaded", mount);
-    PZ2.set = function(on) {
+    PZ3.set = function(on) {
       on = !!on;
-      if (on === PZ2.on) return;
-      if (on && !PZ2.started()) return;
-      PZ2.on = on;
+      if (on === PZ3.on) return;
+      if (on && !PZ3.started()) return;
+      PZ3.on = on;
       d.hidden = !on;
       try {
-        const c = PZ2.ctx();
+        const c = PZ3.ctx();
         if (c) on ? c.suspend() : c.resume();
       } catch (e) {
       }
@@ -121,8 +121,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       } catch (e) {
       }
     };
-    PZ2.toggle = () => PZ2.set(!PZ2.on);
-    PZ2.more = function(host, btns, label) {
+    PZ3.toggle = () => PZ3.set(!PZ3.on);
+    PZ3.more = function(host, btns, label) {
       btns = btns.filter(Boolean);
       if (!host || !btns.length) return;
       const s2 = document.createElement("style");
@@ -159,16 +159,16 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       });
       return b;
     };
-    d.querySelector("#pzGo").onclick = () => PZ2.set(false);
+    d.querySelector("#pzGo").onclick = () => PZ3.set(false);
     document.addEventListener("keydown", (e) => {
-      if (e.code === "Escape" && !document.body.classList.contains("photo") && !document.querySelector(".xm")) PZ2.toggle();
+      if (e.code === "Escape" && !document.body.classList.contains("photo") && !document.querySelector(".xm")) PZ3.toggle();
     });
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden && PZ2.started() && !PZ2.on) PZ2.set(true);
+      if (document.hidden && PZ3.started() && !PZ3.on) PZ3.set(true);
     });
     document.addEventListener("click", (e) => {
       const b = e.target.closest && e.target.closest("[data-pz]");
-      if (b) PZ2.toggle();
+      if (b) PZ3.toggle();
     });
   })();
 
@@ -606,7 +606,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         this.ctx = c;
         const m = c.createGain();
         m.gain.value = this.muted ? 0 : 0.6;
-        m.connect(c.destination);
+        window.UX ? UX.out(c, m) : m.connect(c.destination);
         this.master = m;
         const bus = c.createGain();
         bus.gain.value = 1;
@@ -627,7 +627,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         bus.connect(cv);
         cv.connect(wet);
         wet.connect(m);
-        const w = this.noise(), lp = c.createBiquadFilter();
+        const w = this.noise(0, 0.37), lp = c.createBiquadFilter();
         lp.type = "lowpass";
         lp.frequency.value = 650;
         const wg = c.createGain();
@@ -642,7 +642,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         w.connect(lp);
         lp.connect(wg);
         wg.connect(m);
-        const w2 = this.noise(), bp = c.createBiquadFilter();
+        const w2 = this.noise(0, 1.5), bp = c.createBiquadFilter();
         bp.type = "bandpass";
         bp.frequency.value = 2200;
         bp.Q.value = 0.7;
@@ -658,7 +658,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           pn.connect(m);
           this.bk[side] = pn;
           [[520, 2, 0.7, 0.05], [1250, 3, 1.3, 0.03], [2600, 4, 2.1, 0.014]].forEach(([f, q, lf, v], i) => {
-            const n = this.noise(Math.random() * 1.8), b = c.createBiquadFilter();
+            const n = this.noise(Math.random() * 1.8, f < 800 ? 0.71 : f < 1900 ? 1.07 : 1.52), b = c.createBiquadFilter();
             b.type = "bandpass";
             b.frequency.value = f;
             b.Q.value = q;
@@ -695,7 +695,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           setTimeout(blip, rnd(90, 260));
         };
         blip();
-        const wn = this.noise(Math.random() * 1.5), wh = c.createBiquadFilter();
+        const wn = this.noise(Math.random() * 1.5, 1.21), wh = c.createBiquadFilter();
         wh.type = "highpass";
         wh.frequency.value = 380;
         const wl = c.createBiquadFilter();
@@ -716,7 +716,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           const sp = c.createStereoPanner();
           sp.pan.value = pan;
           sp.connect(m);
-          const r1 = this.noise(Math.random() * 1.8), hp = c.createBiquadFilter();
+          const r1 = this.noise(Math.random() * 1.8, 2.94), hp = c.createBiquadFilter();
           hp.type = "highpass";
           hp.frequency.value = hf;
           const rg = c.createGain();
@@ -725,7 +725,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           hp.connect(rg);
           rg.connect(sp);
           this.rgs.push([rg, 0.07]);
-          const r2 = this.noise(Math.random() * 1.8), bp2 = c.createBiquadFilter();
+          const r2 = this.noise(Math.random() * 1.8, 1.29), bp2 = c.createBiquadFilter();
           bp2.type = "bandpass";
           bp2.frequency.value = 1500;
           bp2.Q.value = 0.6;
@@ -791,8 +791,14 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         o.stop(t + dur + 0.1);
       });
     },
-    noise(off) {
-      const c = this.ctx, s = c.createBufferSource();
+    noise(off, k) {
+      const c = this.ctx;
+      if (window.UX && UX.pinkSrc) {
+        const g2 = UX.pinkSrc(c, k);
+        g2.start(0, (off || 0) * 3);
+        return g2;
+      }
+      const s = c.createBufferSource();
       s.buffer = this.nbuf;
       s.loop = true;
       s.start(0, off || 0);
@@ -906,16 +912,22 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       o2.stop(t + dur + 0.1);
     },
     drum(t, vol, p) {
-      if (!this.ok()) return;
+      if (!this.ok() || window.UX && UX.quiet) return;
       const c = this.ctx;
       const o = c.createOscillator(), gn = c.createGain();
       o.type = "sine";
+      vol *= 0.42;
       o.frequency.setValueAtTime(115 * p, t);
       o.frequency.exponentialRampToValueAtTime(48 * p, t + 0.28);
-      gn.gain.setValueAtTime(vol, t);
+      const dl = c.createBiquadFilter();
+      dl.type = "lowpass";
+      dl.frequency.value = 700;
+      gn.gain.setValueAtTime(1e-4, t);
+      gn.gain.linearRampToValueAtTime(vol, t + 0.04);
       gn.gain.exponentialRampToValueAtTime(1e-4, t + 0.9);
       o.connect(gn);
-      gn.connect(this.bus);
+      gn.connect(dl);
+      dl.connect(this.bus);
       o.start(t);
       o.stop(t + 1);
       const s = c.createBufferSource();
@@ -989,14 +1001,14 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       o.stop(t + 0.35);
     },
     firework(pan, vol, kind) {
-      if (!this.ok()) return;
+      if (!this.ok() || window.UX && UX.quiet) return;
       const c = this.ctx, t = c.currentTime + 0.02, v = vol == null ? 1 : vol, d = this.dest(pan, -8);
       const o = c.createOscillator(), gn = c.createGain();
       o.type = "sine";
       o.frequency.setValueAtTime(95 - (kind === 1 ? 20 : 0), t);
       o.frequency.exponentialRampToValueAtTime(38, t + 0.35);
       gn.gain.setValueAtTime(1e-4, t);
-      gn.gain.linearRampToValueAtTime(0.14 * v, t + 0.01);
+      gn.gain.linearRampToValueAtTime(0.08 * v, t + 0.03);
       gn.gain.exponentialRampToValueAtTime(1e-4, t + 0.7);
       o.connect(gn);
       gn.connect(d);
@@ -1024,7 +1036,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     },
     /* rugido del dragón: gruñido grave (diente de sierra con vibrato, filtro que se abre y cierra), ruido ronco y un golpe sub-grave */
     roar() {
-      if (!this.ok()) return;
+      if (!this.ok() || window.UX && UX.quiet) return;
       const c = this.ctx, t = c.currentTime + 0.03, D = 2.4, d = this.dest(-2.6, -3);
       const lp = c.createBiquadFilter();
       lp.type = "lowpass";
@@ -1034,8 +1046,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       lp.frequency.exponentialRampToValueAtTime(220, t + D);
       const out = c.createGain();
       out.gain.setValueAtTime(1e-4, t);
-      out.gain.linearRampToValueAtTime(0.26, t + 0.25);
-      out.gain.setValueAtTime(0.26, t + 0.9);
+      out.gain.linearRampToValueAtTime(0.14, t + 0.25);
+      out.gain.setValueAtTime(0.14, t + 0.9);
       out.gain.exponentialRampToValueAtTime(1e-4, t + D);
       lp.connect(out);
       out.connect(d);
@@ -4144,10 +4156,6 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     setInterval(() => {
       if (document.hidden || !G.started) return;
       played += 5;
-      if (played >= next) {
-        next += 30 * 60;
-        toast("Llevas un buen rato. Toma agua, suelta los hombros y respira hondo. El juego te espera.");
-      }
     }, 5e3);
   }
 
@@ -4171,7 +4179,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     let LG = ls.get("rio3d-lang", "es");
     if (!K.includes(LG)) LG = "es";
     const ix = LG === "en" ? 1 : 2, MAP = /* @__PURE__ */ new Map(), RX = [];
-    const UX3 = window.UX = {
+    const UX4 = window.UX = {
       lang: LG,
       onLang: null,
       add(rows) {
@@ -4188,7 +4196,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         if (r) return s.replace(t, r[ix]);
         for (const [re, f] of RX) {
           const m = t.match(re);
-          if (m) return s.replace(t, f(m, LG === "en" ? 1 : 2, UX3.tr));
+          if (m) return s.replace(t, f(m, LG === "en" ? 1 : 2, UX4.tr));
         }
         return s;
       },
@@ -4197,19 +4205,19 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         document.documentElement.lang = LG;
         const walk = (n) => {
           if (n.nodeType === 3) {
-            const v = UX3.tr(n.nodeValue);
+            const v = UX4.tr(n.nodeValue);
             if (v !== n.nodeValue) n.nodeValue = v;
             return;
           }
           if (n.nodeType !== 1 || n.tagName === "SCRIPT" || n.tagName === "STYLE") return;
           const al = n.getAttribute && n.getAttribute("aria-label");
           if (al) {
-            const v = UX3.tr(al);
+            const v = UX4.tr(al);
             if (v !== al) n.setAttribute("aria-label", v);
           }
           const tt = n.getAttribute && n.getAttribute("title");
           if (tt) {
-            const v = UX3.tr(tt);
+            const v = UX4.tr(tt);
             if (v !== tt) n.setAttribute("title", v);
           }
           n.childNodes.forEach(walk);
@@ -4230,7 +4238,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
             navigator.vibrate(p);
             return;
           }
-          if (!UX3._sw) {
+          if (!UX4._sw) {
             const l = document.createElement("label");
             l.style.cssText = "position:fixed;left:-99px;top:0;opacity:0;pointer-events:none";
             const i = document.createElement("input");
@@ -4238,17 +4246,17 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
             i.setAttribute("switch", "");
             l.appendChild(i);
             document.body.appendChild(l);
-            UX3._sw = l;
+            UX4._sw = l;
           }
-          UX3._sw.click();
+          UX4._sw.click();
         } catch (e) {
         }
       },
       subsOn: () => ls.get("rio3d-subs", "0") === "1",
       /* subtítulo de ambiente: UX.cap('Campanillas'); gap = ms mínimos entre repeticiones de la misma clave */
       cap(k, gap) {
-        if (!UX3.subsOn()) return;
-        const n = performance.now(), l = UX3._cl || (UX3._cl = {});
+        if (!UX4.subsOn()) return;
+        const n = performance.now(), l = UX4._cl || (UX4._cl = {});
         if (l[k] && n - l[k] < (gap || 9e3)) return;
         l[k] = n;
         let e = document.getElementById("uxcap");
@@ -4259,10 +4267,10 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           e.style.cssText = "position:fixed;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 50px));transform:translateX(-50%);background:rgba(20,22,48,.84);color:#fbf1e0;padding:6px 14px;border-radius:8px;font:600 .86rem system-ui,sans-serif;opacity:0;transition:opacity .4s;z-index:20;pointer-events:none;max-width:86%;text-align:center";
           document.body.appendChild(e);
         }
-        e.textContent = "[" + UX3.tr(k) + "]";
+        e.textContent = "[" + UX4.tr(k) + "]";
         e.style.opacity = 1;
-        clearTimeout(UX3._ct);
-        UX3._ct = setTimeout(() => e.style.opacity = 0, 2600);
+        clearTimeout(UX4._ct);
+        UX4._ct = setTimeout(() => e.style.opacity = 0, 2600);
       },
       /* botones de ajustes para el menú «Más». opts.hand=true añade el modo una mano (clases hand-r / hand-l en body). */
       btns(cls, opts) {
@@ -4280,7 +4288,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           const n = K[(K.indexOf(LG) + 1) % 3];
           ls.set("rio3d-lang", n);
           try {
-            UX3.onLang && UX3.onLang();
+            UX4.onLang && UX4.onLang();
           } catch (e) {
           }
           location.reload();
@@ -4288,41 +4296,245 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         lb.textContent = (LG === "en" ? "Language: " : LG === "ja" ? "\u8A00\u8A9E: " : "Idioma: ") + NM[LG];
         out.push(lb);
         const sb = mk2("uxSubs", () => {
-          ls.set("rio3d-subs", UX3.subsOn() ? "0" : "1");
-          sb.textContent = UX3.subsOn() ? "Subt\xEDtulos: s\xED" : "Subt\xEDtulos: no";
+          ls.set("rio3d-subs", UX4.subsOn() ? "0" : "1");
+          sb.textContent = UX4.subsOn() ? "Subt\xEDtulos: s\xED" : "Subt\xEDtulos: no";
         });
-        sb.textContent = UX3.subsOn() ? "Subt\xEDtulos: s\xED" : "Subt\xEDtulos: no";
+        sb.textContent = UX4.subsOn() ? "Subt\xEDtulos: s\xED" : "Subt\xEDtulos: no";
         out.push(sb);
         const hb = mk2("uxHap", () => {
           const on = ls.get("rio3d-hap", "1") === "1";
           ls.set("rio3d-hap", on ? "0" : "1");
           hb.textContent = on ? "Vibraci\xF3n: no" : "Vibraci\xF3n: s\xED";
-          if (!on) UX3.hap(15);
+          if (!on) UX4.hap(15);
         });
         hb.textContent = ls.get("rio3d-hap", "1") === "1" ? "Vibraci\xF3n: s\xED" : "Vibraci\xF3n: no";
         out.push(hb);
         if (opts.hand) {
           const names = { "0": "Una mano: no", r: "Una mano: derecha", l: "Una mano: izquierda" }, seq = ["0", "r", "l"];
-          const apply = (v) => {
+          const apply2 = (v) => {
             document.body.classList.remove("hand-r", "hand-l");
             if (v !== "0") document.body.classList.add("hand-" + v);
           };
           let cur = ls.get("rio3d-hand", "0");
           if (!names[cur]) cur = "0";
-          apply(cur);
+          apply2(cur);
           const hd = mk2("uxHand", () => {
             cur = seq[(seq.indexOf(cur) + 1) % 3];
             ls.set("rio3d-hand", cur);
-            apply(cur);
+            apply2(cur);
             hd.textContent = names[cur];
           });
           hd.textContent = names[cur];
           out.push(hd);
         }
+        const vb = mk2("uxVol", () => {
+          const seq = ["1", ".7", ".4"];
+          const i = seq.indexOf(String(UX4.api.vol()).replace("0.", "."));
+          UX4.api.setVol(seq[(i + 1) % 3]);
+          vb.textContent = vt();
+        });
+        const vt = () => T("Volumen: ", "Volume: ", "\u97F3\u91CF: ") + Math.round(UX4.api.vol() * 100) + " %";
+        vb.textContent = vt();
+        out.push(vb);
+        const tb = mk2("uxSoft", () => {
+          UX4.api.setSoft(!UX4.api.soft());
+          tb.textContent = tt();
+        });
+        const tt = () => UX4.api.soft() ? T("Tono suave: s\xED", "Soft tone: on", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30F3") : T("Tono suave: no", "Soft tone: off", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30D5");
+        tb.textContent = tt();
+        out.push(tb);
+        const sl = mk2("uxSleep", () => {
+          const seq = [0, 15, 30, 45];
+          UX4.api.sleep(seq[(seq.indexOf(UX4.api.sleepMin()) + 1) % 4]);
+          sl.textContent = st();
+        });
+        const st = () => UX4.api.sleepMin() ? T("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX4.api.sleepMin() + " min" : T("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
+        sl.textContent = st();
+        UX4._sb = () => {
+          sl.textContent = st();
+        };
+        out.push(sl);
+        if (opts.wear) {
+          const wb = mk2("uxWear", () => {
+            ls.set("ux-wear", ls.get("ux-wear", "0") === "1" ? "0" : "1");
+            wb.textContent = wt();
+          });
+          const wt = () => ls.get("ux-wear", "0") === "1" ? T("Desgaste por ausencia: s\xED", "Wear while away: on", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30F3") : T("Desgaste por ausencia: no", "Wear while away: off", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30D5");
+          wb.textContent = wt();
+          out.push(wb);
+        }
         return out;
+      },
+      /* confirmación dentro del juego (en lugar de confirm() nativo) */
+      ask(msg, ok) {
+        const d = document.createElement("div");
+        d.style.cssText = "position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(20,22,48,.6);font:15px/1.4 system-ui,sans-serif";
+        const b = document.createElement("div");
+        b.style.cssText = "background:#2b2d52;color:#fbf1e0;border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:20px 22px;max-width:min(86vw,360px);text-align:center";
+        const p = document.createElement("p");
+        p.style.margin = "0 0 14px";
+        p.textContent = UX4.tr(msg);
+        b.appendChild(p);
+        const mk2 = (t, f) => {
+          const x = document.createElement("button");
+          x.type = "button";
+          x.textContent = t;
+          x.style.cssText = "margin:0 6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:inherit;font:inherit;cursor:pointer";
+          x.onclick = () => {
+            d.remove();
+            f && f();
+          };
+          return x;
+        };
+        b.appendChild(mk2(T("Cancelar", "Cancel", "\u30AD\u30E3\u30F3\u30BB\u30EB")));
+        b.appendChild(mk2(T("S\xED, reiniciar", "Yes, restart", "\u306F\u3044\u3001\u6700\u521D\u304B\u3089"), ok));
+        d.appendChild(b);
+        document.body.appendChild(d);
       }
     };
-    UX3.add([
+    const T = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
+    const W = { vol: ls.get("ux-vol", "1"), soft: ls.get("ux-soft", "0") === "1", k: 1, nodes: [], end: 0, min: 0, ov: null };
+    UX4.quiet = false;
+    const apply = () => {
+      for (const n of W.nodes) {
+        try {
+          const t = n.c.currentTime;
+          n.lp.frequency.setTargetAtTime(W.soft ? 2800 : 22e3, t, 0.1);
+          n.g.gain.setTargetAtTime(+W.vol * W.k, t, 0.1);
+        } catch (e) {
+        }
+      }
+    };
+    UX4.out = (c, node) => {
+      const lp = c.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = W.soft ? 2800 : 22e3;
+      lp.Q.value = 0.5;
+      const g2 = c.createGain();
+      g2.gain.value = +W.vol * W.k;
+      node.connect(lp);
+      lp.connect(g2);
+      g2.connect(c.destination);
+      W.nodes.push({ c, lp, g: g2 });
+      return g2;
+    };
+    UX4.pinkSrc = (c, k) => {
+      let b = c._pink;
+      if (!b) {
+        const sr = c.sampleRate, L = Math.floor(sr * 12), tl = Math.floor(sr * 1.5), n = L + tl, d = new Float32Array(n);
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        for (let i = 0; i < n; i++) {
+          const w = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + w * 0.0555179;
+          b1 = 0.99332 * b1 + w * 0.0750759;
+          b2 = 0.969 * b2 + w * 0.153852;
+          b3 = 0.8665 * b3 + w * 0.3104856;
+          b4 = 0.55 * b4 + w * 0.5329522;
+          b5 = -0.7616 * b5 - w * 0.016898;
+          d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.2215 * 0.5;
+          b6 = w * 0.115926;
+        }
+        b = c.createBuffer(1, L, sr);
+        const o = b.getChannelData(0);
+        for (let i = 0; i < L; i++) o[i] = d[i];
+        for (let i = 0; i < tl; i++) {
+          const a = i / tl * Math.PI / 2;
+          o[i] = d[i] * Math.sin(a) + d[L + i] * Math.cos(a);
+        }
+        c._pink = b;
+      }
+      const s = c.createBufferSource();
+      s.buffer = b;
+      s.loop = true;
+      const g2 = c.createGain();
+      g2.gain.value = k || 1;
+      s.connect(g2);
+      g2.start = (w, o) => s.start(w || 0, o || 0);
+      g2.stop = (w) => s.stop(w);
+      return g2;
+    };
+    UX4.api = {
+      soft: () => W.soft,
+      setSoft(v) {
+        W.soft = !!v;
+        ls.set("ux-soft", v ? "1" : "0");
+        apply();
+      },
+      vol: () => +W.vol,
+      setVol(v) {
+        W.vol = String(v);
+        ls.set("ux-vol", W.vol);
+        apply();
+      },
+      sleepMin: () => W.min,
+      sleep(m) {
+        W.min = m;
+        W.end = m ? Date.now() + m * 6e4 : 0;
+        W.k = 1;
+        UX4.quiet = false;
+        if (W.ov) W.ov.style.opacity = 0;
+        apply();
+      }
+    };
+    const sleepTick = () => {
+      if (!W.end) return;
+      const rem = (W.end - Date.now()) / 1e3;
+      if (!W.ov) {
+        const o = document.createElement("div");
+        o.style.cssText = "position:fixed;inset:0;z-index:29;pointer-events:none;background:#1a0d00;opacity:0;transition:opacity 1.2s";
+        document.body.appendChild(o);
+        W.ov = o;
+      }
+      if (rem <= 0) {
+        W.end = 0;
+        W.min = 0;
+        W.k = 0;
+        apply();
+        W.ov.style.opacity = 0.6;
+        try {
+          window.PZ && PZ.set(true);
+        } catch (e) {
+        }
+        setTimeout(() => {
+          W.k = 1;
+          UX4.quiet = false;
+          apply();
+          W.ov.style.opacity = 0;
+          UX4._sb && UX4._sb();
+        }, 1500);
+        return;
+      }
+      if (rem < 300) {
+        UX4.quiet = true;
+        W.k = Math.pow(rem / 300, 2);
+        W.ov.style.opacity = (1 - rem / 300) * 0.6;
+        apply();
+      }
+    };
+    setInterval(sleepTick, 1e3);
+    {
+      let played = 0, next = 20 * 60;
+      setInterval(() => {
+        if (document.hidden || window.PZ && (PZ.on || !PZ.started())) return;
+        played += 5;
+        if (played >= next) {
+          next += 30 * 60;
+          let e = document.getElementById("uxrest");
+          if (!e) {
+            e = document.createElement("div");
+            e.id = "uxrest";
+            e.setAttribute("aria-live", "polite");
+            e.style.cssText = "position:fixed;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 60px));transform:translateX(-50%);max-width:min(88vw,420px);text-align:center;background:rgba(20,22,48,.88);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:14px/1.4 system-ui,sans-serif;z-index:28;pointer-events:none;transition:opacity .8s;opacity:0";
+            document.body.appendChild(e);
+          }
+          e.textContent = T("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
+          e.style.opacity = 1;
+          clearTimeout(UX4._rt);
+          UX4._rt = setTimeout(() => e.style.opacity = 0, 7e3);
+        }
+      }, 5e3);
+    }
+    UX4.add([
       ["Pausa", "Pause", "\u4E00\u6642\u505C\u6B62"],
       ["Continuar", "Resume", "\u518D\u958B"],
       ["M\xE1s", "More", "\u305D\u306E\u4ED6"],
@@ -4362,9 +4574,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   })();
 
   // src2d/rio/i18n.js
-  var UX = window.UX;
+  var UX2 = window.UX;
   function setupI18n() {
-    UX.add([
+    UX2.add([
       ["R\xEDo de Linternas", "River of Lanterns", "\u30E9\u30F3\u30BF\u30F3\u306E\u5DDD"],
       ["Distancia", "Distance", "\u8DDD\u96E2"],
       ["Linternas", "Lanterns", "\u30E9\u30F3\u30BF\u30F3"],
@@ -4410,26 +4622,26 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       ["Festival del castillo: los tambores resuenan", "Castle festival: the drums echo across the water", "\u57CE\u306E\u796D\u308A\uFF1A\u592A\u9F13\u304C\u6C34\u9762\u306B\u97FF\u304D\u307E\u3059"],
       ["Festival del castillo: fuegos artificiales sobre la Garza Blanca", "Castle festival: fireworks over the White Heron", "\u57CE\u306E\u796D\u308A\uFF1A\u767D\u9DFA\u57CE\u306E\u591C\u7A7A\u306B\u82B1\u706B\u304C\u4E0A\u304C\u308A\u307E\u3059"]
     ]);
-    UX.rx([
+    UX2.rx([
       [/^Siguiente: (.+) en (\d+) m$/, (m, i, tr) => i === 1 ? "Next: " + tr(m[1]) + " in " + m[2] + " m" : "\u6B21\uFF1A" + tr(m[1]) + "\uFF08\u3042\u3068" + m[2] + " m\uFF09"],
       [/^Descubriste: (.+)$/, (m, i, tr) => i === 1 ? "You discovered: " + tr(m[1]) : "\u767A\u898B\uFF1A" + tr(m[1])]
     ]);
-    document.title = UX.tr(document.title);
+    document.title = UX2.tr(document.title);
   }
   function startI18n() {
-    UX.init();
+    UX2.init();
   }
 
   // src2d/rio/main.js
-  var PZ = window.PZ;
-  var UX2 = window.UX;
+  var PZ2 = window.PZ;
+  var UX3 = window.UX;
   initCanvas();
   initInput();
   initControls();
   var last = 0;
   var saveAcc = 0;
   function frame(ms) {
-    if (PZ.on) {
+    if (PZ2.on) {
       last = ms / 1e3;
       requestAnimationFrame(frame);
       return;
@@ -4452,8 +4664,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   updateHUD();
   requestAnimationFrame(frame);
   initCalm();
-  PZ.ctx = () => A.ctx;
-  PZ.started = () => G.started;
+  PZ2.ctx = () => A.ctx;
+  PZ2.started = () => G.started;
   window.__jr = {
     state: () => ({ started: G.started, dist: Math.round(G.s), lamps: G.lit.size, clock: Math.round(G.clock) }),
     /* depuración: tp(s) teletransporta la distancia G.s (y centra la canoa); setClock(c) fija la hora (ciclo de 360 s); lmPos/lmType exponen el mundo */
@@ -4489,7 +4701,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     dbg: castleDbg
   };
   setupI18n();
-  PZ.more(document.querySelector("header"), [$("#breath-btn"), $("#mute"), $("#reset"), ...UX2.btns("btn")]);
+  PZ2.more(document.querySelector("header"), [$("#breath-btn"), $("#mute"), $("#reset"), ...UX3.btns("btn")]);
   startI18n();
 })();
 

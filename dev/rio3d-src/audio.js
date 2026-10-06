@@ -9,17 +9,17 @@ export const A={
   init(){
     if(this.ctx)return;
     const C=this.ctx=new (window.AudioContext||window.webkitAudioContext)();
-    this.m=C.createGain();this.m.gain.value=.8;this.m.connect(C.destination);
+    this.m=C.createGain();this.m.gain.value=.8;window.UX?UX.out(C,this.m):this.m.connect(C.destination);
     const len=C.sampleRate*2.6,ir=C.createBuffer(2,len,C.sampleRate);
     for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.4)}
     this.rv=C.createConvolver();this.rv.buffer=ir;const rg=C.createGain();rg.gain.value=.55;this.rv.connect(rg);rg.connect(this.m);
     const nb=C.createBuffer(1,C.sampleRate*3,C.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;this.nb=nb;
-    const loop=()=>{const s=C.createBufferSource();s.buffer=nb;s.loop=true;s.start(0,Math.random()*2);return s};
+    const loop=k=>{if(k&&window.UX&&UX.pinkSrc){const g=UX.pinkSrc(C,k);g.start(0,Math.random()*6);return g}const s=C.createBufferSource();s.buffer=nb;s.loop=true;s.start(0,Math.random()*2);return s};
     // agua del río
-    const w=loop(),wf=C.createBiquadFilter();wf.type='bandpass';wf.frequency.value=520;wf.Q.value=.5;this.wg=C.createGain();this.wg.gain.value=.03;
+    const w=loop(.81),wf=C.createBiquadFilter();wf.type='bandpass';wf.frequency.value=520;wf.Q.value=.5;this.wg=C.createGain();this.wg.gain.value=.03;
     w.connect(wf);wf.connect(this.wg);this.wg.connect(this.m);
     // murmullo agudo del arroyo
-    const w2=loop(),wf2=C.createBiquadFilter();wf2.type='bandpass';wf2.frequency.value=2200;wf2.Q.value=1.2;this.wg2=C.createGain();this.wg2.gain.value=.008;
+    const w2=loop(1.46),wf2=C.createBiquadFilter();wf2.type='bandpass';wf2.frequency.value=2200;wf2.Q.value=1.2;this.wg2=C.createGain();this.wg2.gain.value=.008;
     w2.connect(wf2);wf2.connect(this.wg2);this.wg2.connect(this.m);
     // grillos de noche
     const cr=loop(),cf=C.createBiquadFilter();cf.type='bandpass';cf.frequency.value=4300;cf.Q.value=4;this.cg=C.createGain();this.cg.gain.value=0;
@@ -30,12 +30,12 @@ export const A={
     [1,1.5,2.0].forEach((r,i)=>{const o=C.createOscillator();o.type='sine';o.frequency.value=73.42*r*(i===2?1.003:1);const g=C.createGain();g.gain.value=i===1?.5:.7;o.connect(g);g.connect(this.dg);o.start()});
     const dl=C.createOscillator(),dlg=C.createGain();dl.frequency.value=.07;dlg.gain.value=.02;dl.connect(dlg);dlg.connect(this.dg.gain);dl.start();
     // fregado (ruido filtrado cuyo volumen sigue el movimiento) y lluvia
-    const sc=loop(),sf=C.createBiquadFilter();sf.type='bandpass';sf.frequency.value=2600;sf.Q.value=.8;this.sg=C.createGain();this.sg.gain.value=0;
+    const sc=loop(1.6),sf=C.createBiquadFilter();sf.type='bandpass';sf.frequency.value=2600;sf.Q.value=.8;this.sg=C.createGain();this.sg.gain.value=0;
     sc.connect(sf);sf.connect(this.sg);this.sg.connect(this.m);this.sf=sf;
-    const rn=loop(),rf=C.createBiquadFilter();rf.type='highpass';rf.frequency.value=1800;this.rg=C.createGain();this.rg.gain.value=0;
+    const rn=loop(2.69),rf=C.createBiquadFilter();rf.type='highpass';rf.frequency.value=1800;this.rg=C.createGain();this.rg.gain.value=0;
     rn.connect(rf);rf.connect(this.rg);this.rg.connect(this.m);
     // viento en el acantilado: ruido grave con ráfagas lentas
-    const wd=loop(),wdf=C.createBiquadFilter();wdf.type='bandpass';wdf.frequency.value=420;wdf.Q.value=.6;this.wdg=C.createGain();this.wdg.gain.value=.012;
+    const wd=loop(.71),wdf=C.createBiquadFilter();wdf.type='bandpass';wdf.frequency.value=420;wdf.Q.value=.6;this.wdg=C.createGain();this.wdg.gain.value=.012;
     const wl=C.createOscillator(),wlg=C.createGain();wl.frequency.value=.09;wlg.gain.value=.009;wl.connect(wlg);wlg.connect(this.wdg.gain);wl.start();
     const wl2=C.createOscillator(),wlg2=C.createGain();wl2.frequency.value=.023;wlg2.gain.value=180;wl2.connect(wlg2);wlg2.connect(wdf.frequency);wl2.start();
     wd.connect(wdf);wdf.connect(this.wdg);this.wdg.connect(this.m);
@@ -59,7 +59,7 @@ export const A={
   setMood(prog,night){this.mood={prog:clamp(prog,0,1),night:night==null?1:night};if(this.pad&&this.ctx)this.padFilter()},
   padFilter(){
     const m=this.mood,t=this.ctx.currentTime,bright=m.prog*(1-.35*m.night);
-    this.pad.f.frequency.setTargetAtTime(320+bright*1150,t,2.5);
+    this.pad.f.frequency.setTargetAtTime(520+bright*1000,t,2.5);
     this.pad.pg.gain.setTargetAtTime(.04*(1+.15*(1-m.night)),t,2);
   },
   padChord(first){
@@ -67,7 +67,7 @@ export const A={
     const dark=[[-12,-5,0,7],[-12,-4,3,7],[-12,0,7,12],[-12,-5,3,7]],
           mid=[[-12,0,7,15],[-4,3,7,12],[0,7,12,15],[-4,0,7,15]],
           warm=[[0,7,14,19],[0,7,12,15],[-4,3,7,12],[0,7,12,19]];
-    const set=pr<.33?dark:pr<.7?mid:warm;p.ch=(p.ch+1+(Math.random()<.3?1:0))%set.length;
+    const set=pr<.5?mid:warm;p.ch=(p.ch+1+(Math.random()<.3?1:0))%set.length;
     const ch=set[p.ch];
     p.vs.forEach(([a,b],i)=>{const fr=D*Math.pow(2,ch[i]/12);a.frequency.setTargetAtTime(fr,t,first?.01:3.2);b.frequency.setTargetAtTime(fr*1.002,t,first?.01:3.2)});
     this.padFilter();
@@ -78,6 +78,12 @@ export const A={
     if(!this.ctx||!this.on)return;cap('Campanita',2500);const t=this.ctx.currentTime;
     [0,2,4].forEach((k,i)=>this.pluck(hz((deg||0)+k+5,2),t+i*.15,.09,x));
   },
+  breathTone(up,dur){
+    const c=this.ctx;if(!c||c.state!=='running'||!this.on)return;const t=c.currentTime;
+    [[1,.05],[1.5,.022]].forEach(([k,v])=>{const o=c.createOscillator(),gn=c.createGain();o.type='sine';
+      o.frequency.setValueAtTime((up?196:262)*k,t);o.frequency.linearRampToValueAtTime((up?262:196)*k,t+dur);
+      if(up){gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(v,t+dur)}else{gn.gain.setValueAtTime(v,t);gn.gain.linearRampToValueAtTime(0,t+dur)}
+      o.connect(gn);gn.connect(this.m);o.start(t);o.stop(t+dur+.1)})},
   resume(){if(this.ctx&&this.ctx.state!=='running')this.ctx.resume()},
   setOn(v){this.on=v;if(this.m)this.m.gain.setTargetAtTime(v?.8:0,this.ctx.currentTime,.2)},
   update(speed,night,t){const day=1-night;

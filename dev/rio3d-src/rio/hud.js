@@ -22,7 +22,6 @@ el('go').onclick=()=>{
   try{A.init();A.resume()}catch(e){}
   el('start').hidden=true;el('hud').hidden=false;el('places-row').hidden=false;updateDiary(0);el('hint').hidden=false;S.started=true;
   setTimeout(()=>{try{if(localStorage.getItem('rio3d-ob')==='1')el('hint').style.opacity=0}catch(e){el('hint').style.opacity=0}},9000);
-  setTimeout(()=>toast('Llevas un buen rato en el río: respira hondo y estira un poco los hombros.'),25*60*1000);
 };
 /* marcadores periódicos (cada 0.4 s): diario, ambiente sonoro, distancia y hora */
 let hudT=0;

@@ -37,6 +37,6 @@ export function initCalm(){
     setInterval(()=>{
       if(document.hidden||!G.started)return;
       played+=5;
-      if(played>=next){next+=30*60;toast('Llevas un buen rato. Toma agua, suelta los hombros y respira hondo. El juego te espera.')}
+      
     },5000);
 }

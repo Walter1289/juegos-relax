@@ -46,11 +46,13 @@ export function updateNext(){
   nextB.style.opacity=.92;nextB.style.pointerEvents='auto'}
 /* respiración guiada */
 let breathOn=false,breathTm=0;
-function breathStep(i){const t=['Inhala','Sostén','Exhala'],d=[4000,2000,6000],c=el('bcircle');if(!breathOn)return;el('btxt').textContent=t[i];
-  c.style.transition='transform '+d[i]/1000+'s ease-in-out';c.style.transform=i===0?'scale(1.5)':i===2?'scale(.7)':c.style.transform;breathTm=setTimeout(()=>breathStep((i+1)%3),d[i])}
+function breathStep(i,n){n=n||0;const t=['Inhala','Sostén','Exhala'],d=[4000,1000,6000],c=el('bcircle');if(!breathOn)return;
+  if(n>=15){el('btxt').textContent='Gracias por respirar';c.style.transform='scale(.7)';breathTm=setTimeout(()=>{breathOn=false;el('breath').hidden=true},2800);return}
+  el('btxt').textContent=t[i];try{if(i===0)A.breathTone(true,5);if(i===2)A.breathTone(false,6)}catch(e){}
+  c.style.transition='transform '+d[i]/1000+'s ease-in-out';c.style.transform=i===0?'scale(1.5)':i===2?'scale(.7)':c.style.transform;breathTm=setTimeout(()=>breathStep((i+1)%3,n+1),d[i])}
 // enlaza botones del HUD superior: menú "más", sonido, reinicio (onReset) y respiración
 export function bindHud(onReset){
-  PZ.more(el('top'),[el('brt'),el('snd'),el('rst')].concat(UX.btns('',{hand:true})));
+  PZ.more(el('top'),[el('brt'),el('snd'),el('rst')].concat(UX.btns('',{hand:true,wear:true})));
   el('snd').onclick=()=>{A.on=!A.on;if(A.ctx)A.setOn(A.on);el('snd').textContent='Sonido: '+(A.on?'sí':'no')};
   el('rst').onclick=onReset;
   el('brt').onclick=()=>{breathOn=!breathOn;el('breath').hidden=!breathOn;clearTimeout(breathTm);if(breathOn){el('bcircle').style.transform='scale(.7)';breathStep(0)}};

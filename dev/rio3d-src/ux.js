@@ -64,9 +64,69 @@
         const hd=mk('uxHand',()=>{cur=seq[(seq.indexOf(cur)+1)%3];ls.set('rio3d-hand',cur);apply(cur);hd.textContent=names[cur]});
         hd.textContent=names[cur];out.push(hd);
       }
+      const vb=mk('uxVol',()=>{const seq=['1','.7','.4'];const i=seq.indexOf(String(UX.api.vol()).replace('0.','.'));UX.api.setVol(seq[(i+1)%3]);vb.textContent=vt()});
+      const vt=()=>T('Volumen: ','Volume: ','音量: ')+Math.round(UX.api.vol()*100)+' %';vb.textContent=vt();out.push(vb);
+      const tb=mk('uxSoft',()=>{UX.api.setSoft(!UX.api.soft());tb.textContent=tt()});
+      const tt=()=>UX.api.soft()?T('Tono suave: sí','Soft tone: on','やわらかい音: オン'):T('Tono suave: no','Soft tone: off','やわらかい音: オフ');tb.textContent=tt();out.push(tb);
+      const sl=mk('uxSleep',()=>{const seq=[0,15,30,45];UX.api.sleep(seq[(seq.indexOf(UX.api.sleepMin())+1)%4]);sl.textContent=st()});
+      const st=()=>UX.api.sleepMin()?T('Dormir: ','Sleep: ','おやすみ: ')+UX.api.sleepMin()+' min':T('Dormir: no','Sleep: off','おやすみ: オフ');sl.textContent=st();UX._sb=()=>{sl.textContent=st()};out.push(sl);
+      if(opts.wear){const wb=mk('uxWear',()=>{ls.set('ux-wear',ls.get('ux-wear','0')==='1'?'0':'1');wb.textContent=wt()});
+        const wt=()=>ls.get('ux-wear','0')==='1'?T('Desgaste por ausencia: sí','Wear while away: on','不在中の汚れ: オン'):T('Desgaste por ausencia: no','Wear while away: off','不在中の汚れ: オフ');wb.textContent=wt();out.push(wb)}
       return out;
+    },
+    /* confirmación dentro del juego (en lugar de confirm() nativo) */
+    ask(msg,ok){
+      const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(20,22,48,.6);font:15px/1.4 system-ui,sans-serif';
+      const b=document.createElement('div');b.style.cssText='background:#2b2d52;color:#fbf1e0;border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:20px 22px;max-width:min(86vw,360px);text-align:center';
+      const p=document.createElement('p');p.style.margin='0 0 14px';p.textContent=UX.tr(msg);b.appendChild(p);
+      const mk=(t,f)=>{const x=document.createElement('button');x.type='button';x.textContent=t;x.style.cssText='margin:0 6px;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:inherit;font:inherit;cursor:pointer';x.onclick=()=>{d.remove();f&&f()};return x};
+      b.appendChild(mk(T('Cancelar','Cancel','キャンセル')));b.appendChild(mk(T('Sí, reiniciar','Yes, restart','はい、最初から'),ok));d.appendChild(b);document.body.appendChild(d)
     }
   };
+
+  /* ---------- bienestar: salida de audio común (volumen, tono suave, temporizador de sueño) y recordatorio de descanso ---------- */
+  const T=(es,en,ja)=>LG==='en'?en:LG==='ja'?ja:es;
+  const W={vol:ls.get('ux-vol','1'),soft:ls.get('ux-soft','0')==='1',k:1,nodes:[],end:0,min:0,ov:null};
+  UX.quiet=false;
+  const apply=()=>{for(const n of W.nodes){try{const t=n.c.currentTime;n.lp.frequency.setTargetAtTime(W.soft?2800:22000,t,.1);n.g.gain.setTargetAtTime(+W.vol*W.k,t,.1)}catch(e){}}};
+  /* UX.out(ctx,nodo): intercala pasa-bajos y ganancia entre el master del juego y destination */
+  UX.out=(c,node)=>{const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=W.soft?2800:22000;lp.Q.value=.5;const g=c.createGain();g.gain.value=+W.vol*W.k;node.connect(lp);lp.connect(g);g.connect(c.destination);W.nodes.push({c,lp,g});return g};
+  /* ruido rosa (Kellet) de 12 s con bucle sin costura (cola de 1,5 s mezclada con potencia constante); k = compensación de nivel de la capa */
+  UX.pinkSrc=(c,k)=>{
+    let b=c._pink;
+    if(!b){const sr=c.sampleRate,L=Math.floor(sr*12),tl=Math.floor(sr*1.5),n=L+tl,d=new Float32Array(n);
+      let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+      for(let i=0;i<n;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.2215*.5;b6=w*.115926}
+      b=c.createBuffer(1,L,sr);const o=b.getChannelData(0);
+      for(let i=0;i<L;i++)o[i]=d[i];
+      for(let i=0;i<tl;i++){const a=i/tl*Math.PI/2;o[i]=d[i]*Math.sin(a)+d[L+i]*Math.cos(a)}
+      c._pink=b}
+    const s=c.createBufferSource();s.buffer=b;s.loop=true;const g=c.createGain();g.gain.value=k||1;s.connect(g);
+    g.start=(w,o)=>s.start(w||0,o||0);g.stop=w=>s.stop(w);return g};
+  UX.api={
+    soft:()=>W.soft,setSoft(v){W.soft=!!v;ls.set('ux-soft',v?'1':'0');apply()},
+    vol:()=>+W.vol,setVol(v){W.vol=String(v);ls.set('ux-vol',W.vol);apply()},
+    sleepMin:()=>W.min,
+    sleep(m){W.min=m;W.end=m?Date.now()+m*60000:0;W.k=1;UX.quiet=false;if(W.ov)W.ov.style.opacity=0;apply()}
+  };
+  const sleepTick=()=>{
+    if(!W.end)return;const rem=(W.end-Date.now())/1000;
+    if(!W.ov){const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:29;pointer-events:none;background:#1a0d00;opacity:0;transition:opacity 1.2s';document.body.appendChild(o);W.ov=o}
+    if(rem<=0){W.end=0;W.min=0;W.k=0;apply();W.ov.style.opacity=.6;try{window.PZ&&PZ.set(true)}catch(e){}
+      setTimeout(()=>{W.k=1;UX.quiet=false;apply();W.ov.style.opacity=0;UX._sb&&UX._sb()},1500);return}
+    if(rem<300){UX.quiet=true;W.k=Math.pow(rem/300,2);W.ov.style.opacity=(1-rem/300)*.6;apply()}
+  };
+  setInterval(sleepTick,1000);
+  /* recordatorio de descanso único para los cinco juegos: a los 20 min y luego cada 30, solo con la pestaña visible y sin pausa */
+  {let played=0,next=20*60;
+   setInterval(()=>{
+    if(document.hidden||(window.PZ&&(PZ.on||!PZ.started())))return;
+    played+=5;
+    if(played>=next){next+=30*60;
+      let e=document.getElementById('uxrest');
+      if(!e){e=document.createElement('div');e.id='uxrest';e.setAttribute('aria-live','polite');e.style.cssText='position:fixed;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 60px));transform:translateX(-50%);max-width:min(88vw,420px);text-align:center;background:rgba(20,22,48,.88);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:14px/1.4 system-ui,sans-serif;z-index:28;pointer-events:none;transition:opacity .8s;opacity:0';document.body.appendChild(e)}
+      e.textContent=T('Buen momento para soltar los hombros y tomar un poco de agua.','A good moment to relax your shoulders and have some water.','肩の力を抜いて、水を一口飲むのによい頃合いです。');e.style.opacity=1;clearTimeout(UX._rt);UX._rt=setTimeout(()=>e.style.opacity=0,7000)}
+   },5000)}
   UX.add([
     ['Pausa','Pause','一時停止'],['Continuar','Resume','再開'],['Más','More','その他'],['Respirar','Breathe','呼吸'],['Sonido: sí','Sound: on','音: オン'],['Sonido: no','Sound: off','音: オフ'],['Reiniciar','Restart','最初から'],
     ['En pausa','Paused','一時停止中'],['Respira con calma.','Breathe calmly.','ゆっくり呼吸しましょう。'],['Todo seguirá aquí cuando vuelvas.','Everything will be here when you return.','戻ってくるまで、すべてそのままです。'],

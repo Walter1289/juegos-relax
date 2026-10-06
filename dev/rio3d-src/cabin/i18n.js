@@ -24,7 +24,7 @@ UX.add([
  ['Mejor con auriculares. Tu avance se guarda en este dispositivo.','Best with headphones. Your progress is saved on this device.','ヘッドホン推奨。進み具合はこの端末に保存されます。'],
  ['Entrar a la cabaña','Enter the cabin','小屋に入る'],['← Menú','← Menu','← メニュー'],
  ['Arrastra sobre la suciedad para limpiar · arrastra el fondo para girar · pellizca para acercar','Drag over the grime to clean · drag the background to rotate · pinch to zoom','汚れをなぞって掃除 · 背景をドラッグで回転 · ピンチでズーム'],
- ['Inhala','Inhale','吸って'],['Sostén','Hold','止めて'],['Exhala','Exhale','吐いて'],
+ ['Inhala','Inhale','吸って'],['Gracias por respirar','Thank you for breathing','呼吸してくれてありがとう'],['Sostén','Hold','止めて'],['Exhala','Exhale','吐いて'],
  ['Acercar','Zoom in','ズームイン'],['Alejar','Zoom out','ズームアウト'],['Centrar vista','Center view','視点を戻す'],
  ['Esencial','Essential','必須'],['Funcional','Functional','機能'],['Decoración','Decoration','飾り'],['Colección','Collection','コレクション'],
  ['Vacía. Cada reparación te da un objeto.','Empty. Every repair gives you an item.','空っぽ。修理するたびにアイテムがもらえます。'],

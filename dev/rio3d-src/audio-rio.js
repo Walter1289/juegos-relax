@@ -14,7 +14,7 @@ export const A={
     try{
       const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
       const c=new C();this.ctx=c;
-      const m=c.createGain();m.gain.value=this.muted?0:.6*this.vol;m.connect(c.destination);this.master=m;
+      const m=c.createGain();m.gain.value=this.muted?0:.6*this.vol;window.UX?UX.out(c,m):m.connect(c.destination);this.master=m;
       const bus=c.createGain();bus.gain.value=1;bus.connect(m);this.bus=bus;
       const nb=c.createBuffer(1,c.sampleRate*2,c.sampleRate),nd=nb.getChannelData(0);
       for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
@@ -24,18 +24,18 @@ export const A={
       for(let ch=0;ch<2;ch++){const d=rb.getChannelData(ch);for(let i=0;i<rl;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rl,2.6)}
       const cv=c.createConvolver();cv.buffer=rb;const wet=c.createGain();wet.gain.value=.38;bus.connect(cv);cv.connect(wet);wet.connect(m);
       // agua
-      const w=this.noise(),lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=650;
+      const w=this.noise(0,.37),lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=650;
       const wg=c.createGain();wg.gain.value=.07;
       const lfo=c.createOscillator();lfo.frequency.value=.09;const lg=c.createGain();lg.gain.value=.04;lfo.connect(lg);lg.connect(wg.gain);lfo.start();
       w.connect(lp);lp.connect(wg);wg.connect(m);
-      const w2=this.noise(),bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2200;bp.Q.value=.7;
+      const w2=this.noise(0,1.5),bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2200;bp.Q.value=.7;
       const g2=c.createGain();g2.gain.value=.02;w2.connect(bp);bp.connect(g2);g2.connect(m);
       // Arroyos en cada orilla (sonido espacial HRTF): suenan más fuerte del lado al que te acercas
       this.bk={};this.bkx={'-1':-4,'1':4};
       [-1,1].forEach(side=>{
         const pn=this.panner(side*4,0,0,2,.6);pn.connect(m);this.bk[side]=pn;
         [[520,2,.7,.05],[1250,3,1.3,.03],[2600,4,2.1,.014]].forEach(([f,q,lf,v],i)=>{
-          const n=this.noise(Math.random()*1.8),b=c.createBiquadFilter();b.type='bandpass';b.frequency.value=f;b.Q.value=q;
+          const n=this.noise(Math.random()*1.8,f<800?.71:f<1900?1.07:1.52),b=c.createBiquadFilter();b.type='bandpass';b.frequency.value=f;b.Q.value=q;
           const gn=c.createGain();gn.gain.value=v;const l=c.createOscillator(),lg=c.createGain();l.frequency.value=lf*(side>0?1.13:.91);lg.gain.value=v*.7;l.connect(lg);lg.connect(gn.gain);l.start();
           n.connect(b);b.connect(gn);gn.connect(pn);
         });
@@ -53,7 +53,7 @@ export const A={
         setTimeout(blip,rnd(90,260));
       };blip();
       // Cascadita: ruido que se acerca por delante cuando te aproximas al lugar
-      const wn=this.noise(Math.random()*1.5),wh=c.createBiquadFilter();wh.type='highpass';wh.frequency.value=380;
+      const wn=this.noise(Math.random()*1.5,1.21),wh=c.createBiquadFilter();wh.type='highpass';wh.frequency.value=380;
       const wl=c.createBiquadFilter();wl.type='lowpass';wl.frequency.value=4200;
       const wgn=c.createGain();wgn.gain.value=0;const wpn=this.panner(0,0,-30,2,.5);
       wn.connect(wh);wh.connect(wl);wl.connect(wgn);wgn.connect(wpn);wpn.connect(m);this.wfG=wgn;this.wfP=wpn;
@@ -61,9 +61,9 @@ export const A={
       this.rgs=[];
       [[-.75,3200],[.75,3600]].forEach(([pan,hf])=>{
         const sp=c.createStereoPanner();sp.pan.value=pan;sp.connect(m);
-        const r1=this.noise(Math.random()*1.8),hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=hf;
+        const r1=this.noise(Math.random()*1.8,2.94),hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=hf;
         const rg=c.createGain();rg.gain.value=0;r1.connect(hp);hp.connect(rg);rg.connect(sp);this.rgs.push([rg,.07]);
-        const r2=this.noise(Math.random()*1.8),bp2=c.createBiquadFilter();bp2.type='bandpass';bp2.frequency.value=1500;bp2.Q.value=.6;
+        const r2=this.noise(Math.random()*1.8,1.29),bp2=c.createBiquadFilter();bp2.type='bandpass';bp2.frequency.value=1500;bp2.Q.value=.6;
         const rg2=c.createGain();rg2.gain.value=0;r2.connect(bp2);bp2.connect(rg2);rg2.connect(sp);this.rgs.push([rg2,.035]);
       });
       this.rainLvl=0;
@@ -91,7 +91,7 @@ export const A={
       o.connect(gn);gn.connect(this.bus);o.start(t);o.stop(t+dur+.1);
     });
   },
-  noise(off){const c=this.ctx,s=c.createBufferSource();s.buffer=this.nbuf;s.loop=true;s.start(0,off||0);return s},
+  noise(off,k){const c=this.ctx;if(window.UX&&UX.pinkSrc){const g=UX.pinkSrc(c,k);g.start(0,(off||0)*3);return g}const s=c.createBufferSource();s.buffer=this.nbuf;s.loop=true;s.start(0,off||0);return s},
   panner(x,y,z,ref,roll,now){
     const p=this.ctx.createPanner();p.panningModel='HRTF';p.distanceModel='inverse';p.refDistance=ref||2;p.rolloffFactor=roll==null?.6:roll;
     if(p.positionX){p.positionX.value=x;p.positionY.value=y;p.positionZ.value=z}else p.setPosition(x,y,z);
@@ -134,11 +134,12 @@ export const A={
     gn.connect(d);o.start(t);o2.start(t);o.stop(t+dur+.1);o2.stop(t+dur+.1);
   },
   drum(t,vol,p){
-    if(!this.ok())return;const c=this.ctx;
+    if(!this.ok()||(window.UX&&UX.quiet))return;const c=this.ctx;
     const o=c.createOscillator(),gn=c.createGain();o.type='sine';
-    o.frequency.setValueAtTime(115*p,t);o.frequency.exponentialRampToValueAtTime(48*p,t+.28);
-    gn.gain.setValueAtTime(vol,t);gn.gain.exponentialRampToValueAtTime(.0001,t+.9);
-    o.connect(gn);gn.connect(this.bus);o.start(t);o.stop(t+1);
+    vol*=.42;o.frequency.setValueAtTime(115*p,t);o.frequency.exponentialRampToValueAtTime(48*p,t+.28);
+    const dl=c.createBiquadFilter();dl.type='lowpass';dl.frequency.value=700;
+    gn.gain.setValueAtTime(.0001,t);gn.gain.linearRampToValueAtTime(vol,t+.04);gn.gain.exponentialRampToValueAtTime(.0001,t+.9);
+    o.connect(gn);gn.connect(dl);dl.connect(this.bus);o.start(t);o.stop(t+1);
     const s=c.createBufferSource();s.buffer=this.nbuf;const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=500;
     const ng=c.createGain();ng.gain.setValueAtTime(vol*.5,t);ng.gain.exponentialRampToValueAtTime(.0001,t+.1);
     s.connect(lp);lp.connect(ng);ng.connect(this.bus);s.start(t,Math.random());s.stop(t+.15);
@@ -250,14 +251,14 @@ export const A={
     p.vs.forEach(([a,b],i)=>{const fr=D*Math.pow(2,(ch[i]+sh)/12);a.frequency.setTargetAtTime(fr,t,first?.01:3.2);b.frequency.setTargetAtTime(fr*1.002,t,first?.01:3.2)});
     this.padFilter();
   },
-  boom(x){if(!this.ok())return;this.cap('Fuegos artificiales');const c=this.ctx,t=c.currentTime,d=this.dest((x||0)*5,-9);
-    const o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(95,t);o.frequency.exponentialRampToValueAtTime(38,t+.5);g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.0001,t+.7);o.connect(g);g.connect(d);o.start(t);o.stop(t+.8);
+  boom(x){if(!this.ok()||(window.UX&&UX.quiet))return;this.cap('Fuegos artificiales');const c=this.ctx,t=c.currentTime,d=this.dest((x||0)*5,-9);
+    const o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(95,t);o.frequency.exponentialRampToValueAtTime(38,t+.5);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.07,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+.7);o.connect(g);g.connect(d);o.start(t);o.stop(t+.8);
     const s=c.createBufferSource();s.buffer=this.nbuf;const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=2500;const ng=c.createGain();ng.gain.setValueAtTime(0,t+.5);ng.gain.linearRampToValueAtTime(.035,t+.55);ng.gain.exponentialRampToValueAtTime(.0001,t+1.6);s.connect(hp);hp.connect(ng);ng.connect(d);s.start(t+.5,Math.random());s.stop(t+1.7);hap(8)},
   /* rugido del dragón: ruido grave filtrado con barrido descendente + retumbo */
-  roar(){hap([30,60,30,90,40]);if(!this.ok())return;this.cap('Rugido del dragón');const c=this.ctx,t=c.currentTime,d=this.dest(0,-12);
+  roar(){if(!this.ok()||(window.UX&&UX.quiet))return;hap([30,60,30,90,40]);this.cap('Rugido del dragón');const c=this.ctx,t=c.currentTime,d=this.dest(0,-12);
     const o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),lp=c.createBiquadFilter();o.type='sawtooth';o2.type='square';o.frequency.setValueAtTime(70,t);o.frequency.linearRampToValueAtTime(110,t+.5);o.frequency.exponentialRampToValueAtTime(48,t+2.2);o2.frequency.setValueAtTime(35,t);o2.frequency.exponentialRampToValueAtTime(24,t+2.2);
     lp.type='lowpass';lp.frequency.setValueAtTime(260,t);lp.frequency.linearRampToValueAtTime(900,t+.5);lp.frequency.exponentialRampToValueAtTime(140,t+2.2);lp.Q.value=4;
-    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.16,t+.3);g.gain.setValueAtTime(.16,t+.9);g.gain.exponentialRampToValueAtTime(.0001,t+2.4);o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(d);o.start(t);o2.start(t);o.stop(t+2.5);o2.stop(t+2.5);
+    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.10,t+.3);g.gain.setValueAtTime(.10,t+.9);g.gain.exponentialRampToValueAtTime(.0001,t+2.4);o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(d);o.start(t);o2.start(t);o.stop(t+2.5);o2.stop(t+2.5);
     const s=c.createBufferSource();s.buffer=this.nbuf;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=420;bp.Q.value=1.2;const ng=c.createGain();ng.gain.setValueAtTime(.0001,t);ng.gain.linearRampToValueAtTime(.05,t+.3);ng.gain.exponentialRampToValueAtTime(.0001,t+1.8);s.connect(bp);bp.connect(ng);ng.connect(d);s.start(t,Math.random());s.stop(t+2)},
   onCap:null,
   cap(k){if(!this.onCap)return;const n=performance.now(),l=this._cl||(this._cl={}),gap={'Golpe suave de la canoa':1500,'Fuegos artificiales':1500,'Salpicadura':9000,'Lluvia suave':40000,'Cascada cercana':30000}[k]||9000;if(l[k]&&n-l[k]<gap)return;l[k]=n;this.onCap(k)},
