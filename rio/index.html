@@ -833,10 +833,10 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     },
     space(ox, hw, dz) {
       if (!this.ctx) return;
-      const L = Math.max(0.9, (hw + ox) / 40), R = Math.max(0.9, (hw - ox) / 40);
-      this.bkx["-1"] = -L;
+      const L2 = Math.max(0.9, (hw + ox) / 40), R = Math.max(0.9, (hw - ox) / 40);
+      this.bkx["-1"] = -L2;
       this.bkx["1"] = R;
-      this.setPos(this.bk[-1], -L, 0, 0);
+      this.setPos(this.bk[-1], -L2, 0, 0);
       this.setPos(this.bk[1], R, 0, 0);
       if (dz == null || dz < -300) {
         this.wfG.gain.setTargetAtTime(0, this.ctx.currentTime, 0.4);
@@ -1108,16 +1108,16 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       [0, 3, 5, 6].forEach((i, j) => this.pluck(SC[i], 0.12, t + j * 0.2));
       this.bell(SC[8], t + 0.9, 0.07);
     },
-    chirp(t0) {
+    chirp(t02) {
       const c = this.ctx, o = c.createOscillator(), gn = c.createGain();
       o.frequency.value = 4300 + Math.random() * 200;
-      gn.gain.setValueAtTime(0, t0);
-      gn.gain.linearRampToValueAtTime(0.012, t0 + 0.01);
-      gn.gain.linearRampToValueAtTime(0, t0 + 0.06);
+      gn.gain.setValueAtTime(0, t02);
+      gn.gain.linearRampToValueAtTime(0.012, t02 + 0.01);
+      gn.gain.linearRampToValueAtTime(0, t02 + 0.06);
       o.connect(gn);
       gn.connect(this.master);
-      o.start(t0);
-      o.stop(t0 + 0.08);
+      o.start(t02);
+      o.stop(t02 + 0.08);
     },
     mute(on) {
       this.muted = on;
@@ -1708,7 +1708,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     if (withGable) gableChi(c, 0, yb, rw * 0.12, rh * 0.74);
   }
   function towerH(S) {
-    return S.sh + S.tiers.reduce((a, T, i) => a + T.th + (i < S.tiers.length - 1 ? T.rh * 0.78 : T.rh + 8), 0) + 42;
+    return S.sh + S.tiers.reduce((a, T2, i) => a + T2.th + (i < S.tiers.length - 1 ? T2.rh * 0.78 : T2.rh + 8), 0) + 42;
   }
   function tower(c, S) {
     const win = [], ty = [], eaves = [];
@@ -1742,26 +1742,26 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       }
     }
     let y = -S.sh;
-    S.tiers.forEach((T, i) => {
+    S.tiers.forEach((T2, i) => {
       const last2 = i === S.tiers.length - 1;
-      wall(c, y, T.tw, T.th, T.nw, win);
-      ty.push(y - T.th / 2);
-      const yTop = y - T.th;
-      if (i < 2) eaves.push([yTop + 6, T.rw]);
-      if (last2) topRoof(c, yTop, T.rw, T.rh, true);
+      wall(c, y, T2.tw, T2.th, T2.nw, win);
+      ty.push(y - T2.th / 2);
+      const yTop = y - T2.th;
+      if (i < 2) eaves.push([yTop + 6, T2.rw]);
+      if (last2) topRoof(c, yTop, T2.rw, T2.rh, true);
       else {
-        roofTier(c, yTop, T.rw, S.tiers[i + 1].tw + 6, T.rh);
-        if (T.g === "kara") gableKara(c, 0, yTop + 4, T.gw, T.gh);
-        else if (T.g === "chi2") {
-          gableChi(c, -T.rw * 0.2, yTop + 4, T.gw, T.gh);
-          gableChi(c, T.rw * 0.2, yTop + 4, T.gw, T.gh);
-        } else if (T.g === "kara+chi") {
-          gableKara(c, 0, yTop + 4, T.gw, T.gh);
-          gableChi(c, -T.rw * 0.3, yTop + 4, T.gw * 0.62, T.gh * 0.7);
-          gableChi(c, T.rw * 0.3, yTop + 4, T.gw * 0.62, T.gh * 0.7);
+        roofTier(c, yTop, T2.rw, S.tiers[i + 1].tw + 6, T2.rh);
+        if (T2.g === "kara") gableKara(c, 0, yTop + 4, T2.gw, T2.gh);
+        else if (T2.g === "chi2") {
+          gableChi(c, -T2.rw * 0.2, yTop + 4, T2.gw, T2.gh);
+          gableChi(c, T2.rw * 0.2, yTop + 4, T2.gw, T2.gh);
+        } else if (T2.g === "kara+chi") {
+          gableKara(c, 0, yTop + 4, T2.gw, T2.gh);
+          gableChi(c, -T2.rw * 0.3, yTop + 4, T2.gw * 0.62, T2.gh * 0.7);
+          gableChi(c, T2.rw * 0.3, yTop + 4, T2.gw * 0.62, T2.gh * 0.7);
         }
       }
-      y = yTop - T.rh * 0.78;
+      y = yTop - T2.rh * 0.78;
     });
     return { win, ty, eaves, top: y };
   }
@@ -2526,12 +2526,12 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       g2.globalCompositeOperation = "source-over";
     }
     for (let i = 0; i < 7; i++) {
-      const a = -Math.PI / 2 + (i - 3) * 0.42, L = 34 + i % 2 * 10 + m * 10, w = Math.sin(t * 3 + i) * 3;
+      const a = -Math.PI / 2 + (i - 3) * 0.42, L2 = 34 + i % 2 * 10 + m * 10, w = Math.sin(t * 3 + i) * 3;
       g2.fillStyle = i % 2 ? C.red : "#f08a3a";
       g2.beginPath();
       g2.moveTo(Math.cos(a - 0.2) * 14, Math.sin(a - 0.2) * 14 - 4);
-      g2.quadraticCurveTo(Math.cos(a) * L * 0.8 + w, Math.sin(a) * L * 0.8 - 4, Math.cos(a + 0.1) * L + w * 1.4, Math.sin(a + 0.1) * L - 4);
-      g2.quadraticCurveTo(Math.cos(a + 0.15) * L * 0.5, Math.sin(a + 0.15) * L * 0.5 - 4, Math.cos(a + 0.2) * 14, Math.sin(a + 0.2) * 14 - 4);
+      g2.quadraticCurveTo(Math.cos(a) * L2 * 0.8 + w, Math.sin(a) * L2 * 0.8 - 4, Math.cos(a + 0.1) * L2 + w * 1.4, Math.sin(a + 0.1) * L2 - 4);
+      g2.quadraticCurveTo(Math.cos(a + 0.15) * L2 * 0.5, Math.sin(a + 0.15) * L2 * 0.5 - 4, Math.cos(a + 0.2) * 14, Math.sin(a + 0.2) * 14 - 4);
       g2.fill();
     }
     g2.lineCap = "round";
@@ -3332,6 +3332,168 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     toast("El r\xEDo vuelve a empezar");
   }
 
+  // rio3d-src/story.js
+  var LKEY = "rio-found-types";
+  var L = [
+    // [lugar(es), es, en, ja]
+    ["Puente de madera", "Dej\xE9 la caba\xF1a al amanecer. El primer puente cruje igual que mi escalera: me dio confianza.", "I left the cabin at dawn. The first bridge creaks just like my stairs, and that made me brave.", "\u591C\u660E\u3051\u306B\u5C0F\u5C4B\u3092\u51FA\u307E\u3057\u305F\u3002\u6700\u521D\u306E\u6A4B\u306F\u79C1\u306E\u968E\u6BB5\u3068\u540C\u3058\u3088\u3046\u306B\u304D\u3057\u3093\u3067\u3001\u52C7\u6C17\u3092\u304F\u308C\u307E\u3057\u305F\u3002"],
+    ["Torii sobre el agua", "Pas\xE9 bajo un portal que flota. Ped\xED un deseo en voz baja: que la caba\xF1a nunca se quede sola.", "I drifted under a gate that floats. I whispered a wish: that the cabin is never left alone.", "\u6C34\u306B\u6D6E\u304B\u3076\u9580\u3092\u304F\u3050\u308A\u3001\u5C0F\u3055\u306A\u58F0\u3067\u9858\u3044\u307E\u3057\u305F\u3002\u5C0F\u5C4B\u304C\u3072\u3068\u308A\u307C\u3063\u3061\u306B\u306A\u308A\u307E\u305B\u3093\u3088\u3046\u306B\u3002"],
+    ["Aldea de farolillos", "Una aldea entera enciende farolillos para recibir a quien llega. Por primera vez no me sent\xED de paso.", "A whole village lights lanterns for whoever arrives. For once I did not feel like I was just passing through.", "\u6751\u3058\u3085\u3046\u304C\u3001\u8A2A\u308C\u308B\u4EBA\u306E\u305F\u3081\u306B\u63D0\u706F\u3092\u3068\u3082\u3057\u307E\u3059\u3002\u521D\u3081\u3066\u300C\u901A\u308A\u3059\u304C\u308A\u300D\u3068\u611F\u3058\u307E\u305B\u3093\u3067\u3057\u305F\u3002"],
+    ["Jard\xEDn de sakura", "Los cerezos sueltan p\xE9talos como si el aire tuviera memoria. Guard\xE9 uno para ti, entre las p\xE1ginas del mapa.", "The cherry trees let go of petals as if the air had a memory. I saved one for you between the map pages.", "\u685C\u306F\u3001\u7A7A\u6C17\u304C\u8A18\u61B6\u3092\u6301\u3063\u3066\u3044\u308B\u304B\u306E\u3088\u3046\u306B\u82B1\u3073\u3089\u3092\u6563\u3089\u3057\u307E\u3059\u3002\u5730\u56F3\u306E\u9593\u306B\u4E00\u679A\u3001\u3042\u306A\u305F\u306E\u305F\u3081\u306B\u631F\u307F\u307E\u3057\u305F\u3002"],
+    ["Ca\xF1averal de las garzas", "Las garzas pescan sin prisa. Aprend\xED de ellas que esperar tambi\xE9n es avanzar.", "The herons fish without hurry. They taught me that waiting is also a way of moving forward.", "\u30B5\u30AE\u306F\u6025\u304C\u305A\u9B5A\u3092\u5F85\u3061\u307E\u3059\u3002\u5F85\u3064\u3053\u3068\u3082\u524D\u306B\u9032\u3080\u3053\u3068\u3060\u3068\u6559\u308F\u308A\u307E\u3057\u305F\u3002"],
+    ["Templo de la campana", "La campana suena una vez y el r\xEDo entero se acomoda. Quise que la oyeras desde tu balc\xF3n.", "The bell rings once and the whole river settles. I wanted you to hear it from your balcony.", "\u9418\u304C\u3072\u3068\u3064\u9CF4\u308B\u3068\u3001\u5DDD\u305C\u3093\u305F\u3044\u304C\u9759\u307E\u308A\u307E\u3059\u3002\u3042\u306A\u305F\u306E\u30D0\u30EB\u30B3\u30CB\u30FC\u304B\u3089\u3082\u805E\u3053\u3048\u305F\u3089\u3044\u3044\u306E\u306B\u3002"],
+    ["Cascadita de musgo", "Una cascada peque\xF1ita, verde de tan callada. Me qued\xE9 una tarde entera y no extra\xF1\xE9 nada.", "A tiny waterfall, green with quiet. I stayed a whole afternoon and missed nothing.", "\u9759\u3051\u3055\u3067\u7DD1\u306B\u67D3\u307E\u3063\u305F\u5C0F\u3055\u306A\u6EDD\u3002\u5348\u5F8C\u3044\u3063\u3071\u3044\u904E\u3054\u3057\u3066\u3001\u4F55\u3082\u604B\u3057\u304F\u306A\u308A\u307E\u305B\u3093\u3067\u3057\u305F\u3002"],
+    ["Casa de t\xE9", "Me sirvieron t\xE9 sin preguntar nada. Dej\xE9 encima de la mesa tu receta, por si quieres hacerla en la caba\xF1a.", "They served me tea without asking a thing. I left your recipe on the table, in case you want to make it at the cabin.", "\u4F55\u3082\u805E\u304B\u305A\u306B\u304A\u8336\u3092\u51FA\u3057\u3066\u304F\u308C\u307E\u3057\u305F\u3002\u5C0F\u5C4B\u3067\u3082\u4F5C\u308C\u308B\u3088\u3046\u3001\u30EC\u30B7\u30D4\u3092\u673A\u306B\u6B8B\u3057\u307E\u3057\u305F\u3002"],
+    ["Bosque de bamb\xFA", "El bamb\xFA canta cuando sopla el viento. Pens\xE9 en tu campanilla y sonre\xED sola.", "The bamboo sings when the wind blows. I thought of your wind chime and smiled to myself.", "\u98A8\u304C\u5439\u304F\u3068\u7AF9\u304C\u6B4C\u3044\u307E\u3059\u3002\u3042\u306A\u305F\u306E\u98A8\u9234\u3092\u601D\u3044\u51FA\u3057\u3066\u3001\u3072\u3068\u308A\u3067\u5FAE\u7B11\u307F\u307E\u3057\u305F\u3002"],
+    ["Estanque de lotos", "Un estanque de lotos que se abre de noche. Todo lo que empieza despacio merece su tiempo.", "A lotus pond that opens at night. Everything that begins slowly deserves its time.", "\u591C\u306B\u958B\u304F\u84EE\u306E\u6C60\u3002\u3086\u3063\u304F\u308A\u59CB\u307E\u308B\u3082\u306E\u306B\u306F\u3001\u305D\u308C\u3060\u3051\u306E\u6642\u9593\u304C\u5FC5\u8981\u3067\u3059\u3002"],
+    ["Castillo de la Garza Blanca", "Llegu\xE9. El castillo brilla igual que las luces de tu terraza. No hac\xEDa falta llegar tan lejos para entenderlo: mi casa siempre fue la caba\xF1a. Cu\xEDdala a tu gusto; ya es tuya.", "I made it. The castle glows just like the lights on your deck. I did not need to come this far to understand it: my home was always the cabin. Keep it your way; it is yours now.", "\u305F\u3069\u308A\u7740\u304D\u307E\u3057\u305F\u3002\u57CE\u306F\u3001\u3042\u306A\u305F\u306E\u30C6\u30E9\u30B9\u306E\u706F\u308A\u3068\u540C\u3058\u3088\u3046\u306B\u8F1D\u3044\u3066\u3044\u307E\u3059\u3002\u3053\u3053\u307E\u3067\u6765\u306A\u304F\u3066\u3082\u5206\u304B\u3063\u305F\u306F\u305A\u3067\u3059\u3002\u79C1\u306E\u5BB6\u306F\u3044\u3064\u3082\u5C0F\u5C4B\u3067\u3057\u305F\u3002\u597D\u304D\u306A\u3088\u3046\u306B\u5B88\u3063\u3066\u304F\u3060\u3055\u3044\u3002\u3082\u3046\u3042\u306A\u305F\u306E\u3082\u306E\u3067\u3059\u3002"]
+  ];
+  var LM_ES = L.map((x) => x[0]);
+  var LETTERS = L.map((x) => x[1]);
+  var foundTypes = () => {
+    const s = /* @__PURE__ */ new Set();
+    for (const k of ["rio3d-found", LKEY]) {
+      try {
+        JSON.parse(localStorage.getItem(k) || "[]").forEach((i) => s.add(i));
+      } catch (e) {
+      }
+    }
+    return s;
+  };
+
+  // rio3d-src/tasks.js
+  var TKEY = "rio-tasks";
+  var T = [
+    // [encargo es,en,ja, margen es,en,ja]
+    ["Dejar una linterna en el barandal", "Leave a lantern on the railing", "\u624B\u3059\u308A\u306B\u30E9\u30F3\u30BF\u30F3\u3092\u7F6E\u304F", "Dej\xE9 una linterna en el barandal. Si cruzas de noche, ah\xED estar\xE1 esper\xE1ndote.", "I left a lantern on the railing. If you cross at night, it will be waiting for you.", "\u624B\u3059\u308A\u306B\u30E9\u30F3\u30BF\u30F3\u3092\u7F6E\u304D\u307E\u3057\u305F\u3002\u591C\u306B\u6E21\u308B\u306A\u3089\u3001\u305D\u3053\u3067\u5F85\u3063\u3066\u3044\u307E\u3059\u3002"],
+    ["Pedir un deseo bajo el portal", "Make a wish under the gate", "\u9CE5\u5C45\u306E\u4E0B\u3067\u9858\u3044\u3054\u3068\u3092\u3059\u308B", "Ped\xED otro deseo bajo el portal. Este no es m\xEDo: es para quien lea esto.", "I made another wish under the gate. This one is not mine: it is for whoever reads this.", "\u9CE5\u5C45\u306E\u4E0B\u3067\u3082\u3046\u3072\u3068\u3064\u9858\u3044\u307E\u3057\u305F\u3002\u79C1\u306E\u3067\u306F\u306A\u304F\u3001\u3053\u308C\u3092\u8AAD\u3080\u3042\u306A\u305F\u306E\u305F\u3081\u306B\u3002"],
+    ["Encender un farolillo", "Light a lantern", "\u3061\u3087\u3046\u3061\u3093\u3092\u3068\u3082\u3059", "Encend\xED un farolillo en la aldea. Dicen que dura hasta que alguien lo recuerda.", "I lit a lantern in the village. They say it burns until someone remembers it.", "\u6751\u3067\u3061\u3087\u3046\u3061\u3093\u3092\u3068\u3082\u3057\u307E\u3057\u305F\u3002\u8AB0\u304B\u304C\u601D\u3044\u51FA\u3059\u3042\u3044\u3060\u3001\u6D88\u3048\u306A\u3044\u305D\u3046\u3067\u3059\u3002"],
+    ["Guardar un p\xE9talo de sakura", "Keep a sakura petal", "\u685C\u306E\u82B1\u3073\u3089\u3092\u3057\u307E\u3046", "Guard\xE9 otro p\xE9talo. Ya tengo suficientes para forrar una carta entera.", "I kept another petal. I now have enough to line a whole letter.", "\u3082\u3046\u4E00\u679A\u3001\u82B1\u3073\u3089\u3092\u3057\u307E\u3044\u307E\u3057\u305F\u3002\u624B\u7D19\u3092\u4E00\u901A\u3046\u3081\u3089\u308C\u308B\u307B\u3069\u306B\u306A\u308A\u307E\u3057\u305F\u3002"],
+    ["Quedarse quieto con las garzas", "Stay still with the herons", "\u30B5\u30AE\u3068\u9759\u304B\u306B\u5F85\u3064", "Me qued\xE9 quieta con las garzas hasta que me olvidaron. Fue el mejor halago.", "I stayed still with the herons until they forgot I was there. Best compliment ever.", "\u30B5\u30AE\u306E\u305D\u3070\u3067\u3058\u3063\u3068\u3057\u3066\u3001\u79C1\u306E\u5B58\u5728\u3092\u5FD8\u308C\u3089\u308C\u308B\u307E\u3067\u5F85\u3061\u307E\u3057\u305F\u3002\u6700\u9AD8\u306E\u307B\u3081\u8A00\u8449\u3067\u3059\u3002"],
+    ["Tocar la campana", "Ring the bell", "\u9418\u3092\u9CF4\u3089\u3059", "Toqu\xE9 la campana una vez m\xE1s. Si la oyes desde el balc\xF3n, es m\xEDa.", "I rang the bell once more. If you hear it from your balcony, it is mine.", "\u3082\u3046\u4E00\u5EA6\u9418\u3092\u9CF4\u3089\u3057\u307E\u3057\u305F\u3002\u30D0\u30EB\u30B3\u30CB\u30FC\u3067\u805E\u3053\u3048\u305F\u3089\u3001\u305D\u308C\u306F\u79C1\u3067\u3059\u3002"],
+    ["Llenar un frasco con agua de la cascada", "Fill a jar with waterfall water", "\u6EDD\u306E\u6C34\u3092\u74F6\u306B\u304F\u3080", "Llen\xE9 un frasco con agua de la cascada. Ponlo en el estantito: huele a tarde larga.", "I filled a jar with waterfall water. Put it on the little shelf: it smells like a long afternoon.", "\u6EDD\u306E\u6C34\u3092\u74F6\u306B\u304F\u307F\u307E\u3057\u305F\u3002\u5C0F\u3055\u306A\u68DA\u306B\u7F6E\u3044\u3066\u304F\u3060\u3055\u3044\u3002\u9577\u3044\u5348\u5F8C\u306E\u9999\u308A\u304C\u3057\u307E\u3059\u3002"],
+    ["Compartir una taza de t\xE9", "Share a cup of tea", "\u304A\u8336\u3092\u308F\u304B\u3061\u3042\u3046", "Compart\xED una taza de t\xE9. Pens\xE9 en la tuya, en la caba\xF1a, humeando.", "I shared a cup of tea. I thought of yours, steaming at the cabin.", "\u304A\u8336\u3092\u308F\u304B\u3061\u3042\u3044\u307E\u3057\u305F\u3002\u5C0F\u5C4B\u3067\u6E6F\u6C17\u3092\u7ACB\u3066\u308B\u3042\u306A\u305F\u306E\u4E00\u676F\u3092\u601D\u3044\u307E\u3057\u305F\u3002"],
+    ["Escuchar el bamb\xFA", "Listen to the bamboo", "\u7AF9\u306E\u97F3\u306B\u8033\u3092\u3059\u307E\u3059", "Escuch\xE9 el bamb\xFA un buen rato. Suena a campanilla de viento sin due\xF1o.", "I listened to the bamboo a good while. It sounds like a wind chime with no owner.", "\u7AF9\u306E\u97F3\u3092\u3057\u3070\u3089\u304F\u805E\u304D\u307E\u3057\u305F\u3002\u6301\u3061\u4E3B\u306E\u3044\u306A\u3044\u98A8\u9234\u306E\u3088\u3046\u3067\u3059\u3002"],
+    ["Dejar una flor en el estanque", "Leave a flower on the pond", "\u6C60\u306B\u82B1\u3092\u6D6E\u304B\u3079\u308B", "Dej\xE9 una flor en el estanque. Flota hacia donde t\xFA ya est\xE1s.", "I left a flower on the pond. It floats toward wherever you already are.", "\u6C60\u306B\u82B1\u3092\u6D6E\u304B\u3079\u307E\u3057\u305F\u3002\u3042\u306A\u305F\u304C\u3044\u308B\u65B9\u3078\u6D41\u308C\u3066\u3044\u304D\u307E\u3059\u3002"],
+    ["Encender los fuegos para Mara", "Light the fireworks for Mara", "\u30DE\u30E9\u306E\u305F\u3081\u306B\u82B1\u706B\u3092\u3042\u3052\u308B", "Esta noche los fuegos del castillo son para ti. Gracias por seguirme hasta aqu\xED.", "Tonight the castle fireworks are for you. Thank you for following me all the way here.", "\u4ECA\u591C\u306E\u57CE\u306E\u82B1\u706B\u306F\u3042\u306A\u305F\u306E\u305F\u3081\u306B\u3002\u3053\u3053\u307E\u3067\u3064\u3044\u3066\u304D\u3066\u304F\u308C\u3066\u3042\u308A\u304C\u3068\u3046\u3002"]
+  ];
+  var get = () => {
+    try {
+      return JSON.parse(localStorage.getItem(TKEY) || "{}");
+    } catch (e) {
+      return {};
+    }
+  };
+  var tasksActive = () => foundTypes().has(10);
+  function addTaskTexts(ux) {
+    ux.add(T.map((x) => [x[0], x[1], x[2]]));
+    ux.add(T.map((x) => [x[3], x[4], x[5]]));
+    ux.add([["Mant\xE9n pulsado para hacerlo", "Press and hold to do it", "\u9577\u62BC\u3057\u3067\u5B9F\u884C"], ["Hecho. Un recuerdo m\xE1s para la caba\xF1a.", "Done. One more keepsake for the cabin.", "\u3067\u304D\u307E\u3057\u305F\u3002\u5C0F\u5C4B\u306B\u601D\u3044\u51FA\u304C\u3072\u3068\u3064\u5897\u3048\u307E\u3057\u305F\u3002"], ["Encargo de Mara", "Mara\u2019s errand", "\u30DE\u30E9\u306E\u304A\u9858\u3044"], ["En el margen", "In the margin", "\u4F59\u767D\u306B"]]);
+  }
+  var box;
+  var bar;
+  var txt;
+  var cur = null;
+  var hold = 0;
+  var raf = 0;
+  var t0 = 0;
+  var did = false;
+  var chimeFn = null;
+  function mk2() {
+    box = document.createElement("button");
+    box.type = "button";
+    box.style.cssText = "position:fixed;left:50%;bottom:max(150px,calc(env(safe-area-inset-bottom) + 144px));transform:translateX(-50%);z-index:60;display:none;min-height:50px;max-width:min(90vw,420px);padding:10px 20px;border-radius:99px;border:1px solid #ffc77a;background:rgba(40,40,80,.88);color:#fbf1e0;font:600 .9rem/1.25 system-ui;cursor:pointer;overflow:hidden;touch-action:none";
+    bar = document.createElement("span");
+    bar.style.cssText = "position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,199,122,.35);pointer-events:none";
+    txt = document.createElement("span");
+    txt.style.cssText = "position:relative";
+    box.append(bar, txt);
+    document.body.appendChild(box);
+    const start = (e) => {
+      if (cur == null) return;
+      e.preventDefault();
+      hold = 1;
+      t0 = performance.now();
+      loop();
+    }, stop = () => {
+      hold = 0;
+      bar.style.width = "0";
+    };
+    box.addEventListener("pointerdown", start);
+    box.addEventListener("pointerup", stop);
+    box.addEventListener("pointerleave", stop);
+    box.addEventListener("pointercancel", stop);
+    box.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        finish();
+      }
+    });
+  }
+  function loop() {
+    cancelAnimationFrame(raf);
+    const f = () => {
+      if (!hold) return;
+      const k = Math.min(1, (performance.now() - t0) / 2200);
+      bar.style.width = k * 100 + "%";
+      if (k >= 1) {
+        hold = 0;
+        finish();
+        return;
+      }
+      raf = requestAnimationFrame(f);
+    };
+    raf = requestAnimationFrame(f);
+  }
+  function finish() {
+    if (cur == null) return;
+    const d = get();
+    d[cur] = 1;
+    try {
+      localStorage.setItem(TKEY, JSON.stringify(d));
+    } catch (e) {
+    }
+    const tp = cur;
+    cur = null;
+    box.style.display = "none";
+    bar.style.width = "0";
+    try {
+      chimeFn && chimeFn(tp);
+    } catch (e) {
+    }
+    try {
+      UX.hap([10, 50, 10]);
+    } catch (e) {
+    }
+    try {
+      UX.say(UX.tr("Hecho. Un recuerdo m\xE1s para la caba\xF1a."));
+    } catch (e) {
+    }
+  }
+  function taskTick(type, chime) {
+    if (!did) {
+      did = true;
+      try {
+        addTaskTexts(window.UX);
+      } catch (e) {
+      }
+    }
+    chimeFn = chime;
+    const ok = type != null && T[type] && tasksActive() && !get()[type];
+    if (!ok) {
+      if (cur != null && !hold) {
+        cur = null;
+        if (box) box.style.display = "none";
+      }
+      return;
+    }
+    if (cur === type) return;
+    if (!box) mk2();
+    cur = type;
+    txt.textContent = UX.tr(T[type][0]) + " \xB7 " + UX.tr("Mant\xE9n pulsado para hacerlo");
+    box.style.display = "block";
+  }
+
   // src2d/rio/rules.js
   function bump(dir, vol) {
     G.bumpT = 0.7;
@@ -3420,6 +3582,12 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       updateHUD();
       saveSoon();
     }
+    taskTick(Math.abs(G.s - lmPos(k)) < 110 ? lmType(k) : null, () => {
+      try {
+        A.discover();
+      } catch (e) {
+      }
+    });
     if (G.hintT > 14) $("#hint").style.opacity = 0;
   }
 
@@ -3429,13 +3597,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     E.forEach((p, i) => i ? g2.lineTo(p[0], p[1]) : g2.moveTo(p[0], p[1]));
   }
   function drawTerrain(g2) {
-    const { VW, VH, cy, sc, cs0 } = V, N = Math.ceil(VH / 8) + 6, L = [], Rr = [];
+    const { VW, VH, cy, sc, cs0 } = V, N = Math.ceil(VH / 8) + 6, L2 = [], Rr = [];
     for (let i = 0; i < N; i++) {
       const y = -24 + i * 8, s = sc + cy - y, X = VW / 2 + center(s) - cs0, h = halfW(s);
-      L.push([X - h, y]);
+      L2.push([X - h, y]);
       Rr.push([X + h, y]);
     }
-    V.L = L;
+    V.L = L2;
     V.R = Rr;
     let gr = g2.createLinearGradient(0, 0, 0, VH);
     gr.addColorStop(0, "#7fb263");
@@ -3446,11 +3614,11 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     g2.lineCap = "round";
     g2.lineWidth = 20;
     g2.strokeStyle = "#e6d8a8";
-    edgePath(g2, L);
+    edgePath(g2, L2);
     g2.stroke();
     edgePath(g2, Rr);
     g2.stroke();
-    edgePath(g2, L);
+    edgePath(g2, L2);
     for (let i = N - 1; i >= 0; i--) g2.lineTo(Rr[i][0], Rr[i][1]);
     g2.closePath();
     let wg = g2.createLinearGradient(0, 0, 0, VH);
@@ -3460,7 +3628,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     g2.fill();
     g2.lineWidth = 3;
     g2.strokeStyle = "rgba(255,255,255,.35)";
-    edgePath(g2, L);
+    edgePath(g2, L2);
     g2.stroke();
     edgePath(g2, Rr);
     g2.stroke();
@@ -3798,7 +3966,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     g2.fill();
     g2.restore();
   }
-  function drawCanoe(g2, x, y, ang, ph, hold, night) {
+  function drawCanoe(g2, x, y, ang, ph, hold2, night) {
     g2.save();
     g2.translate(x, y);
     g2.rotate(ang);
@@ -3862,7 +4030,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     const s = Math.sin(ph), side = s >= 0 ? 1 : -1;
     g2.strokeStyle = "#d9b27a";
     g2.lineWidth = 3;
-    if (hold) {
+    if (hold2) {
       const pp = ph - (side < 0 ? Math.PI : 0), tx = side * 46, ty = 20 - 14 * Math.cos(pp);
       line(g2, side * 7, 18, tx, ty);
       g2.fillStyle = "#c79a62";
@@ -4101,11 +4269,11 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   // src2d/rio/calm.js
   function initCalm() {
     const el = document.getElementById("breath"), orb = el.querySelector(".orb"), lab = el.querySelector("span"), btn = document.getElementById("breath-btn");
-    let run = false, t0 = 0, raf = 0, lastKey = -1;
+    let run = false, t02 = 0, raf2 = 0, lastKey = -1;
     const IN = 4, HOLD = 1, OUT = 6, CYC = IN + HOLD + OUT, N = 5;
     function stop(msg) {
       run = false;
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(raf2);
       btn.textContent = "Respirar";
       if (msg) {
         lab.textContent = msg;
@@ -4117,7 +4285,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     }
     function tick(now) {
       if (!run) return;
-      const t = (now - t0) / 1e3;
+      const t = (now - t02) / 1e3;
       if (t >= CYC * N) {
         stop("Gracias por respirar");
         return;
@@ -4144,7 +4312,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           if (ph === 2) A.breathTone(false, OUT);
         }
       }
-      raf = requestAnimationFrame(tick);
+      raf2 = requestAnimationFrame(tick);
     }
     btn.onclick = () => {
       if (run) {
@@ -4157,8 +4325,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       lab.textContent = "Prep\xE1rate\u2026";
       btn.textContent = "Detener";
       if (A.ctx && A.ctx.state === "suspended") A.ctx.resume();
-      t0 = performance.now();
-      raf = requestAnimationFrame(tick);
+      t02 = performance.now();
+      raf2 = requestAnimationFrame(tick);
     };
     let played = 0, next = 20 * 60;
     setInterval(() => {
@@ -4283,7 +4451,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       /* botones de ajustes para el menú «Más». opts.hand=true añade el modo una mano (clases hand-r / hand-l en body). */
       btns(cls, opts) {
         opts = opts || {};
-        const mk2 = (id, f) => {
+        const mk3 = (id, f) => {
           const b = document.createElement("button");
           b.type = "button";
           b.id = id;
@@ -4292,7 +4460,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           return b;
         };
         const out = [];
-        const lb = mk2("uxLang", () => {
+        const lb = mk3("uxLang", () => {
           const n = K[(K.indexOf(LG) + 1) % 3];
           ls.set("rio3d-lang", n);
           try {
@@ -4303,13 +4471,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         });
         lb.textContent = (LG === "en" ? "Language: " : LG === "ja" ? "\u8A00\u8A9E: " : "Idioma: ") + NM[LG];
         out.push(lb);
-        const sb = mk2("uxSubs", () => {
+        const sb = mk3("uxSubs", () => {
           ls.set("rio3d-subs", UX4.subsOn() ? "0" : "1");
           sb.textContent = UX4.subsOn() ? "Subt\xEDtulos: s\xED" : "Subt\xEDtulos: no";
         });
         sb.textContent = UX4.subsOn() ? "Subt\xEDtulos: s\xED" : "Subt\xEDtulos: no";
         out.push(sb);
-        const hb = mk2("uxHap", () => {
+        const hb = mk3("uxHap", () => {
           const on = ls.get("rio3d-hap", "1") === "1";
           ls.set("rio3d-hap", on ? "0" : "1");
           hb.textContent = on ? "Vibraci\xF3n: no" : "Vibraci\xF3n: s\xED";
@@ -4323,51 +4491,51 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
             document.body.classList.remove("hand-r", "hand-l");
             if (v !== "0") document.body.classList.add("hand-" + v);
           };
-          let cur = ls.get("rio3d-hand", "0");
-          if (!names[cur]) cur = "0";
-          apply2(cur);
-          const hd = mk2("uxHand", () => {
-            cur = seq[(seq.indexOf(cur) + 1) % 3];
-            ls.set("rio3d-hand", cur);
-            apply2(cur);
-            hd.textContent = names[cur];
+          let cur2 = ls.get("rio3d-hand", "0");
+          if (!names[cur2]) cur2 = "0";
+          apply2(cur2);
+          const hd = mk3("uxHand", () => {
+            cur2 = seq[(seq.indexOf(cur2) + 1) % 3];
+            ls.set("rio3d-hand", cur2);
+            apply2(cur2);
+            hd.textContent = names[cur2];
           });
-          hd.textContent = names[cur];
+          hd.textContent = names[cur2];
           out.push(hd);
         }
-        const vb = mk2("uxVol", () => {
+        const vb = mk3("uxVol", () => {
           const seq = ["1", ".7", ".4"];
           const i = seq.indexOf(String(UX4.api.vol()).replace("0.", "."));
           UX4.api.setVol(seq[(i + 1) % 3]);
           vb.textContent = vt();
         });
-        const vt = () => T("Volumen: ", "Volume: ", "\u97F3\u91CF: ") + Math.round(UX4.api.vol() * 100) + " %";
+        const vt = () => T2("Volumen: ", "Volume: ", "\u97F3\u91CF: ") + Math.round(UX4.api.vol() * 100) + " %";
         vb.textContent = vt();
         out.push(vb);
-        const tb = mk2("uxSoft", () => {
+        const tb = mk3("uxSoft", () => {
           UX4.api.setSoft(!UX4.api.soft());
           tb.textContent = tt();
         });
-        const tt = () => UX4.api.soft() ? T("Tono suave: s\xED", "Soft tone: on", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30F3") : T("Tono suave: no", "Soft tone: off", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30D5");
+        const tt = () => UX4.api.soft() ? T2("Tono suave: s\xED", "Soft tone: on", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30F3") : T2("Tono suave: no", "Soft tone: off", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30D5");
         tb.textContent = tt();
         out.push(tb);
-        const sl = mk2("uxSleep", () => {
+        const sl = mk3("uxSleep", () => {
           const seq = [0, 15, 30, 45];
           UX4.api.sleep(seq[(seq.indexOf(UX4.api.sleepMin()) + 1) % 4]);
           sl.textContent = st();
         });
-        const st = () => UX4.api.sleepMin() ? T("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX4.api.sleepMin() + " min" : T("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
+        const st = () => UX4.api.sleepMin() ? T2("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX4.api.sleepMin() + " min" : T2("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
         sl.textContent = st();
         UX4._sb = () => {
           sl.textContent = st();
         };
         out.push(sl);
         if (opts.wear) {
-          const wb = mk2("uxWear", () => {
+          const wb = mk3("uxWear", () => {
             ls.set("ux-wear", ls.get("ux-wear", "0") === "1" ? "0" : "1");
             wb.textContent = wt();
           });
-          const wt = () => ls.get("ux-wear", "0") === "1" ? T("Desgaste por ausencia: s\xED", "Wear while away: on", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30F3") : T("Desgaste por ausencia: no", "Wear while away: off", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30D5");
+          const wt = () => ls.get("ux-wear", "0") === "1" ? T2("Desgaste por ausencia: s\xED", "Wear while away: on", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30F3") : T2("Desgaste por ausencia: no", "Wear while away: off", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30D5");
           wb.textContent = wt();
           out.push(wb);
         }
@@ -4383,7 +4551,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         p.style.margin = "0 0 14px";
         p.textContent = UX4.tr(msg);
         b.appendChild(p);
-        const mk2 = (t, f) => {
+        const mk3 = (t, f) => {
           const x = document.createElement("button");
           x.type = "button";
           x.textContent = t;
@@ -4394,13 +4562,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           };
           return x;
         };
-        b.appendChild(mk2(T("Cancelar", "Cancel", "\u30AD\u30E3\u30F3\u30BB\u30EB")));
-        b.appendChild(mk2(T("S\xED, reiniciar", "Yes, restart", "\u306F\u3044\u3001\u6700\u521D\u304B\u3089"), ok));
+        b.appendChild(mk3(T2("Cancelar", "Cancel", "\u30AD\u30E3\u30F3\u30BB\u30EB")));
+        b.appendChild(mk3(T2("S\xED, reiniciar", "Yes, restart", "\u306F\u3044\u3001\u6700\u521D\u304B\u3089"), ok));
         d.appendChild(b);
         document.body.appendChild(d);
       }
     };
-    const T = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
+    const T2 = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
     const W = { vol: ls.get("ux-vol", "1"), soft: ls.get("ux-soft", "0") === "1", k: 1, nodes: [], end: 0, min: 0, ov: null };
     UX4.quiet = false;
     const apply = () => {
@@ -4429,7 +4597,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     UX4.pinkSrc = (c, k) => {
       let b = c._pink;
       if (!b) {
-        const sr = c.sampleRate, L = Math.floor(sr * 12), tl = Math.floor(sr * 1.5), n = L + tl, d = new Float32Array(n);
+        const sr = c.sampleRate, L2 = Math.floor(sr * 12), tl = Math.floor(sr * 1.5), n = L2 + tl, d = new Float32Array(n);
         let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
         for (let i = 0; i < n; i++) {
           const w = Math.random() * 2 - 1;
@@ -4442,12 +4610,12 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.2215 * 0.5;
           b6 = w * 0.115926;
         }
-        b = c.createBuffer(1, L, sr);
+        b = c.createBuffer(1, L2, sr);
         const o = b.getChannelData(0);
-        for (let i = 0; i < L; i++) o[i] = d[i];
+        for (let i = 0; i < L2; i++) o[i] = d[i];
         for (let i = 0; i < tl; i++) {
           const a = i / tl * Math.PI / 2;
-          o[i] = d[i] * Math.sin(a) + d[L + i] * Math.cos(a);
+          o[i] = d[i] * Math.sin(a) + d[L2 + i] * Math.cos(a);
         }
         c._pink = b;
       }
@@ -4535,7 +4703,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
             e.style.cssText = "position:fixed;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 60px));transform:translateX(-50%);max-width:min(88vw,420px);text-align:center;background:rgba(20,22,48,.88);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:14px/1.4 system-ui,sans-serif;z-index:28;pointer-events:none;transition:opacity .8s;opacity:0";
             document.body.appendChild(e);
           }
-          e.textContent = T("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
+          e.textContent = T2("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
           e.style.opacity = 1;
           clearTimeout(UX4._rt);
           UX4._rt = setTimeout(() => e.style.opacity = 0, 7e3);
@@ -4600,11 +4768,11 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       const orb = document.createElement("div");
       orb.style.cssText = "width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#ffe9b8,#ffb86b 70%);box-shadow:0 0 50px rgba(255,200,120,.45);transform:scale(.55);transition:transform 4s ease-in-out";
       const lb = document.createElement("div"), t = document.createElement("div");
-      t.textContent = T("Un minuto para respirar", "One minute to breathe", "1\u5206\u3060\u3051\u6DF1\u547C\u5438");
+      t.textContent = T2("Un minuto para respirar", "One minute to breathe", "1\u5206\u3060\u3051\u6DF1\u547C\u5438");
       t.style.cssText = "font-weight:400;opacity:.75;font-size:.9rem";
       const sk = document.createElement("button");
       sk.type = "button";
-      sk.textContent = T("Saltar", "Skip", "\u30B9\u30AD\u30C3\u30D7");
+      sk.textContent = T2("Saltar", "Skip", "\u30B9\u30AD\u30C3\u30D7");
       sk.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#363a66;color:#fbf1e0;font:inherit;font-size:.9rem;cursor:pointer";
       o.append(t, orb, lb, sk);
       document.body.appendChild(o);
@@ -4621,13 +4789,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         if (!alive) return;
         if (n >= 5) return end(true);
         n++;
-        lb.textContent = T("Inhala", "Breathe in", "\u5438\u3063\u3066");
+        lb.textContent = T2("Inhala", "Breathe in", "\u5438\u3063\u3066");
         orb.style.transition = "transform 4s ease-in-out";
         orb.style.transform = "scale(1)";
         UX4.hap(8);
         tm = setTimeout(() => {
           if (!alive) return;
-          lb.textContent = T("Exhala", "Breathe out", "\u5410\u3044\u3066");
+          lb.textContent = T2("Exhala", "Breathe out", "\u5410\u3044\u3066");
           orb.style.transition = "transform 6s ease-in-out";
           orb.style.transform = "scale(.55)";
           tm = setTimeout(step, 6e3);
@@ -4653,23 +4821,23 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     function moodUI() {
       const go = document.getElementById("go");
       if (!go || document.getElementById("uxmood")) return;
-      const box = document.createElement("div");
-      box.id = "uxmood";
-      box.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 0 14px";
+      const box2 = document.createElement("div");
+      box2.id = "uxmood";
+      box2.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 0 14px";
       const q = document.createElement("div");
-      q.textContent = T("\xBFC\xF3mo llegas hoy?", "How are you arriving today?", "\u4ECA\u65E5\u306F\u3069\u3093\u306A\u6C17\u5206\u3067\u3059\u304B\uFF1F");
+      q.textContent = T2("\xBFC\xF3mo llegas hoy?", "How are you arriving today?", "\u4ECA\u65E5\u306F\u3069\u3093\u306A\u6C17\u5206\u3067\u3059\u304B\uFF1F");
       q.style.cssText = "font:600 .95rem system-ui;opacity:.9";
       const row = document.createElement("div");
       row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;justify-content:center";
       const sub = document.createElement("div");
-      sub.textContent = T("Es opcional. Solo ajusto el sonido o te ofrezco respirar.", "Optional. I only adjust the sound or offer you a breath.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002");
+      sub.textContent = T2("Es opcional. Solo ajusto el sonido o te ofrezco respirar.", "Optional. I only adjust the sound or offer you a breath.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002");
       sub.style.cssText = "font:400 .72rem system-ui;opacity:.6";
       let pick = null;
       const bs = {};
       [["calm", "Tranquilo", "Calm", "\u304A\u3060\u3084\u304B"], ["tired", "Cansado", "Tired", "\u3064\u304B\u308C\u305F"], ["rest", "Inquieto", "Restless", "\u305D\u308F\u305D\u308F"], ["think", "Con ganas de pensar", "In a thoughtful mood", "\u8003\u3048\u3054\u3068\u3092\u3057\u305F\u3044"]].forEach(([k, es, en, ja]) => {
         const b = document.createElement("button");
         b.type = "button";
-        b.textContent = T(es, en, ja);
+        b.textContent = T2(es, en, ja);
         b.style.cssText = "min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid #5a609a;background:rgba(54,58,102,.7);color:#fbf1e0;font:500 .85rem system-ui;cursor:pointer";
         b.onclick = () => {
           pick = pick === k ? null : k;
@@ -4682,8 +4850,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         bs[k] = b;
         row.appendChild(b);
       });
-      box.append(q, row, sub);
-      go.parentNode.insertBefore(box, go);
+      box2.append(q, row, sub);
+      go.parentNode.insertBefore(box2, go);
       go.addEventListener("click", () => {
         ls.set("ux-mood", pick || "");
         if (pick === "tired") {
@@ -4691,7 +4859,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           if (+UX4.api.vol() > 0.7) UX4.api.setVol(".7");
           setTimeout(() => {
             try {
-              UX4.say(T("Baj\xE9 el sonido y suavic\xE9 los agudos. Cuando quieras, cambia esto en \xABM\xE1s\xBB.", "I lowered the sound and softened the highs. Change it any time in \u201CMore\u201D.", "\u97F3\u3092\u5C0F\u3055\u304F\u3001\u9AD8\u97F3\u3092\u3084\u308F\u3089\u3052\u307E\u3057\u305F\u3002\u300C\u305D\u306E\u4ED6\u300D\u3067\u3044\u3064\u3067\u3082\u5909\u3048\u3089\u308C\u307E\u3059\u3002"));
+              UX4.say(T2("Baj\xE9 el sonido y suavic\xE9 los agudos. Cuando quieras, cambia esto en \xABM\xE1s\xBB.", "I lowered the sound and softened the highs. Change it any time in \u201CMore\u201D.", "\u97F3\u3092\u5C0F\u3055\u304F\u3001\u9AD8\u97F3\u3092\u3084\u308F\u3089\u3052\u307E\u3057\u305F\u3002\u300C\u305D\u306E\u4ED6\u300D\u3067\u3044\u3064\u3067\u3082\u5909\u3048\u3089\u308C\u307E\u3059\u3002"));
             } catch (e) {
             }
           }, 900);
@@ -4699,7 +4867,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         if (pick === "rest") setTimeout(() => breathe(), 600);
         if (pick === "think") setTimeout(() => {
           try {
-            UX4.say(T("Sin prisa. Aqu\xED no hay nada que ganar ni perder.", "No hurry. There is nothing to win or lose here.", "\u6025\u304C\u306A\u304F\u3066\u5927\u4E08\u592B\u3002\u52DD\u3061\u3082\u8CA0\u3051\u3082\u3042\u308A\u307E\u305B\u3093\u3002"));
+            UX4.say(T2("Sin prisa. Aqu\xED no hay nada que ganar ni perder.", "No hurry. There is nothing to win or lose here.", "\u6025\u304C\u306A\u304F\u3066\u5927\u4E08\u592B\u3002\u52DD\u3061\u3082\u8CA0\u3051\u3082\u3042\u308A\u307E\u305B\u3093\u3002"));
           } catch (e) {
           }
         }, 900);

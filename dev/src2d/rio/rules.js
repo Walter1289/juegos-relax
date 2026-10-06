@@ -7,6 +7,7 @@ import {A} from './audio.js';
 import {ripple,splash} from './particles.js';
 import {toast,updateHUD} from './ui.js';
 import {saveSoon} from './save.js';
+import {taskTick} from '../../rio3d-src/tasks.js';
 
 function bump(dir,vol){G.bumpT=.7;hap(vol&&vol<1?10:16);ripple(V.VW/2+G.ox+dir*20,V.cy,6,40,.5);A.bump(vol||1,dir)}
 function paddleStroke(){
@@ -54,5 +55,6 @@ export function update(dt){
   }
   const k=lmIndexAt(G.s);
   if(Math.abs(G.s-lmPos(k))<(lmType(k)===10?240:130)&&!G.found.has(k)){G.found.add(k);try{const ky='rio-found-types',a=JSON.parse(localStorage.getItem(ky)||'[]'),t=lmType(k);if(!a.includes(t)){a.push(t);localStorage.setItem(ky,JSON.stringify(a))}}catch(e){}toast('Descubriste: '+LM[lmType(k)]);A.discover();hap([20,50,20,50,30]);if(lmType(k)===5&&A.ctx){cap('Campana de templo',15000);A.bell(196,A.ctx.currentTime+.3,.1,true,-(halfW(G.s)+128+G.ox)/40,-1)}updateHUD();saveSoon()}
+  taskTick(Math.abs(G.s-lmPos(k))<110?lmType(k):null,()=>{try{A.discover()}catch(e){}});
   if(G.hintT>14)$('#hint').style.opacity=0;
 }

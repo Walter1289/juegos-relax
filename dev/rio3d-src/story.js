@@ -1,3 +1,4 @@
+import {TASK_TXT,tasksDone,addTaskTexts} from './tasks.js';
 /* Cartas de Mara: una por cada lugar del río. Se abren en el diario de la Cabaña cuando el jugador descubre ese lugar en Río de Linternas (2D o 3D). */
 export const LKEY='rio-found-types';
 const L=[ // [lugar(es), es, en, ja]
@@ -16,24 +17,25 @@ const L=[ // [lugar(es), es, en, ja]
 export const LM_ES=L.map(x=>x[0]);
 export const LETTERS=L.map(x=>x[1]);
 export const foundTypes=()=>{const s=new Set();for(const k of ['rio3d-found',LKEY]){try{JSON.parse(localStorage.getItem(k)||'[]').forEach(i=>s.add(i))}catch(e){}}return s};
-export function addStoryTexts(ux){
+export function addStoryTexts(ux){addTaskTexts(ux);
   ux.add(L.map(x=>[x[1],x[2],x[3]]));
   ux.add([['Puente de madera','Wooden bridge','木の橋'],['Torii sobre el agua','Torii over the water','水上の鳥居'],['Aldea de farolillos','Lantern village','ちょうちんの村'],['Jardín de sakura','Sakura garden','桜の庭'],['Cañaveral de las garzas','Heron reedbed','サギの葦原'],['Templo de la campana','Bell temple','鐘の寺'],['Cascadita de musgo','Mossy waterfall','苔の小さな滝'],['Casa de té','Tea house','茶屋'],['Bosque de bambú','Bamboo forest','竹林'],['Estanque de lotos','Lotus pond','蓮の池'],['Castillo de la Garza Blanca','White Heron Castle','白鷺城'],['Cartas de Mara','Mara’s letters','マラの手紙'],['Carta sin abrir','Unopened letter','未開封の手紙'],['Descúbrelo en el río para leerla','Discover it on the river to read it','川で見つけると読めます'],['Abrir carta','Open letter','手紙を開く'],['Notas de visitantes','Visitor notes','訪問者のメモ'],['Mara te dejó una carta','Mara left you a letter','マラが手紙を残しました'],['Carta de Mara','Letter from Mara','マラの手紙'],['Una carta nueva te espera en el diario','A new letter waits in the diary','日記に新しい手紙が届いています']]);
   ux.rx([[/^Carta sin abrir · (.+)$/,(m,ix,tr)=>tr('Carta sin abrir')+' · '+tr(m[1])]]);
 }
 /* Sección de cartas dentro del diario. tr: traductor del juego, addMem: suma recuerdos, save: guarda. Devuelve cuántas cartas hay nuevas. */
 export function lettersSection(box,state,tr,addMem,save){
-  const f=foundTypes();state.ltr=state.ltr||{};let fresh=0;
+  const f=foundTypes(),td=tasksDone();state.ltr=state.ltr||{};let fresh=0;
   const h=document.createElement('h3');h.style.cssText='margin:12px 0 8px;font:600 .95rem system-ui';h.textContent=tr('Cartas de Mara');box.appendChild(h);
   LETTERS.forEach((t,i)=>{const p=document.createElement('p');p.style.margin='0 0 10px';
     const sp=(x)=>{const e=document.createElement('span');e.textContent=x;p.appendChild(e)};sp('✉ ');
-    if(f.has(i)){if(!state.ltr[i]){state.ltr[i]=1;fresh++}sp(tr(t));p.style.color='#ffe9b8'}
+    if(f.has(i)){if(!state.ltr[i]){state.ltr[i]=1;fresh++}sp(tr(t));p.style.color='#ffe9b8';
+      if(td[i]&&TASK_TXT(i)){const m=document.createElement('div');m.style.cssText='margin:6px 0 0 14px;font-size:.88em;color:#cfe8ff';const a=document.createElement('span');a.textContent='✦ ';const b=document.createElement('span');b.textContent=tr(TASK_TXT(i)[3]);m.append(a,b);p.appendChild(m);if(state.ltr[i]<2){state.ltr[i]=2;fresh++}}}
     else{sp(tr('Carta sin abrir'));sp(' · ');sp(tr(LM_ES[i]));p.style.opacity='.55'}
     box.appendChild(p)});
   if(fresh){addMem(3*fresh);save()}
   return fresh;
 }
-export const newLetters=state=>{const f=foundTypes();let n=0;f.forEach(i=>{if(i>=0&&i<LETTERS.length&&!(state.ltr||{})[i])n++});return n};
+export const newLetters=state=>{const f=foundTypes(),td=tasksDone();let n=0;f.forEach(i=>{if(i>=0&&i<LETTERS.length&&!(state.ltr||{})[i])n++});Object.keys(td).forEach(i=>{if(f.has(+i)&&((state.ltr||{})[i]||0)<2)n++});return n};
 /* Estaciones: solo ambiente (pétalos, motas doradas, hojas, copos). Automática según el mes o fija a elección. */
 export const SEAS=['Primavera','Verano','Otoño','Invierno'];
 const SK='cab-season',MODES=['auto','0','1','2','3'];

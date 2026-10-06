@@ -12,6 +12,7 @@ import {optimizeLM} from './lm-parts.js';
 import {startCine} from './cine.js';
 import {castleStep} from './castle.js';
 import {env} from './env.js';
+import {taskTick} from '../tasks.js';
 const dragons=new Map();try{window.__dragons=dragons}catch(e){}
 function updateDragons(ps,k0,k1){
   for(const [k,g] of dragons){const s=g.userData.dragon.s;if(s<ps-140||s>ps+380){scene.remove(g);disposeLM(g);dragons.delete(k)}}
@@ -23,6 +24,7 @@ export function updateLandmarks(ps){
   for(const [k,g] of lmMade)if(k<k0||k>k1){if(g.parent)scene.remove(g);disposeLM(g);lmMade.delete(k)}
   for(let k=k0;k<=k1;k++){let g=lmMade.get(k);if(!g){g=buildLM(k);lmMade.set(k,g)}if(!g.parent)scene.add(g);
     {const t=lmType(k);if(lmPos(k)-ps<(t===2?70:t===10?130:55)&&ps-lmPos(k)<25&&(!lmFound.has(t)||(!S.X.hasSnap(t)&&!retaken.has(t)))){const first=!lmFound.has(t);lmFound.add(t);retaken.add(t);lmSeen.add(k);startCine(k);if(first){toast('Descubriste: '+LM[t]);try{A.chime(0,k%5)}catch(e){}saveFound();updateDiary(ps);S.X.found(t)}}}}
+  {let nt=null;for(let k=k0;k<=k1;k++){if(Math.abs(lmPos(k)-ps)<60){nt=lmType(k);break}}taskTick(nt,()=>{try{A.chime(0,2)}catch(e){}})}
   for(const [,g] of lmMade){if(g.userData.job){const t0=performance.now();let r;do{r=g.userData.job.next()}while(!r.done&&performance.now()-t0<5);if(r.done){g.userData.job=null;optimizeLM(g)}}else if(g.userData.cas)castleStep(g,env.night,.016)}
   for(const s of lmG){s.material.opacity=s.userData.base*(.3+.7*S.glowK)}glowMat.uniforms.k.value=S.glowK;
   fallMat.uniforms.t.value=P.t;fallMat.uniforms.fogCol.value.copy(scene.fog.color);

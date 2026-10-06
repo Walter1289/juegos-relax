@@ -353,14 +353,14 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           UX3.api.setVol(seq[(i + 1) % 3]);
           vb.textContent = vt();
         });
-        const vt = () => T2("Volumen: ", "Volume: ", "\u97F3\u91CF: ") + Math.round(UX3.api.vol() * 100) + " %";
+        const vt = () => T3("Volumen: ", "Volume: ", "\u97F3\u91CF: ") + Math.round(UX3.api.vol() * 100) + " %";
         vb.textContent = vt();
         out.push(vb);
         const tb = mk2("uxSoft", () => {
           UX3.api.setSoft(!UX3.api.soft());
           tb.textContent = tt();
         });
-        const tt = () => UX3.api.soft() ? T2("Tono suave: s\xED", "Soft tone: on", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30F3") : T2("Tono suave: no", "Soft tone: off", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30D5");
+        const tt = () => UX3.api.soft() ? T3("Tono suave: s\xED", "Soft tone: on", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30F3") : T3("Tono suave: no", "Soft tone: off", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30D5");
         tb.textContent = tt();
         out.push(tb);
         const sl = mk2("uxSleep", () => {
@@ -368,7 +368,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           UX3.api.sleep(seq[(seq.indexOf(UX3.api.sleepMin()) + 1) % 4]);
           sl.textContent = st();
         });
-        const st = () => UX3.api.sleepMin() ? T2("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX3.api.sleepMin() + " min" : T2("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
+        const st = () => UX3.api.sleepMin() ? T3("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX3.api.sleepMin() + " min" : T3("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
         sl.textContent = st();
         UX3._sb = () => {
           sl.textContent = st();
@@ -379,7 +379,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
             ls.set("ux-wear", ls.get("ux-wear", "0") === "1" ? "0" : "1");
             wb.textContent = wt();
           });
-          const wt = () => ls.get("ux-wear", "0") === "1" ? T2("Desgaste por ausencia: s\xED", "Wear while away: on", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30F3") : T2("Desgaste por ausencia: no", "Wear while away: off", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30D5");
+          const wt = () => ls.get("ux-wear", "0") === "1" ? T3("Desgaste por ausencia: s\xED", "Wear while away: on", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30F3") : T3("Desgaste por ausencia: no", "Wear while away: off", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30D5");
           wb.textContent = wt();
           out.push(wb);
         }
@@ -406,13 +406,13 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           };
           return x;
         };
-        b.appendChild(mk2(T2("Cancelar", "Cancel", "\u30AD\u30E3\u30F3\u30BB\u30EB")));
-        b.appendChild(mk2(T2("S\xED, reiniciar", "Yes, restart", "\u306F\u3044\u3001\u6700\u521D\u304B\u3089"), ok));
+        b.appendChild(mk2(T3("Cancelar", "Cancel", "\u30AD\u30E3\u30F3\u30BB\u30EB")));
+        b.appendChild(mk2(T3("S\xED, reiniciar", "Yes, restart", "\u306F\u3044\u3001\u6700\u521D\u304B\u3089"), ok));
         d.appendChild(b);
         document.body.appendChild(d);
       }
     };
-    const T2 = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
+    const T3 = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
     const W2 = { vol: ls.get("ux-vol", "1"), soft: ls.get("ux-soft", "0") === "1", k: 1, nodes: [], end: 0, min: 0, ov: null };
     UX3.quiet = false;
     const apply = () => {
@@ -547,7 +547,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
             e.style.cssText = "position:fixed;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 60px));transform:translateX(-50%);max-width:min(88vw,420px);text-align:center;background:rgba(20,22,48,.88);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:14px/1.4 system-ui,sans-serif;z-index:28;pointer-events:none;transition:opacity .8s;opacity:0";
             document.body.appendChild(e);
           }
-          e.textContent = T2("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
+          e.textContent = T3("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
           e.style.opacity = 1;
           clearTimeout(UX3._rt);
           UX3._rt = setTimeout(() => e.style.opacity = 0, 7e3);
@@ -612,11 +612,11 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       const orb = document.createElement("div");
       orb.style.cssText = "width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#ffe9b8,#ffb86b 70%);box-shadow:0 0 50px rgba(255,200,120,.45);transform:scale(.55);transition:transform 4s ease-in-out";
       const lb = document.createElement("div"), t = document.createElement("div");
-      t.textContent = T2("Un minuto para respirar", "One minute to breathe", "1\u5206\u3060\u3051\u6DF1\u547C\u5438");
+      t.textContent = T3("Un minuto para respirar", "One minute to breathe", "1\u5206\u3060\u3051\u6DF1\u547C\u5438");
       t.style.cssText = "font-weight:400;opacity:.75;font-size:.9rem";
       const sk = document.createElement("button");
       sk.type = "button";
-      sk.textContent = T2("Saltar", "Skip", "\u30B9\u30AD\u30C3\u30D7");
+      sk.textContent = T3("Saltar", "Skip", "\u30B9\u30AD\u30C3\u30D7");
       sk.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#363a66;color:#fbf1e0;font:inherit;font-size:.9rem;cursor:pointer";
       o.append(t, orb, lb, sk);
       document.body.appendChild(o);
@@ -633,13 +633,13 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         if (!alive) return;
         if (n >= 5) return end(true);
         n++;
-        lb.textContent = T2("Inhala", "Breathe in", "\u5438\u3063\u3066");
+        lb.textContent = T3("Inhala", "Breathe in", "\u5438\u3063\u3066");
         orb.style.transition = "transform 4s ease-in-out";
         orb.style.transform = "scale(1)";
         UX3.hap(8);
         tm = setTimeout(() => {
           if (!alive) return;
-          lb.textContent = T2("Exhala", "Breathe out", "\u5410\u3044\u3066");
+          lb.textContent = T3("Exhala", "Breathe out", "\u5410\u3044\u3066");
           orb.style.transition = "transform 6s ease-in-out";
           orb.style.transform = "scale(.55)";
           tm = setTimeout(step, 6e3);
@@ -669,19 +669,19 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       box.id = "uxmood";
       box.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 0 14px";
       const q = document.createElement("div");
-      q.textContent = T2("\xBFC\xF3mo llegas hoy?", "How are you arriving today?", "\u4ECA\u65E5\u306F\u3069\u3093\u306A\u6C17\u5206\u3067\u3059\u304B\uFF1F");
+      q.textContent = T3("\xBFC\xF3mo llegas hoy?", "How are you arriving today?", "\u4ECA\u65E5\u306F\u3069\u3093\u306A\u6C17\u5206\u3067\u3059\u304B\uFF1F");
       q.style.cssText = "font:600 .95rem system-ui;opacity:.9";
       const row = document.createElement("div");
       row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;justify-content:center";
       const sub = document.createElement("div");
-      sub.textContent = T2("Es opcional. Solo ajusto el sonido o te ofrezco respirar.", "Optional. I only adjust the sound or offer you a breath.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002");
+      sub.textContent = T3("Es opcional. Solo ajusto el sonido o te ofrezco respirar.", "Optional. I only adjust the sound or offer you a breath.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002");
       sub.style.cssText = "font:400 .72rem system-ui;opacity:.6";
       let pick = null;
       const bs = {};
       [["calm", "Tranquilo", "Calm", "\u304A\u3060\u3084\u304B"], ["tired", "Cansado", "Tired", "\u3064\u304B\u308C\u305F"], ["rest", "Inquieto", "Restless", "\u305D\u308F\u305D\u308F"], ["think", "Con ganas de pensar", "In a thoughtful mood", "\u8003\u3048\u3054\u3068\u3092\u3057\u305F\u3044"]].forEach(([k, es, en, ja]) => {
         const b = document.createElement("button");
         b.type = "button";
-        b.textContent = T2(es, en, ja);
+        b.textContent = T3(es, en, ja);
         b.style.cssText = "min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid #5a609a;background:rgba(54,58,102,.7);color:#fbf1e0;font:500 .85rem system-ui;cursor:pointer";
         b.onclick = () => {
           pick = pick === k ? null : k;
@@ -703,7 +703,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           if (+UX3.api.vol() > 0.7) UX3.api.setVol(".7");
           setTimeout(() => {
             try {
-              UX3.say(T2("Baj\xE9 el sonido y suavic\xE9 los agudos. Cuando quieras, cambia esto en \xABM\xE1s\xBB.", "I lowered the sound and softened the highs. Change it any time in \u201CMore\u201D.", "\u97F3\u3092\u5C0F\u3055\u304F\u3001\u9AD8\u97F3\u3092\u3084\u308F\u3089\u3052\u307E\u3057\u305F\u3002\u300C\u305D\u306E\u4ED6\u300D\u3067\u3044\u3064\u3067\u3082\u5909\u3048\u3089\u308C\u307E\u3059\u3002"));
+              UX3.say(T3("Baj\xE9 el sonido y suavic\xE9 los agudos. Cuando quieras, cambia esto en \xABM\xE1s\xBB.", "I lowered the sound and softened the highs. Change it any time in \u201CMore\u201D.", "\u97F3\u3092\u5C0F\u3055\u304F\u3001\u9AD8\u97F3\u3092\u3084\u308F\u3089\u3052\u307E\u3057\u305F\u3002\u300C\u305D\u306E\u4ED6\u300D\u3067\u3044\u3064\u3067\u3082\u5909\u3048\u3089\u308C\u307E\u3059\u3002"));
             } catch (e) {
             }
           }, 900);
@@ -711,7 +711,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         if (pick === "rest") setTimeout(() => breathe(), 600);
         if (pick === "think") setTimeout(() => {
           try {
-            UX3.say(T2("Sin prisa. Aqu\xED no hay nada que ganar ni perder.", "No hurry. There is nothing to win or lose here.", "\u6025\u304C\u306A\u304F\u3066\u5927\u4E08\u592B\u3002\u52DD\u3061\u3082\u8CA0\u3051\u3082\u3042\u308A\u307E\u305B\u3093\u3002"));
+            UX3.say(T3("Sin prisa. Aqu\xED no hay nada que ganar ni perder.", "No hurry. There is nothing to win or lose here.", "\u6025\u304C\u306A\u304F\u3066\u5927\u4E08\u592B\u3002\u52DD\u3061\u3082\u8CA0\u3051\u3082\u3042\u308A\u307E\u305B\u3093\u3002"));
           } catch (e) {
           }
         }, 900);
@@ -1884,8 +1884,8 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     celeb = null;
   }
   function updateLights(dt) {
-    const T2 = { tab: 1, lamp: state.repaired.lampara && state.repaired.panel ? 1 : 0, moon: state.repaired.ventana ? 1 : 0, str: state.repaired.luces ? 1 : 0, nich: state.repaired.nichos ? 1 : 0 };
-    for (const k in T2) lit[k] = lerp(lit[k], T2[k], Math.min(1, dt * 2.2));
+    const T3 = { tab: 1, lamp: state.repaired.lampara && state.repaired.panel ? 1 : 0, moon: state.repaired.ventana ? 1 : 0, str: state.repaired.luces ? 1 : 0, nich: state.repaired.nichos ? 1 : 0 };
+    for (const k in T3) lit[k] = lerp(lit[k], T3[k], Math.min(1, dt * 2.2));
   }
   function updateParts(dt) {
     for (let i = parts.length - 1; i >= 0; i--) {
@@ -2453,6 +2453,37 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     drawStrings(g2, !!S.luces);
   }
 
+  // rio3d-src/tasks.js
+  var TKEY = "rio-tasks";
+  var T = [
+    // [encargo es,en,ja, margen es,en,ja]
+    ["Dejar una linterna en el barandal", "Leave a lantern on the railing", "\u624B\u3059\u308A\u306B\u30E9\u30F3\u30BF\u30F3\u3092\u7F6E\u304F", "Dej\xE9 una linterna en el barandal. Si cruzas de noche, ah\xED estar\xE1 esper\xE1ndote.", "I left a lantern on the railing. If you cross at night, it will be waiting for you.", "\u624B\u3059\u308A\u306B\u30E9\u30F3\u30BF\u30F3\u3092\u7F6E\u304D\u307E\u3057\u305F\u3002\u591C\u306B\u6E21\u308B\u306A\u3089\u3001\u305D\u3053\u3067\u5F85\u3063\u3066\u3044\u307E\u3059\u3002"],
+    ["Pedir un deseo bajo el portal", "Make a wish under the gate", "\u9CE5\u5C45\u306E\u4E0B\u3067\u9858\u3044\u3054\u3068\u3092\u3059\u308B", "Ped\xED otro deseo bajo el portal. Este no es m\xEDo: es para quien lea esto.", "I made another wish under the gate. This one is not mine: it is for whoever reads this.", "\u9CE5\u5C45\u306E\u4E0B\u3067\u3082\u3046\u3072\u3068\u3064\u9858\u3044\u307E\u3057\u305F\u3002\u79C1\u306E\u3067\u306F\u306A\u304F\u3001\u3053\u308C\u3092\u8AAD\u3080\u3042\u306A\u305F\u306E\u305F\u3081\u306B\u3002"],
+    ["Encender un farolillo", "Light a lantern", "\u3061\u3087\u3046\u3061\u3093\u3092\u3068\u3082\u3059", "Encend\xED un farolillo en la aldea. Dicen que dura hasta que alguien lo recuerda.", "I lit a lantern in the village. They say it burns until someone remembers it.", "\u6751\u3067\u3061\u3087\u3046\u3061\u3093\u3092\u3068\u3082\u3057\u307E\u3057\u305F\u3002\u8AB0\u304B\u304C\u601D\u3044\u51FA\u3059\u3042\u3044\u3060\u3001\u6D88\u3048\u306A\u3044\u305D\u3046\u3067\u3059\u3002"],
+    ["Guardar un p\xE9talo de sakura", "Keep a sakura petal", "\u685C\u306E\u82B1\u3073\u3089\u3092\u3057\u307E\u3046", "Guard\xE9 otro p\xE9talo. Ya tengo suficientes para forrar una carta entera.", "I kept another petal. I now have enough to line a whole letter.", "\u3082\u3046\u4E00\u679A\u3001\u82B1\u3073\u3089\u3092\u3057\u307E\u3044\u307E\u3057\u305F\u3002\u624B\u7D19\u3092\u4E00\u901A\u3046\u3081\u3089\u308C\u308B\u307B\u3069\u306B\u306A\u308A\u307E\u3057\u305F\u3002"],
+    ["Quedarse quieto con las garzas", "Stay still with the herons", "\u30B5\u30AE\u3068\u9759\u304B\u306B\u5F85\u3064", "Me qued\xE9 quieta con las garzas hasta que me olvidaron. Fue el mejor halago.", "I stayed still with the herons until they forgot I was there. Best compliment ever.", "\u30B5\u30AE\u306E\u305D\u3070\u3067\u3058\u3063\u3068\u3057\u3066\u3001\u79C1\u306E\u5B58\u5728\u3092\u5FD8\u308C\u3089\u308C\u308B\u307E\u3067\u5F85\u3061\u307E\u3057\u305F\u3002\u6700\u9AD8\u306E\u307B\u3081\u8A00\u8449\u3067\u3059\u3002"],
+    ["Tocar la campana", "Ring the bell", "\u9418\u3092\u9CF4\u3089\u3059", "Toqu\xE9 la campana una vez m\xE1s. Si la oyes desde el balc\xF3n, es m\xEDa.", "I rang the bell once more. If you hear it from your balcony, it is mine.", "\u3082\u3046\u4E00\u5EA6\u9418\u3092\u9CF4\u3089\u3057\u307E\u3057\u305F\u3002\u30D0\u30EB\u30B3\u30CB\u30FC\u3067\u805E\u3053\u3048\u305F\u3089\u3001\u305D\u308C\u306F\u79C1\u3067\u3059\u3002"],
+    ["Llenar un frasco con agua de la cascada", "Fill a jar with waterfall water", "\u6EDD\u306E\u6C34\u3092\u74F6\u306B\u304F\u3080", "Llen\xE9 un frasco con agua de la cascada. Ponlo en el estantito: huele a tarde larga.", "I filled a jar with waterfall water. Put it on the little shelf: it smells like a long afternoon.", "\u6EDD\u306E\u6C34\u3092\u74F6\u306B\u304F\u307F\u307E\u3057\u305F\u3002\u5C0F\u3055\u306A\u68DA\u306B\u7F6E\u3044\u3066\u304F\u3060\u3055\u3044\u3002\u9577\u3044\u5348\u5F8C\u306E\u9999\u308A\u304C\u3057\u307E\u3059\u3002"],
+    ["Compartir una taza de t\xE9", "Share a cup of tea", "\u304A\u8336\u3092\u308F\u304B\u3061\u3042\u3046", "Compart\xED una taza de t\xE9. Pens\xE9 en la tuya, en la caba\xF1a, humeando.", "I shared a cup of tea. I thought of yours, steaming at the cabin.", "\u304A\u8336\u3092\u308F\u304B\u3061\u3042\u3044\u307E\u3057\u305F\u3002\u5C0F\u5C4B\u3067\u6E6F\u6C17\u3092\u7ACB\u3066\u308B\u3042\u306A\u305F\u306E\u4E00\u676F\u3092\u601D\u3044\u307E\u3057\u305F\u3002"],
+    ["Escuchar el bamb\xFA", "Listen to the bamboo", "\u7AF9\u306E\u97F3\u306B\u8033\u3092\u3059\u307E\u3059", "Escuch\xE9 el bamb\xFA un buen rato. Suena a campanilla de viento sin due\xF1o.", "I listened to the bamboo a good while. It sounds like a wind chime with no owner.", "\u7AF9\u306E\u97F3\u3092\u3057\u3070\u3089\u304F\u805E\u304D\u307E\u3057\u305F\u3002\u6301\u3061\u4E3B\u306E\u3044\u306A\u3044\u98A8\u9234\u306E\u3088\u3046\u3067\u3059\u3002"],
+    ["Dejar una flor en el estanque", "Leave a flower on the pond", "\u6C60\u306B\u82B1\u3092\u6D6E\u304B\u3079\u308B", "Dej\xE9 una flor en el estanque. Flota hacia donde t\xFA ya est\xE1s.", "I left a flower on the pond. It floats toward wherever you already are.", "\u6C60\u306B\u82B1\u3092\u6D6E\u304B\u3079\u307E\u3057\u305F\u3002\u3042\u306A\u305F\u304C\u3044\u308B\u65B9\u3078\u6D41\u308C\u3066\u3044\u304D\u307E\u3059\u3002"],
+    ["Encender los fuegos para Mara", "Light the fireworks for Mara", "\u30DE\u30E9\u306E\u305F\u3081\u306B\u82B1\u706B\u3092\u3042\u3052\u308B", "Esta noche los fuegos del castillo son para ti. Gracias por seguirme hasta aqu\xED.", "Tonight the castle fireworks are for you. Thank you for following me all the way here.", "\u4ECA\u591C\u306E\u57CE\u306E\u82B1\u706B\u306F\u3042\u306A\u305F\u306E\u305F\u3081\u306B\u3002\u3053\u3053\u307E\u3067\u3064\u3044\u3066\u304D\u3066\u304F\u308C\u3066\u3042\u308A\u304C\u3068\u3046\u3002"]
+  ];
+  var TASK_TXT = (type) => T[type] || null;
+  var get = () => {
+    try {
+      return JSON.parse(localStorage.getItem(TKEY) || "{}");
+    } catch (e) {
+      return {};
+    }
+  };
+  var tasksDone = get;
+  function addTaskTexts(ux) {
+    ux.add(T.map((x) => [x[0], x[1], x[2]]));
+    ux.add(T.map((x) => [x[3], x[4], x[5]]));
+    ux.add([["Mant\xE9n pulsado para hacerlo", "Press and hold to do it", "\u9577\u62BC\u3057\u3067\u5B9F\u884C"], ["Hecho. Un recuerdo m\xE1s para la caba\xF1a.", "Done. One more keepsake for the cabin.", "\u3067\u304D\u307E\u3057\u305F\u3002\u5C0F\u5C4B\u306B\u601D\u3044\u51FA\u304C\u3072\u3068\u3064\u5897\u3048\u307E\u3057\u305F\u3002"], ["Encargo de Mara", "Mara\u2019s errand", "\u30DE\u30E9\u306E\u304A\u9858\u3044"], ["En el margen", "In the margin", "\u4F59\u767D\u306B"]]);
+  }
+
   // rio3d-src/story.js
   var LKEY = "rio-found-types";
   var L = [
@@ -2482,12 +2513,13 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     return s;
   };
   function addStoryTexts(ux) {
+    addTaskTexts(ux);
     ux.add(L.map((x) => [x[1], x[2], x[3]]));
     ux.add([["Puente de madera", "Wooden bridge", "\u6728\u306E\u6A4B"], ["Torii sobre el agua", "Torii over the water", "\u6C34\u4E0A\u306E\u9CE5\u5C45"], ["Aldea de farolillos", "Lantern village", "\u3061\u3087\u3046\u3061\u3093\u306E\u6751"], ["Jard\xEDn de sakura", "Sakura garden", "\u685C\u306E\u5EAD"], ["Ca\xF1averal de las garzas", "Heron reedbed", "\u30B5\u30AE\u306E\u8466\u539F"], ["Templo de la campana", "Bell temple", "\u9418\u306E\u5BFA"], ["Cascadita de musgo", "Mossy waterfall", "\u82D4\u306E\u5C0F\u3055\u306A\u6EDD"], ["Casa de t\xE9", "Tea house", "\u8336\u5C4B"], ["Bosque de bamb\xFA", "Bamboo forest", "\u7AF9\u6797"], ["Estanque de lotos", "Lotus pond", "\u84EE\u306E\u6C60"], ["Castillo de la Garza Blanca", "White Heron Castle", "\u767D\u9DFA\u57CE"], ["Cartas de Mara", "Mara\u2019s letters", "\u30DE\u30E9\u306E\u624B\u7D19"], ["Carta sin abrir", "Unopened letter", "\u672A\u958B\u5C01\u306E\u624B\u7D19"], ["Desc\xFAbrelo en el r\xEDo para leerla", "Discover it on the river to read it", "\u5DDD\u3067\u898B\u3064\u3051\u308B\u3068\u8AAD\u3081\u307E\u3059"], ["Abrir carta", "Open letter", "\u624B\u7D19\u3092\u958B\u304F"], ["Notas de visitantes", "Visitor notes", "\u8A2A\u554F\u8005\u306E\u30E1\u30E2"], ["Mara te dej\xF3 una carta", "Mara left you a letter", "\u30DE\u30E9\u304C\u624B\u7D19\u3092\u6B8B\u3057\u307E\u3057\u305F"], ["Carta de Mara", "Letter from Mara", "\u30DE\u30E9\u306E\u624B\u7D19"], ["Una carta nueva te espera en el diario", "A new letter waits in the diary", "\u65E5\u8A18\u306B\u65B0\u3057\u3044\u624B\u7D19\u304C\u5C4A\u3044\u3066\u3044\u307E\u3059"]]);
     ux.rx([[/^Carta sin abrir · (.+)$/, (m, ix, tr) => tr("Carta sin abrir") + " \xB7 " + tr(m[1])]]);
   }
   function lettersSection(box, state2, tr, addMem2, save2) {
-    const f = foundTypes();
+    const f = foundTypes(), td = tasksDone();
     state2.ltr = state2.ltr || {};
     let fresh = 0;
     const h = document.createElement("h3");
@@ -2510,6 +2542,20 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         }
         sp(tr(t));
         p.style.color = "#ffe9b8";
+        if (td[i] && TASK_TXT(i)) {
+          const m = document.createElement("div");
+          m.style.cssText = "margin:6px 0 0 14px;font-size:.88em;color:#cfe8ff";
+          const a = document.createElement("span");
+          a.textContent = "\u2726 ";
+          const b = document.createElement("span");
+          b.textContent = tr(TASK_TXT(i)[3]);
+          m.append(a, b);
+          p.appendChild(m);
+          if (state2.ltr[i] < 2) {
+            state2.ltr[i] = 2;
+            fresh++;
+          }
+        }
       } else {
         sp(tr("Carta sin abrir"));
         sp(" \xB7 ");
@@ -2525,10 +2571,13 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     return fresh;
   }
   var newLetters = (state2) => {
-    const f = foundTypes();
+    const f = foundTypes(), td = tasksDone();
     let n = 0;
     f.forEach((i) => {
       if (i >= 0 && i < LETTERS.length && !(state2.ltr || {})[i]) n++;
+    });
+    Object.keys(td).forEach((i) => {
+      if (f.has(+i) && ((state2.ltr || {})[i] || 0) < 2) n++;
     });
     return n;
   };
@@ -3215,12 +3264,12 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   }
   var panel;
   var btn;
-  var T = (s) => uTr(s);
+  var T2 = (s) => uTr(s);
   function mkb(txt, fn, cls, dis) {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "chip " + (cls || "");
-    b.textContent = T(txt);
+    b.textContent = T2(txt);
     if (dis) b.disabled = true;
     b.onclick = fn;
     return b;
@@ -3229,7 +3278,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     if (!panel) return;
     if (btn) {
       btn.hidden = !unlocked();
-      btn.textContent = T(habOn ? "Volver a reparar" : "Habitar");
+      btn.textContent = T2(habOn ? "Volver a reparar" : "Habitar");
     }
     if (!habOn) {
       panel.style.display = "none";
@@ -3241,11 +3290,11 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     top.className = "grp";
     const lab = document.createElement("span");
     lab.className = "lab";
-    lab.textContent = T("Recuerdos") + ": " + (state.mem || 0);
+    lab.textContent = T2("Recuerdos") + ": " + (state.mem || 0);
     top.appendChild(lab);
     const rb = (id, txt, fn, r) => {
       const b = mkb(txt, fn, "", r.cd > 0);
-      if (r.cd > 0) b.textContent = T(txt) + " \xB7 " + Math.ceil(r.cd) + " s";
+      if (r.cd > 0) b.textContent = T2(txt) + " \xB7 " + Math.ceil(r.cd) + " s";
       top.appendChild(b);
     };
     rb("te", "Preparar t\xE9", doTe, rit.te);
@@ -3262,12 +3311,12 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     if (!s) {
       const e = document.createElement("span");
       e.className = "loot";
-      e.textContent = T("Toca un c\xEDrculo de la caba\xF1a para decorar ese lugar.");
+      e.textContent = T2("Toca un c\xEDrculo de la caba\xF1a para decorar ese lugar.");
       g2.appendChild(e);
     } else {
       const l2 = document.createElement("span");
       l2.className = "lab";
-      l2.textContent = T(s.n);
+      l2.textContent = T2(s.n);
       g2.appendChild(l2);
       const cur2 = state.decor[s.id];
       if (cur2) g2.appendChild(mkb("Quitar", () => {
@@ -3279,7 +3328,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         const own = !!state.own[d.id], here = state.decor[s.id] === d.id;
         if (here) return;
         const b = mkb(own ? d.name : d.name + " \xB7 " + d.cost, () => place(s, d), own ? "done" : (state.mem || 0) >= d.cost ? "ready" : "locked");
-        b.title = own ? T("Colocar") : T("Comprar con recuerdos");
+        b.title = own ? T2("Colocar") : T2("Comprar con recuerdos");
         g2.appendChild(b);
       });
     }
@@ -3313,20 +3362,20 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     b.style.cssText = "background:#363a66;color:#fbf1e0;border:1px solid #5a609a;border-radius:16px;padding:18px 20px;max-width:min(88vw,420px);max-height:70vh;overflow:auto;font:15px/1.45 var(--f-body,system-ui)";
     const h = document.createElement("h2");
     h.style.cssText = "margin:0 0 10px;font:600 1.1rem var(--f-display,system-ui)";
-    h.textContent = T("Diario de la caba\xF1a");
+    h.textContent = T2("Diario de la caba\xF1a");
     b.appendChild(h);
     if (!state.notes.length) {
       const p = document.createElement("p");
-      p.textContent = T("A\xFAn vac\xEDo. Los visitantes dejan notas sobre quien vivi\xF3 aqu\xED.");
+      p.textContent = T2("A\xFAn vac\xEDo. Los visitantes dejan notas sobre quien vivi\xF3 aqu\xED.");
       b.appendChild(p);
     }
     state.notes.forEach((n) => {
       const p = document.createElement("p");
       p.style.margin = "0 0 10px";
-      p.textContent = "\xB7 " + T(n);
+      p.textContent = "\xB7 " + T2(n);
       b.appendChild(p);
     });
-    lettersSection(b, state, T, addMem, scheduleSave);
+    lettersSection(b, state, T2, addMem, scheduleSave);
     const c = mkb("Cerrar", () => m.remove(), "");
     b.appendChild(c);
     m.appendChild(b);
