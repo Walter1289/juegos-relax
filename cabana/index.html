@@ -591,6 +591,140 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       ["Madera que cruje", "Creaking wood", "\u304D\u3057\u3080\u6728\u306E\u97F3"],
       ["Estrella fugaz", "Shooting star", "\u6D41\u308C\u661F"]
     ]);
+    UX3.add([
+      ["\xBFC\xF3mo llegas hoy?", "How are you arriving today?", "\u4ECA\u65E5\u306F\u3069\u3093\u306A\u6C17\u5206\u3067\u3059\u304B\uFF1F"],
+      ["Tranquilo", "Calm", "\u304A\u3060\u3084\u304B"],
+      ["Cansado", "Tired", "\u3064\u304B\u308C\u305F"],
+      ["Inquieto", "Restless", "\u305D\u308F\u305D\u308F"],
+      ["Con ganas de pensar", "In a thoughtful mood", "\u8003\u3048\u3054\u3068\u3092\u3057\u305F\u3044"],
+      ["Es opcional. Solo ajusto el sonido o te ofrezco respirar.", "Optional. I only adjust the sound or offer you a breath.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002"],
+      ["Baj\xE9 el sonido y suavic\xE9 los agudos. Cuando quieras, cambia esto en \xABM\xE1s\xBB.", "I lowered the sound and softened the highs. Change it any time in \u201CMore\u201D.", "\u97F3\u3092\u5C0F\u3055\u304F\u3001\u9AD8\u97F3\u3092\u3084\u308F\u3089\u3052\u307E\u3057\u305F\u3002\u300C\u305D\u306E\u4ED6\u300D\u3067\u3044\u3064\u3067\u3082\u5909\u3048\u3089\u308C\u307E\u3059\u3002"],
+      ["Un minuto para respirar", "One minute to breathe", "1\u5206\u3060\u3051\u6DF1\u547C\u5438"],
+      ["Inhala", "Breathe in", "\u5438\u3063\u3066"],
+      ["Exhala", "Breathe out", "\u5410\u3044\u3066"],
+      ["Saltar", "Skip", "\u30B9\u30AD\u30C3\u30D7"],
+      ["Gracias por respirar. Entremos con calma.", "Thank you for breathing. Let us go in gently.", "\u6DF1\u547C\u5438\u3042\u308A\u304C\u3068\u3046\u3002\u3086\u3063\u304F\u308A\u5165\u308A\u307E\u3057\u3087\u3046\u3002"],
+      ["Sin prisa. Aqu\xED no hay nada que ganar ni perder.", "No hurry. There is nothing to win or lose here.", "\u6025\u304C\u306A\u304F\u3066\u5927\u4E08\u592B\u3002\u52DD\u3061\u3082\u8CA0\u3051\u3082\u3042\u308A\u307E\u305B\u3093\u3002"]
+    ]);
+    function breathe(done) {
+      const o = document.createElement("div");
+      o.style.cssText = "position:fixed;inset:0;z-index:70;display:grid;place-items:center;align-content:center;gap:18px;background:rgba(20,22,48,.92);color:#fbf1e0;font:600 1.1rem system-ui;text-align:center";
+      const orb = document.createElement("div");
+      orb.style.cssText = "width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#ffe9b8,#ffb86b 70%);box-shadow:0 0 50px rgba(255,200,120,.45);transform:scale(.55);transition:transform 4s ease-in-out";
+      const lb = document.createElement("div"), t = document.createElement("div");
+      t.textContent = T2("Un minuto para respirar", "One minute to breathe", "1\u5206\u3060\u3051\u6DF1\u547C\u5438");
+      t.style.cssText = "font-weight:400;opacity:.75;font-size:.9rem";
+      const sk = document.createElement("button");
+      sk.type = "button";
+      sk.textContent = T2("Saltar", "Skip", "\u30B9\u30AD\u30C3\u30D7");
+      sk.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#363a66;color:#fbf1e0;font:inherit;font-size:.9rem;cursor:pointer";
+      o.append(t, orb, lb, sk);
+      document.body.appendChild(o);
+      let n = 0, alive = true, tm;
+      const end = (ok) => {
+        if (!alive) return;
+        alive = false;
+        clearTimeout(tm);
+        o.remove();
+        done && done(ok);
+      };
+      sk.onclick = () => end(false);
+      const step = () => {
+        if (!alive) return;
+        if (n >= 5) return end(true);
+        n++;
+        lb.textContent = T2("Inhala", "Breathe in", "\u5438\u3063\u3066");
+        orb.style.transition = "transform 4s ease-in-out";
+        orb.style.transform = "scale(1)";
+        UX3.hap(8);
+        tm = setTimeout(() => {
+          if (!alive) return;
+          lb.textContent = T2("Exhala", "Breathe out", "\u5410\u3044\u3066");
+          orb.style.transition = "transform 6s ease-in-out";
+          orb.style.transform = "scale(.55)";
+          tm = setTimeout(step, 6e3);
+        }, 4e3);
+      };
+      step();
+    }
+    UX3.say = (m) => {
+      let e = document.getElementById("uxsay");
+      if (!e) {
+        e = document.createElement("div");
+        e.id = "uxsay";
+        e.style.cssText = "position:fixed;left:50%;bottom:max(90px,calc(env(safe-area-inset-bottom) + 80px));transform:translateX(-50%);max-width:min(88vw,420px);background:rgba(20,22,48,.9);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:500 .85rem/1.35 system-ui;text-align:center;z-index:65;pointer-events:none;transition:opacity .5s;opacity:0";
+        document.body.appendChild(e);
+      }
+      e.textContent = m;
+      e.style.opacity = 1;
+      clearTimeout(UX3._st);
+      UX3._st = setTimeout(() => e.style.opacity = 0, 4200);
+    };
+    UX3.breathe = breathe;
+    UX3.mood = () => moodUI();
+    function moodUI() {
+      const go = document.getElementById("go");
+      if (!go || document.getElementById("uxmood")) return;
+      const box = document.createElement("div");
+      box.id = "uxmood";
+      box.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 0 14px";
+      const q = document.createElement("div");
+      q.textContent = T2("\xBFC\xF3mo llegas hoy?", "How are you arriving today?", "\u4ECA\u65E5\u306F\u3069\u3093\u306A\u6C17\u5206\u3067\u3059\u304B\uFF1F");
+      q.style.cssText = "font:600 .95rem system-ui;opacity:.9";
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;justify-content:center";
+      const sub = document.createElement("div");
+      sub.textContent = T2("Es opcional. Solo ajusto el sonido o te ofrezco respirar.", "Optional. I only adjust the sound or offer you a breath.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002");
+      sub.style.cssText = "font:400 .72rem system-ui;opacity:.6";
+      let pick = null;
+      const bs = {};
+      [["calm", "Tranquilo", "Calm", "\u304A\u3060\u3084\u304B"], ["tired", "Cansado", "Tired", "\u3064\u304B\u308C\u305F"], ["rest", "Inquieto", "Restless", "\u305D\u308F\u305D\u308F"], ["think", "Con ganas de pensar", "In a thoughtful mood", "\u8003\u3048\u3054\u3068\u3092\u3057\u305F\u3044"]].forEach(([k, es, en, ja]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = T2(es, en, ja);
+        b.style.cssText = "min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid #5a609a;background:rgba(54,58,102,.7);color:#fbf1e0;font:500 .85rem system-ui;cursor:pointer";
+        b.onclick = () => {
+          pick = pick === k ? null : k;
+          for (const j in bs) {
+            bs[j].style.borderColor = j === pick ? "#ffc77a" : "#5a609a";
+            bs[j].style.background = j === pick ? "rgba(255,199,122,.22)" : "rgba(54,58,102,.7)";
+          }
+          UX3.hap(6);
+        };
+        bs[k] = b;
+        row.appendChild(b);
+      });
+      box.append(q, row, sub);
+      go.parentNode.insertBefore(box, go);
+      go.addEventListener("click", () => {
+        ls.set("ux-mood", pick || "");
+        if (pick === "tired") {
+          UX3.api.setSoft(true);
+          if (+UX3.api.vol() > 0.7) UX3.api.setVol(".7");
+          setTimeout(() => {
+            try {
+              UX3.say(T2("Baj\xE9 el sonido y suavic\xE9 los agudos. Cuando quieras, cambia esto en \xABM\xE1s\xBB.", "I lowered the sound and softened the highs. Change it any time in \u201CMore\u201D.", "\u97F3\u3092\u5C0F\u3055\u304F\u3001\u9AD8\u97F3\u3092\u3084\u308F\u3089\u3052\u307E\u3057\u305F\u3002\u300C\u305D\u306E\u4ED6\u300D\u3067\u3044\u3064\u3067\u3082\u5909\u3048\u3089\u308C\u307E\u3059\u3002"));
+            } catch (e) {
+            }
+          }, 900);
+        }
+        if (pick === "rest") setTimeout(() => breathe(), 600);
+        if (pick === "think") setTimeout(() => {
+          try {
+            UX3.say(T2("Sin prisa. Aqu\xED no hay nada que ganar ni perder.", "No hurry. There is nothing to win or lose here.", "\u6025\u304C\u306A\u304F\u3066\u5927\u4E08\u592B\u3002\u52DD\u3061\u3082\u8CA0\u3051\u3082\u3042\u308A\u307E\u305B\u3093\u3002"));
+          } catch (e) {
+          }
+        }, 900);
+      }, true);
+    }
+    const i0 = UX3.init;
+    UX3.init = function() {
+      i0.apply(this, arguments);
+      try {
+        moodUI();
+      } catch (e) {
+      }
+    };
   })();
 
   // src2d/cabana/util.js

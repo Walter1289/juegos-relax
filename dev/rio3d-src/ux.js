@@ -136,4 +136,40 @@
     ['Cuac de pato','Duck quack','カモの鳴き声'],['Aleteo de garza','Heron wingbeats','サギの羽ばたき'],['Golpe suave de la canoa','Soft knock on the canoe','カヌーが軽くぶつかる音'],['Salpicadura','Splash','水しぶき'],['Fuegos artificiales','Fireworks','花火'],['Nota de linterna','Lantern note','ランタンの音'],['Cascada cercana','Waterfall nearby','近くの滝の音'],['Lluvia suave','Soft rain','やさしい雨音'],
     ['Viento','Wind','風'],['Grillos','Crickets','コオロギ'],['Fregado','Scrubbing','こする音'],['Madera que cruje','Creaking wood','きしむ木の音'],['Estrella fugaz','Shooting star','流れ星'],
   ]);
+
+  /* ---- chequeo de ánimo: una pregunta suave en la pantalla de inicio; se puede saltar; solo guarda la última elección en este dispositivo ---- */
+  UX.add([['¿Cómo llegas hoy?','How are you arriving today?','今日はどんな気分ですか？'],['Tranquilo','Calm','おだやか'],['Cansado','Tired','つかれた'],['Inquieto','Restless','そわそわ'],['Con ganas de pensar','In a thoughtful mood','考えごとをしたい'],['Es opcional. Solo ajusto el sonido o te ofrezco respirar.','Optional. I only adjust the sound or offer you a breath.','任意です。音の調整や深呼吸の提案だけをします。'],
+    ['Bajé el sonido y suavicé los agudos. Cuando quieras, cambia esto en «Más».','I lowered the sound and softened the highs. Change it any time in “More”.','音を小さく、高音をやわらげました。「その他」でいつでも変えられます。'],['Un minuto para respirar','One minute to breathe','1分だけ深呼吸'],['Inhala','Breathe in','吸って'],['Exhala','Breathe out','吐いて'],['Saltar','Skip','スキップ'],['Gracias por respirar. Entremos con calma.','Thank you for breathing. Let us go in gently.','深呼吸ありがとう。ゆっくり入りましょう。'],['Sin prisa. Aquí no hay nada que ganar ni perder.','No hurry. There is nothing to win or lose here.','急がなくて大丈夫。勝ちも負けもありません。']]);
+  function breathe(done){
+    const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:70;display:grid;place-items:center;align-content:center;gap:18px;background:rgba(20,22,48,.92);color:#fbf1e0;font:600 1.1rem system-ui;text-align:center';
+    const orb=document.createElement('div');orb.style.cssText='width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#ffe9b8,#ffb86b 70%);box-shadow:0 0 50px rgba(255,200,120,.45);transform:scale(.55);transition:transform 4s ease-in-out';
+    const lb=document.createElement('div'),t=document.createElement('div');t.textContent=T('Un minuto para respirar','One minute to breathe','1分だけ深呼吸');t.style.cssText='font-weight:400;opacity:.75;font-size:.9rem';
+    const sk=document.createElement('button');sk.type='button';sk.textContent=T('Saltar','Skip','スキップ');sk.style.cssText='min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#363a66;color:#fbf1e0;font:inherit;font-size:.9rem;cursor:pointer';
+    o.append(t,orb,lb,sk);document.body.appendChild(o);let n=0,alive=true,tm;
+    const end=(ok)=>{if(!alive)return;alive=false;clearTimeout(tm);o.remove();done&&done(ok)};sk.onclick=()=>end(false);
+    const step=()=>{if(!alive)return;if(n>=5)return end(true);n++;lb.textContent=T('Inhala','Breathe in','吸って');orb.style.transition='transform 4s ease-in-out';orb.style.transform='scale(1)';UX.hap(8);
+      tm=setTimeout(()=>{if(!alive)return;lb.textContent=T('Exhala','Breathe out','吐いて');orb.style.transition='transform 6s ease-in-out';orb.style.transform='scale(.55)';tm=setTimeout(step,6000)},4000)};
+    step();
+  }
+  UX.say=m=>{let e=document.getElementById('uxsay');if(!e){e=document.createElement('div');e.id='uxsay';e.style.cssText='position:fixed;left:50%;bottom:max(90px,calc(env(safe-area-inset-bottom) + 80px));transform:translateX(-50%);max-width:min(88vw,420px);background:rgba(20,22,48,.9);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:500 .85rem/1.35 system-ui;text-align:center;z-index:65;pointer-events:none;transition:opacity .5s;opacity:0';document.body.appendChild(e)}e.textContent=m;e.style.opacity=1;clearTimeout(UX._st);UX._st=setTimeout(()=>e.style.opacity=0,4200)};
+  UX.breathe=breathe;UX.mood=()=>moodUI();
+  function moodUI(){
+    const go=document.getElementById('go');if(!go||document.getElementById('uxmood'))return;
+    const box=document.createElement('div');box.id='uxmood';box.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 0 14px';
+    const q=document.createElement('div');q.textContent=T('¿Cómo llegas hoy?','How are you arriving today?','今日はどんな気分ですか？');q.style.cssText='font:600 .95rem system-ui;opacity:.9';
+    const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:8px;justify-content:center';
+    const sub=document.createElement('div');sub.textContent=T('Es opcional. Solo ajusto el sonido o te ofrezco respirar.','Optional. I only adjust the sound or offer you a breath.','任意です。音の調整や深呼吸の提案だけをします。');sub.style.cssText='font:400 .72rem system-ui;opacity:.6';
+    let pick=null;const bs={};
+    [['calm','Tranquilo','Calm','おだやか'],['tired','Cansado','Tired','つかれた'],['rest','Inquieto','Restless','そわそわ'],['think','Con ganas de pensar','In a thoughtful mood','考えごとをしたい']].forEach(([k,es,en,ja])=>{
+      const b=document.createElement('button');b.type='button';b.textContent=T(es,en,ja);b.style.cssText='min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid #5a609a;background:rgba(54,58,102,.7);color:#fbf1e0;font:500 .85rem system-ui;cursor:pointer';
+      b.onclick=()=>{pick=pick===k?null:k;for(const j in bs){bs[j].style.borderColor=j===pick?'#ffc77a':'#5a609a';bs[j].style.background=j===pick?'rgba(255,199,122,.22)':'rgba(54,58,102,.7)'}UX.hap(6)};bs[k]=b;row.appendChild(b)});
+    box.append(q,row,sub);go.parentNode.insertBefore(box,go);
+    go.addEventListener('click',()=>{
+      ls.set('ux-mood',pick||'');
+      if(pick==='tired'){UX.api.setSoft(true);if(+UX.api.vol()>.7)UX.api.setVol('.7');setTimeout(()=>{try{UX.say(T('Bajé el sonido y suavicé los agudos. Cuando quieras, cambia esto en «Más».','I lowered the sound and softened the highs. Change it any time in “More”.','音を小さく、高音をやわらげました。「その他」でいつでも変えられます。'))}catch(e){}},900)}
+      if(pick==='rest')setTimeout(()=>breathe(),600);
+      if(pick==='think')setTimeout(()=>{try{UX.say(T('Sin prisa. Aquí no hay nada que ganar ni perder.','No hurry. There is nothing to win or lose here.','急がなくて大丈夫。勝ちも負けもありません。'))}catch(e){}},900);
+    },true);
+  }
+  const i0=UX.init;UX.init=function(){i0.apply(this,arguments);try{moodUI()}catch(e){}};
 })();
