@@ -33,6 +33,7 @@ h1{margin:0;font:600 clamp(1.7rem,6vw,2.3rem)/1.1 system-ui,sans-serif}
 p{margin:0;color:var(--muted);line-height:1.55}
 #go{align-self:flex-start;background:var(--lamp);color:#3b2a1a;border:0;border-radius:99px;padding:13px 28px;font:700 1rem system-ui,sans-serif;cursor:pointer}
 #go:disabled{opacity:.6}
+#go2{align-self:flex-start;background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,.35);border-radius:99px;padding:10px 20px;font:600 .9rem system-ui,sans-serif;cursor:pointer}
 #err{color:#ffb4a8}
 </style>
 </head>
@@ -58,6 +59,7 @@ p{margin:0;color:var(--muted);line-height:1.55}
     <p>Mejor con auriculares: el sonido es espacial.</p>
     <p id="err" hidden></p>
     <button id="go">Entrar al río</button>
+    <button id="go2" hidden>Empezar desde el principio</button>
   </div>
 </div>
 <script src="app.js"></script>
