@@ -1,5 +1,5 @@
 /* Service worker: precarga todo y sirve sin conexión. Sube VERSION para forzar actualización. */
-const VERSION='v19';
+const VERSION='v20';
 const CACHE = 'respirar-' + VERSION;
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
@@ -10,17 +10,26 @@ const ASSETS = [
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
 ];
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => Promise.all(ASSETS.map(u => fetch(new Request(u, {cache: 'reload'})).then(r => { if (!r.ok) throw new Error(u); return c.put(u, r); })))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('respirar-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('respirar-') && k !== CACHE && k !== 'respirar-fonts').map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 /* Caché primero, con actualización en segundo plano (stale-while-revalidate) solo para mismo origen. */
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.origin !== location.origin) return;
+  if (url.origin !== location.origin) {
+    /* Fuentes de Google: se guardan la primera vez y luego funcionan sin conexión */
+    if (/(^|\.)fonts\.(googleapis|gstatic)\.com$/.test(url.hostname)) {
+      e.respondWith(caches.open('respirar-fonts').then(async c => {
+        const hit = await c.match(req); if (hit) return hit;
+        try { const r = await fetch(req); if (r && (r.ok || r.type === 'opaque')) c.put(req, r.clone()); return r; } catch (err) { return Response.error(); }
+      }));
+    }
+    return;
+  }
   e.respondWith(caches.open(CACHE).then(async c => {
     const hit = await c.match(req, {ignoreSearch: true});
     const net = fetch(req).then(r => { if (r && r.ok) c.put(req, r.clone()); return r }).catch(() => null);
