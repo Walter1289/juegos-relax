@@ -5,7 +5,7 @@ Dos juegos relajantes en HTML5 Canvas, sin dependencias ni build:
 
 - `rio/` Río de Linternas
 - `cabana/` Cabaña del Acantilado
-- `rio3d/` Río 3D (prototipo en primera persona, Three.js)
+- `rio3d/` Río 3D (primera y tercera persona, Three.js)
 - `cabana3d/` Cabaña 3D (prototipo, Three.js)
 
 Se publican con GitHub Pages desde la rama `main`, carpeta raíz.
