@@ -61,6 +61,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     <span>Linternas <b id="lamps">0</b></span>
     <span>Lugares <b id="places">0/10</b></span>
   </div>
+  <button class="btn" id="pausebtn" data-pz type="button">Pausa</button>
   <button class="btn" id="breath-btn" type="button">Respirar</button>
   <button class="btn" id="mute" type="button">Sonido: sí</button>
   <button class="btn" id="reset" type="button">Reiniciar</button>
@@ -933,10 +934,11 @@ $('#reset').onclick=e=>{
 addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden)save();
-  const c=A.ctx;if(c){if(document.hidden)c.suspend();else c.resume()}
+  const c=A.ctx;if(c){if(document.hidden)c.suspend();else if(!PZ.on)c.resume()}
 });
 let last=0,saveAcc=0;
 function frame(ms){
+  if(window.PZ&&PZ.on){last=ms/1000;requestAnimationFrame(frame);return}
   const t=ms/1000,dt=Math.min(.05,last?t-last:.016);last=t;
   if(G.started){update(dt);saveAcc+=dt;if(saveAcc>8){saveAcc=0;save()}}else G.clock+=dt;
   fx(dt);render();
@@ -983,6 +985,33 @@ requestAnimationFrame(frame);
     if(played>=next){next+=30*60;toast('Llevas un buen rato. Toma agua, suelta los hombros y respira hondo. El juego te espera.')}
   },5000);
 })();
+</script>
+<script>
+/* Pausa compartida: botón + Esc, pausa automática al salir de la pestaña, silencia el audio.
+   Cada juego define PZ.ctx() y PZ.started() y se detiene mientras PZ.on sea true. */
+(function(){
+  if(window.PZ)return;
+  const PZ=window.PZ={on:false,ctx:()=>null,started:()=>true};
+  const st=document.createElement('style');
+  st.textContent='#pz{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(24,26,56,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:#fbf1e0;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px}#pz[hidden]{display:none}#pz .c{display:flex;flex-direction:column;gap:12px;align-items:center}#pz h2{margin:0;font:600 1.7rem system-ui}#pz p{margin:0;color:#cbc8e8;line-height:1.5}#pz button{background:#ffc77a;color:#3b2a1a;border:0;border-radius:99px;padding:13px 32px;font:700 1rem system-ui;cursor:pointer}';
+  document.head.appendChild(st);
+  const d=document.createElement('div');d.id='pz';d.hidden=true;
+  d.innerHTML='<div class="c"><h2>En pausa</h2><p>Respira con calma.<br>Todo seguirá aquí cuando vuelvas.</p><button type="button" id="pzGo">Continuar</button></div>';
+  const mount=()=>document.body.appendChild(d);document.body?mount():addEventListener('DOMContentLoaded',mount);
+  PZ.set=function(on){
+    on=!!on;if(on===PZ.on)return;if(on&&!PZ.started())return;
+    PZ.on=on;d.hidden=!on;
+    try{const c=PZ.ctx();if(c)on?c.suspend():c.resume()}catch(e){}
+    document.querySelectorAll('[data-pz]').forEach(b=>b.textContent=on?'Continuar':'Pausa');
+    if(on)try{document.activeElement&&document.activeElement.blur()}catch(e){}
+  };
+  PZ.toggle=()=>PZ.set(!PZ.on);
+  d.querySelector('#pzGo').onclick=()=>PZ.set(false);
+  document.addEventListener('keydown',e=>{if(e.code==='Escape'&&!document.body.classList.contains('photo')&&!document.querySelector('.xm'))PZ.toggle()});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&PZ.started()&&!PZ.on)PZ.set(true)});
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-pz]');if(b)PZ.toggle()});
+})();
+PZ.ctx=()=>A.ctx;PZ.started=()=>G.started;
 </script>
 
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js").catch(function(){})</script>

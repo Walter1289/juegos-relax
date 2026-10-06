@@ -68,6 +68,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     <span id="pct">0%</span>
   </div>
   <span class="mats" id="mats">Tablas: 0</span>
+  <button class="btn" id="pausebtn" data-pz type="button">Pausa</button>
   <button class="btn" id="breath-btn" type="button">Respirar</button>
   <button class="btn" id="mute" type="button">Sonido: sí</button>
   <button class="btn" id="reset" type="button">Reiniciar</button>
@@ -654,7 +655,7 @@ function update(dt,t){
   if(dirtyFlag&&t-lastMeasure>.35){lastMeasure=t;dirtyFlag=false;measure();updateUI();if(started)checkDone()}
 }
 let last=0;
-function frame(ms){const t=ms/1000,dt=Math.min(.05,t-last);last=t;update(dt,t);render(t);requestAnimationFrame(frame)}
+function frame(ms){if(window.PZ&&PZ.on){last=ms/1000;requestAnimationFrame(frame);return}const t=ms/1000,dt=Math.min(.05,t-last);last=t;update(dt,t);render(t);requestAnimationFrame(frame)}
 
 /* ===== Entrada: arrastrar limpia, tocar repara ===== */
 let drawing=false,lx=0,ly=0,sx=0,sy=0,st=0,moved=0;
@@ -811,7 +812,7 @@ const A={
   },
   mute(on){this.muted=on;if(this.master)this.master.gain.setTargetAtTime(on?0:.55,this.ctx.currentTime,.05)}
 };
-document.addEventListener('visibilitychange',()=>{const c=A.ctx;if(!c)return;if(document.hidden)c.suspend();else c.resume()});
+document.addEventListener('visibilitychange',()=>{const c=A.ctx;if(!c)return;if(document.hidden)c.suspend();else if(!PZ.on)c.resume()});
 
 /* ===== Controles y arranque ===== */
 $('#go').onclick=()=>{started=true;$('#start').hidden=true;A.init();toast(pendingMsg||'Empieza limpiando el piso. Arrastra para lavar.');pendingMsg=''};
@@ -868,6 +869,33 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&started)sa
     if(played>=next){next+=30*60;toast('Llevas un buen rato. Toma agua, suelta los hombros y respira hondo. El juego te espera.')}
   },5000);
 })();
+</script>
+<script>
+/* Pausa compartida: botón + Esc, pausa automática al salir de la pestaña, silencia el audio.
+   Cada juego define PZ.ctx() y PZ.started() y se detiene mientras PZ.on sea true. */
+(function(){
+  if(window.PZ)return;
+  const PZ=window.PZ={on:false,ctx:()=>null,started:()=>true};
+  const st=document.createElement('style');
+  st.textContent='#pz{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(24,26,56,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:#fbf1e0;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px}#pz[hidden]{display:none}#pz .c{display:flex;flex-direction:column;gap:12px;align-items:center}#pz h2{margin:0;font:600 1.7rem system-ui}#pz p{margin:0;color:#cbc8e8;line-height:1.5}#pz button{background:#ffc77a;color:#3b2a1a;border:0;border-radius:99px;padding:13px 32px;font:700 1rem system-ui;cursor:pointer}';
+  document.head.appendChild(st);
+  const d=document.createElement('div');d.id='pz';d.hidden=true;
+  d.innerHTML='<div class="c"><h2>En pausa</h2><p>Respira con calma.<br>Todo seguirá aquí cuando vuelvas.</p><button type="button" id="pzGo">Continuar</button></div>';
+  const mount=()=>document.body.appendChild(d);document.body?mount():addEventListener('DOMContentLoaded',mount);
+  PZ.set=function(on){
+    on=!!on;if(on===PZ.on)return;if(on&&!PZ.started())return;
+    PZ.on=on;d.hidden=!on;
+    try{const c=PZ.ctx();if(c)on?c.suspend():c.resume()}catch(e){}
+    document.querySelectorAll('[data-pz]').forEach(b=>b.textContent=on?'Continuar':'Pausa');
+    if(on)try{document.activeElement&&document.activeElement.blur()}catch(e){}
+  };
+  PZ.toggle=()=>PZ.set(!PZ.on);
+  d.querySelector('#pzGo').onclick=()=>PZ.set(false);
+  document.addEventListener('keydown',e=>{if(e.code==='Escape'&&!document.body.classList.contains('photo')&&!document.querySelector('.xm'))PZ.toggle()});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&PZ.started()&&!PZ.on)PZ.set(true)});
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-pz]');if(b)PZ.toggle()});
+})();
+PZ.ctx=()=>A.ctx;PZ.started=()=>started;
 </script>
 
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js").catch(function(){})</script>
