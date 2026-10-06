@@ -1,0 +1,85 @@
+<title>Cabaña del Acantilado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Concepto: juego a pantalla completa. Escena centrada con márgenes, HUD arriba, lista de reparaciones abajo. Paleta nocturna fija por elección (noche con lámparas). */
+:root{--bg:#2b2d52;--panel:#363a66;--panel-2:#42477a;--ink:#fbf1e0;--muted:#cbc8e8;--lamp:#ffc77a;--moss:#a9d08f;--line:#5a609a;--f-display:'Fredoka','Trebuchet MS',system-ui,sans-serif;--f-body:'Nunito','Segoe UI',system-ui,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;display:flex;flex-direction:column;gap:8px;padding-inline:16px;padding-block:10px;overflow:hidden}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+h1{font:600 1.15rem/1.1 var(--f-display);margin:0;letter-spacing:.01em;color:var(--ink)}
+.prog{display:flex;align-items:center;gap:10px;flex:1 1 200px;min-width:0}
+.bar{flex:1;height:10px;border-radius:99px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--moss),var(--lamp));border-radius:99px;transition:width .5s}
+#pct{font-variant-numeric:tabular-nums;min-width:3.4ch;text-align:right;color:var(--muted);font-weight:700}
+.mats{font-weight:700;color:var(--lamp);font-variant-numeric:tabular-nums;white-space:nowrap}
+button{font:inherit;color:inherit}
+.btn{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:6px 12px;cursor:pointer;color:var(--ink);font-weight:600}
+.btn:hover{border-color:var(--lamp)}
+:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+#stage{flex:1;min-height:0;position:relative;display:grid;place-items:center}
+canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.5);cursor:crosshair;background:#3a3d73}
+#toast{position:absolute;left:50%;bottom:10px;transform:translate(-50%,8px);background:rgba(54,58,102,.95);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none;max-width:92%;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#start{position:absolute;inset:0;display:grid;place-items:center;background:rgba(36,38,72,.84);backdrop-filter:blur(3px);z-index:2;padding:16px}
+[hidden]{display:none!important}
+.card{max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.card h2{font:600 1.6rem/1.1 var(--f-display);margin:0}
+.card p,.card li{margin:0;color:var(--muted);line-height:1.5}
+.card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.go{background:var(--lamp);color:#2a1a08;border:0;border-radius:12px;padding:12px 18px;font-weight:800;font-size:1rem;cursor:pointer}
+#chips{display:flex;flex-direction:column;gap:6px;max-height:30vh;overflow-y:auto}
+.grp{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.lab{font:700 .68rem var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:6.2rem}
+.loot{font-size:.72rem;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:99px;padding:3px 9px}
+.loot.on{color:var(--ink);border-color:var(--moss)}
+.chip{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;text-align:left;min-width:0}
+.chip b{font-size:.85rem}
+.chip small{color:var(--muted);font-size:.72rem}
+.chip.ready{border-color:var(--lamp)}
+.chip.ready small{color:var(--lamp)}
+.chip.done{border-color:var(--moss)}
+.chip.done small{color:var(--moss)}
+@media (prefers-reduced-motion:reduce){.bar i,#toast{transition:none}}
+
+#breath{position:fixed;left:50%;top:84px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:3}
+#breath .orb{width:128px;height:128px;border-radius:50%;background:radial-gradient(circle at 38% 32%,rgba(255,255,255,.6),rgba(196,176,255,.3) 58%,rgba(196,176,255,.1));box-shadow:0 0 44px rgba(206,186,255,.38);transform:scale(.5)}
+#breath span{font-weight:700;font-size:.95rem;color:var(--ink);text-shadow:0 1px 8px rgba(0,0,0,.55)}
+</style>
+
+<header>
+  <h1>Cabaña del Acantilado</h1>
+  <div class="prog">
+    <div class="bar" role="progressbar" aria-label="Progreso de la cabaña" aria-valuemin="0" aria-valuemax="100"><i id="fill"></i></div>
+    <span id="pct">0%</span>
+  </div>
+  <span class="mats" id="mats">Tablas: 0</span>
+  <button class="btn" id="pausebtn" data-pz type="button">Pausa</button>
+  <button class="btn" id="breath-btn" type="button">Respirar</button>
+  <button class="btn" id="mute" type="button">Sonido: sí</button>
+  <button class="btn" id="reset" type="button">Reiniciar</button>
+</header>
+<main id="stage">
+  <canvas id="game" aria-label="Cabaña en un acantilado, de noche"></canvas>
+  <div id="toast" role="status"></div>
+  <div id="start">
+    <div class="card">
+      <h2>Cabaña del Acantilado</h2>
+      <p>Una cabaña olvidada en lo alto de la montaña. Límpiala, repárala y enciende sus luces, sin prisa.</p>
+      <ul>
+        <li>Arrastra el dedo o el mouse para lavar la suciedad.</li>
+        <li>Al limpiar ganas tablas. Toca un objeto ya limpio para repararlo.</li>
+        <li>Con auriculares el sonido es envolvente: el agua, las campanas y la lluvia suenan desde su lugar.</li>
+        <li>El avance se guarda en este dispositivo.</li>
+      </ul>
+      <button class="go" id="go" type="button">Tocar para empezar</button>
+    </div>
+  </div>
+</main>
+<div id="breath" hidden aria-live="polite"><div class="orb"></div><span></span></div>
+
+<div id="chips"></div>
+
+<!--BUNDLE-->
