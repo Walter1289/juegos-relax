@@ -418,14 +418,14 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       const m = location.pathname.match(/\/(cabana3d|rio3d|cabana|rio)(\/|$)/);
       return m ? m[1] : /caba/i.test(document.title) ? "cabana" : "rio";
     })(), VK = "ux-vol-" + GM;
-    const W2 = { vol: ls.get(VK, ls.get("ux-vol", "1")), soft: ls.get("ux-soft", "0") === "1", k: 1, nodes: [], end: 0, min: 0, ov: null };
+    const W3 = { vol: ls.get(VK, ls.get("ux-vol", "1")), soft: ls.get("ux-soft", "0") === "1", k: 1, nodes: [], end: 0, min: 0, ov: null };
     UX3.quiet = false;
     const apply = () => {
-      for (const n of W2.nodes) {
+      for (const n of W3.nodes) {
         try {
           const t = n.c.currentTime;
-          n.lp.frequency.setTargetAtTime(W2.soft ? 2800 : 22e3, t, 0.1);
-          n.g.gain.setTargetAtTime(+W2.vol * W2.k, t, 0.1);
+          n.lp.frequency.setTargetAtTime(W3.soft ? 2800 : 22e3, t, 0.1);
+          n.g.gain.setTargetAtTime(+W3.vol * W3.k, t, 0.1);
         } catch (e) {
         }
       }
@@ -433,14 +433,14 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     UX3.out = (c, node) => {
       const lp = c.createBiquadFilter();
       lp.type = "lowpass";
-      lp.frequency.value = W2.soft ? 2800 : 22e3;
+      lp.frequency.value = W3.soft ? 2800 : 22e3;
       lp.Q.value = 0.5;
       const g2 = c.createGain();
-      g2.gain.value = +W2.vol * W2.k;
+      g2.gain.value = +W3.vol * W3.k;
       node.connect(lp);
       lp.connect(g2);
       g2.connect(c.destination);
-      W2.nodes.push({ c, lp, g: g2 });
+      W3.nodes.push({ c, lp, g: g2 });
       return g2;
     };
     UX3.pinkSrc = (c, k) => {
@@ -479,60 +479,60 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       return g2;
     };
     UX3.api = {
-      soft: () => W2.soft,
+      soft: () => W3.soft,
       setSoft(v) {
-        W2.soft = !!v;
+        W3.soft = !!v;
         ls.set("ux-soft", v ? "1" : "0");
         apply();
       },
-      vol: () => +W2.vol,
+      vol: () => +W3.vol,
       setVol(v) {
-        W2.vol = String(v);
-        ls.set(VK, W2.vol);
+        W3.vol = String(v);
+        ls.set(VK, W3.vol);
         apply();
       },
-      sleepMin: () => W2.min,
+      sleepMin: () => W3.min,
       sleep(m) {
-        W2.min = m;
-        W2.end = m ? Date.now() + m * 6e4 : 0;
-        W2.k = 1;
+        W3.min = m;
+        W3.end = m ? Date.now() + m * 6e4 : 0;
+        W3.k = 1;
         UX3.quiet = false;
-        if (W2.ov) W2.ov.style.opacity = 0;
+        if (W3.ov) W3.ov.style.opacity = 0;
         apply();
       }
     };
     const sleepTick = () => {
-      if (!W2.end) return;
-      const rem = (W2.end - Date.now()) / 1e3;
-      if (!W2.ov) {
+      if (!W3.end) return;
+      const rem = (W3.end - Date.now()) / 1e3;
+      if (!W3.ov) {
         const o = document.createElement("div");
         o.style.cssText = "position:fixed;inset:0;z-index:29;pointer-events:none;background:#1a0d00;opacity:0;transition:opacity 1.2s";
         document.body.appendChild(o);
-        W2.ov = o;
+        W3.ov = o;
       }
       if (rem <= 0) {
-        W2.end = 0;
-        W2.min = 0;
-        W2.k = 0;
+        W3.end = 0;
+        W3.min = 0;
+        W3.k = 0;
         apply();
-        W2.ov.style.opacity = 0.6;
+        W3.ov.style.opacity = 0.6;
         try {
           window.PZ && PZ.set(true);
         } catch (e) {
         }
         setTimeout(() => {
-          W2.k = 1;
+          W3.k = 1;
           UX3.quiet = false;
           apply();
-          W2.ov.style.opacity = 0;
+          W3.ov.style.opacity = 0;
           UX3._sb && UX3._sb();
         }, 1500);
         return;
       }
       if (rem < 300) {
         UX3.quiet = true;
-        W2.k = Math.pow(rem / 300, 2);
-        W2.ov.style.opacity = (1 - rem / 300) * 0.6;
+        W3.k = Math.pow(rem / 300, 2);
+        W3.ov.style.opacity = (1 - rem / 300) * 0.6;
         apply();
       }
     };
@@ -1029,7 +1029,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   var KEY = "cabana-acantilado-v2";
   var OLD_KEY = "cabana-acantilado-v1";
   var CLEAN_MIN = 0.55;
-  var state = { repaired: {}, spent: 0, done: false, best: 0, decor: {}, own: {}, mem: 0, notes: [], vis: {}, ltr: {} };
+  var state = { repaired: {}, spent: 0, done: false, best: 0, decor: {}, own: {}, mem: 0, notes: [], vis: {}, ltr: {}, cnt: {} };
   var DW = W / 2;
   var DH = H / 2;
   var dirt = mk(DW, DH);
@@ -1302,7 +1302,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   // src2d/cabana/persist.js
   function save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ r: state.repaired, s: state.spent, d: state.done, b: state.best, dc: state.decor, ow: state.own, me: state.mem, nt: state.notes, vv: state.vis, lt: state.ltr, t: Date.now(), img: dirt.toDataURL("image/png") }));
+      localStorage.setItem(KEY, JSON.stringify({ r: state.repaired, s: state.spent, d: state.done, b: state.best, dc: state.decor, ow: state.own, me: state.mem, nt: state.notes, vv: state.vis, lt: state.ltr, ct: state.cnt, t: Date.now(), img: dirt.toDataURL("image/png") }));
     } catch (e) {
     }
   }
@@ -1331,6 +1331,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     state.notes = o.nt || [];
     state.vis = o.vv || {};
     state.ltr = o.lt || {};
+    state.cnt = o.ct || {};
     rt.sceneDirty = true;
     const finish = () => {
       if (o.t && (() => {
@@ -1709,8 +1710,8 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         return { o, gn };
       });
       const deg = (i) => {
-        const n2 = SC.length, k = (i % n2 + n2) % n2, oc = Math.floor(i / n2);
-        return D3 * Math.pow(2, (SC[k] + 12 * oc) / 12);
+        const n2 = SC.length, k = (i % n2 + n2) % n2, oc2 = Math.floor(i / n2);
+        return D3 * Math.pow(2, (SC[k] + 12 * oc2) / 12);
       };
       let root = 0, n = 0;
       const tune = (tc) => {
@@ -1960,6 +1961,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     state.notes = [];
     state.vis = {};
     state.ltr = {};
+    state.cnt = {};
     rt.sceneDirty = true;
     makeGrime();
     ITEMS.forEach((o) => o.flash = 0);
@@ -2459,6 +2461,267 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     drawStrings(g2, !!S.luces);
   }
 
+  // rio3d-src/zen.js
+  var SK = "zen-sand";
+  var W2 = 640;
+  var H2 = 380;
+  var STONES = [[170, 150, 34], [300, 235, 24], [470, 120, 30]];
+  function addZenTexts(ux) {
+    ux.add([["Jard\xEDn zen", "Zen garden", "\u7985\u306E\u5EAD"], ["Rastrillar la arena con calma", "Rake the sand slowly", "\u7802\u3092\u3086\u3063\u304F\u308A\u304B\u304D\u5206\u3051\u308B"], ["Olas alrededor de las piedras", "Ripples around the stones", "\u77F3\u306E\u307E\u308F\u308A\u306B\u6CE2\u7D0B"], ["Alisar", "Smooth", "\u306A\u3089\u3059"], ["Cerrar", "Close", "\u9589\u3058\u308B"], ["Se abri\xF3 el jard\xEDn zen: ya le\xEDste todas las cartas de Mara", "The zen garden is open: you have read all of Mara\u2019s letters", "\u7985\u306E\u5EAD\u304C\u958B\u304D\u307E\u3057\u305F\u3002\u30DE\u30E9\u306E\u624B\u7D19\u3092\u3059\u3079\u3066\u8AAD\u307F\u307E\u3057\u305F"], ["Arrastra el dedo sobre la arena. No hay prisa ni forma correcta.", "Drag your finger over the sand. No rush, no right way.", "\u7802\u306E\u4E0A\u3092\u6307\u3067\u306A\u305E\u3063\u3066\u304F\u3060\u3055\u3044\u3002\u6025\u3050\u5FC5\u8981\u3082\u3001\u6B63\u3057\u3044\u5F62\u3082\u3042\u308A\u307E\u305B\u3093\u3002"], ["Un momento de calma te dej\xF3 un recuerdo", "A calm moment left you a keepsake", "\u9759\u304B\u306A\u3072\u3068\u3068\u304D\u304C\u601D\u3044\u51FA\u3092\u3072\u3068\u3064\u6B8B\u3057\u307E\u3057\u305F"], ["Mara dej\xF3 escrito: \xABel jard\xEDn no se termina, se acompa\xF1a\xBB", "Mara wrote: \u201Ca garden is never finished, only kept company\u201D", "\u30DE\u30E9\u306F\u3053\u3046\u66F8\u304D\u307E\u3057\u305F\u3002\u300C\u5EAD\u306F\u5B8C\u6210\u3055\u305B\u308B\u3082\u306E\u3067\u306F\u306A\u304F\u3001\u5BC4\u308A\u305D\u3046\u3082\u306E\u300D"]]);
+  }
+  var zenUnlocked = (state2, n) => {
+    const l = state2.ltr || {};
+    for (let i = 0; i < (n || 11); i++) if (!l[i]) return false;
+    return true;
+  };
+  function openZen(o) {
+    const tr = o.tr || ((s) => s), ov = document.createElement("div");
+    ov.style.cssText = "position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(14,16,36,.94);color:#fbf1e0;font:500 .9rem system-ui;padding:12px";
+    const tt = document.createElement("div");
+    tt.textContent = tr("Jard\xEDn zen");
+    tt.style.cssText = "font:600 1.15rem system-ui";
+    const cv = document.createElement("canvas");
+    cv.width = W2;
+    cv.height = H2;
+    cv.style.cssText = "position:relative;inset:auto;display:block;height:auto;z-index:auto;width:min(94vw,640px);max-height:58vh;aspect-ratio:640/380;border-radius:18px;border:1px solid #5a609a;touch-action:none;box-shadow:0 10px 40px rgba(0,0,0,.45);cursor:crosshair";
+    const hint = document.createElement("div");
+    hint.textContent = tr("Arrastra el dedo sobre la arena. No hay prisa ni forma correcta.");
+    hint.style.cssText = "opacity:.7;font-size:.8rem;text-align:center;max-width:90vw";
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;justify-content:center";
+    const mk2 = (t, f) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = tr(t);
+      b.style.cssText = "min-height:44px;padding:8px 16px;border-radius:99px;border:1px solid #5a609a;background:#363a66;color:#fbf1e0;font:inherit;cursor:pointer";
+      b.onclick = f;
+      row.appendChild(b);
+      return b;
+    };
+    ov.append(tt, cv, hint, row);
+    document.body.appendChild(ov);
+    const g2 = cv.getContext("2d"), sand = document.createElement("canvas");
+    sand.width = W2;
+    sand.height = H2;
+    const sg = sand.getContext("2d");
+    const base2 = () => {
+      sg.fillStyle = "#d9c9a3";
+      sg.fillRect(0, 0, W2, H2);
+      for (let i = 0; i < 2400; i++) {
+        sg.fillStyle = "rgba(" + (i % 2 ? "120,100,70" : "255,245,215") + ",.07)";
+        sg.fillRect(Math.random() * W2, Math.random() * H2, 1.4, 1.4);
+      }
+    };
+    base2();
+    let dirty = false;
+    try {
+      const s = localStorage.getItem(SK);
+      if (s) {
+        const im = new Image();
+        im.onload = () => {
+          sg.drawImage(im, 0, 0);
+          draw();
+        };
+        im.src = s;
+      }
+    } catch (e) {
+    }
+    const save2 = () => {
+      if (!dirty) return;
+      dirty = false;
+      try {
+        localStorage.setItem(SK, sand.toDataURL("image/png"));
+      } catch (e) {
+      }
+    };
+    const stone = (x, y, r) => {
+      g2.fillStyle = "rgba(0,0,0,.22)";
+      g2.beginPath();
+      g2.ellipse(x + 5, y + r * 0.7, r * 1.05, r * 0.45, 0, 0, 7);
+      g2.fill();
+      const gr = g2.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r * 1.1);
+      gr.addColorStop(0, "#9d9aa6");
+      gr.addColorStop(1, "#4f4d5a");
+      g2.fillStyle = gr;
+      g2.beginPath();
+      g2.ellipse(x, y, r, r * 0.78, 0, 0, 7);
+      g2.fill();
+      g2.fillStyle = "rgba(110,150,100,.5)";
+      g2.beginPath();
+      g2.ellipse(x - r * 0.2, y - r * 0.5, r * 0.4, r * 0.14, 0, 0, 7);
+      g2.fill();
+    };
+    const bonsai = (x, y) => {
+      g2.fillStyle = "#6b4d3a";
+      g2.fillRect(x - 4, y - 34, 8, 34);
+      g2.fillStyle = "#8b6a50";
+      g2.fillRect(x - 28, y - 6, 56, 10);
+      for (const [dx, dy, r] of [[-14, -42, 15], [10, -52, 18], [22, -34, 12]]) {
+        g2.fillStyle = "#5d9a6c";
+        g2.beginPath();
+        g2.arc(x + dx, y + dy, r, 0, 7);
+        g2.fill();
+        g2.fillStyle = "rgba(255,255,255,.12)";
+        g2.beginPath();
+        g2.arc(x + dx - 4, y + dy - 5, r * 0.5, 0, 7);
+        g2.fill();
+      }
+    };
+    const lantern = (x, y) => {
+      const c = "#8a8896";
+      g2.fillStyle = c;
+      g2.fillRect(x - 14, y - 8, 28, 8);
+      g2.fillRect(x - 5, y - 34, 10, 28);
+      g2.fillRect(x - 17, y - 42, 34, 8);
+      g2.fillRect(x - 11, y - 62, 22, 20);
+      g2.fillStyle = "rgba(255,225,160,.95)";
+      g2.fillRect(x - 6, y - 57, 12, 11);
+      g2.fillStyle = c;
+      g2.beginPath();
+      g2.moveTo(x - 19, y - 62);
+      g2.lineTo(x, y - 78);
+      g2.lineTo(x + 19, y - 62);
+      g2.fill();
+      const gl = g2.createRadialGradient(x, y - 52, 2, x, y - 52, 60);
+      gl.addColorStop(0, "rgba(255,200,120,.35)");
+      gl.addColorStop(1, "rgba(255,200,120,0)");
+      g2.fillStyle = gl;
+      g2.fillRect(x - 60, y - 112, 120, 120);
+    };
+    function draw() {
+      g2.drawImage(sand, 0, 0);
+      for (const [x, y, r] of STONES) stone(x, y, r);
+      bonsai(560, 330);
+      lantern(70, 340);
+      const v = g2.createRadialGradient(W2 / 2, H2 / 2, H2 * 0.35, W2 / 2, H2 / 2, H2 * 0.9);
+      v.addColorStop(0, "rgba(20,20,40,0)");
+      v.addColorStop(1, "rgba(20,20,40,.35)");
+      g2.fillStyle = v;
+      g2.fillRect(0, 0, W2, H2);
+    }
+    draw();
+    let ctx = null, gain = null, src = null;
+    const snd = () => {
+      try {
+        ctx = o.ctx && o.ctx();
+        if (!ctx || gain) return;
+        const f = ctx.createBiquadFilter();
+        f.type = "bandpass";
+        f.frequency.value = 1100;
+        f.Q.value = 0.6;
+        gain = ctx.createGain();
+        gain.gain.value = 0;
+        src = window.UX && UX.pinkSrc ? UX.pinkSrc(ctx, 1) : null;
+        if (!src) return;
+        src.connect(f);
+        f.connect(gain);
+        window.UX ? UX.out(ctx, gain) : gain.connect(ctx.destination);
+        src.start(0);
+      } catch (e) {
+        gain = null;
+      }
+    };
+    const vol = (v) => {
+      try {
+        gain && ctx && gain.gain.setTargetAtTime(v, ctx.currentTime, 0.05);
+      } catch (e) {
+      }
+    };
+    let last2 = null, dist = 0, got = 0, px = 0, py = 0;
+    const pt = (e) => {
+      const r = cv.getBoundingClientRect();
+      return [(e.clientX - r.left) / r.width * W2, (e.clientY - r.top) / r.height * H2];
+    };
+    cv.addEventListener("pointerdown", (e) => {
+      cv.setPointerCapture(e.pointerId);
+      last2 = pt(e);
+      snd();
+      vol(0.012);
+    });
+    cv.addEventListener("pointermove", (e) => {
+      if (!last2) return;
+      const p = pt(e), dx = p[0] - last2[0], dy = p[1] - last2[1], d = Math.hypot(dx, dy);
+      if (d < 2) return;
+      const nx = -dy / d, ny = dx / d;
+      for (let k = -2; k <= 2; k++) {
+        const ox = nx * k * 8, oy = ny * k * 8;
+        sg.lineCap = "round";
+        sg.lineWidth = 3.2;
+        sg.strokeStyle = "rgba(95,78,52,.34)";
+        sg.beginPath();
+        sg.moveTo(last2[0] + ox + 1, last2[1] + oy + 1);
+        sg.lineTo(p[0] + ox + 1, p[1] + oy + 1);
+        sg.stroke();
+        sg.lineWidth = 2;
+        sg.strokeStyle = "rgba(255,248,225,.5)";
+        sg.beginPath();
+        sg.moveTo(last2[0] + ox - 1, last2[1] + oy - 1);
+        sg.lineTo(p[0] + ox - 1, p[1] + oy - 1);
+        sg.stroke();
+      }
+      last2 = p;
+      dist += d;
+      dirty = true;
+      draw();
+      vol(Math.min(0.03, 6e-3 + d * 12e-4));
+      if (dist > 1100 && got < 3) {
+        dist = 0;
+        got++;
+        try {
+          o.addMem && o.addMem(1);
+          o.say && o.say(tr("Un momento de calma te dej\xF3 un recuerdo"));
+        } catch (e2) {
+        }
+      }
+    });
+    const end = () => {
+      last2 = null;
+      vol(0);
+      save2();
+    };
+    cv.addEventListener("pointerup", end);
+    cv.addEventListener("pointercancel", end);
+    mk2("Olas alrededor de las piedras", () => {
+      for (const [x, y, r] of STONES) for (let rad = r + 14; rad < r + 112; rad += 11) {
+        sg.lineWidth = 3;
+        sg.strokeStyle = "rgba(95,78,52,.32)";
+        sg.beginPath();
+        sg.ellipse(x + 1, y + 1, rad, rad * 0.8, 0, 0, 7);
+        sg.stroke();
+        sg.lineWidth = 1.8;
+        sg.strokeStyle = "rgba(255,248,225,.5)";
+        sg.beginPath();
+        sg.ellipse(x - 1, y - 1, rad, rad * 0.8, 0, 0, 7);
+        sg.stroke();
+      }
+      dirty = true;
+      draw();
+      save2();
+      try {
+        o.chime && o.chime();
+      } catch (e) {
+      }
+    });
+    mk2("Alisar", () => {
+      base2();
+      dirty = true;
+      draw();
+      save2();
+    });
+    mk2("Cerrar", () => {
+      end();
+      try {
+        src && src.stop && src.stop();
+        gain && gain.disconnect();
+      } catch (e) {
+      }
+      ov.remove();
+    });
+    ov.onclick = (e) => {
+      if (e.target === ov) row.lastChild.click();
+    };
+  }
+
   // rio3d-src/tasks.js
   var TKEY = "rio-tasks";
   var T = [
@@ -2520,9 +2783,34 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   };
   function addStoryTexts(ux) {
     addTaskTexts(ux);
+    addMileTexts(ux);
+    addZenTexts(ux);
     ux.add(L.map((x) => [x[1], x[2], x[3]]));
     ux.add([["Puente de madera", "Wooden bridge", "\u6728\u306E\u6A4B"], ["Torii sobre el agua", "Torii over the water", "\u6C34\u4E0A\u306E\u9CE5\u5C45"], ["Aldea de farolillos", "Lantern village", "\u3061\u3087\u3046\u3061\u3093\u306E\u6751"], ["Jard\xEDn de sakura", "Sakura garden", "\u685C\u306E\u5EAD"], ["Ca\xF1averal de las garzas", "Heron reedbed", "\u30B5\u30AE\u306E\u8466\u539F"], ["Templo de la campana", "Bell temple", "\u9418\u306E\u5BFA"], ["Cascadita de musgo", "Mossy waterfall", "\u82D4\u306E\u5C0F\u3055\u306A\u6EDD"], ["Casa de t\xE9", "Tea house", "\u8336\u5C4B"], ["Bosque de bamb\xFA", "Bamboo forest", "\u7AF9\u6797"], ["Estanque de lotos", "Lotus pond", "\u84EE\u306E\u6C60"], ["Castillo de la Garza Blanca", "White Heron Castle", "\u767D\u9DFA\u57CE"], ["Cartas de Mara", "Mara\u2019s letters", "\u30DE\u30E9\u306E\u624B\u7D19"], ["Carta sin abrir", "Unopened letter", "\u672A\u958B\u5C01\u306E\u624B\u7D19"], ["Desc\xFAbrelo en el r\xEDo para leerla", "Discover it on the river to read it", "\u5DDD\u3067\u898B\u3064\u3051\u308B\u3068\u8AAD\u3081\u307E\u3059"], ["Abrir carta", "Open letter", "\u624B\u7D19\u3092\u958B\u304F"], ["Notas de visitantes", "Visitor notes", "\u8A2A\u554F\u8005\u306E\u30E1\u30E2"], ["Mara te dej\xF3 una carta", "Mara left you a letter", "\u30DE\u30E9\u304C\u624B\u7D19\u3092\u6B8B\u3057\u307E\u3057\u305F"], ["Carta de Mara", "Letter from Mara", "\u30DE\u30E9\u306E\u624B\u7D19"], ["Una carta nueva te espera en el diario", "A new letter waits in the diary", "\u65E5\u8A18\u306B\u65B0\u3057\u3044\u624B\u7D19\u304C\u5C4A\u3044\u3066\u3044\u307E\u3059"]]);
     ux.rx([[/^Carta sin abrir · (.+)$/, (m, ix, tr) => tr("Carta sin abrir") + " \xB7 " + tr(m[1])]]);
+  }
+  var sf = (s) => Object.values(s.decor || {}).filter(Boolean).length;
+  var oc = (s) => Object.keys(s.own || {}).length;
+  var nn = (s) => (s.notes || []).length;
+  var ct = (s) => s.cnt || {};
+  var MILE = [
+    // [condición, pista es, en, ja]
+    [(s) => !!(s.repaired && s.repaired.techo), "Termina de reparar el techo", "Finish repairing the roof", "\u5C4B\u6839\u306E\u4FEE\u7406\u3092\u304A\u308F\u3089\u305B\u308B"],
+    [(s) => oc(s) >= 1, "Coloca tu primer objeto", "Place your first object", "\u6700\u521D\u306E\u98FE\u308A\u3092\u7F6E\u304F"],
+    [(s) => nn(s) >= 1, "Recibe a tu primer visitante", "Welcome your first visitor", "\u6700\u521D\u306E\u8A2A\u554F\u8005\u3092\u8FCE\u3048\u308B"],
+    [(s) => (ct(s).te || 0) >= 1, "Prepara un t\xE9", "Make a cup of tea", "\u304A\u8336\u3092\u3044\u308C\u308B"],
+    [(s) => sf(s) >= 2, "Decora dos lugares de la caba\xF1a", "Decorate two spots in the cabin", "\u5C0F\u5C4B\u306E2\u304B\u6240\u3092\u98FE\u308B"],
+    [(s) => (ct(s).rg || 0) >= 1, "Riega las plantas", "Water the plants", "\u690D\u7269\u306B\u6C34\u3092\u3084\u308B"],
+    [(s) => nn(s) >= 3, "Escucha las historias de tres visitas", "Hear the stories of three visits", "3\u56DE\u306E\u8A2A\u554F\u8005\u306E\u8A71\u3092\u805E\u304F"],
+    [(s) => sf(s) >= 4, "Decora cuatro lugares", "Decorate four spots", "4\u304B\u6240\u3092\u98FE\u308B"],
+    [(s) => oc(s) >= 5, "Re\xFAne cinco objetos", "Gather five objects", "\u98FE\u308A\u30925\u3064\u96C6\u3081\u308B"],
+    [(s) => nn(s) >= 6, "Lee seis notas de los visitantes", "Read six visitor notes", "\u8A2A\u554F\u8005\u306E\u30E1\u30E2\u30926\u3064\u8AAD\u3080"],
+    [(s) => sf(s) >= 6, "Deja decorados todos los lugares", "Leave every spot decorated", "\u3059\u3079\u3066\u306E\u5834\u6240\u3092\u98FE\u308B"]
+  ];
+  var letterOpen = (s, i) => !!(s.ltr || {})[i] || foundTypes().has(i) && MILE[i][0](s);
+  function addMileTexts(ux) {
+    ux.add(MILE.map((m) => [m[1], m[2], m[3]]));
+    ux.add([["Desc\xFAbrelo en el r\xEDo", "Discover it on the river", "\u5DDD\u3067\u898B\u3064\u3051\u307E\u3057\u3087\u3046"], ["Pista", "Hint", "\u30D2\u30F3\u30C8"], ["Se abri\xF3 una carta nueva en el diario", "A new letter opened in the diary", "\u65E5\u8A18\u306B\u65B0\u3057\u3044\u624B\u7D19\u304C\u958B\u304D\u307E\u3057\u305F"]]);
   }
   function lettersSection(box, state2, tr, addMem2, save2) {
     const f = foundTypes(), td = tasksDone();
@@ -2541,7 +2829,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         p.appendChild(e);
       };
       sp("\u2709 ");
-      if (f.has(i)) {
+      if (letterOpen(state2, i)) {
         if (!state2.ltr[i]) {
           state2.ltr[i] = 1;
           fresh++;
@@ -2566,7 +2854,15 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
         sp(tr("Carta sin abrir"));
         sp(" \xB7 ");
         sp(tr(LM_ES[i]));
-        p.style.opacity = ".55";
+        p.style.opacity = ".6";
+        const hn = document.createElement("div");
+        hn.style.cssText = "margin:4px 0 0 14px;font-size:.82em;color:#cfd6ff";
+        const a = document.createElement("span");
+        a.textContent = "\u2727 ";
+        const b = document.createElement("span");
+        b.textContent = tr(f.has(i) ? MILE[i][1] : "Desc\xFAbrelo en el r\xEDo");
+        hn.append(a, b);
+        p.appendChild(hn);
       }
       box.appendChild(p);
     });
@@ -2579,20 +2875,18 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   var newLetters = (state2) => {
     const f = foundTypes(), td = tasksDone();
     let n = 0;
-    f.forEach((i) => {
-      if (i >= 0 && i < LETTERS.length && !(state2.ltr || {})[i]) n++;
-    });
+    for (let i = 0; i < LETTERS.length; i++) if (!(state2.ltr || {})[i] && letterOpen(state2, i)) n++;
     Object.keys(td).forEach((i) => {
       if (f.has(+i) && ((state2.ltr || {})[i] || 0) < 2) n++;
     });
     return n;
   };
   var SEAS = ["Primavera", "Verano", "Oto\xF1o", "Invierno"];
-  var SK = "cab-season";
+  var SK2 = "cab-season";
   var MODES = ["auto", "0", "1", "2", "3"];
   var seasonMode = () => {
     try {
-      return localStorage.getItem(SK) || "auto";
+      return localStorage.getItem(SK2) || "auto";
     } catch (e) {
       return "auto";
     }
@@ -2606,7 +2900,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   var cycleSeason = () => {
     const n = MODES[(MODES.indexOf(seasonMode()) + 1) % 5];
     try {
-      localStorage.setItem(SK, n);
+      localStorage.setItem(SK2, n);
     } catch (e) {
     }
     return n;
@@ -2615,6 +2909,16 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   var SEAS_COL = [[255, 182, 200], [255, 222, 140], [232, 140, 70], [240, 246, 255]];
   function addSeasonTexts(ux) {
     ux.add([["Estaci\xF3n: Auto", "Season: Auto", "\u5B63\u7BC0: \u304A\u307E\u304B\u305B"], ["Estaci\xF3n: Primavera", "Season: Spring", "\u5B63\u7BC0: \u6625"], ["Estaci\xF3n: Verano", "Season: Summer", "\u5B63\u7BC0: \u590F"], ["Estaci\xF3n: Oto\xF1o", "Season: Autumn", "\u5B63\u7BC0: \u79CB"], ["Estaci\xF3n: Invierno", "Season: Winter", "\u5B63\u7BC0: \u51AC"]]);
+  }
+  var _seen = -1;
+  function watchLetters(state2, say, tr) {
+    const n = newLetters(state2);
+    if (_seen < 0) {
+      _seen = n;
+      return;
+    }
+    if (n > _seen) say(tr("Se abri\xF3 una carta nueva en el diario"));
+    _seen = n;
   }
 
   // rio3d-src/habdata.js
@@ -3226,6 +3530,8 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     if (rit.te.cd > 0) return;
     rit.te.cd = CD;
     rit.te.anim = 7;
+    state.cnt = state.cnt || {};
+    state.cnt.te = (state.cnt.te || 0) + 1;
     addMem(1);
     toast("Preparas t\xE9. El vapor sube despacio. Qu\xE9 calma.");
     uCap("Tetera", 2e4);
@@ -3243,6 +3549,8 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       return;
     }
     rit.riego.cd = CD;
+    state.cnt = state.cnt || {};
+    state.cnt.rg = (state.cnt.rg || 0) + 1;
     addMem(1);
     burst(768, 480);
     burst(420, 545);
@@ -3396,6 +3704,12 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     rb("te", "Preparar t\xE9", doTe, rit.te);
     rb("riego", "Regar plantas", doRiego, rit.riego);
     top.appendChild(mkb("Diario de la caba\xF1a", () => showDiary(), ""));
+    if (zenUnlocked(state)) top.appendChild(mkb("Jard\xEDn zen", () => openZen({ tr: T2, ctx: () => A.ctx, addMem, say: toast, chime: () => {
+      try {
+        A.chime(0);
+      } catch (e) {
+      }
+    } }), "ready"));
     top.appendChild(mkb(seasonLabel(), () => {
       cycleSeason();
       refreshPanel();
@@ -3472,6 +3786,15 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       b.appendChild(p);
     });
     lettersSection(b, state, T2, addMem, scheduleSave);
+    state.cnt = state.cnt || {};
+    if (zenUnlocked(state) && !state.cnt.zen) {
+      state.cnt.zen = 1;
+      scheduleSave();
+      setTimeout(() => {
+        toast("Se abri\xF3 el jard\xEDn zen: ya le\xEDste todas las cartas de Mara");
+        refreshPanel();
+      }, 600);
+    }
     const c = mkb("Cerrar", () => m.remove(), "");
     b.appendChild(c);
     m.appendChild(b);
@@ -3504,6 +3827,9 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     setTimeout(() => {
       if (unlocked() && newLetters(state) > 0) toast("Una carta nueva te espera en el diario");
     }, 4e3);
+    setInterval(() => {
+      if (unlocked() && !document.hidden) watchLetters(state, toast, T2);
+    }, 2500);
     let was = unlocked();
     setInterval(() => {
       const u = unlocked();

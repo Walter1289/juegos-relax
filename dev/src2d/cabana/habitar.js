@@ -8,7 +8,8 @@ import {A} from './audio.js';
 import {scheduleSave} from './persist.js';
 import {seasonNow,cycleSeason,seasonLabel,SEAS_COL} from '../../rio3d-src/story.js';
 import {tasksDone} from '../../rio3d-src/tasks.js';
-import {lettersSection,newLetters} from '../../rio3d-src/story.js';
+import {lettersSection,newLetters,watchLetters} from '../../rio3d-src/story.js';
+import {openZen,zenUnlocked} from '../../rio3d-src/zen.js';
 import {VN} from '../../rio3d-src/habdata.js';
 export {addHabTexts} from '../../rio3d-src/habdata.js';
 export {addStoryTexts,addSeasonTexts} from '../../rio3d-src/story.js';
@@ -91,8 +92,8 @@ function visitorTap(px,py){
 export function addMem(n){state.mem=(state.mem||0)+n;refreshPanel()}
 const rit={te:{cd:0,anim:0},riego:{cd:0}};
 const CD=90;
-function doTe(){if(rit.te.cd>0)return;rit.te.cd=CD;rit.te.anim=7;addMem(1);toast('Preparas té. El vapor sube despacio. Qué calma.');uCap('Tetera',20000);try{A.chime(-2)}catch(e){}uHap([8,40,8]);scheduleSave()}
-function doRiego(){if(rit.riego.cd>0)return;if(!state.repaired.plantas){toast('Primero repara las plantas');return}rit.riego.cd=CD;addMem(1);burst(768,480);burst(420,545);toast('Riegas las plantas. Huelen a campo.');uHap([8,40,8]);scheduleSave()}
+function doTe(){if(rit.te.cd>0)return;rit.te.cd=CD;rit.te.anim=7;state.cnt=state.cnt||{};state.cnt.te=(state.cnt.te||0)+1;addMem(1);toast('Preparas té. El vapor sube despacio. Qué calma.');uCap('Tetera',20000);try{A.chime(-2)}catch(e){}uHap([8,40,8]);scheduleSave()}
+function doRiego(){if(rit.riego.cd>0)return;if(!state.repaired.plantas){toast('Primero repara las plantas');return}rit.riego.cd=CD;state.cnt=state.cnt||{};state.cnt.rg=(state.cnt.rg||0)+1;addMem(1);burst(768,480);burst(420,545);toast('Riegas las plantas. Huelen a campo.');uHap([8,40,8]);scheduleSave()}
 /* ---------- bucle ---------- */
 let wc=12;
 export function updateHab(dt,t){
@@ -149,6 +150,7 @@ export function refreshPanel(){
   const rb=(id,txt,fn,r)=>{const b=mkb(txt,fn,'',r.cd>0);if(r.cd>0)b.textContent=T(txt)+' · '+Math.ceil(r.cd)+' s';top.appendChild(b)};
   rb('te','Preparar té',doTe,rit.te);rb('riego','Regar plantas',doRiego,rit.riego);
   top.appendChild(mkb('Diario de la cabaña',()=>showDiary(),''));
+  if(zenUnlocked(state))top.appendChild(mkb('Jardín zen',()=>openZen({tr:T,ctx:()=>A.ctx,addMem,say:toast,chime:()=>{try{A.chime(0)}catch(e){}}}),'ready'));
   top.appendChild(mkb(seasonLabel(),()=>{cycleSeason();refreshPanel()},''));
   panel.appendChild(top);
   const s=sel_&&slotOf(sel_);
@@ -178,6 +180,7 @@ function showDiary(){
   if(!state.notes.length){const p=document.createElement('p');p.textContent=T('Aún vacío. Los visitantes dejan notas sobre quien vivió aquí.');b.appendChild(p)}
   state.notes.forEach(n=>{const p=document.createElement('p');p.style.margin='0 0 10px';p.textContent='· '+T(n);b.appendChild(p)});
   lettersSection(b,state,T,addMem,scheduleSave);
+  state.cnt=state.cnt||{};if(zenUnlocked(state)&&!state.cnt.zen){state.cnt.zen=1;scheduleSave();setTimeout(()=>{toast('Se abrió el jardín zen: ya leíste todas las cartas de Mara');refreshPanel()},600)}
   const c=mkb('Cerrar',()=>m.remove(),'');b.appendChild(c);m.appendChild(b);m.onclick=e=>{if(e.target===m)m.remove()};document.body.appendChild(m);
 }
 export function initHabitar(){
@@ -187,6 +190,7 @@ export function initHabitar(){
   btn.onclick=()=>{habOn=!habOn;sel_=null;$('#chips').style.display=habOn?'none':'';refreshPanel()};
   setInterval(()=>{if(habOn&&!document.hidden&&(rit.te.cd>0||rit.riego.cd>0))refreshPanel()},1000);
   setTimeout(()=>{if(unlocked()&&newLetters(state)>0)toast('Una carta nueva te espera en el diario')},4000);
+  setInterval(()=>{if(unlocked()&&!document.hidden)watchLetters(state,toast,T)},2500);
   let was=unlocked();
   setInterval(()=>{const u=unlocked();if(u!==was){was=u;refreshPanel();if(u)toast('La cabaña ya se puede habitar: toca «Habitar»')}},1500);
   window.__habd={vis,spawn,place,DECOR,SLOTS,state,rit,show:(on)=>{habOn=on;refreshPanel()}};

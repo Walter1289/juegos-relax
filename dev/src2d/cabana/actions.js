@@ -26,6 +26,6 @@ export function attempt(o){
 }
 export function resetAll(){
   try{localStorage.removeItem(KEY);localStorage.removeItem(OLD_KEY)}catch(e){}
-  state.repaired={};state.spent=0;state.done=false;state.best=0;state.decor={};state.own={};state.mem=0;state.notes=[];state.vis={};state.ltr={};rt.sceneDirty=true;
+  state.repaired={};state.spent=0;state.done=false;state.best=0;state.decor={};state.own={};state.mem=0;state.notes=[];state.vis={};state.ltr={};state.cnt={};rt.sceneDirty=true;
   makeGrime();ITEMS.forEach(o=>o.flash=0);measure();updateUI();updateLoot();A.rain(false);try{localStorage.removeItem(CELEB_KEY)}catch(e){}clearCeleb();toast('Cabaña reiniciada');
 }

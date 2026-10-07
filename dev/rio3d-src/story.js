@@ -1,3 +1,4 @@
+import {addZenTexts} from './zen.js';
 import {TASK_TXT,tasksDone,addTaskTexts} from './tasks.js';
 /* Cartas de Mara: una por cada lugar del río. Se abren en el diario de la Cabaña cuando el jugador descubre ese lugar en Río de Linternas (2D o 3D). */
 export const LKEY='rio-found-types';
@@ -17,25 +18,42 @@ const L=[ // [lugar(es), es, en, ja]
 export const LM_ES=L.map(x=>x[0]);
 export const LETTERS=L.map(x=>x[1]);
 export const foundTypes=()=>{const s=new Set();for(const k of ['rio3d-found',LKEY]){try{JSON.parse(localStorage.getItem(k)||'[]').forEach(i=>s.add(i))}catch(e){}}return s};
-export function addStoryTexts(ux){addTaskTexts(ux);
+export function addStoryTexts(ux){addTaskTexts(ux);addMileTexts(ux);addZenTexts(ux);
   ux.add(L.map(x=>[x[1],x[2],x[3]]));
   ux.add([['Puente de madera','Wooden bridge','木の橋'],['Torii sobre el agua','Torii over the water','水上の鳥居'],['Aldea de farolillos','Lantern village','ちょうちんの村'],['Jardín de sakura','Sakura garden','桜の庭'],['Cañaveral de las garzas','Heron reedbed','サギの葦原'],['Templo de la campana','Bell temple','鐘の寺'],['Cascadita de musgo','Mossy waterfall','苔の小さな滝'],['Casa de té','Tea house','茶屋'],['Bosque de bambú','Bamboo forest','竹林'],['Estanque de lotos','Lotus pond','蓮の池'],['Castillo de la Garza Blanca','White Heron Castle','白鷺城'],['Cartas de Mara','Mara’s letters','マラの手紙'],['Carta sin abrir','Unopened letter','未開封の手紙'],['Descúbrelo en el río para leerla','Discover it on the river to read it','川で見つけると読めます'],['Abrir carta','Open letter','手紙を開く'],['Notas de visitantes','Visitor notes','訪問者のメモ'],['Mara te dejó una carta','Mara left you a letter','マラが手紙を残しました'],['Carta de Mara','Letter from Mara','マラの手紙'],['Una carta nueva te espera en el diario','A new letter waits in the diary','日記に新しい手紙が届いています']]);
   ux.rx([[/^Carta sin abrir · (.+)$/,(m,ix,tr)=>tr('Carta sin abrir')+' · '+tr(m[1])]]);
 }
+/* Cada carta se abre cuando se cumplen dos cosas: el lugar fue descubierto en el río Y la cabaña alcanzó un cambio (el desarrollo de la historia sigue la remodelación). */
+const sf=s=>Object.values(s.decor||{}).filter(Boolean).length,oc=s=>Object.keys(s.own||{}).length,nn=s=>(s.notes||[]).length,ct=s=>s.cnt||{};
+const MILE=[ // [condición, pista es, en, ja]
+[s=>!!(s.repaired&&s.repaired.techo),'Termina de reparar el techo','Finish repairing the roof','屋根の修理をおわらせる'],
+[s=>oc(s)>=1,'Coloca tu primer objeto','Place your first object','最初の飾りを置く'],
+[s=>nn(s)>=1,'Recibe a tu primer visitante','Welcome your first visitor','最初の訪問者を迎える'],
+[s=>(ct(s).te||0)>=1,'Prepara un té','Make a cup of tea','お茶をいれる'],
+[s=>sf(s)>=2,'Decora dos lugares de la cabaña','Decorate two spots in the cabin','小屋の2か所を飾る'],
+[s=>(ct(s).rg||0)>=1,'Riega las plantas','Water the plants','植物に水をやる'],
+[s=>nn(s)>=3,'Escucha las historias de tres visitas','Hear the stories of three visits','3回の訪問者の話を聞く'],
+[s=>sf(s)>=4,'Decora cuatro lugares','Decorate four spots','4か所を飾る'],
+[s=>oc(s)>=5,'Reúne cinco objetos','Gather five objects','飾りを5つ集める'],
+[s=>nn(s)>=6,'Lee seis notas de los visitantes','Read six visitor notes','訪問者のメモを6つ読む'],
+[s=>sf(s)>=6,'Deja decorados todos los lugares','Leave every spot decorated','すべての場所を飾る'],
+];
+export const letterOpen=(s,i)=>!!((s.ltr||{})[i])||(foundTypes().has(i)&&MILE[i][0](s));
+export function addMileTexts(ux){ux.add(MILE.map(m=>[m[1],m[2],m[3]]));ux.add([['Descúbrelo en el río','Discover it on the river','川で見つけましょう'],['Pista','Hint','ヒント'],['Se abrió una carta nueva en el diario','A new letter opened in the diary','日記に新しい手紙が開きました']])}
 /* Sección de cartas dentro del diario. tr: traductor del juego, addMem: suma recuerdos, save: guarda. Devuelve cuántas cartas hay nuevas. */
 export function lettersSection(box,state,tr,addMem,save){
   const f=foundTypes(),td=tasksDone();state.ltr=state.ltr||{};let fresh=0;
   const h=document.createElement('h3');h.style.cssText='margin:12px 0 8px;font:600 .95rem system-ui';h.textContent=tr('Cartas de Mara');box.appendChild(h);
   LETTERS.forEach((t,i)=>{const p=document.createElement('p');p.style.margin='0 0 10px';
     const sp=(x)=>{const e=document.createElement('span');e.textContent=x;p.appendChild(e)};sp('✉ ');
-    if(f.has(i)){if(!state.ltr[i]){state.ltr[i]=1;fresh++}sp(tr(t));p.style.color='#ffe9b8';
+    if(letterOpen(state,i)){if(!state.ltr[i]){state.ltr[i]=1;fresh++}sp(tr(t));p.style.color='#ffe9b8';
       if(td[i]&&TASK_TXT(i)){const m=document.createElement('div');m.style.cssText='margin:6px 0 0 14px;font-size:.88em;color:#cfe8ff';const a=document.createElement('span');a.textContent='✦ ';const b=document.createElement('span');b.textContent=tr(TASK_TXT(i)[3]);m.append(a,b);p.appendChild(m);if(state.ltr[i]<2){state.ltr[i]=2;fresh++}}}
-    else{sp(tr('Carta sin abrir'));sp(' · ');sp(tr(LM_ES[i]));p.style.opacity='.55'}
+    else{sp(tr('Carta sin abrir'));sp(' · ');sp(tr(LM_ES[i]));p.style.opacity='.6';const hn=document.createElement('div');hn.style.cssText='margin:4px 0 0 14px;font-size:.82em;color:#cfd6ff';const a=document.createElement('span');a.textContent='✧ ';const b=document.createElement('span');b.textContent=tr(f.has(i)?MILE[i][1]:'Descúbrelo en el río');hn.append(a,b);p.appendChild(hn)}
     box.appendChild(p)});
   if(fresh){addMem(3*fresh);save()}
   return fresh;
 }
-export const newLetters=state=>{const f=foundTypes(),td=tasksDone();let n=0;f.forEach(i=>{if(i>=0&&i<LETTERS.length&&!(state.ltr||{})[i])n++});Object.keys(td).forEach(i=>{if(f.has(+i)&&((state.ltr||{})[i]||0)<2)n++});return n};
+export const newLetters=state=>{const f=foundTypes(),td=tasksDone();let n=0;for(let i=0;i<LETTERS.length;i++)if(!(state.ltr||{})[i]&&letterOpen(state,i))n++;Object.keys(td).forEach(i=>{if(f.has(+i)&&((state.ltr||{})[i]||0)<2)n++});return n};
 /* Estaciones: solo ambiente (pétalos, motas doradas, hojas, copos). Automática según el mes o fija a elección. */
 export const SEAS=['Primavera','Verano','Otoño','Invierno'];
 const SK='cab-season',MODES=['auto','0','1','2','3'];
@@ -45,3 +63,6 @@ export const cycleSeason=()=>{const n=MODES[(MODES.indexOf(seasonMode())+1)%5];t
 export const seasonLabel=()=>'Estación: '+(seasonMode()==='auto'?'Auto':SEAS[+seasonMode()]);
 export const SEAS_COL=[[255,182,200],[255,222,140],[232,140,70],[240,246,255]];
 export function addSeasonTexts(ux){ux.add([['Estación: Auto','Season: Auto','季節: おまかせ'],['Estación: Primavera','Season: Spring','季節: 春'],['Estación: Verano','Season: Summer','季節: 夏'],['Estación: Otoño','Season: Autumn','季節: 秋'],['Estación: Invierno','Season: Winter','季節: 冬']])}
+
+/* aviso cuando se abre una carta nueva (se llama de vez en cuando) */
+let _seen=-1;export function watchLetters(state,say,tr){const n=newLetters(state);if(_seen<0){_seen=n;return}if(n>_seen)say(tr('Se abrió una carta nueva en el diario'));_seen=n}
