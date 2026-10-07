@@ -353,7 +353,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           UX3.api.setVol(seq[(i + 1) % 3]);
           vb.textContent = vt();
         });
-        const vt = () => T3("Volumen: ", "Volume: ", "\u97F3\u91CF: ") + Math.round(UX3.api.vol() * 100) + " %";
+        const vt = () => T3("Volumen de este juego: ", "Volume (this game): ", "\u3053\u306E\u30B2\u30FC\u30E0\u306E\u97F3\u91CF: ") + Math.round(UX3.api.vol() * 100) + " %";
         vb.textContent = vt();
         out.push(vb);
         const tb = mk2("uxSoft", () => {
@@ -413,7 +413,11 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       }
     };
     const T3 = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
-    const W2 = { vol: ls.get("ux-vol", "1"), soft: ls.get("ux-soft", "0") === "1", k: 1, nodes: [], end: 0, min: 0, ov: null };
+    const GM = (() => {
+      const m = location.pathname.match(/\/(cabana3d|rio3d|cabana|rio)(\/|$)/);
+      return m ? m[1] : /caba/i.test(document.title) ? "cabana" : "rio";
+    })(), VK = "ux-vol-" + GM;
+    const W2 = { vol: ls.get(VK, ls.get("ux-vol", "1")), soft: ls.get("ux-soft", "0") === "1", k: 1, nodes: [], end: 0, min: 0, ov: null };
     UX3.quiet = false;
     const apply = () => {
       for (const n of W2.nodes) {
@@ -483,7 +487,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       vol: () => +W2.vol,
       setVol(v) {
         W2.vol = String(v);
-        ls.set("ux-vol", W2.vol);
+        ls.set(VK, W2.vol);
         apply();
       },
       sleepMin: () => W2.min,

@@ -65,7 +65,7 @@
         hd.textContent=names[cur];out.push(hd);
       }
       const vb=mk('uxVol',()=>{const seq=['1','.7','.4'];const i=seq.indexOf(String(UX.api.vol()).replace('0.','.'));UX.api.setVol(seq[(i+1)%3]);vb.textContent=vt()});
-      const vt=()=>T('Volumen: ','Volume: ','音量: ')+Math.round(UX.api.vol()*100)+' %';vb.textContent=vt();out.push(vb);
+      const vt=()=>T('Volumen de este juego: ','Volume (this game): ','このゲームの音量: ')+Math.round(UX.api.vol()*100)+' %';vb.textContent=vt();out.push(vb);
       const tb=mk('uxSoft',()=>{UX.api.setSoft(!UX.api.soft());tb.textContent=tt()});
       const tt=()=>UX.api.soft()?T('Tono suave: sí','Soft tone: on','やわらかい音: オン'):T('Tono suave: no','Soft tone: off','やわらかい音: オフ');tb.textContent=tt();out.push(tb);
       const sl=mk('uxSleep',()=>{const seq=[0,15,30,45];UX.api.sleep(seq[(seq.indexOf(UX.api.sleepMin())+1)%4]);sl.textContent=st()});
@@ -86,7 +86,9 @@
 
   /* ---------- bienestar: salida de audio común (volumen, tono suave, temporizador de sueño) y recordatorio de descanso ---------- */
   const T=(es,en,ja)=>LG==='en'?en:LG==='ja'?ja:es;
-  const W={vol:ls.get('ux-vol','1'),soft:ls.get('ux-soft','0')==='1',k:1,nodes:[],end:0,min:0,ov:null};
+  /* volumen propio de cada juego (clave por juego; si no existe, hereda el valor general anterior) */
+  const GM=(()=>{const m=location.pathname.match(/\/(cabana3d|rio3d|cabana|rio)(\/|$)/);return m?m[1]:/caba/i.test(document.title)?'cabana':'rio'})(),VK='ux-vol-'+GM;
+  const W={vol:ls.get(VK,ls.get('ux-vol','1')),soft:ls.get('ux-soft','0')==='1',k:1,nodes:[],end:0,min:0,ov:null};
   UX.quiet=false;
   const apply=()=>{for(const n of W.nodes){try{const t=n.c.currentTime;n.lp.frequency.setTargetAtTime(W.soft?2800:22000,t,.1);n.g.gain.setTargetAtTime(+W.vol*W.k,t,.1)}catch(e){}}};
   /* UX.out(ctx,nodo): intercala pasa-bajos y ganancia entre el master del juego y destination */
@@ -105,7 +107,7 @@
     g.start=(w,o)=>s.start(w||0,o||0);g.stop=w=>s.stop(w);return g};
   UX.api={
     soft:()=>W.soft,setSoft(v){W.soft=!!v;ls.set('ux-soft',v?'1':'0');apply()},
-    vol:()=>+W.vol,setVol(v){W.vol=String(v);ls.set('ux-vol',W.vol);apply()},
+    vol:()=>+W.vol,setVol(v){W.vol=String(v);ls.set(VK,W.vol);apply()},
     sleepMin:()=>W.min,
     sleep(m){W.min=m;W.end=m?Date.now()+m*60000:0;W.k=1;UX.quiet=false;if(W.ov)W.ov.style.opacity=0;apply()}
   };
