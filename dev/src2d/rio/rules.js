@@ -8,6 +8,7 @@ import {ripple,splash} from './particles.js';
 import {toast,updateHUD} from './ui.js';
 import {saveSoon} from './save.js';
 import {taskTick} from '../../rio3d-src/tasks.js';
+import {STILL,tickStill} from '../../rio3d-src/still.js';
 import {dayPending,dayTake,dayRand} from '../../rio3d-src/daylamp.js';
 import {albumSee} from '../../rio3d-src/album.js';
 
@@ -27,8 +28,9 @@ export function update(dt){
   let steer=0;
   if(G.px!=null)steer=clamp((G.px-(V.VW/2+G.ox))/90,-1,1);
   if(keys.l)steer-=1;if(keys.r)steer+=1;steer=clamp(steer,-1,1);
-  G.v+=(40-G.v)*Math.min(1,dt*.9);
-  G.vx+=(steer*125-G.vx)*Math.min(1,dt*2.2);
+  tickStill(dt,G.started,()=>ripple(V.VW/2+G.ox,V.cy,10,70,.6));
+  G.v+=(40*(1-STILL.k)-G.v)*Math.min(1,dt*.9);
+  G.vx+=(steer*125*(1-STILL.k)-G.vx)*Math.min(1,dt*2.2);
   G.ox+=G.vx*dt;
   const lim=halfW(G.s)-36;
   G.bumpT-=dt;

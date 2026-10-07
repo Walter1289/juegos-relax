@@ -1,5 +1,6 @@
 import {addZenTexts} from './zen.js';
 import {claimDay} from './daylamp.js';
+import {claimStill} from './still.js';
 import {addAlbumTexts,claimAlbum,albumCount,openAlbum,ALB} from './album.js';
 import {TASK_TXT,tasksDone,addTaskTexts,VTXT,tasks2Done} from './tasks.js';
 /* Cartas de Mara: una por cada lugar del río. Se abren en el diario de la Cabaña cuando el jugador descubre ese lugar en Río de Linternas (2D o 3D). */
@@ -53,7 +54,7 @@ export function lettersSection(box,state,tr,addMem,save){
       if(t2[i]&&VTXT(i)){const m=document.createElement('div');m.style.cssText='margin:6px 0 0 14px;font-size:.88em;color:#e8d3ff';const a=document.createElement('span');a.textContent='↩ ';const b=document.createElement('span');b.textContent=tr(VTXT(i)[3]);m.append(a,b);p.appendChild(m);nv++}}
     else{sp(tr('Carta sin abrir'));sp(' · ');sp(tr(LM_ES[i]));p.style.opacity='.6';const hn=document.createElement('div');hn.style.cssText='margin:4px 0 0 14px;font-size:.82em;color:#cfd6ff';const a=document.createElement('span');a.textContent='✧ ';const b=document.createElement('span');b.textContent=tr(f.has(i)?MILE[i][1]:'Descúbrelo en el río');hn.append(a,b);p.appendChild(hn)}
     box.appendChild(p)});
-  const na=claimAlbum(state)+0;const nd=claimDay(state);if(na||nd){addMem(2*na+nd);save()}
+  const na=claimAlbum(state)+0;const nd=claimDay(state)+claimStill(state);if(na||nd){addMem(2*na+nd);save()}
   const ab=document.createElement('button');ab.type='button';ab.textContent=tr('Cuaderno del río')+' · '+albumCount()+'/'+ALB.length;ab.style.cssText='min-height:44px;margin:4px 8px 4px 0;padding:8px 14px;border-radius:99px;border:1px solid #5a609a;background:#2b2d52;color:#fbf1e0;font:inherit;cursor:pointer';ab.onclick=()=>openAlbum(tr);box.appendChild(ab);
   state.cnt=state.cnt||{};const dv=Math.max(0,nv-(state.cnt.tv||0));if(dv){state.cnt.tv=nv;addMem(2*dv);save()}
   if(fresh){addMem(3*fresh);save()}

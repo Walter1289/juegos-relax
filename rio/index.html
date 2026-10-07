@@ -3538,6 +3538,117 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     toast("El r\xEDo vuelve a empezar");
   }
 
+  // rio3d-src/still.js
+  var SK = "rio-still";
+  var STILL = { on: false, k: 0, t: 0, ev: 0 };
+  var LINES = [
+    ["Un pez sube a respirar y deja c\xEDrculos en el agua.", "A fish rises for air and leaves circles on the water.", "\u9B5A\u304C\u606F\u3092\u3057\u306B\u4E0A\u304C\u308A\u3001\u6C34\u306B\u8F2A\u3092\u6B8B\u3057\u307E\u3059\u3002"],
+    ["El viento mueve las ca\xF1as, y luego vuelve el silencio.", "The wind stirs the reeds, then silence returns.", "\u98A8\u304C\u8466\u3092\u3086\u3089\u3057\u3001\u307E\u305F\u9759\u3051\u3055\u304C\u623B\u308A\u307E\u3059\u3002"],
+    ["Una hoja pasa despacio; t\xFA no.", "A leaf drifts by, slowly; you do not.", "\u8449\u304C\u3086\u3063\u304F\u308A\u6D41\u308C\u3066\u3044\u304D\u307E\u3059\u3002\u3042\u306A\u305F\u306F\u52D5\u304D\u307E\u305B\u3093\u3002"],
+    ["Se oye el agua rozando la canoa. Eso es todo, y alcanza.", "You can hear water brushing the canoe. That is all, and it is enough.", "\u6C34\u304C\u30AB\u30CC\u30FC\u3092\u306A\u3067\u308B\u97F3\u3060\u3051\u3002\u305D\u308C\u3067\u5341\u5206\u3067\u3059\u3002"],
+    ["Las nubes se reflejan en el r\xEDo, tan quietas como t\xFA.", "Clouds reflect in the river, as still as you are.", "\u96F2\u304C\u5DDD\u306B\u6620\u308A\u3001\u3042\u306A\u305F\u3068\u540C\u3058\u304F\u3089\u3044\u9759\u304B\u3067\u3059\u3002"]
+  ];
+  function addStillTexts(ux) {
+    ux.add(LINES);
+    ux.add([["Quedarme quieto", "Stay still", "\u3058\u3063\u3068\u3059\u308B"], ["Seguir el r\xEDo", "Follow the river", "\u5DDD\u3092\u9032\u3080"], ["Una lib\xE9lula se posa en la proa.", "A dragonfly lands on the bow.", "\u30C8\u30F3\u30DC\u304C\u8239\u9996\u306B\u6B62\u307E\u308A\u307E\u3057\u305F\u3002"], ["Quedarte quieto tambi\xE9n cuenta. Un recuerdo para la caba\xF1a.", "Staying still counts too. A keepsake for the cabin.", "\u3058\u3063\u3068\u3057\u3066\u3044\u308B\u306E\u3082\u5927\u5207\u3002\u5C0F\u5C4B\u306B\u601D\u3044\u51FA\u304C\u3072\u3068\u3064\u3002"]]);
+  }
+  var day2 = () => {
+    const d = /* @__PURE__ */ new Date();
+    return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+  };
+  var get2 = () => {
+    try {
+      return JSON.parse(localStorage.getItem(SK) || "{}") || {};
+    } catch (e) {
+      return {};
+    }
+  };
+  var btn = null;
+  var paid = false;
+  function initStill() {
+    if (btn || typeof document === "undefined") return;
+    try {
+      addStillTexts(window.UX);
+    } catch (e) {
+    }
+    btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "stillBtn";
+    btn.style.cssText = "position:fixed;left:12px;bottom:max(96px,calc(env(safe-area-inset-bottom) + 88px));z-index:58;min-height:44px;padding:8px 16px;border-radius:99px;border:1px solid #5a609a;background:rgba(32,34,70,.82);color:#fbf1e0;font:600 .85rem system-ui;cursor:pointer;display:none";
+    const tr = (s) => {
+      try {
+        return UX.tr(s);
+      } catch (e) {
+        return s;
+      }
+    };
+    const lab = () => {
+      btn.textContent = tr(STILL.on ? "Seguir el r\xEDo" : "Quedarme quieto");
+    };
+    lab();
+    btn.onclick = () => {
+      STILL.on = !STILL.on;
+      STILL.t = 0;
+      STILL.ev = 0;
+      paid = false;
+      lab();
+      try {
+        UX.hap(8);
+      } catch (e) {
+      }
+    };
+    document.body.appendChild(btn);
+  }
+  var showStill = (v) => {
+    if (!btn) initStill();
+    if (btn) btn.style.display = v ? "block" : "none";
+  };
+  function tickStill(dt, started, ripple2) {
+    if (started && (!btn || btn.style.display === "none")) showStill(true);
+    STILL.k += ((STILL.on ? 1 : 0) - STILL.k) * Math.min(1, dt * 1.2);
+    if (!STILL.on) return;
+    STILL.t += dt;
+    if (STILL.ev === 0 && STILL.t >= 20) {
+      STILL.ev = 1;
+      albumSee("libelula");
+      try {
+        UX.say(UX.tr("Una lib\xE9lula se posa en la proa."));
+      } catch (e) {
+      }
+      try {
+        ripple2 && ripple2();
+      } catch (e) {
+      }
+    } else if (STILL.ev >= 1 && STILL.t >= 20 + STILL.ev * 50) {
+      const l = LINES[(STILL.ev - 1) % LINES.length];
+      STILL.ev++;
+      try {
+        UX.say(UX.tr(l[0]));
+      } catch (e) {
+      }
+      try {
+        ripple2 && ripple2();
+      } catch (e) {
+      }
+    }
+    if (!paid && STILL.t >= 45) {
+      paid = true;
+      const o = get2();
+      if (o.d !== day2()) {
+        o.d = day2();
+        o.n = (o.n || 0) + 1;
+        try {
+          localStorage.setItem(SK, JSON.stringify(o));
+        } catch (e) {
+        }
+        try {
+          UX.say(UX.tr("Quedarte quieto tambi\xE9n cuenta. Un recuerdo para la caba\xF1a."));
+        } catch (e) {
+        }
+      }
+    }
+  }
+
   // rio3d-src/story.js
   var LKEY = "rio-found-types";
   var L = [
@@ -3566,10 +3677,10 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     }
     return s;
   };
-  var SK = "rio3d-season";
+  var SK2 = "rio3d-season";
   var seasonMode = () => {
     try {
-      return localStorage.getItem(SK) || "auto";
+      return localStorage.getItem(SK2) || "auto";
     } catch (e) {
       return "auto";
     }
@@ -3631,7 +3742,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     const o = g2();
     return o.day === dayK() ? Math.max(0, V_PER_DAY - (o.n || 0)) : V_PER_DAY;
   };
-  var get2 = () => {
+  var get3 = () => {
     try {
       return JSON.parse(localStorage.getItem(TKEY) || "{}");
     } catch (e) {
@@ -3715,7 +3826,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       } catch (e) {
       }
     } else {
-      const d = get2();
+      const d = get3();
       d[cur] = 1;
       try {
         localStorage.setItem(TKEY, JSON.stringify(d));
@@ -3750,7 +3861,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     }
     chimeFn = chime;
     const act = type != null && T[type] && tasksActive();
-    const v1 = act && !get2()[type], v2 = act && !v1 && !tasks2Done()[type] && tasks2Left() > 0;
+    const v1 = act && !get3()[type], v2 = act && !v1 && !tasks2Done()[type] && tasks2Left() > 0;
     const ok = v1 || v2;
     if (!ok) {
       if (cur != null && !hold) {
@@ -3802,8 +3913,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     if (keys.l) steer -= 1;
     if (keys.r) steer += 1;
     steer = clamp(steer, -1, 1);
-    G.v += (40 - G.v) * Math.min(1, dt * 0.9);
-    G.vx += (steer * 125 - G.vx) * Math.min(1, dt * 2.2);
+    tickStill(dt, G.started, () => ripple(V.VW / 2 + G.ox, V.cy, 10, 70, 0.6));
+    G.v += (40 * (1 - STILL.k) - G.v) * Math.min(1, dt * 0.9);
+    G.vx += (steer * 125 * (1 - STILL.k) - G.vx) * Math.min(1, dt * 2.2);
     G.ox += G.vx * dt;
     const lim = halfW(G.s) - 36;
     G.bumpT -= dt;
@@ -4574,13 +4686,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 
   // src2d/rio/calm.js
   function initCalm() {
-    const el = document.getElementById("breath"), orb = el.querySelector(".orb"), lab = el.querySelector("span"), btn = document.getElementById("breath-btn");
+    const el = document.getElementById("breath"), orb = el.querySelector(".orb"), lab = el.querySelector("span"), btn2 = document.getElementById("breath-btn");
     let run = false, t02 = 0, raf2 = 0, lastKey = -1;
     const IN = 4, HOLD = 1, OUT = 6, CYC = IN + HOLD + OUT, N = 5;
     function stop(msg) {
       run = false;
       cancelAnimationFrame(raf2);
-      btn.textContent = "Respirar";
+      btn2.textContent = "Respirar";
       if (msg) {
         lab.textContent = msg;
         orb.style.transform = "scale(.7)";
@@ -4620,7 +4732,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       }
       raf2 = requestAnimationFrame(tick);
     }
-    btn.onclick = () => {
+    btn2.onclick = () => {
       if (run) {
         stop();
         return;
@@ -4629,7 +4741,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       lastKey = -1;
       el.hidden = false;
       lab.textContent = "Prep\xE1rate\u2026";
-      btn.textContent = "Detener";
+      btn2.textContent = "Detener";
       if (A.ctx && A.ctx.state === "suspended") A.ctx.resume();
       t02 = performance.now();
       raf2 = requestAnimationFrame(tick);

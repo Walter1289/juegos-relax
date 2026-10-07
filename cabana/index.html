@@ -2856,6 +2856,23 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     document.body.appendChild(ov);
   }
 
+  // rio3d-src/still.js
+  var SK2 = "rio-still";
+  var get2 = () => {
+    try {
+      return JSON.parse(localStorage.getItem(SK2) || "{}") || {};
+    } catch (e) {
+      return {};
+    }
+  };
+  var stillTotal = () => get2().n || 0;
+  var claimStill = (state2) => {
+    state2.cnt = state2.cnt || {};
+    const n = Math.max(0, stillTotal() - (state2.cnt.st || 0));
+    if (n) state2.cnt.st = stillTotal();
+    return n;
+  };
+
   // rio3d-src/tasks.js
   var TKEY = "rio-tasks";
   var T = [
@@ -2899,14 +2916,14 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   };
   var tasks2Done = () => g2().d;
   var TASK_TXT = (type) => T[type] || null;
-  var get2 = () => {
+  var get3 = () => {
     try {
       return JSON.parse(localStorage.getItem(TKEY) || "{}");
     } catch (e) {
       return {};
     }
   };
-  var tasksDone = get2;
+  var tasksDone = get3;
   function addTaskTexts(ux) {
     ux.add(T.map((x) => [x[0], x[1], x[2]]));
     ux.add(T.map((x) => [x[3], x[4], x[5]]));
@@ -3042,7 +3059,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       box.appendChild(p);
     });
     const na = claimAlbum(state2) + 0;
-    const nd = claimDay(state2);
+    const nd = claimDay(state2) + claimStill(state2);
     if (na || nd) {
       addMem2(2 * na + nd);
       save2();
@@ -3080,11 +3097,11 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     return n;
   };
   var SEAS = ["Primavera", "Verano", "Oto\xF1o", "Invierno"];
-  var SK2 = "rio3d-season";
+  var SK3 = "rio3d-season";
   var MODES = ["auto", "0", "1", "2", "3"];
   var seasonMode = () => {
     try {
-      return localStorage.getItem(SK2) || "auto";
+      return localStorage.getItem(SK3) || "auto";
     } catch (e) {
       return "auto";
     }
@@ -3098,7 +3115,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
   var cycleSeason = () => {
     const n = MODES[(MODES.indexOf(seasonMode()) + 1) % 5];
     try {
-      localStorage.setItem(SK2, n);
+      localStorage.setItem(SK3, n);
     } catch (e) {
     }
     return n;
