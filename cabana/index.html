@@ -64,6 +64,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
 </head>
 <body>
 <header>
+  <a class="btn" id="menuLink" href="../" hidden style="text-decoration:none">← Menú</a><script>try{if(/\/(rio|cabana)\/?(index\.html)?$/.test(location.pathname))document.getElementById("menuLink").hidden=false}catch(e){}</script>
   <h1>Cabaña del Acantilado</h1>
   <div class="prog">
     <div class="bar" role="progressbar" aria-label="Progreso de la cabaña" aria-valuemin="0" aria-valuemax="100"><i id="fill"></i></div>
@@ -596,6 +597,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       ["Estrella fugaz", "Shooting star", "\u6D41\u308C\u661F"]
     ]);
     UX3.add([
+      ["\u2190 Men\xFA", "\u2190 Menu", "\u2190 \u30E1\u30CB\u30E5\u30FC"],
       ["\xBFC\xF3mo llegas hoy?", "How are you arriving today?", "\u4ECA\u65E5\u306F\u3069\u3093\u306A\u6C17\u5206\u3067\u3059\u304B\uFF1F"],
       ["Tranquilo", "Calm", "\u304A\u3060\u3084\u304B"],
       ["Cansado", "Tired", "\u3064\u304B\u308C\u305F"],

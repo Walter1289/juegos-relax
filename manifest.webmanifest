@@ -1,7 +1,7 @@
 {
-  "name": "Juegos para respirar",
-  "short_name": "Respirar",
-  "description": "Juegos tranquilos: Río de Linternas, Cabaña del Acantilado y Río 3D.",
+  "name": "Sin Prisa · juegos tranquilos",
+  "short_name": "Sin Prisa",
+  "description": "Juegos tranquilos, sin prisa ni puntaje: Río de Linternas, Cabaña del Acantilado y sus versiones 3D.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
