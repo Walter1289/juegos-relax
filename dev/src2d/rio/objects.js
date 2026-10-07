@@ -1,6 +1,6 @@
 /* objects.js — objetos del paisaje (plantas, rocas, patos, carpas, linternas, árboles) y sus pasadas de dibujo */
 import {clamp,circ,rr,line,poly} from './util.js';
-import {V} from './state.js';
+import {V,G} from './state.js';
 import {center,CELL,genCell} from './world.js';
 
 export const sx=o=>V.VW/2+center(o.s)-V.cs0+o.off;
@@ -122,7 +122,18 @@ const DRAW={
 export const PASS_LOW=new Set(['patch','tuft','reed','post','bamboo']);
 export const PASS_WATER=new Set(['streak','pad','rock','koi','duck','lantern']);
 export const PASS_HIGH=new Set(['tree','sakura']);
+function drawDay(g){
+  const o=G.dl;if(!o)return;const x=sx(o),y0=sy(o);if(y0<-130||y0>V.VH+130||x<-130||x>V.VW+130)return;
+  const f=o.fade||0,y=y0+Math.sin(V.t*1.4)*1.8,pu=.5+.5*Math.sin(V.t*2.2);
+  g.save();g.globalAlpha=1-f;
+  g.save();g.globalCompositeOperation='lighter';const gr=g.createRadialGradient(x,y,0,x,y,58+f*30);gr.addColorStop(0,'rgba(255,205,110,'+(.55+.2*pu)+')');gr.addColorStop(1,'rgba(255,205,110,0)');g.fillStyle=gr;g.fillRect(x-90,y-90,180,180);g.restore();
+  g.strokeStyle='rgba(255,226,150,'+(.35+.3*pu)+')';g.lineWidth=2;circ(g,x,y,21+pu*4);g.stroke();
+  g.fillStyle='#b8863f';rr(g,x-11,y-11,22,22,4);g.fill();g.fillStyle='#ffd37a';rr(g,x-8,y-8,16,16,3);g.fill();
+  g.strokeStyle='rgba(140,90,30,.55)';g.lineWidth=1;line(g,x-8,y,x+8,y);line(g,x,y-8,x,y+8);
+  g.restore();V.lights.push([x,y,90,.9*(1-f)]);
+}
 export function drawObjs(g,set){
+  if(set===PASS_WATER)drawDay(g);
   eachObj(o=>{
     if(!set.has(o.t))return;
     const x=sx(o),y=sy(o);

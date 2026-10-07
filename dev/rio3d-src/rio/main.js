@@ -18,7 +18,7 @@ import {placeBoat,updatePaddles,updateCharacter,bowLight,blGlow,bl} from './boat
 import {updateRipples,spawnRipple} from './ripples.js';
 import './input.js';
 import {updateHud,toast,savePos} from './hud.js';
-import {updateLanterns,collectLanterns,mkLantern} from './lanterns.js';
+import {updateLanterns,collectLanterns,mkLantern,updateDayLamp} from './lanterns.js';
 import {weather} from './weather.js';
 import {stepPlayer} from './player.js';
 import {LM,lmFound} from './lm-data.js';
@@ -58,7 +58,7 @@ function frame(now,manual){
   bl.material.color.set(0xffe2a8);
   updateRocks(dt,P.dist||s);updateFarBoats(dt,P.dist||s);updateMassifs(P.dist||s);massMistMat.color.copy(scene.fog.color).multiplyScalar(1.05);updateCritters(dt,P.dist||s);updateFish(dt,P.dist||s);updateFauna(dt,P.dist||s);foamMat.opacity=.55+.15*Math.sin(P.t*.8);foam.position.y=Math.sin(P.t*.9)*.01;
   updateLanterns(P.t,P.dist||s);updateLandmarks(P.dist||s);
-  collectLanterns();
+  collectLanterns();updateDayLamp(P.t,P.dist||s);
   updateRipples(dt);
   updateFW(dt,night);updateAur(night);
   updateFireflies(night);

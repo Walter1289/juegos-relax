@@ -96,9 +96,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   (function() {
     if (window.PZ) return;
     const PZ3 = window.PZ = { on: false, ctx: () => null, started: () => true };
-    const st = document.createElement("style");
-    st.textContent = "#pz{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(24,26,56,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:#fbf1e0;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px}#pz[hidden]{display:none}#pz .c{display:flex;flex-direction:column;gap:12px;align-items:center}#pz h2{margin:0;font:600 1.7rem system-ui}#pz p{margin:0;color:#cbc8e8;line-height:1.5}#pz button{background:#ffc77a;color:#3b2a1a;border:0;border-radius:99px;padding:13px 32px;font:700 1rem system-ui;cursor:pointer}";
-    document.head.appendChild(st);
+    const st2 = document.createElement("style");
+    st2.textContent = "#pz{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(24,26,56,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:#fbf1e0;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px}#pz[hidden]{display:none}#pz .c{display:flex;flex-direction:column;gap:12px;align-items:center}#pz h2{margin:0;font:600 1.7rem system-ui}#pz p{margin:0;color:#cbc8e8;line-height:1.5}#pz button{background:#ffc77a;color:#3b2a1a;border:0;border-radius:99px;padding:13px 32px;font:700 1rem system-ui;cursor:pointer}";
+    document.head.appendChild(st2);
     const d = document.createElement("div");
     d.id = "pz";
     d.hidden = true;
@@ -173,6 +173,70 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     });
   })();
 
+  // rio3d-src/daylamp.js
+  var DK = "rio-day";
+  var DAYS = [
+    // [es,en,ja]
+    ["Hoy no tienes que llegar a ning\xFAn sitio.", "You do not have to get anywhere today.", "\u4ECA\u65E5\u306F\u3069\u3053\u304B\u3078\u7740\u304B\u306A\u304F\u3066\u5927\u4E08\u592B\u3002"],
+    ["El agua tambi\xE9n descansa mientras avanza.", "Water also rests while it moves.", "\u6C34\u306F\u6D41\u308C\u306A\u304C\u3089\u3082\u4F11\u3093\u3067\u3044\u307E\u3059\u3002"],
+    ["Respira hondo. Lo dem\xE1s puede esperar a ma\xF1ana.", "Breathe deep. The rest can wait until tomorrow.", "\u6DF1\u547C\u5438\u3092\u3002\u3042\u3068\u306F\u660E\u65E5\u3067\u3044\u3044\u3002"],
+    ["Algo peque\xF1o hecho con calma ya es suficiente.", "One small thing done calmly is enough.", "\u5C0F\u3055\u306A\u3053\u3068\u3092\u3086\u3063\u304F\u308A\u3002\u305D\u308C\u3067\u5341\u5206\u3067\u3059\u3002"],
+    ["Las nubes no se apuran y aun as\xED llegan.", "Clouds never hurry and still they arrive.", "\u96F2\u306F\u6025\u304C\u306A\u3044\u306E\u306B\u3001\u3061\u3083\u3093\u3068\u7740\u304D\u307E\u3059\u3002"],
+    ["Mara dejar\xEDa una nota: \xABmira hacia arriba un momento\xBB.", "Mara would leave a note: \u201Clook up for a moment\u201D.", "\u30DE\u30E9\u306A\u3089\u30E1\u30E2\u3092\u6B8B\u3059\u3067\u3057\u3087\u3046\u3002\u300C\u5C11\u3057\u7A7A\u3092\u898B\u4E0A\u3052\u3066\u300D\u3002"],
+    ["No hace falta entenderlo todo esta noche.", "You do not need to understand everything tonight.", "\u4ECA\u591C\u3001\u3059\u3079\u3066\u3092\u5206\u304B\u308B\u5FC5\u8981\u306F\u3042\u308A\u307E\u305B\u3093\u3002"],
+    ["Una taza caliente y un r\xEDo quieto: buen plan.", "A warm cup and a quiet river: a good plan.", "\u6E29\u304B\u3044\u304A\u8336\u3068\u9759\u304B\u306A\u5DDD\u3002\u3044\u3044\u8A08\u753B\u3067\u3059\u3002"],
+    ["Lo que pesa hoy flota un poco m\xE1s ligero en el agua.", "What weighs on you today floats lighter on the water.", "\u4ECA\u65E5\u306E\u91CD\u3055\u3082\u3001\u6C34\u306E\u4E0A\u3067\u306F\u5C11\u3057\u8EFD\u304F\u306A\u308A\u307E\u3059\u3002"],
+    ["Est\xE1 bien ir despacio. As\xED se ven m\xE1s cosas.", "It is fine to go slowly. You see more that way.", "\u3086\u3063\u304F\u308A\u3067\u5927\u4E08\u592B\u3002\u305D\u306E\u307B\u3046\u304C\u591A\u304F\u304C\u898B\u3048\u307E\u3059\u3002"],
+    ["Cada farolillo es un \xABgracias\xBB que nadie pidi\xF3.", "Every lantern is a \u201Cthank you\u201D nobody asked for.", "\u3061\u3087\u3046\u3061\u3093\u306F\u3072\u3068\u3064\u305A\u3064\u3001\u983C\u307E\u308C\u306A\u3044\u300C\u3042\u308A\u304C\u3068\u3046\u300D\u3002"],
+    ["El r\xEDo no compara tu ritmo con el de nadie.", "The river does not compare your pace with anyone\u2019s.", "\u5DDD\u306F\u3042\u306A\u305F\u306E\u901F\u3055\u3092\u8AB0\u3068\u3082\u6BD4\u3079\u307E\u305B\u3093\u3002"],
+    ["Escucha un rato: siempre hay algo suave sonando.", "Listen a while: something gentle is always playing.", "\u3057\u3070\u3089\u304F\u8033\u3092\u3059\u307E\u305B\u3066\u3002\u3044\u3064\u3082\u3084\u3055\u3057\u3044\u97F3\u304C\u3057\u3066\u3044\u307E\u3059\u3002"],
+    ["Hoy cuenta aunque solo hayas flotado un poco.", "Today counts even if you only floated a little.", "\u5C11\u3057\u6D6E\u304B\u3093\u3060\u3060\u3051\u3067\u3082\u3001\u4ECA\u65E5\u306F\u3061\u3083\u3093\u3068\u4E00\u65E5\u3067\u3059\u3002"]
+  ];
+  var day = () => {
+    const d = /* @__PURE__ */ new Date();
+    return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+  };
+  var idx = () => Math.floor((Date.now() - (/* @__PURE__ */ new Date()).getTimezoneOffset() * 6e4) / 864e5);
+  var st = () => {
+    try {
+      return JSON.parse(localStorage.getItem(DK) || "{}") || {};
+    } catch (e) {
+      return {};
+    }
+  };
+  var dayPending = () => st().k !== day();
+  var dayTotal = () => st().n || 0;
+  var dayLog = () => st().log || [];
+  var dayRand = (n) => {
+    const x = Math.sin((idx() * 131 + n) * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  function dayTake() {
+    const s = st();
+    if (s.k === day()) return null;
+    const p = idx() % DAYS.length;
+    s.k = day();
+    s.n = (s.n || 0) + 1;
+    s.log = (s.log || []).concat([[day(), p]]).slice(-12);
+    try {
+      localStorage.setItem(DK, JSON.stringify(s));
+    } catch (e) {
+    }
+    try {
+      window.UX && UX.say && UX.say(UX.tr(DAYS[p][0]));
+    } catch (e) {
+    }
+    try {
+      window.UX && UX.hap && UX.hap([12, 40, 12]);
+    } catch (e) {
+    }
+    return DAYS[p];
+  }
+  function addDayTexts(ux) {
+    ux.add(DAYS.map((d) => [d[0], d[1], d[2]]));
+    ux.add([["Farolillos del d\xEDa", "Lanterns of the day", "\u4ECA\u65E5\u306E\u3061\u3087\u3046\u3061\u3093"], ["Hoy ya recogiste el farolillo. Ma\xF1ana habr\xE1 otro.", "You already picked up today\u2019s lantern. There will be another tomorrow.", "\u4ECA\u65E5\u306E\u3061\u3087\u3046\u3061\u3093\u306F\u3082\u3046\u62FE\u3044\u307E\u3057\u305F\u3002\u660E\u65E5\u307E\u305F\u6D41\u308C\u3066\u304D\u307E\u3059\u3002"], ["A\xFAn no recoges ninguno", "You have not picked up any yet", "\u307E\u3060\u62FE\u3063\u3066\u3044\u307E\u305B\u3093"]]);
+  }
+
   // rio3d-src/album.js
   var AK = "rio-album";
   var ALB = [
@@ -195,6 +259,10 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     return cache;
   };
   function addAlbumTexts(ux) {
+    try {
+      addDayTexts(ux);
+    } catch (e) {
+    }
     ux.add(ALB.map((a) => [a[1], a[2], a[3]]));
     ux.add(ALB.map((a) => [a[4], a[5], a[6]]));
     ux.add([["Cuaderno del r\xEDo", "River notebook", "\u5DDD\u306E\u30CE\u30FC\u30C8"], ["A\xFAn no lo has visto", "You have not seen this yet", "\u307E\u3060\u898B\u3066\u3044\u307E\u305B\u3093"], ["Nueva anotaci\xF3n en el cuaderno del r\xEDo", "New entry in the river notebook", "\u5DDD\u306E\u30CE\u30FC\u30C8\u306B\u65B0\u3057\u3044\u8A18\u9332"], ["Se llena solo, a su ritmo. No hay prisa.", "It fills by itself, at its own pace. No rush.", "\u3086\u3063\u304F\u308A\u3001\u3072\u3068\u308A\u3067\u306B\u57CB\u307E\u3063\u3066\u3044\u304D\u307E\u3059\u3002"], ["Cerrar", "Close", "\u9589\u3058\u308B"], ["Anotado: ", "Noted: ", "\u8A18\u9332: "], ["anotaciones", "entries", "\u4EF6"]]);
@@ -240,6 +308,25 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       p.append(n, d);
       b.appendChild(p);
     });
+    {
+      const h2 = document.createElement("div");
+      h2.style.cssText = "font-weight:600;margin:14px 0 6px";
+      h2.textContent = tr("Farolillos del d\xEDa") + " \xB7 " + dayTotal();
+      b.appendChild(h2);
+      const lg = dayLog().slice().reverse();
+      if (!lg.length) {
+        const e = document.createElement("div");
+        e.style.cssText = "opacity:.55;font-size:.88em;margin-bottom:12px";
+        e.textContent = tr("A\xFAn no recoges ninguno");
+        b.appendChild(e);
+      }
+      lg.forEach((x) => {
+        const p = document.createElement("div");
+        p.style.cssText = "margin:0 0 8px;padding:8px 12px;border-radius:12px;background:rgba(255,233,184,.08);font-size:.88em";
+        p.textContent = "\u{1F3EE} " + tr(DAYS[x[1]][0]);
+        b.appendChild(p);
+      });
+    }
     const c = document.createElement("button");
     c.type = "button";
     c.textContent = tr("Cerrar");
@@ -321,9 +408,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   var lctx = lightC.getContext("2d");
   var DPR = Math.min(window.devicePixelRatio || 1, 2);
   function resize() {
-    const st = $("#stage");
-    view.W = Math.max(200, st.clientWidth);
-    view.H = Math.max(200, st.clientHeight);
+    const st2 = $("#stage");
+    view.W = Math.max(200, st2.clientWidth);
+    view.H = Math.max(200, st2.clientHeight);
     const { W, H } = view;
     view.U = clamp(Math.min(W / 760, H / 820), 0.55, 1.5);
     const U = view.U;
@@ -1441,8 +1528,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     }
   }
   function drawFW(g2) {
-    const B = FW.bursts, st = FW.star;
-    if (!B.length && !st) return;
+    const B = FW.bursts, st2 = FW.star;
+    if (!B.length && !st2) return;
     g2.save();
     g2.globalCompositeOperation = "lighter";
     for (const b of B) {
@@ -1491,8 +1578,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         g2.drawImage(sp, b.x + p[j] - 9, b.y + p[j + 1] - 9, 18, 18);
       }
     }
-    if (st) {
-      const u = st.t / 0.9, x = st.x - 340 * st.t, y = st.y + 90 * st.t, a = Math.sin(Math.PI * u);
+    if (st2) {
+      const u = st2.t / 0.9, x = st2.x - 340 * st2.t, y = st2.y + 90 * st2.t, a = Math.sin(Math.PI * u);
       g2.globalAlpha = a * 0.8;
       g2.strokeStyle = "rgb(255,250,230)";
       g2.lineWidth = 1.6;
@@ -3360,7 +3447,41 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   var PASS_LOW = /* @__PURE__ */ new Set(["patch", "tuft", "reed", "post", "bamboo"]);
   var PASS_WATER = /* @__PURE__ */ new Set(["streak", "pad", "rock", "koi", "duck", "lantern"]);
   var PASS_HIGH = /* @__PURE__ */ new Set(["tree", "sakura"]);
+  function drawDay(g2) {
+    const o = G.dl;
+    if (!o) return;
+    const x = sx(o), y0 = sy(o);
+    if (y0 < -130 || y0 > V.VH + 130 || x < -130 || x > V.VW + 130) return;
+    const f = o.fade || 0, y = y0 + Math.sin(V.t * 1.4) * 1.8, pu = 0.5 + 0.5 * Math.sin(V.t * 2.2);
+    g2.save();
+    g2.globalAlpha = 1 - f;
+    g2.save();
+    g2.globalCompositeOperation = "lighter";
+    const gr = g2.createRadialGradient(x, y, 0, x, y, 58 + f * 30);
+    gr.addColorStop(0, "rgba(255,205,110," + (0.55 + 0.2 * pu) + ")");
+    gr.addColorStop(1, "rgba(255,205,110,0)");
+    g2.fillStyle = gr;
+    g2.fillRect(x - 90, y - 90, 180, 180);
+    g2.restore();
+    g2.strokeStyle = "rgba(255,226,150," + (0.35 + 0.3 * pu) + ")";
+    g2.lineWidth = 2;
+    circ(g2, x, y, 21 + pu * 4);
+    g2.stroke();
+    g2.fillStyle = "#b8863f";
+    rr(g2, x - 11, y - 11, 22, 22, 4);
+    g2.fill();
+    g2.fillStyle = "#ffd37a";
+    rr(g2, x - 8, y - 8, 16, 16, 3);
+    g2.fill();
+    g2.strokeStyle = "rgba(140,90,30,.55)";
+    g2.lineWidth = 1;
+    line(g2, x - 8, y, x + 8, y);
+    line(g2, x, y - 8, x, y + 8);
+    g2.restore();
+    V.lights.push([x, y, 90, 0.9 * (1 - f)]);
+  }
   function drawObjs(g2, set) {
+    if (set === PASS_WATER) drawDay(g2);
     eachObj((o) => {
       if (!set.has(o.t)) return;
       const x = sx(o), y = sy(o);
@@ -3661,6 +3782,19 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       } else if (o.t === "lantern" && !G.lit.has(o.id)) {
         if (Math.abs(G.ox - o.off) < 30 && Math.abs(G.s - o.s) < 56) lightLantern(o);
       }
+    }
+    if (G.dl === void 0) G.dl = dayPending() ? { s: G.s + 230 + dayRand(1) * 240, off: (dayRand(2) * 2 - 1) * 0.25 * halfW(G.s + 300), t: "daylamp", id: "day" } : null;
+    if (G.dl && !G.dl.fade && Math.abs(G.ox - G.dl.off) < 48 && Math.abs(G.s - G.dl.s) < 56 && dayTake()) {
+      G.dl.fade = 1;
+      const x = sx(G.dl), y = sy(G.dl);
+      ripple(x, y, 8, 60, 0.7);
+      splash(x, y, true);
+      A.next(0.2, 0, 0);
+      hap([10, 40, 14, 40, 10]);
+    }
+    if (G.dl && G.dl.fade) {
+      G.dl.fade -= dt * 0.8;
+      if (G.dl.fade <= 0) G.dl = null;
     }
     const k = lmIndexAt(G.s);
     if (Math.abs(G.s - lmPos(k)) < (lmType(k) === 10 ? 240 : 130) && !G.found.has(k)) {
@@ -4640,12 +4774,12 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         const sl = mk3("uxSleep", () => {
           const seq = [0, 15, 30, 45];
           UX4.api.sleep(seq[(seq.indexOf(UX4.api.sleepMin()) + 1) % 4]);
-          sl.textContent = st();
+          sl.textContent = st2();
         });
-        const st = () => UX4.api.sleepMin() ? T2("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX4.api.sleepMin() + " min" : T2("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
-        sl.textContent = st();
+        const st2 = () => UX4.api.sleepMin() ? T2("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX4.api.sleepMin() + " min" : T2("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
+        sl.textContent = st2();
         UX4._sb = () => {
-          sl.textContent = st();
+          sl.textContent = st2();
         };
         out.push(sl);
         if (opts.wear) {
@@ -5115,6 +5249,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     lmPos,
     lmType,
     lmIndexAt,
+    G,
     lmFound: () => [...G.found],
     typeNear: (r) => {
       const k = lmIndexAt(G.s);

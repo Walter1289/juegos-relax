@@ -7,6 +7,7 @@ import {hw,cx} from './world.js';
 import {spr,glowTex,scene} from './core.js';
 import {spawnRipple} from './ripples.js';
 import {toast} from './hud.js';
+import {dayPending,dayTake,dayRand} from '../daylamp.js';
 /* ---------- linternas flotantes ---------- */
 const LSP=46;const lanterns=new Map(),pool=[];let collected=new Set();try{JSON.parse(localStorage.getItem('rio3d-coll')||'[]').forEach(i=>collected.add(i))}catch(e){}try{S.count=+localStorage.getItem('rio3d-lant')||0}catch(e){}
 export const lanternPos=k=>{const s=70+k*LSP+hash(k,1)*20,e=(hash(k,2)*2-1)*.6*hw(s);return[cx(s)+e,-s]};
@@ -41,4 +42,14 @@ export function collectLanterns(){
     if(dx*dx+dz*dz<17){collected.add(k);S.count++;try{localStorage.setItem('rio3d-lant',String(S.count));localStorage.setItem('rio3d-coll',JSON.stringify([...collected]))}catch(e){}o.userData.collecting=true;
       const ang=Math.atan2(dx,-dz)-P.psi;A.lantern(Math.sin(ang));spawnRipple(x,z);el('n').textContent=S.count;
       if(S.count===1)toast('Cada linterna es una nota. Sigue el río a tu ritmo.')}}
+}
+
+/* Farolillo del día: uno dorado y más grande, una vez por día real (aparece delante de ti al empezar) */
+let dl,dlPos=null;export const dayLampAt=()=>dlPos;
+export function updateDayLamp(t,ps){
+  if(dl===undefined||!dl&&dlPos===null&&!updateDayLamp.init){updateDayLamp.init=1;if(dayPending()){const s=ps+55+dayRand(1)*55;dlPos=[cx(s)+(dayRand(2)*2-1)*.25*hw(s),-s];dl=mkLantern();dl.scale.setScalar(1.7);dl.userData.glow.material.color.set(0xffd27a);scene.add(dl)}else dl=null}
+  if(!dl)return;const [x,z]=dlPos;dl.position.set(x,Math.sin(t*1.1)*.06,z);dl.rotation.z=Math.sin(t*.8)*.08;
+  const u=dl.userData;if(dl.userData.fade===undefined){u.glow.material.opacity=.75+.2*Math.sin(t*2.2);u.refl.material.opacity=.5+.15*Math.sin(t*2)}
+  if(u.taken){u.fade-=.012;dl.scale.setScalar(1.7+(1-u.fade)*.9);u.glow.material.opacity*=Math.max(0,u.fade);u.refl.material.opacity*=Math.max(0,u.fade);if(u.fade<=0){scene.remove(dl);dl=null;dlPos=null}return}
+  const dx=x-P.px,dz=z-P.pz;if(dx*dx+dz*dz<26&&dayTake()){u.taken=1;u.fade=1;const ang=Math.atan2(dx,-dz)-P.psi;A.lantern(Math.sin(ang));spawnRipple(x,z)}
 }

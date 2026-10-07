@@ -43,7 +43,7 @@ window.__jr={
   /* depuración: tp(s) teletransporta la distancia G.s (y centra la canoa); setClock(c) fija la hora (ciclo de 360 s); lmPos/lmType exponen el mundo */
   tp:s=>{G.s=s;G.ox=0;G.vx=0;return Math.round(G.s)},
   setClock:c=>{G.clock=c;return G.clock},
-  lmPos,lmType,lmIndexAt,
+  lmPos,lmType,lmIndexAt,G,
   lmFound:()=>[...G.found],
   typeNear:(r)=>{const k=lmIndexAt(G.s);return Math.abs(G.s-lmPos(k))<(r||600)?lmType(k):-1},
   /* avanza la simulación n pasos de dt segundos sin dibujar (para capturas con poca velocidad de fotogramas) */
