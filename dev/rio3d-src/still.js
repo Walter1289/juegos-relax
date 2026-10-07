@@ -2,7 +2,10 @@
    (una libélula a los 20 s, pequeñas escenas cada ~50 s). Una vez al día, quedarse quieto ≥45 s da un recuerdo para la cabaña. */
 import {albumSee} from './album.js';
 const SK='rio-still';
-export const STILL={on:false,k:0,t:0,ev:0};
+export const STILL={on:false,k:0,t:0,ev:0,menu:false};
+/* Con cualquier menú o ventana abierta (Más, cuaderno, ajustes, respirar…) la canoa se detiene casi por completo, para que nada avance sin tu control. */
+const MENU='#pzMore:not([hidden]),#menu:not([hidden]),.xm,#pz:not([hidden]),body>div[style*="inset:0"]:not([style*="pointer-events:none"])';
+let mt=0;const menuOpen=()=>{try{return !!document.querySelector(MENU)}catch(e){return false}};
 const LINES=[
 ['Un pez sube a respirar y deja círculos en el agua.','A fish rises for air and leaves circles on the water.','魚が息をしに上がり、水に輪を残します。'],
 ['El viento mueve las cañas, y luego vuelve el silencio.','The wind stirs the reeds, then silence returns.','風が葦をゆらし、また静けさが戻ります。'],
@@ -30,7 +33,8 @@ export const showStill=v=>{if(!btn)initStill();if(btn)btn.style.display=v?'block
 /* dt en segundos; ripple(): ondas en la canoa; started: el juego ya corre */
 export function tickStill(dt,started,ripple){
   if(started&&(!btn||btn.style.display==='none'))showStill(true);
-  STILL.k+=((STILL.on?1:0)-STILL.k)*Math.min(1,dt*1.2);
+  mt-=dt;if(mt<=0){mt=.25;STILL.menu=menuOpen()}
+  STILL.k+=((STILL.on||STILL.menu?1:0)-STILL.k)*Math.min(1,dt*(STILL.menu?3:1.2));
   if(!STILL.on)return;
   STILL.t+=dt;
   if(STILL.ev===0&&STILL.t>=20){STILL.ev=1;albumSee('libelula');try{UX.say(UX.tr('Una libélula se posa en la proa.'))}catch(e){}try{ripple&&ripple()}catch(e){}}

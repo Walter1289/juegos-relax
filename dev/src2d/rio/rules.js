@@ -29,7 +29,7 @@ export function update(dt){
   if(G.px!=null)steer=clamp((G.px-(V.VW/2+G.ox))/90,-1,1);
   if(keys.l)steer-=1;if(keys.r)steer+=1;steer=clamp(steer,-1,1);
   tickStill(dt,G.started,()=>ripple(V.VW/2+G.ox,V.cy,10,70,.6));
-  G.v+=(40*(1-STILL.k)-G.v)*Math.min(1,dt*.9);
+  G.v+=(40*(1-STILL.k)-G.v)*Math.min(1,dt*(STILL.menu?4:.9));
   G.vx+=(steer*125*(1-STILL.k)-G.vx)*Math.min(1,dt*2.2);
   G.ox+=G.vx*dt;
   const lim=halfW(G.s)-36;

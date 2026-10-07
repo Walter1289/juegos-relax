@@ -14,7 +14,7 @@ export function stepPlayer(dt,s){
     const hold=P.hold||P.key.up,steerIn=clamp(IN.steer+(P.key.r?1:0)-(P.key.l?1:0),-1,1);
     // velocidad: corriente suave + remada
     tickStill(dt,true,()=>spawnRipple(P.px,P.pz));const sk=1-STILL.k;
-    const target=S.X.photo?0:2.6*(1-.85*S.cineW)*sk;P.v+=(target-P.v)*.5*dt;
+    const target=S.X.photo?0:2.6*(1-.85*S.cineW)*sk;P.v+=(target-P.v)*(STILL.menu?3:.5)*dt;
     const ta=tanAng(s);
     const turn=steerIn*(.55+Math.min(P.v,6)/6*.45);
     P.psi+=turn*dt;
