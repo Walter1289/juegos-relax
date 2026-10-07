@@ -8,6 +8,7 @@ import {ripple,splash} from './particles.js';
 import {toast,updateHUD} from './ui.js';
 import {saveSoon} from './save.js';
 import {taskTick} from '../../rio3d-src/tasks.js';
+import {albumSee} from '../../rio3d-src/album.js';
 
 function bump(dir,vol){G.bumpT=.7;hap(vol&&vol<1?10:16);ripple(V.VW/2+G.ox+dir*20,V.cy,6,40,.5);A.bump(vol||1,dir)}
 function paddleStroke(){
@@ -49,12 +50,13 @@ export function update(dt){
         const dx=G.ox-o.off,ds=G.s+d-o.s,dist=Math.hypot(dx,ds),need=o.r+17;
         if(dist<need&&dist>.01){G.ox+=dx/dist*(need-dist)*.6;G.vx+=dx/dist*40;if(G.bumpT<=0)bump(Math.sign(dx),.5)}
       }
+    }else if((o.t==='duck'||o.t==='koi')&&Math.abs(G.s-o.s)<70&&Math.abs(G.ox-o.off)<150){albumSee(o.t==='duck'?'pato':'koi')
     }else if(o.t==='lantern'&&!G.lit.has(o.id)){
       if(Math.abs(G.ox-o.off)<30&&Math.abs(G.s-o.s)<56)lightLantern(o);
     }
   }
   const k=lmIndexAt(G.s);
-  if(Math.abs(G.s-lmPos(k))<(lmType(k)===10?240:130)&&!G.found.has(k)){G.found.add(k);try{const ky='rio-found-types',a=JSON.parse(localStorage.getItem(ky)||'[]'),t=lmType(k);if(!a.includes(t)){a.push(t);localStorage.setItem(ky,JSON.stringify(a))}}catch(e){}toast('Descubriste: '+LM[lmType(k)]);A.discover();hap([20,50,20,50,30]);if(lmType(k)===5&&A.ctx){cap('Campana de templo',15000);A.bell(196,A.ctx.currentTime+.3,.1,true,-(halfW(G.s)+128+G.ox)/40,-1)}updateHUD();saveSoon()}
+  if(Math.abs(G.s-lmPos(k))<(lmType(k)===10?240:130)&&!G.found.has(k)){G.found.add(k);try{if(lmType(k)===4)albumSee('garza');if(lmType(k)===9)albumSee('loto')}catch(e){}try{const ky='rio-found-types',a=JSON.parse(localStorage.getItem(ky)||'[]'),t=lmType(k);if(!a.includes(t)){a.push(t);localStorage.setItem(ky,JSON.stringify(a))}}catch(e){}toast('Descubriste: '+LM[lmType(k)]);A.discover();hap([20,50,20,50,30]);if(lmType(k)===5&&A.ctx){cap('Campana de templo',15000);A.bell(196,A.ctx.currentTime+.3,.1,true,-(halfW(G.s)+128+G.ox)/40,-1)}updateHUD();saveSoon()}
   taskTick(Math.abs(G.s-lmPos(k))<110?lmType(k):null,()=>{try{A.discover()}catch(e){}});
   if(G.hintT>14)$('#hint').style.opacity=0;
 }

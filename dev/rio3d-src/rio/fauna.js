@@ -1,5 +1,6 @@
 /* Fauna: carpas koi, patos, libélulas, garzas y sus encuentros con la canoa (curiosidad, huida, aterrizaje). */
 import {A} from '../audio-rio.js';
+import {albumSee} from '../album.js';
 import {toonGrad} from '../style.js';
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -106,7 +107,8 @@ export function updateFauna(dt,ps){
 
 /* ====== interacción de los animales con la canoa ====== */
 export const ENC=(()=>{try{return JSON.parse(localStorage.getItem('rio3d-enc')||'{}')||{}}catch(e){return{}}})();
-export function encounter(k,msg){if(ENC[k])return;ENC[k]=Date.now();try{localStorage.setItem('rio3d-enc',JSON.stringify(ENC))}catch(e){}toast(msg)}
+const ALB_MAP={heron:'garza',koi:'koi',duck:'pato',dragonfly:'libelula',festival:'festival'};
+export function encounter(k,msg){try{ALB_MAP[k]&&albumSee(ALB_MAP[k])}catch(e){}if(ENC[k])return;ENC[k]=Date.now();try{localStorage.setItem('rio3d-enc',JSON.stringify(ENC))}catch(e){}toast(msg)}
 // garza en vuelo: geometría fusionada de una garza, usada para las garzas «vivas» de la reserva
 const heronGeo=(()=>{const h=mkHeron(1,0);lmAnim.pop();h.updateMatrixWorld(true);const gs=[];
   h.traverse(o=>{if(!o.isMesh)return;const g=o.geometry.clone().applyMatrix4(o.matrixWorld);g.deleteAttribute('uv');const c=o.material.color,n=g.attributes.position.count,a=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=c.r;a[i*3+1]=c.g;a[i*3+2]=c.b}g.setAttribute('color',new THREE.BufferAttribute(a,3));gs.push(g.index?g.toNonIndexed():g)});

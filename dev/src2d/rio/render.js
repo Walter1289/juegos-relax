@@ -10,6 +10,8 @@ import {drawWake,drawCanoe} from './canoe.js';
 import {drawHorizon} from './horizon.js';
 import {ripples,drops,petals,flies,rain} from './particles.js';
 import {drawFW} from './fireworks.js';
+import {seasonNow} from '../../rio3d-src/story.js';
+const PETC=['rgba(250,200,215,.85)','rgba(255,232,150,.7)','rgba(232,140,70,.85)','rgba(244,248,255,.92)'],TINT=['','rgba(255,214,120,.045)','rgba(235,130,60,.07)','rgba(200,220,255,.09)'];
 
 export function render(){
   const sk=sky((G.clock/360)%1),dark=sk.dark;
@@ -28,7 +30,7 @@ export function render(){
   drawLandmarksOver(g);
   drawHorizon(g,sk);
   drawLandmarksTop(g);
-  for(const p of petals){g.save();g.translate(p.x,p.y);g.rotate(p.rot);g.fillStyle='rgba(250,200,215,.85)';g.beginPath();g.ellipse(0,0,4,2.2,0,0,7);g.fill();g.restore()}
+  for(const p of petals){g.save();g.translate(p.x,p.y);g.rotate(p.rot);g.fillStyle=PETC[seasonNow()];g.beginPath();g.ellipse(0,0,4,2.2,0,0,7);g.fill();g.restore()}
   if(G.rain>.03){
     g.strokeStyle='rgba(205,222,250,'+(.4*G.rain)+')';g.lineWidth=1.1;g.beginPath();
     const n=Math.floor(rain.length*G.rain);
@@ -36,6 +38,7 @@ export function render(){
     g.stroke();
   }
   for(const d of drops){const a=1-d.l/d.m;g.fillStyle=d.warm?'rgba(255,214,140,'+a+')':'rgba(230,248,255,'+a*.9+')';circ(g,d.x,d.y,d.warm?2.2:1.8);g.fill()}
+  {const tn=TINT[seasonNow()];if(tn){g.save();g.setTransform(1,0,0,1,0,0);g.fillStyle=tn;g.fillRect(0,0,g.canvas.width,g.canvas.height);g.restore()}}
   if(dark>.02){
     lctx.setTransform(1,0,0,1,0,0);lctx.globalCompositeOperation='source-over';lctx.clearRect(0,0,lightC.width,lightC.height);
     lctx.fillStyle='rgba(8,10,36,'+dark+')';lctx.fillRect(0,0,lightC.width,lightC.height);

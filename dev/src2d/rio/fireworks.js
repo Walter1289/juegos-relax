@@ -1,5 +1,6 @@
 /* fireworks.js — festival de linternas: fuegos artificiales nocturnos junto a la aldea y estrella fugaz */
 import {clamp,lerp,circ,cap,hap} from './util.js';
+import {albumSee} from '../../rio3d-src/album.js';
 import {V,G} from './state.js';
 import {lmIndexAt,lmPos,lmType} from './world.js';
 import {A} from './audio.js';
@@ -58,7 +59,7 @@ export function fwStep(dt){
   const B=FW.bursts,mode=festivalMode();
   FW.sndT-=dt;FW.hapT-=dt;
   if(mode===1){
-    if(!FW.seen){FW.seen=true;try{localStorage.setItem('rio-de-linternas-fw','1')}catch(e){}toast('Festival de linternas: la aldea celebra esta noche')}
+    try{albumSee('festival')}catch(e){}if(!FW.seen){FW.seen=true;try{localStorage.setItem('rio-de-linternas-fw','1')}catch(e){}toast('Festival de linternas: la aldea celebra esta noche')}
     FW.t-=dt;
     if(FW.t<=0){FW.t=.6+Math.random()*1.3;const n=Math.random()<.4?2:1;for(let i=0;i<n&&B.length<FW_MAX;i++)fwLaunch(1)}
   }else if(mode===2){

@@ -173,6 +173,86 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     });
   })();
 
+  // rio3d-src/album.js
+  var AK = "rio-album";
+  var ALB = [
+    // [id, nombre es, en, ja, descripción es, en, ja]
+    ["koi", "Carpa koi", "Koi carp", "\u9326\u9BC9", "Se acercan despacio y nadan junto a la canoa, como si te conocieran.", "They drift close and swim beside the canoe as if they knew you.", "\u3086\u3063\u304F\u308A\u8FD1\u3065\u3044\u3066\u3001\u30AB\u30CC\u30FC\u306E\u305D\u3070\u3092\u6CF3\u304E\u307E\u3059\u3002\u307E\u308B\u3067\u77E5\u308A\u5408\u3044\u306E\u3088\u3046\u306B\u3002"],
+    ["pato", "Pato del r\xEDo", "River duck", "\u5DDD\u306E\u30AB\u30E2", "Decide acompa\xF1arte un rato y luego sigue su camino.", "Chooses to keep you company for a while, then goes its own way.", "\u3057\u3070\u3089\u304F\u5BC4\u308A\u305D\u3063\u3066\u304F\u308C\u3066\u3001\u3084\u304C\u3066\u81EA\u5206\u306E\u9053\u3078\u3002"],
+    ["garza", "Garza blanca", "White heron", "\u30B7\u30E9\u30B5\u30AE", "Pesca sin prisa. Alza el vuelo solo cuando pasas muy cerca.", "Fishes without hurry. Takes flight only when you pass very close.", "\u6025\u304C\u305A\u9B5A\u3092\u5F85\u3061\u307E\u3059\u3002\u3068\u3066\u3082\u8FD1\u304F\u3092\u901A\u308B\u3068\u98DB\u3073\u7ACB\u3061\u307E\u3059\u3002"],
+    ["libelula", "Lib\xE9lula", "Dragonfly", "\u30C8\u30F3\u30DC", "Se posa un instante en la proa y se va, ligera como un pensamiento.", "Lands on the bow for an instant and leaves, light as a thought.", "\u8239\u9996\u306B\u305D\u3063\u3068\u6B62\u307E\u3063\u3066\u3001\u8003\u3048\u3054\u3068\u306E\u3088\u3046\u306B\u8EFD\u304F\u53BB\u308A\u307E\u3059\u3002"],
+    ["loto", "Flor de loto", "Lotus flower", "\u84EE\u306E\u82B1", "Abre al anochecer en los estanques tranquilos.", "Opens at dusk in the quiet ponds.", "\u9759\u304B\u306A\u6C60\u3067\u5915\u66AE\u308C\u306B\u958B\u304D\u307E\u3059\u3002"],
+    ["festival", "Festival de linternas", "Lantern festival", "\u3061\u3087\u3046\u3061\u3093\u796D\u308A", "La aldea enciende farolillos para quien llega de noche.", "The village lights lanterns for whoever arrives at night.", "\u591C\u306B\u7740\u3044\u305F\u4EBA\u306E\u305F\u3081\u306B\u3001\u6751\u304C\u3061\u3087\u3046\u3061\u3093\u3092\u3068\u3082\u3057\u307E\u3059\u3002"]
+  ];
+  var cache = null;
+  var get = () => {
+    if (cache) return cache;
+    try {
+      cache = JSON.parse(localStorage.getItem(AK) || "{}") || {};
+    } catch (e) {
+      cache = {};
+    }
+    return cache;
+  };
+  function addAlbumTexts(ux) {
+    ux.add(ALB.map((a) => [a[1], a[2], a[3]]));
+    ux.add(ALB.map((a) => [a[4], a[5], a[6]]));
+    ux.add([["Cuaderno del r\xEDo", "River notebook", "\u5DDD\u306E\u30CE\u30FC\u30C8"], ["A\xFAn no lo has visto", "You have not seen this yet", "\u307E\u3060\u898B\u3066\u3044\u307E\u305B\u3093"], ["Nueva anotaci\xF3n en el cuaderno del r\xEDo", "New entry in the river notebook", "\u5DDD\u306E\u30CE\u30FC\u30C8\u306B\u65B0\u3057\u3044\u8A18\u9332"], ["Se llena solo, a su ritmo. No hay prisa.", "It fills by itself, at its own pace. No rush.", "\u3086\u3063\u304F\u308A\u3001\u3072\u3068\u308A\u3067\u306B\u57CB\u307E\u3063\u3066\u3044\u304D\u307E\u3059\u3002"], ["Cerrar", "Close", "\u9589\u3058\u308B"], ["Anotado: ", "Noted: ", "\u8A18\u9332: "], ["anotaciones", "entries", "\u4EF6"]]);
+  }
+  function albumSee(id) {
+    const a = get();
+    if (a[id]) return;
+    a[id] = Date.now();
+    cache = a;
+    try {
+      localStorage.setItem(AK, JSON.stringify(a));
+    } catch (e2) {
+    }
+    const e = ALB.find((x) => x[0] === id);
+    try {
+      window.UX && UX.say && UX.say(UX.tr("Anotado: ") + UX.tr(e[1]));
+    } catch (x) {
+    }
+  }
+  function openAlbum(tr) {
+    tr = tr || (window.UX ? UX.tr : ((s2) => s2));
+    const seen = get();
+    const ov = document.createElement("div");
+    ov.style.cssText = "position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(14,16,36,.88);padding:12px";
+    const b = document.createElement("div");
+    b.style.cssText = "background:#363a66;color:#fbf1e0;border:1px solid #5a609a;border-radius:16px;padding:18px 20px;max-width:min(92vw,460px);max-height:82vh;overflow:auto;font:15px/1.45 system-ui";
+    const h = document.createElement("h2");
+    h.style.cssText = "margin:0 0 4px;font:600 1.15rem system-ui";
+    h.textContent = tr("Cuaderno del r\xEDo");
+    const s = document.createElement("div");
+    s.style.cssText = "opacity:.65;font-size:.8rem;margin-bottom:12px";
+    s.textContent = tr("Se llena solo, a su ritmo. No hay prisa.");
+    b.append(h, s);
+    ALB.forEach((a) => {
+      const k = !!seen[a[0]], p = document.createElement("div");
+      p.style.cssText = "margin:0 0 12px;padding:10px 12px;border-radius:12px;background:" + (k ? "rgba(255,233,184,.10)" : "rgba(255,255,255,.04)") + ";" + (k ? "" : "opacity:.55");
+      const n = document.createElement("div");
+      n.style.cssText = "font-weight:600";
+      n.textContent = (k ? "\u2726 " : "\xB7 ") + (k ? tr(a[1]) : "?");
+      const d = document.createElement("div");
+      d.style.cssText = "font-size:.88em;opacity:.85";
+      d.textContent = k ? tr(a[4]) : tr("A\xFAn no lo has visto");
+      p.append(n, d);
+      b.appendChild(p);
+    });
+    const c = document.createElement("button");
+    c.type = "button";
+    c.textContent = tr("Cerrar");
+    c.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#2b2d52;color:#fbf1e0;font:inherit;cursor:pointer";
+    c.onclick = () => ov.remove();
+    b.appendChild(c);
+    ov.appendChild(b);
+    ov.onclick = (e) => {
+      if (e.target === ov) ov.remove();
+    };
+    document.body.appendChild(ov);
+  }
+
   // src2d/rio/util.js
   var $ = (s) => document.querySelector(s);
   var cap = (k, gap) => {
@@ -317,9 +397,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     return lmType(k) === CASTLE && Math.abs(s - lmPos(k)) < (r || 900);
   };
   var CELL = 100;
-  var cache = /* @__PURE__ */ new Map();
+  var cache2 = /* @__PURE__ */ new Map();
   function genCell(c) {
-    let a = cache.get(c);
+    let a = cache2.get(c);
     if (a) return a;
     a = [];
     const R = (i) => H2(c, i), base = c * CELL, mid = base + CELL / 2, hw = halfW(mid);
@@ -372,8 +452,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         a.push({ t, s, off: side * (h + extra), side, sd: H2(c, side * 90 + j), r: t === "sakura" ? 46 + e * 30 : t === "tree" ? 34 + e * 26 : 0 });
       }
     }
-    cache.set(c, a);
-    if (cache.size > 240) cache.delete(cache.keys().next().value);
+    cache2.set(c, a);
+    if (cache2.size > 240) cache2.delete(cache2.keys().next().value);
     return a;
   }
   var KF = [[0, [255, 170, 90, 0.16], 0.05], [0.22, [255, 120, 90, 0.2], 0.14], [0.42, [60, 70, 150, 0.3], 0.48], [0.62, [20, 28, 80, 0.26], 0.64], [0.84, [120, 100, 180, 0.22], 0.34], [1, [255, 170, 90, 0.16], 0.05]];
@@ -1278,6 +1358,10 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     FW.sndT -= dt;
     FW.hapT -= dt;
     if (mode === 1) {
+      try {
+        albumSee("festival");
+      } catch (e) {
+      }
       if (!FW.seen) {
         FW.seen = true;
         try {
@@ -3361,6 +3445,20 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     }
     return s;
   };
+  var SK = "rio3d-season";
+  var seasonMode = () => {
+    try {
+      return localStorage.getItem(SK) || "auto";
+    } catch (e) {
+      return "auto";
+    }
+  };
+  var seasonNow = () => {
+    const m = seasonMode();
+    if (m !== "auto") return +m;
+    const mo = (/* @__PURE__ */ new Date()).getMonth();
+    return mo >= 2 && mo <= 4 ? 0 : mo >= 5 && mo <= 7 ? 1 : mo >= 8 && mo <= 10 ? 2 : 3;
+  };
 
   // rio3d-src/tasks.js
   var TKEY = "rio-tasks";
@@ -3378,7 +3476,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     ["Dejar una flor en el estanque", "Leave a flower on the pond", "\u6C60\u306B\u82B1\u3092\u6D6E\u304B\u3079\u308B", "Dej\xE9 una flor en el estanque. Flota hacia donde t\xFA ya est\xE1s.", "I left a flower on the pond. It floats toward wherever you already are.", "\u6C60\u306B\u82B1\u3092\u6D6E\u304B\u3079\u307E\u3057\u305F\u3002\u3042\u306A\u305F\u304C\u3044\u308B\u65B9\u3078\u6D41\u308C\u3066\u3044\u304D\u307E\u3059\u3002"],
     ["Encender los fuegos para Mara", "Light the fireworks for Mara", "\u30DE\u30E9\u306E\u305F\u3081\u306B\u82B1\u706B\u3092\u3042\u3052\u308B", "Esta noche los fuegos del castillo son para ti. Gracias por seguirme hasta aqu\xED.", "Tonight the castle fireworks are for you. Thank you for following me all the way here.", "\u4ECA\u591C\u306E\u57CE\u306E\u82B1\u706B\u306F\u3042\u306A\u305F\u306E\u305F\u3081\u306B\u3002\u3053\u3053\u307E\u3067\u3064\u3044\u3066\u304D\u3066\u304F\u308C\u3066\u3042\u308A\u304C\u3068\u3046\u3002"]
   ];
-  var get = () => {
+  var get2 = () => {
     try {
       return JSON.parse(localStorage.getItem(TKEY) || "{}");
     } catch (e) {
@@ -3448,7 +3546,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   }
   function finish() {
     if (cur == null) return;
-    const d = get();
+    const d = get2();
     d[cur] = 1;
     try {
       localStorage.setItem(TKEY, JSON.stringify(d));
@@ -3480,7 +3578,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       }
     }
     chimeFn = chime;
-    const ok = type != null && T[type] && tasksActive() && !get()[type];
+    const ok = type != null && T[type] && tasksActive() && !get2()[type];
     if (!ok) {
       if (cur != null && !hold) {
         cur = null;
@@ -3558,6 +3656,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
             if (G.bumpT <= 0) bump(Math.sign(dx), 0.5);
           }
         }
+      } else if ((o.t === "duck" || o.t === "koi") && Math.abs(G.s - o.s) < 70 && Math.abs(G.ox - o.off) < 150) {
+        albumSee(o.t === "duck" ? "pato" : "koi");
       } else if (o.t === "lantern" && !G.lit.has(o.id)) {
         if (Math.abs(G.ox - o.off) < 30 && Math.abs(G.s - o.s) < 56) lightLantern(o);
       }
@@ -3565,6 +3665,11 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     const k = lmIndexAt(G.s);
     if (Math.abs(G.s - lmPos(k)) < (lmType(k) === 10 ? 240 : 130) && !G.found.has(k)) {
       G.found.add(k);
+      try {
+        if (lmType(k) === 4) albumSee("garza");
+        if (lmType(k) === 9) albumSee("loto");
+      } catch (e) {
+      }
       try {
         const ky = "rio-found-types", a = JSON.parse(localStorage.getItem(ky) || "[]"), t = lmType(k);
         if (!a.includes(t)) {
@@ -4116,6 +4221,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   }
 
   // src2d/rio/render.js
+  var PETC = ["rgba(250,200,215,.85)", "rgba(255,232,150,.7)", "rgba(232,140,70,.85)", "rgba(244,248,255,.92)"];
+  var TINT = ["", "rgba(255,214,120,.045)", "rgba(235,130,60,.07)", "rgba(200,220,255,.09)"];
   function render() {
     const sk = sky(G.clock / 360 % 1), dark = sk.dark;
     V.dark = dark;
@@ -4147,7 +4254,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       g.save();
       g.translate(p.x, p.y);
       g.rotate(p.rot);
-      g.fillStyle = "rgba(250,200,215,.85)";
+      g.fillStyle = PETC[seasonNow()];
       g.beginPath();
       g.ellipse(0, 0, 4, 2.2, 0, 0, 7);
       g.fill();
@@ -4170,6 +4277,16 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       g.fillStyle = d.warm ? "rgba(255,214,140," + a + ")" : "rgba(230,248,255," + a * 0.9 + ")";
       circ(g, d.x, d.y, d.warm ? 2.2 : 1.8);
       g.fill();
+    }
+    {
+      const tn = TINT[seasonNow()];
+      if (tn) {
+        g.save();
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        g.fillStyle = tn;
+        g.fillRect(0, 0, g.canvas.width, g.canvas.height);
+        g.restore();
+      }
     }
     if (dark > 0.02) {
       lctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -5017,7 +5134,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     dbg: castleDbg
   };
   setupI18n();
-  PZ2.more(document.querySelector("header"), [$("#breath-btn"), $("#mute"), $("#reset"), ...UX3.btns("btn")]);
+  addAlbumTexts(UX3);
+  var albBtn = document.createElement("button");
+  albBtn.type = "button";
+  albBtn.className = "btn";
+  albBtn.textContent = "Cuaderno del r\xEDo";
+  albBtn.onclick = () => openAlbum(UX3.tr);
+  PZ2.more(document.querySelector("header"), [albBtn, $("#breath-btn"), $("#mute"), $("#reset"), ...UX3.btns("btn")]);
   startI18n();
 })();
 

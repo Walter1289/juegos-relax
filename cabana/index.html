@@ -2722,6 +2722,78 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     };
   }
 
+  // rio3d-src/album.js
+  var AK = "rio-album";
+  var ALB = [
+    // [id, nombre es, en, ja, descripción es, en, ja]
+    ["koi", "Carpa koi", "Koi carp", "\u9326\u9BC9", "Se acercan despacio y nadan junto a la canoa, como si te conocieran.", "They drift close and swim beside the canoe as if they knew you.", "\u3086\u3063\u304F\u308A\u8FD1\u3065\u3044\u3066\u3001\u30AB\u30CC\u30FC\u306E\u305D\u3070\u3092\u6CF3\u304E\u307E\u3059\u3002\u307E\u308B\u3067\u77E5\u308A\u5408\u3044\u306E\u3088\u3046\u306B\u3002"],
+    ["pato", "Pato del r\xEDo", "River duck", "\u5DDD\u306E\u30AB\u30E2", "Decide acompa\xF1arte un rato y luego sigue su camino.", "Chooses to keep you company for a while, then goes its own way.", "\u3057\u3070\u3089\u304F\u5BC4\u308A\u305D\u3063\u3066\u304F\u308C\u3066\u3001\u3084\u304C\u3066\u81EA\u5206\u306E\u9053\u3078\u3002"],
+    ["garza", "Garza blanca", "White heron", "\u30B7\u30E9\u30B5\u30AE", "Pesca sin prisa. Alza el vuelo solo cuando pasas muy cerca.", "Fishes without hurry. Takes flight only when you pass very close.", "\u6025\u304C\u305A\u9B5A\u3092\u5F85\u3061\u307E\u3059\u3002\u3068\u3066\u3082\u8FD1\u304F\u3092\u901A\u308B\u3068\u98DB\u3073\u7ACB\u3061\u307E\u3059\u3002"],
+    ["libelula", "Lib\xE9lula", "Dragonfly", "\u30C8\u30F3\u30DC", "Se posa un instante en la proa y se va, ligera como un pensamiento.", "Lands on the bow for an instant and leaves, light as a thought.", "\u8239\u9996\u306B\u305D\u3063\u3068\u6B62\u307E\u3063\u3066\u3001\u8003\u3048\u3054\u3068\u306E\u3088\u3046\u306B\u8EFD\u304F\u53BB\u308A\u307E\u3059\u3002"],
+    ["loto", "Flor de loto", "Lotus flower", "\u84EE\u306E\u82B1", "Abre al anochecer en los estanques tranquilos.", "Opens at dusk in the quiet ponds.", "\u9759\u304B\u306A\u6C60\u3067\u5915\u66AE\u308C\u306B\u958B\u304D\u307E\u3059\u3002"],
+    ["festival", "Festival de linternas", "Lantern festival", "\u3061\u3087\u3046\u3061\u3093\u796D\u308A", "La aldea enciende farolillos para quien llega de noche.", "The village lights lanterns for whoever arrives at night.", "\u591C\u306B\u7740\u3044\u305F\u4EBA\u306E\u305F\u3081\u306B\u3001\u6751\u304C\u3061\u3087\u3046\u3061\u3093\u3092\u3068\u3082\u3057\u307E\u3059\u3002"]
+  ];
+  var cache = null;
+  var get = () => {
+    if (cache) return cache;
+    try {
+      cache = JSON.parse(localStorage.getItem(AK) || "{}") || {};
+    } catch (e) {
+      cache = {};
+    }
+    return cache;
+  };
+  function addAlbumTexts(ux) {
+    ux.add(ALB.map((a) => [a[1], a[2], a[3]]));
+    ux.add(ALB.map((a) => [a[4], a[5], a[6]]));
+    ux.add([["Cuaderno del r\xEDo", "River notebook", "\u5DDD\u306E\u30CE\u30FC\u30C8"], ["A\xFAn no lo has visto", "You have not seen this yet", "\u307E\u3060\u898B\u3066\u3044\u307E\u305B\u3093"], ["Nueva anotaci\xF3n en el cuaderno del r\xEDo", "New entry in the river notebook", "\u5DDD\u306E\u30CE\u30FC\u30C8\u306B\u65B0\u3057\u3044\u8A18\u9332"], ["Se llena solo, a su ritmo. No hay prisa.", "It fills by itself, at its own pace. No rush.", "\u3086\u3063\u304F\u308A\u3001\u3072\u3068\u308A\u3067\u306B\u57CB\u307E\u3063\u3066\u3044\u304D\u307E\u3059\u3002"], ["Cerrar", "Close", "\u9589\u3058\u308B"], ["Anotado: ", "Noted: ", "\u8A18\u9332: "], ["anotaciones", "entries", "\u4EF6"]]);
+  }
+  var albumCount = () => Object.keys(get()).length;
+  function claimAlbum(state2) {
+    state2.cnt = state2.cnt || {};
+    const n = Math.max(0, albumCount() - (state2.cnt.alb || 0));
+    if (n) state2.cnt.alb = albumCount();
+    return n;
+  }
+  function openAlbum(tr) {
+    tr = tr || (window.UX ? UX.tr : ((s2) => s2));
+    const seen = get();
+    const ov = document.createElement("div");
+    ov.style.cssText = "position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(14,16,36,.88);padding:12px";
+    const b = document.createElement("div");
+    b.style.cssText = "background:#363a66;color:#fbf1e0;border:1px solid #5a609a;border-radius:16px;padding:18px 20px;max-width:min(92vw,460px);max-height:82vh;overflow:auto;font:15px/1.45 system-ui";
+    const h = document.createElement("h2");
+    h.style.cssText = "margin:0 0 4px;font:600 1.15rem system-ui";
+    h.textContent = tr("Cuaderno del r\xEDo");
+    const s = document.createElement("div");
+    s.style.cssText = "opacity:.65;font-size:.8rem;margin-bottom:12px";
+    s.textContent = tr("Se llena solo, a su ritmo. No hay prisa.");
+    b.append(h, s);
+    ALB.forEach((a) => {
+      const k = !!seen[a[0]], p = document.createElement("div");
+      p.style.cssText = "margin:0 0 12px;padding:10px 12px;border-radius:12px;background:" + (k ? "rgba(255,233,184,.10)" : "rgba(255,255,255,.04)") + ";" + (k ? "" : "opacity:.55");
+      const n = document.createElement("div");
+      n.style.cssText = "font-weight:600";
+      n.textContent = (k ? "\u2726 " : "\xB7 ") + (k ? tr(a[1]) : "?");
+      const d = document.createElement("div");
+      d.style.cssText = "font-size:.88em;opacity:.85";
+      d.textContent = k ? tr(a[4]) : tr("A\xFAn no lo has visto");
+      p.append(n, d);
+      b.appendChild(p);
+    });
+    const c = document.createElement("button");
+    c.type = "button";
+    c.textContent = tr("Cerrar");
+    c.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#2b2d52;color:#fbf1e0;font:inherit;cursor:pointer";
+    c.onclick = () => ov.remove();
+    b.appendChild(c);
+    ov.appendChild(b);
+    ov.onclick = (e) => {
+      if (e.target === ov) ov.remove();
+    };
+    document.body.appendChild(ov);
+  }
+
   // rio3d-src/tasks.js
   var TKEY = "rio-tasks";
   var T = [
@@ -2739,14 +2811,14 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     ["Encender los fuegos para Mara", "Light the fireworks for Mara", "\u30DE\u30E9\u306E\u305F\u3081\u306B\u82B1\u706B\u3092\u3042\u3052\u308B", "Esta noche los fuegos del castillo son para ti. Gracias por seguirme hasta aqu\xED.", "Tonight the castle fireworks are for you. Thank you for following me all the way here.", "\u4ECA\u591C\u306E\u57CE\u306E\u82B1\u706B\u306F\u3042\u306A\u305F\u306E\u305F\u3081\u306B\u3002\u3053\u3053\u307E\u3067\u3064\u3044\u3066\u304D\u3066\u304F\u308C\u3066\u3042\u308A\u304C\u3068\u3046\u3002"]
   ];
   var TASK_TXT = (type) => T[type] || null;
-  var get = () => {
+  var get2 = () => {
     try {
       return JSON.parse(localStorage.getItem(TKEY) || "{}");
     } catch (e) {
       return {};
     }
   };
-  var tasksDone = get;
+  var tasksDone = get2;
   function addTaskTexts(ux) {
     ux.add(T.map((x) => [x[0], x[1], x[2]]));
     ux.add(T.map((x) => [x[3], x[4], x[5]]));
@@ -2782,6 +2854,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     return s;
   };
   function addStoryTexts(ux) {
+    addAlbumTexts(ux);
     addTaskTexts(ux);
     addMileTexts(ux);
     addZenTexts(ux);
@@ -2866,6 +2939,18 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       }
       box.appendChild(p);
     });
+    const na = claimAlbum(state2);
+    if (na) {
+      addMem2(2 * na);
+      fresh += 0;
+      save2();
+    }
+    const ab = document.createElement("button");
+    ab.type = "button";
+    ab.textContent = tr("Cuaderno del r\xEDo") + " \xB7 " + albumCount() + "/" + ALB.length;
+    ab.style.cssText = "min-height:44px;margin:4px 8px 4px 0;padding:8px 14px;border-radius:99px;border:1px solid #5a609a;background:#2b2d52;color:#fbf1e0;font:inherit;cursor:pointer";
+    ab.onclick = () => openAlbum(tr);
+    box.appendChild(ab);
     if (fresh) {
       addMem2(3 * fresh);
       save2();
@@ -2882,7 +2967,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
     return n;
   };
   var SEAS = ["Primavera", "Verano", "Oto\xF1o", "Invierno"];
-  var SK2 = "cab-season";
+  var SK2 = "rio3d-season";
   var MODES = ["auto", "0", "1", "2", "3"];
   var seasonMode = () => {
     try {

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {openAlbum} from './album.js';
 import {tr,lang,setLang} from './i18n.js';
 
 /* Extras de Río 3D: calidad adaptativa, modo foto, diario con fotos propias,
@@ -243,6 +244,7 @@ export function initExtras(C){
     <div class="row"><span>Subtítulos de ambiente<br><small style="color:var(--muted)">Describe los sonidos con texto</small></span><select id="xsub"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Vibración suave<br><small style="color:var(--muted)">Si tu dispositivo la permite</small></span><select id="xhp"><option value="1">Sí</option><option value="0">No</option></select></div>
     <div class="row"><span>Modo una mano<br><small style="color:var(--muted)">Botones al alcance del pulgar</small></span><select id="xh"><option value="0">No</option><option value="r">Derecha</option><option value="l">Izquierda</option></select></div>
+    <div class="row"><span>Cuaderno del río<br><small style="color:var(--muted)">Lo que has visto en el camino</small></span><button id="xalb" type="button">Abrir</button></div>
     <div class="row"><span>Tono suave<br><small style="color:var(--muted)">Suaviza los sonidos agudos</small></span><select id="xsoft"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Dormir<br><small style="color:var(--muted)">Baja el sonido y la luz poco a poco</small></span><select id="xsl"><option value="0">No</option><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option></select></div>`);
     const q=m.querySelector('#xq'),s=m.querySelector('#xs'),ql=m.querySelector('#xql');
@@ -254,7 +256,7 @@ export function initExtras(C){
     const xs=m.querySelector('#xsub');xs.value=ls.get('rio3d-subs','0');xs.onchange=()=>ls.set('rio3d-subs',xs.value);
     const xp=m.querySelector('#xhp');xp.value=ls.get('rio3d-hap','1');xp.onchange=()=>ls.set('rio3d-hap',xp.value);
     const xso=m.querySelector('#xsoft');xso.value=UX.api.soft()?'1':'0';xso.onchange=()=>UX.api.setSoft(xso.value==='1');
-    const xsl=m.querySelector('#xsl');xsl.value=String(UX.api.sleepMin());xsl.onchange=()=>UX.api.sleep(+xsl.value);
+    m.querySelector('#xalb').onclick=()=>openAlbum(UX.tr);const xsl=m.querySelector('#xsl');xsl.value=String(UX.api.sleepMin());xsl.onchange=()=>UX.api.sleep(+xsl.value);
     const xh=m.querySelector('#xh');xh.value=ls.get('rio3d-hand','0');xh.onchange=()=>{ls.set('rio3d-hand',xh.value);document.body.classList.remove('hand-r','hand-l');if(xh.value!=='0')document.body.classList.add('hand-'+xh.value)};
   };
 
