@@ -21,6 +21,8 @@ import {updateHud,toast,savePos} from './hud.js';
 import {updateLanterns,collectLanterns,mkLantern,updateDayLamp} from './lanterns.js';
 import {weather} from './weather.js';
 import {stepPlayer} from './player.js';
+import {initPad,addPadTexts} from '../steerpad.js';
+import {skipCine} from './state.js';
 import {LM,lmFound} from './lm-data.js';
 import './lm-parts.js';
 import './lm-build.js';
@@ -83,3 +85,5 @@ requestAnimationFrame(frame);
 /* simulación por pasos para las pruebas */
 const sim=(n,dt,fn)=>{window.__lastT=window.__lastT||last;for(let i=0;i<n;i++){window.__lastT+=dt*1000;if(fn)fn(i);frame(window.__lastT,true)}last=window.__lastT};
 installDebug(sim);
+initPad({set:(n,v)=>{if(n==='p')P.key.up=v;else P.key[n]=v},started:()=>S.started&&!S.X.photo,paddle:true,steerPaddles:true,onPress:skipCine});
+try{addPadTexts(window.UX)}catch(e){}

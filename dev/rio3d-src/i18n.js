@@ -41,6 +41,8 @@ const D=[
 ['No','Off','オフ'],['Sí','On','オン'],['Derecha','Right','右'],['Izquierda','Left','左'],
 ['Flauta shakuhachi','Shakuhachi flute','尺八'],['Campanillas','Wind chimes','鈴の音'],['Koto','Koto','琴'],['Campana de templo','Temple bell','寺の鐘'],['Tambor lejano','Distant drum','遠くの太鼓'],
 ['Cuac de pato','Duck quack','カモの鳴き声'],['Aleteo de garza','Heron wingbeats','サギの羽ばたき'],['Golpe suave de la canoa','Soft knock on the canoe','カヌーが軽くぶつかる音'],['Salpicadura','Splash','水しぶき'],['Fuegos artificiales','Fireworks','花火'],['Nota de linterna','Lantern note','ランタンの音'],['Cascada cercana','Waterfall nearby','近くの滝の音'],['Lluvia suave','Soft rain','やさしい雨音'],
+['Menos movimiento y destellos','Less motion and flashes','動きと光を控える'],['Sin cámaras largas, destellos ni balanceo fuerte','No long camera moves, flashes or strong sway','長いカメラ移動・光・強い揺れをなくします'],['Acerca de','About','このゲームについて'],['Privacidad, datos y créditos','Privacy, data and credits','プライバシー・データ・クレジット'],['Abrir','Open','開く'],
+['Botones de dirección','Steering buttons','操作ボタン'],['Alternativa a arrastrar','An alternative to dragging','ドラッグの代わり'],['Girar a la izquierda','Turn left','左へ曲がる'],['Girar a la derecha','Turn right','右へ曲がる'],['Remar','Paddle','こぐ'],['Dirección','Steering','操作'],
 ];
 const MAP=new Map(D.map(r=>[r[0],r]));
 const ix=LG==='en'?1:2;

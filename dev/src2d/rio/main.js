@@ -1,8 +1,9 @@
 /* main.js — arranque: orden de inicialización, bucle de animación, enlace con la pausa (PZ) y el menú «Más» (UX.btns) */
 import '../../rio3d-src/pause.js';   // IIFE: define window.PZ (pausa, Esc, menú «Más»)
 import {openAlbum,addAlbumTexts} from '../../rio3d-src/album.js';
+import {initPad,padButton,addPadTexts} from '../../rio3d-src/steerpad.js';
 import {$} from './util.js';
-import {G} from './state.js';
+import {G,keys} from './state.js';
 import {initCanvas} from './canvas.js';
 import {initInput} from './input.js';
 import {A} from './audio.js';
@@ -35,6 +36,7 @@ function frame(ms){
 load();updateHUD();
 requestAnimationFrame(frame);
 initCalm();
+initPad({set:(n,v)=>{keys[n]=v},started:()=>G.started,anchor:()=>document.getElementById('game')});
 
 /* Enlace con la pausa compartida y gancho de pruebas */
 PZ.ctx=()=>A.ctx;PZ.started=()=>G.started;
@@ -52,7 +54,7 @@ window.__jr={
   dbg:castleDbg,
 };
 setupI18n();
-addAlbumTexts(UX);
+addAlbumTexts(UX);addPadTexts(UX);
 const albBtn=document.createElement('button');albBtn.type='button';albBtn.className='btn';albBtn.textContent='Cuaderno del río';albBtn.onclick=()=>openAlbum(UX.tr);
-PZ.more(document.querySelector('header'),[albBtn,$('#breath-btn'),$('#mute'),$('#reset'),...UX.btns('btn')]);
+PZ.more(document.querySelector('header'),[albBtn,padButton('btn'),$('#breath-btn'),$('#mute'),$('#reset'),...UX.btns('btn')]);
 startI18n();   // al final: traduce el DOM actual (incluido el menú «Más» y la pausa) y observa los cambios

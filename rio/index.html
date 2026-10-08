@@ -348,6 +348,137 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     document.body.appendChild(ov);
   }
 
+  // rio3d-src/steerpad.js
+  var K = "ux-pad";
+  var g = () => {
+    try {
+      return localStorage.getItem(K) === "1";
+    } catch (e) {
+      return false;
+    }
+  };
+  var T = (es, en, ja) => {
+    try {
+      return UX.tr(es);
+    } catch (e) {
+      return es;
+    }
+  };
+  function addPadTexts(ux) {
+    ux.add([
+      ["Girar a la izquierda", "Turn left", "\u5DE6\u3078\u66F2\u304C\u308B"],
+      ["Girar a la derecha", "Turn right", "\u53F3\u3078\u66F2\u304C\u308B"],
+      ["Remar", "Paddle", "\u3053\u3050"],
+      ["Direcci\xF3n", "Steering", "\u64CD\u4F5C"],
+      ["Botones de direcci\xF3n: s\xED", "Steering buttons: on", "\u64CD\u4F5C\u30DC\u30BF\u30F3: \u30AA\u30F3"],
+      ["Botones de direcci\xF3n: no", "Steering buttons: off", "\u64CD\u4F5C\u30DC\u30BF\u30F3: \u30AA\u30D5"],
+      ["Botones de direcci\xF3n", "Steering buttons", "\u64CD\u4F5C\u30DC\u30BF\u30F3"],
+      ["Alternativa a arrastrar", "An alternative to dragging", "\u30C9\u30E9\u30C3\u30B0\u306E\u4EE3\u308F\u308A"]
+    ]);
+  }
+  var box = null;
+  var cfg = null;
+  var subs = [];
+  function place() {
+    let b = 18;
+    try {
+      if (cfg.anchor) {
+        const r = cfg.anchor().getBoundingClientRect();
+        b = Math.max(10, innerHeight - r.bottom + 12);
+      } else b = 18 + (cfg.lift || 0);
+    } catch (e) {
+    }
+    box.style.bottom = "calc(" + Math.round(b) + "px + env(safe-area-inset-bottom))";
+  }
+  function show() {
+    if (box) {
+      box.style.display = g() && cfg.started() ? "flex" : "none";
+      place();
+    }
+  }
+  function setPad(on) {
+    try {
+      localStorage.setItem(K, on ? "1" : "0");
+    } catch (e) {
+    }
+    show();
+    subs.forEach((f) => f());
+  }
+  function onPadChange(f) {
+    subs.push(f);
+  }
+  function padButton(cls) {
+    const b = document.createElement("button");
+    b.type = "button";
+    if (cls) b.className = cls;
+    const t = () => {
+      b.textContent = T(g() ? "Botones de direcci\xF3n: s\xED" : "Botones de direcci\xF3n: no");
+    };
+    t();
+    b.onclick = () => {
+      setPad(!g());
+      t();
+    };
+    onPadChange(t);
+    return b;
+  }
+  function initPad(c) {
+    cfg = c;
+    if (box) return;
+    box = document.createElement("div");
+    box.id = "padBox";
+    box.setAttribute("role", "group");
+    box.setAttribute("aria-label", T("Direcci\xF3n"));
+    box.style.cssText = "position:fixed;right:max(16px,env(safe-area-inset-right));bottom:18px;display:none;gap:14px;z-index:30;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none";
+    const down = /* @__PURE__ */ new Set();
+    const mk3 = (name, sym, label, extra) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = sym;
+      b.setAttribute("aria-label", T(label));
+      b.title = T(label);
+      b.style.cssText = "width:64px;height:64px;border-radius:50%;border:1px solid #5a609a;background:rgba(43,45,82,.72);color:#fbf1e0;font:600 26px system-ui,sans-serif;padding:0;touch-action:none;-webkit-tap-highlight-color:transparent;cursor:pointer";
+      const on = (v) => {
+        [name].concat(extra || []).forEach((n) => cfg.set(n, v));
+        b.style.background = v ? "rgba(255,199,122,.45)" : "rgba(43,45,82,.72)";
+        if (v) down.add(b);
+        else down.delete(b);
+      };
+      b.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        try {
+          b.setPointerCapture(e.pointerId);
+        } catch (x) {
+        }
+        if (cfg.onPress) cfg.onPress();
+        on(true);
+      });
+      ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => b.addEventListener(ev, () => on(false)));
+      b.addEventListener("contextmenu", (e) => e.preventDefault());
+      b.addEventListener("keydown", (e) => {
+        if (e.code === "Space" || e.code === "Enter") {
+          e.preventDefault();
+          on(true);
+        }
+      });
+      b.addEventListener("keyup", (e) => {
+        if (e.code === "Space" || e.code === "Enter") on(false);
+      });
+      b.addEventListener("blur", () => on(false));
+      b._rel = () => on(false);
+      return b;
+    };
+    const l = mk3("l", "\u25C0", "Girar a la izquierda", cfg.steerPaddles ? ["p"] : null), r = mk3("r", "\u25B6", "Girar a la derecha", cfg.steerPaddles ? ["p"] : null);
+    if (cfg.paddle) {
+      const p = mk3("p", "\u224B", "Remar");
+      box.append(l, p, r);
+    } else box.append(l, r);
+    addEventListener("blur", () => box.querySelectorAll("button").forEach((b) => b._rel && b._rel()));
+    document.body.appendChild(box);
+    setInterval(show, 400);
+    show();
+  }
+
   // src2d/rio/util.js
   var $ = (s) => document.querySelector(s);
   var cap = (k, gap) => {
@@ -411,7 +542,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 
   // src2d/rio/canvas.js
   var canvas = $("#game");
-  var g = canvas.getContext("2d");
+  var g2 = canvas.getContext("2d");
   var lightC = mk(8, 8);
   var lctx = lightC.getContext("2d");
   var DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -583,13 +714,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         vg.gain.value = 0.25;
         vg.connect(lp);
         const os = [["sine", 0, 0.7], ["triangle", 5, 0.3]].map(([ty, cents, k]) => {
-          const o = c.createOscillator(), g22 = c.createGain();
+          const o = c.createOscillator(), g23 = c.createGain();
           o.type = ty;
           o.detune.value = cents * (i % 2 ? 1 : -1);
           o.frequency.value = fr(i * 2);
-          g22.gain.value = k;
-          o.connect(g22);
-          g22.connect(vg);
+          g23.gain.value = k;
+          o.connect(g23);
+          g23.connect(vg);
           o.start();
           return o;
         });
@@ -822,11 +953,11 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         bp.type = "bandpass";
         bp.frequency.value = 2200;
         bp.Q.value = 0.7;
-        const g22 = c.createGain();
-        g22.gain.value = 0.02;
+        const g23 = c.createGain();
+        g23.gain.value = 0.02;
         w2.connect(bp);
-        bp.connect(g22);
-        g22.connect(m);
+        bp.connect(g23);
+        g23.connect(m);
         this.bk = {};
         this.bkx = { "-1": -4, "1": 4 };
         [-1, 1].forEach((side) => {
@@ -1042,7 +1173,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     flute(f, t, dur, vol, x, z) {
       if (!this.ok()) return;
       const c = this.ctx, d = this.dest(x, z);
-      const o = c.createOscillator(), o2 = c.createOscillator(), gn = c.createGain(), g22 = c.createGain();
+      const o = c.createOscillator(), o2 = c.createOscillator(), gn = c.createGain(), g23 = c.createGain();
       o.type = "sine";
       o2.type = "triangle";
       o.frequency.setValueAtTime(f * 0.96, t);
@@ -1057,9 +1188,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       vg.connect(o.frequency);
       vb.start(t);
       vb.stop(t + dur + 0.5);
-      g22.gain.value = 0.1;
-      o2.connect(g22);
-      g22.connect(gn);
+      g23.gain.value = 0.1;
+      o2.connect(g23);
+      g23.connect(gn);
       o.connect(gn);
       gn.gain.setValueAtTime(0, t);
       gn.gain.linearRampToValueAtTime(vol, t + 0.35);
@@ -1228,7 +1359,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       lp.connect(out);
       out.connect(d);
       [[72, 1], [73.6, 0.7], [36, 0.9]].forEach(([f, k], i) => {
-        const o = c.createOscillator(), g22 = c.createGain();
+        const o = c.createOscillator(), g23 = c.createGain();
         o.type = i === 2 ? "sine" : "sawtooth";
         o.frequency.setValueAtTime(f * 1.5, t);
         o.frequency.exponentialRampToValueAtTime(f, t + 0.5);
@@ -1240,9 +1371,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         lg.connect(o.frequency);
         lf.start(t);
         lf.stop(t + D + 0.1);
-        g22.gain.value = 0.5 * k;
-        o.connect(g22);
-        g22.connect(lp);
+        g23.gain.value = 0.5 * k;
+        o.connect(g23);
+        g23.connect(lp);
         o.start(t);
         o.stop(t + D + 0.1);
       });
@@ -1884,7 +2015,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     if (withGable) gableChi(c, 0, yb, rw * 0.12, rh * 0.74);
   }
   function towerH(S) {
-    return S.sh + S.tiers.reduce((a, T2, i) => a + T2.th + (i < S.tiers.length - 1 ? T2.rh * 0.78 : T2.rh + 8), 0) + 42;
+    return S.sh + S.tiers.reduce((a, T3, i) => a + T3.th + (i < S.tiers.length - 1 ? T3.rh * 0.78 : T3.rh + 8), 0) + 42;
   }
   function tower(c, S) {
     const win = [], ty = [], eaves = [];
@@ -1918,26 +2049,26 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       }
     }
     let y = -S.sh;
-    S.tiers.forEach((T2, i) => {
+    S.tiers.forEach((T3, i) => {
       const last2 = i === S.tiers.length - 1;
-      wall(c, y, T2.tw, T2.th, T2.nw, win);
-      ty.push(y - T2.th / 2);
-      const yTop = y - T2.th;
-      if (i < 2) eaves.push([yTop + 6, T2.rw]);
-      if (last2) topRoof(c, yTop, T2.rw, T2.rh, true);
+      wall(c, y, T3.tw, T3.th, T3.nw, win);
+      ty.push(y - T3.th / 2);
+      const yTop = y - T3.th;
+      if (i < 2) eaves.push([yTop + 6, T3.rw]);
+      if (last2) topRoof(c, yTop, T3.rw, T3.rh, true);
       else {
-        roofTier(c, yTop, T2.rw, S.tiers[i + 1].tw + 6, T2.rh);
-        if (T2.g === "kara") gableKara(c, 0, yTop + 4, T2.gw, T2.gh);
-        else if (T2.g === "chi2") {
-          gableChi(c, -T2.rw * 0.2, yTop + 4, T2.gw, T2.gh);
-          gableChi(c, T2.rw * 0.2, yTop + 4, T2.gw, T2.gh);
-        } else if (T2.g === "kara+chi") {
-          gableKara(c, 0, yTop + 4, T2.gw, T2.gh);
-          gableChi(c, -T2.rw * 0.3, yTop + 4, T2.gw * 0.62, T2.gh * 0.7);
-          gableChi(c, T2.rw * 0.3, yTop + 4, T2.gw * 0.62, T2.gh * 0.7);
+        roofTier(c, yTop, T3.rw, S.tiers[i + 1].tw + 6, T3.rh);
+        if (T3.g === "kara") gableKara(c, 0, yTop + 4, T3.gw, T3.gh);
+        else if (T3.g === "chi2") {
+          gableChi(c, -T3.rw * 0.2, yTop + 4, T3.gw, T3.gh);
+          gableChi(c, T3.rw * 0.2, yTop + 4, T3.gw, T3.gh);
+        } else if (T3.g === "kara+chi") {
+          gableKara(c, 0, yTop + 4, T3.gw, T3.gh);
+          gableChi(c, -T3.rw * 0.3, yTop + 4, T3.gw * 0.62, T3.gh * 0.7);
+          gableChi(c, T3.rw * 0.3, yTop + 4, T3.gw * 0.62, T3.gh * 0.7);
         }
       }
-      y = yTop - T2.rh * 0.78;
+      y = yTop - T3.rh * 0.78;
     });
     return { win, ty, eaves, top: y };
   }
@@ -3712,7 +3843,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 
   // rio3d-src/tasks.js
   var TKEY = "rio-tasks";
-  var T = [
+  var T2 = [
     // [encargo es,en,ja, margen es,en,ja]
     ["Dejar una linterna en el barandal", "Leave a lantern on the railing", "\u624B\u3059\u308A\u306B\u30E9\u30F3\u30BF\u30F3\u3092\u7F6E\u304F", "Dej\xE9 una linterna en el barandal. Si cruzas de noche, ah\xED estar\xE1 esper\xE1ndote.", "I left a lantern on the railing. If you cross at night, it will be waiting for you.", "\u624B\u3059\u308A\u306B\u30E9\u30F3\u30BF\u30F3\u3092\u7F6E\u304D\u307E\u3057\u305F\u3002\u591C\u306B\u6E21\u308B\u306A\u3089\u3001\u305D\u3053\u3067\u5F85\u3063\u3066\u3044\u307E\u3059\u3002"],
     ["Pedir un deseo bajo el portal", "Make a wish under the gate", "\u9CE5\u5C45\u306E\u4E0B\u3067\u9858\u3044\u3054\u3068\u3092\u3059\u308B", "Ped\xED otro deseo bajo el portal. Este no es m\xEDo: es para quien lea esto.", "I made another wish under the gate. This one is not mine: it is for whoever reads this.", "\u9CE5\u5C45\u306E\u4E0B\u3067\u3082\u3046\u3072\u3068\u3064\u9858\u3044\u307E\u3057\u305F\u3002\u79C1\u306E\u3067\u306F\u306A\u304F\u3001\u3053\u308C\u3092\u8AAD\u3080\u3042\u306A\u305F\u306E\u305F\u3081\u306B\u3002"],
@@ -3746,7 +3877,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     const d = /* @__PURE__ */ new Date();
     return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
   };
-  var g2 = () => {
+  var g22 = () => {
     try {
       const o = JSON.parse(localStorage.getItem(V_KEY) || "{}") || {};
       o.d = o.d || {};
@@ -3755,9 +3886,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       return { d: {} };
     }
   };
-  var tasks2Done = () => g2().d;
+  var tasks2Done = () => g22().d;
   var tasks2Left = () => {
-    const o = g2();
+    const o = g22();
     return o.day === dayK() ? Math.max(0, V_PER_DAY - (o.n || 0)) : V_PER_DAY;
   };
   var get3 = () => {
@@ -3769,14 +3900,14 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   };
   var tasksActive = () => foundTypes().has(10);
   function addTaskTexts(ux) {
-    ux.add(T.map((x) => [x[0], x[1], x[2]]));
-    ux.add(T.map((x) => [x[3], x[4], x[5]]));
+    ux.add(T2.map((x) => [x[0], x[1], x[2]]));
+    ux.add(T2.map((x) => [x[3], x[4], x[5]]));
     ux.add(V2.map((x) => [x[0], x[1], x[2]]));
     ux.add(V2.map((x) => [x[3], x[4], x[5]]));
     ux.add([["Carta de vuelta", "Letter back", "\u8FD4\u4E8B\u306E\u624B\u7D19"], ["Hoy ya diste dos vueltas. Ma\xF1ana, m\xE1s.", "You have already done two returns today. More tomorrow.", "\u4ECA\u65E5\u306F\u3082\u3046\u4E8C\u56DE\u3075\u308A\u8FD4\u308A\u307E\u3057\u305F\u3002\u7D9A\u304D\u306F\u660E\u65E5\u3002"]]);
     ux.add([["Mant\xE9n pulsado para hacerlo", "Press and hold to do it", "\u9577\u62BC\u3057\u3067\u5B9F\u884C"], ["Hecho. Un recuerdo m\xE1s para la caba\xF1a.", "Done. One more keepsake for the cabin.", "\u3067\u304D\u307E\u3057\u305F\u3002\u5C0F\u5C4B\u306B\u601D\u3044\u51FA\u304C\u3072\u3068\u3064\u5897\u3048\u307E\u3057\u305F\u3002"], ["Encargo de Mara", "Mara\u2019s errand", "\u30DE\u30E9\u306E\u304A\u9858\u3044"], ["En el margen", "In the margin", "\u4F59\u767D\u306B"]]);
   }
-  var box;
+  var box2;
   var bar;
   var txt;
   var cur = null;
@@ -3787,15 +3918,15 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   var did = false;
   var chimeFn = null;
   function mk2() {
-    box = document.createElement("button");
-    box.type = "button";
-    box.style.cssText = "position:fixed;left:50%;bottom:max(150px,calc(env(safe-area-inset-bottom) + 144px));transform:translateX(-50%);z-index:60;display:none;min-height:50px;max-width:min(90vw,420px);padding:10px 20px;border-radius:99px;border:1px solid #ffc77a;background:rgba(40,40,80,.88);color:#fbf1e0;font:600 .9rem/1.25 system-ui;cursor:pointer;overflow:hidden;touch-action:none";
+    box2 = document.createElement("button");
+    box2.type = "button";
+    box2.style.cssText = "position:fixed;left:50%;bottom:max(150px,calc(env(safe-area-inset-bottom) + 144px));transform:translateX(-50%);z-index:60;display:none;min-height:50px;max-width:min(90vw,420px);padding:10px 20px;border-radius:99px;border:1px solid #ffc77a;background:rgba(40,40,80,.88);color:#fbf1e0;font:600 .9rem/1.25 system-ui;cursor:pointer;overflow:hidden;touch-action:none";
     bar = document.createElement("span");
     bar.style.cssText = "position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,199,122,.35);pointer-events:none";
     txt = document.createElement("span");
     txt.style.cssText = "position:relative";
-    box.append(bar, txt);
-    document.body.appendChild(box);
+    box2.append(bar, txt);
+    document.body.appendChild(box2);
     const start = (e) => {
       if (cur == null) return;
       e.preventDefault();
@@ -3806,11 +3937,11 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       hold = 0;
       bar.style.width = "0";
     };
-    box.addEventListener("pointerdown", start);
-    box.addEventListener("pointerup", stop);
-    box.addEventListener("pointerleave", stop);
-    box.addEventListener("pointercancel", stop);
-    box.addEventListener("keydown", (e) => {
+    box2.addEventListener("pointerdown", start);
+    box2.addEventListener("pointerup", stop);
+    box2.addEventListener("pointerleave", stop);
+    box2.addEventListener("pointercancel", stop);
+    box2.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         finish();
@@ -3835,7 +3966,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   function finish() {
     if (cur == null) return;
     if (curV) {
-      const o = g2();
+      const o = g22();
       o.d[cur] = 1;
       o.n = (o.day === dayK() ? o.n || 0 : 0) + 1;
       o.day = dayK();
@@ -3854,7 +3985,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     const tp = cur;
     cur = null;
     curV = 0;
-    box.style.display = "none";
+    box2.style.display = "none";
     bar.style.width = "0";
     try {
       chimeFn && chimeFn(tp);
@@ -3878,23 +4009,23 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       }
     }
     chimeFn = chime;
-    const act = type != null && T[type] && tasksActive();
+    const act = type != null && T2[type] && tasksActive();
     const v1 = act && !get3()[type], v2 = act && !v1 && !tasks2Done()[type] && tasks2Left() > 0;
     const ok = v1 || v2;
     if (!ok) {
       if (cur != null && !hold) {
         cur = null;
         curV = 0;
-        if (box) box.style.display = "none";
+        if (box2) box2.style.display = "none";
       }
       return;
     }
     if (cur === type && curV === (v2 ? 1 : 0)) return;
-    if (!box) mk2();
+    if (!box2) mk2();
     cur = type;
     curV = v2 ? 1 : 0;
-    txt.textContent = UX.tr((v2 ? V2 : T)[type][0]) + " \xB7 " + UX.tr("Mant\xE9n pulsado para hacerlo");
-    box.style.display = "block";
+    txt.textContent = UX.tr((v2 ? V2 : T2)[type][0]) + " \xB7 " + UX.tr("Mant\xE9n pulsado para hacerlo");
+    box2.style.display = "block";
   }
 
   // src2d/rio/rules.js
@@ -4548,62 +4679,62 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     V.sc = G.s;
     V.cs0 = center(G.s);
     V.lights = [];
-    g.setTransform(DPR * view.U, 0, 0, DPR * view.U, 0, 0);
-    drawTerrain(g);
-    drawObjs(g, PASS_LOW);
-    drawObjs(g, PASS_WATER);
-    drawLandmarksUnder(g);
+    g2.setTransform(DPR * view.U, 0, 0, DPR * view.U, 0, 0);
+    drawTerrain(g2);
+    drawObjs(g2, PASS_LOW);
+    drawObjs(g2, PASS_WATER);
+    drawLandmarksUnder(g2);
     for (const r of ripples) {
-      g.strokeStyle = "rgba(255,255,255," + r.a * (1 - r.r / r.max) + ")";
-      g.lineWidth = 2;
-      g.beginPath();
-      g.ellipse(r.x, r.y, r.r, r.r * 0.55, 0, 0, 7);
-      g.stroke();
+      g2.strokeStyle = "rgba(255,255,255," + r.a * (1 - r.r / r.max) + ")";
+      g2.lineWidth = 2;
+      g2.beginPath();
+      g2.ellipse(r.x, r.y, r.r, r.r * 0.55, 0, 0, 7);
+      g2.stroke();
     }
     const cx = V.VW / 2 + G.ox, cy = V.cy;
-    drawWake(g, cx, cy, G.ang, G.v);
-    drawCanoe(g, cx, cy, G.ang, G.phase, G.hold || keys.l || keys.r, dark / 0.64);
+    drawWake(g2, cx, cy, G.ang, G.v);
+    drawCanoe(g2, cx, cy, G.ang, G.phase, G.hold || keys.l || keys.r, dark / 0.64);
     V.lights.push([cx + Math.sin(G.ang) * 56, cy - Math.cos(G.ang) * 56, 150, 0.9]);
-    drawObjs(g, PASS_HIGH);
-    drawLandmarksOver(g);
-    drawHorizon(g, sk);
-    drawLandmarksTop(g);
+    drawObjs(g2, PASS_HIGH);
+    drawLandmarksOver(g2);
+    drawHorizon(g2, sk);
+    drawLandmarksTop(g2);
     for (const p of petals) {
-      g.save();
-      g.translate(p.x, p.y);
-      g.rotate(p.rot);
-      g.fillStyle = PETC[seasonNow()];
-      g.beginPath();
-      g.ellipse(0, 0, 4, 2.2, 0, 0, 7);
-      g.fill();
-      g.restore();
+      g2.save();
+      g2.translate(p.x, p.y);
+      g2.rotate(p.rot);
+      g2.fillStyle = PETC[seasonNow()];
+      g2.beginPath();
+      g2.ellipse(0, 0, 4, 2.2, 0, 0, 7);
+      g2.fill();
+      g2.restore();
     }
     if (G.rain > 0.03) {
-      g.strokeStyle = "rgba(205,222,250," + 0.4 * G.rain + ")";
-      g.lineWidth = 1.1;
-      g.beginPath();
+      g2.strokeStyle = "rgba(205,222,250," + 0.4 * G.rain + ")";
+      g2.lineWidth = 1.1;
+      g2.beginPath();
       const n = Math.floor(rain.length * G.rain);
       for (let i = 0; i < n; i++) {
         const d = rain[i];
-        g.moveTo(d.x, d.y);
-        g.lineTo(d.x + 2.3, d.y - 14);
+        g2.moveTo(d.x, d.y);
+        g2.lineTo(d.x + 2.3, d.y - 14);
       }
-      g.stroke();
+      g2.stroke();
     }
     for (const d of drops) {
       const a = 1 - d.l / d.m;
-      g.fillStyle = d.warm ? "rgba(255,214,140," + a + ")" : "rgba(230,248,255," + a * 0.9 + ")";
-      circ(g, d.x, d.y, d.warm ? 2.2 : 1.8);
-      g.fill();
+      g2.fillStyle = d.warm ? "rgba(255,214,140," + a + ")" : "rgba(230,248,255," + a * 0.9 + ")";
+      circ(g2, d.x, d.y, d.warm ? 2.2 : 1.8);
+      g2.fill();
     }
     {
       const tn = TINT[seasonNow()];
       if (tn) {
-        g.save();
-        g.setTransform(1, 0, 0, 1, 0, 0);
-        g.fillStyle = tn;
-        g.fillRect(0, 0, g.canvas.width, g.canvas.height);
-        g.restore();
+        g2.save();
+        g2.setTransform(1, 0, 0, 1, 0, 0);
+        g2.fillStyle = tn;
+        g2.fillRect(0, 0, g2.canvas.width, g2.canvas.height);
+        g2.restore();
       }
     }
     if (dark > 0.02) {
@@ -4621,43 +4752,43 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         lctx.fillStyle = gr;
         lctx.fillRect(x - r, y - r, r * 2, r * 2);
       }
-      g.drawImage(lightC, 0, 0, V.VW, V.VH);
+      g2.drawImage(lightC, 0, 0, V.VW, V.VH);
       if (dark > 0.15) {
-        g.save();
-        g.globalCompositeOperation = "lighter";
+        g2.save();
+        g2.globalCompositeOperation = "lighter";
         const k = 0.18 * clamp(dark / 0.5, 0, 1);
         for (const [x, y, r, a] of V.lights) {
-          const gr = g.createRadialGradient(x, y, 0, x, y, r * 0.7);
+          const gr = g2.createRadialGradient(x, y, 0, x, y, r * 0.7);
           gr.addColorStop(0, "rgba(255,170,80," + k * a + ")");
           gr.addColorStop(1, "rgba(255,170,80,0)");
-          g.fillStyle = gr;
-          g.fillRect(x - r, y - r, r * 2, r * 2);
+          g2.fillStyle = gr;
+          g2.fillRect(x - r, y - r, r * 2, r * 2);
         }
-        g.restore();
+        g2.restore();
       }
     }
     const fa = clamp((dark - 0.25) / 0.3, 0, 1);
     if (fa > 0) {
-      g.save();
-      g.globalCompositeOperation = "lighter";
+      g2.save();
+      g2.globalCompositeOperation = "lighter";
       for (const f of flies) {
         const x = f.x * V.VW + Math.sin(G.clock * 0.4 + f.ph) * 22, y = f.y * V.VH + Math.cos(G.clock * 0.33 + f.ph * 1.7) * 16;
         const a = fa * (0.3 + 0.7 * Math.max(0, Math.sin(G.clock * 1.6 + f.ph)));
-        const gr = g.createRadialGradient(x, y, 0, x, y, 9);
+        const gr = g2.createRadialGradient(x, y, 0, x, y, 9);
         gr.addColorStop(0, "rgba(255,240,150," + a + ")");
         gr.addColorStop(1, "rgba(255,240,150,0)");
-        g.fillStyle = gr;
-        g.fillRect(x - 9, y - 9, 18, 18);
+        g2.fillStyle = gr;
+        g2.fillRect(x - 9, y - 9, 18, 18);
       }
-      g.restore();
+      g2.restore();
     }
-    drawFW(g);
+    drawFW(g2);
     const t = sk.tint;
-    g.fillStyle = "rgba(" + (t[0] | 0) + "," + (t[1] | 0) + "," + (t[2] | 0) + "," + t[3] + ")";
-    g.fillRect(0, 0, V.VW, V.VH);
+    g2.fillStyle = "rgba(" + (t[0] | 0) + "," + (t[1] | 0) + "," + (t[2] | 0) + "," + t[3] + ")";
+    g2.fillRect(0, 0, V.VW, V.VH);
     if (G.rain > 0.03) {
-      g.fillStyle = "rgba(70,88,120," + 0.16 * G.rain + ")";
-      g.fillRect(0, 0, V.VW, V.VH);
+      g2.fillStyle = "rgba(70,88,120," + 0.16 * G.rain + ")";
+      g2.fillRect(0, 0, V.VW, V.VH);
     }
   }
 
@@ -4774,7 +4905,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   // rio3d-src/ux.js
   (function() {
     if (window.UX) return;
-    const K = ["es", "en", "ja"], NM = { es: "Espa\xF1ol", en: "English", ja: "\u65E5\u672C\u8A9E" };
+    const K2 = ["es", "en", "ja"], NM = { es: "Espa\xF1ol", en: "English", ja: "\u65E5\u672C\u8A9E" };
     const ls = { get(k, d) {
       try {
         const v = localStorage.getItem(k);
@@ -4789,7 +4920,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       }
     } };
     let LG = ls.get("rio3d-lang", "es");
-    if (!K.includes(LG)) LG = "es";
+    if (!K2.includes(LG)) LG = "es";
     const ix = LG === "en" ? 1 : 2, MAP = /* @__PURE__ */ new Map(), RX = [];
     const UX4 = window.UX = {
       lang: LG,
@@ -4897,7 +5028,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         };
         const out = [];
         const lb = mk3("uxLang", () => {
-          const n = K[(K.indexOf(LG) + 1) % 3];
+          const n = K2[(K2.indexOf(LG) + 1) % 3];
           ls.set("rio3d-lang", n);
           try {
             UX4.onLang && UX4.onLang();
@@ -4945,14 +5076,14 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           UX4.api.setVol(seq[(i + 1) % 3]);
           vb.textContent = vt();
         });
-        const vt = () => T2("Volumen de este juego: ", "Volume (this game): ", "\u3053\u306E\u30B2\u30FC\u30E0\u306E\u97F3\u91CF: ") + Math.round(UX4.api.vol() * 100) + " %";
+        const vt = () => T3("Volumen de este juego: ", "Volume (this game): ", "\u3053\u306E\u30B2\u30FC\u30E0\u306E\u97F3\u91CF: ") + Math.round(UX4.api.vol() * 100) + " %";
         vb.textContent = vt();
         out.push(vb);
         const tb = mk3("uxSoft", () => {
           UX4.api.setSoft(!UX4.api.soft());
           tb.textContent = tt();
         });
-        const tt = () => UX4.api.soft() ? T2("Tono suave: s\xED", "Soft tone: on", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30F3") : T2("Tono suave: no", "Soft tone: off", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30D5");
+        const tt = () => UX4.api.soft() ? T3("Tono suave: s\xED", "Soft tone: on", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30F3") : T3("Tono suave: no", "Soft tone: off", "\u3084\u308F\u3089\u304B\u3044\u97F3: \u30AA\u30D5");
         tb.textContent = tt();
         out.push(tb);
         const sl = mk3("uxSleep", () => {
@@ -4960,7 +5091,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           UX4.api.sleep(seq[(seq.indexOf(UX4.api.sleepMin()) + 1) % 4]);
           sl.textContent = st2();
         });
-        const st2 = () => UX4.api.sleepMin() ? T2("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX4.api.sleepMin() + " min" : T2("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
+        const st2 = () => UX4.api.sleepMin() ? T3("Dormir: ", "Sleep: ", "\u304A\u3084\u3059\u307F: ") + UX4.api.sleepMin() + " min" : T3("Dormir: no", "Sleep: off", "\u304A\u3084\u3059\u307F: \u30AA\u30D5");
         sl.textContent = st2();
         UX4._sb = () => {
           sl.textContent = st2();
@@ -4971,7 +5102,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
             ls.set("ux-wear", ls.get("ux-wear", "0") === "1" ? "0" : "1");
             wb.textContent = wt();
           });
-          const wt = () => ls.get("ux-wear", "0") === "1" ? T2("Desgaste por ausencia: s\xED", "Wear while away: on", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30F3") : T2("Desgaste por ausencia: no", "Wear while away: off", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30D5");
+          const wt = () => ls.get("ux-wear", "0") === "1" ? T3("Desgaste por ausencia: s\xED", "Wear while away: on", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30F3") : T3("Desgaste por ausencia: no", "Wear while away: off", "\u4E0D\u5728\u4E2D\u306E\u6C5A\u308C: \u30AA\u30D5");
           wb.textContent = wt();
           out.push(wb);
         }
@@ -4979,11 +5110,11 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           UX4.setCalm(!UX4.calm());
           cb.textContent = ct();
         });
-        const ct = () => UX4.calm() ? T2("Menos movimiento y destellos: s\xED", "Less motion and flashes: on", "\u52D5\u304D\u3068\u5149\u3092\u63A7\u3048\u308B: \u30AA\u30F3") : T2("Menos movimiento y destellos: no", "Less motion and flashes: off", "\u52D5\u304D\u3068\u5149\u3092\u63A7\u3048\u308B: \u30AA\u30D5");
+        const ct = () => UX4.calm() ? T3("Menos movimiento y destellos: s\xED", "Less motion and flashes: on", "\u52D5\u304D\u3068\u5149\u3092\u63A7\u3048\u308B: \u30AA\u30F3") : T3("Menos movimiento y destellos: no", "Less motion and flashes: off", "\u52D5\u304D\u3068\u5149\u3092\u63A7\u3048\u308B: \u30AA\u30D5");
         cb.textContent = ct();
         out.push(cb);
         const ab = mk3("uxAbout", () => UX4.about());
-        ab.textContent = T2("Acerca de", "About", "\u3053\u306E\u30B2\u30FC\u30E0\u306B\u3064\u3044\u3066");
+        ab.textContent = T3("Acerca de", "About", "\u3053\u306E\u30B2\u30FC\u30E0\u306B\u3064\u3044\u3066");
         out.push(ab);
         return out;
       },
@@ -5008,13 +5139,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           };
           return x;
         };
-        b.appendChild(mk3(T2("Cancelar", "Cancel", "\u30AD\u30E3\u30F3\u30BB\u30EB")));
-        b.appendChild(mk3(T2("S\xED, reiniciar", "Yes, restart", "\u306F\u3044\u3001\u6700\u521D\u304B\u3089"), ok));
+        b.appendChild(mk3(T3("Cancelar", "Cancel", "\u30AD\u30E3\u30F3\u30BB\u30EB")));
+        b.appendChild(mk3(T3("S\xED, reiniciar", "Yes, restart", "\u306F\u3044\u3001\u6700\u521D\u304B\u3089"), ok));
         d.appendChild(b);
         document.body.appendChild(d);
       }
     };
-    const T2 = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
+    const T3 = (es, en, ja) => LG === "en" ? en : LG === "ja" ? ja : es;
     const GM = (() => {
       const m = location.pathname.match(/\/(cabana3d|rio3d|cabana|rio)(\/|$)/);
       return m ? m[1] : /caba/i.test(document.title) ? "cabana" : "rio";
@@ -5153,7 +5284,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
             e.style.cssText = "position:fixed;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 60px));transform:translateX(-50%);max-width:min(88vw,420px);text-align:center;background:rgba(20,22,48,.88);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:14px/1.4 system-ui,sans-serif;z-index:28;pointer-events:none;transition:opacity .8s;opacity:0";
             document.body.appendChild(e);
           }
-          e.textContent = T2("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
+          e.textContent = T3("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
           e.style.opacity = 1;
           clearTimeout(UX4._rt);
           UX4._rt = setTimeout(() => e.style.opacity = 0, 7e3);
@@ -5219,11 +5350,11 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       const orb = document.createElement("div");
       orb.style.cssText = "width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#ffe9b8,#ffb86b 70%);box-shadow:0 0 50px rgba(255,200,120,.45);transform:scale(.55);transition:transform 4s ease-in-out";
       const lb = document.createElement("div"), t = document.createElement("div");
-      t.textContent = T2("Un minuto para respirar", "One minute to breathe", "1\u5206\u3060\u3051\u6DF1\u547C\u5438");
+      t.textContent = T3("Un minuto para respirar", "One minute to breathe", "1\u5206\u3060\u3051\u6DF1\u547C\u5438");
       t.style.cssText = "font-weight:400;opacity:.75;font-size:.9rem";
       const sk = document.createElement("button");
       sk.type = "button";
-      sk.textContent = T2("Saltar", "Skip", "\u30B9\u30AD\u30C3\u30D7");
+      sk.textContent = T3("Saltar", "Skip", "\u30B9\u30AD\u30C3\u30D7");
       sk.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#363a66;color:#fbf1e0;font:inherit;font-size:.9rem;cursor:pointer";
       o.append(t, orb, lb, sk);
       document.body.appendChild(o);
@@ -5240,13 +5371,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         if (!alive) return;
         if (n >= 5) return end(true);
         n++;
-        lb.textContent = T2("Inhala", "Breathe in", "\u5438\u3063\u3066");
+        lb.textContent = T3("Inhala", "Breathe in", "\u5438\u3063\u3066");
         orb.style.transition = "transform 4s ease-in-out";
         orb.style.transform = "scale(1)";
         UX4.hap(8);
         tm = setTimeout(() => {
           if (!alive) return;
-          lb.textContent = T2("Exhala", "Breathe out", "\u5410\u3044\u3066");
+          lb.textContent = T3("Exhala", "Breathe out", "\u5410\u3044\u3066");
           orb.style.transition = "transform 6s ease-in-out";
           orb.style.transform = "scale(.55)";
           tm = setTimeout(step, 6e3);
@@ -5285,16 +5416,16 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       h.textContent = "Tomoshibi";
       const tg = document.createElement("div");
       tg.style.cssText = "margin:0 0 10px;opacity:.7;font-size:.85em";
-      tg.textContent = T2("\u3068\u3082\u3057\u3073 \xB7 Luz de l\xE1mpara \xB7 Juegos Sin Prisa", "\u3068\u3082\u3057\u3073 \xB7 Lamplight \xB7 No-Rush Games", "\u3068\u3082\u3057\u3073 \xB7 \u306E\u3093\u3073\u308A\u904A\u3079\u308B\u30B2\u30FC\u30E0");
+      tg.textContent = T3("\u3068\u3082\u3057\u3073 \xB7 Luz de l\xE1mpara \xB7 Juegos Sin Prisa", "\u3068\u3082\u3057\u3073 \xB7 Lamplight \xB7 No-Rush Games", "\u3068\u3082\u3057\u3073 \xB7 \u306E\u3093\u3073\u308A\u904A\u3079\u308B\u30B2\u30FC\u30E0");
       const p1 = document.createElement("p");
       p1.style.cssText = "margin:0 0 10px;opacity:.85";
-      p1.textContent = T2("Juegos tranquilos, sin puntaje ni tiempo. Nada que ganar ni perder.", "Calm games with no score and no timer. Nothing to win or lose.", "\u30B9\u30B3\u30A2\u3082\u6642\u9593\u3082\u306A\u3044\u3001\u304A\u3060\u3084\u304B\u306A\u30B2\u30FC\u30E0\u3002\u52DD\u3061\u8CA0\u3051\u306F\u3042\u308A\u307E\u305B\u3093\u3002");
+      p1.textContent = T3("Juegos tranquilos, sin puntaje ni tiempo. Nada que ganar ni perder.", "Calm games with no score and no timer. Nothing to win or lose.", "\u30B9\u30B3\u30A2\u3082\u6642\u9593\u3082\u306A\u3044\u3001\u304A\u3060\u3084\u304B\u306A\u30B2\u30FC\u30E0\u3002\u52DD\u3061\u8CA0\u3051\u306F\u3042\u308A\u307E\u305B\u3093\u3002");
       const p2 = document.createElement("p");
       p2.style.cssText = "margin:0 0 10px;opacity:.85;font-size:.9em";
-      p2.textContent = T2("Es un juego de descanso: no es un producto m\xE9dico ni de terapia y no sustituye la ayuda de un profesional.", "This is a game for rest: it is not a medical or therapy product and does not replace professional help.", "\u3053\u308C\u306F\u4F11\u606F\u306E\u305F\u3081\u306E\u30B2\u30FC\u30E0\u3067\u3059\u3002\u533B\u7642\u3084\u30BB\u30E9\u30D4\u30FC\u306E\u88FD\u54C1\u3067\u306F\u306A\u304F\u3001\u5C02\u9580\u5BB6\u306E\u52A9\u3051\u306E\u4EE3\u308F\u308A\u306B\u306F\u306A\u308A\u307E\u305B\u3093\u3002");
+      p2.textContent = T3("Es un juego de descanso: no es un producto m\xE9dico ni de terapia y no sustituye la ayuda de un profesional.", "This is a game for rest: it is not a medical or therapy product and does not replace professional help.", "\u3053\u308C\u306F\u4F11\u606F\u306E\u305F\u3081\u306E\u30B2\u30FC\u30E0\u3067\u3059\u3002\u533B\u7642\u3084\u30BB\u30E9\u30D4\u30FC\u306E\u88FD\u54C1\u3067\u306F\u306A\u304F\u3001\u5C02\u9580\u5BB6\u306E\u52A9\u3051\u306E\u4EE3\u308F\u308A\u306B\u306F\u306A\u308A\u307E\u305B\u3093\u3002");
       const nav = document.createElement("div");
       nav.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px";
-      [["privacidad.html", T2("Privacidad", "Privacy", "\u30D7\u30E9\u30A4\u30D0\u30B7\u30FC")], ["datos.html", T2("Mis datos", "My data", "\u30C7\u30FC\u30BF")], ["creditos.html", T2("Cr\xE9ditos y licencias", "Credits and licenses", "\u30AF\u30EC\u30B8\u30C3\u30C8\u3068\u30E9\u30A4\u30BB\u30F3\u30B9")]].forEach((x) => {
+      [["privacidad.html", T3("Privacidad", "Privacy", "\u30D7\u30E9\u30A4\u30D0\u30B7\u30FC")], ["datos.html", T3("Mis datos", "My data", "\u30C7\u30FC\u30BF")], ["creditos.html", T3("Cr\xE9ditos y licencias", "Credits and licenses", "\u30AF\u30EC\u30B8\u30C3\u30C8\u3068\u30E9\u30A4\u30BB\u30F3\u30B9")]].forEach((x) => {
         const a = document.createElement("a");
         a.href = "../" + x[0];
         a.textContent = x[1];
@@ -5303,7 +5434,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       });
       const c = document.createElement("button");
       c.type = "button";
-      c.textContent = T2("Cerrar", "Close", "\u9589\u3058\u308B");
+      c.textContent = T3("Cerrar", "Close", "\u9589\u3058\u308B");
       c.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#2b2d52;color:#fbf1e0;font:inherit;cursor:pointer";
       c.onclick = () => o.remove();
       b.append(h, tg, p1, p2, nav, c);
@@ -5337,23 +5468,23 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     function moodUI() {
       const go = document.getElementById("go");
       if (!go || document.getElementById("uxmood")) return;
-      const box2 = document.createElement("div");
-      box2.id = "uxmood";
-      box2.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 0 14px";
+      const box3 = document.createElement("div");
+      box3.id = "uxmood";
+      box3.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 0 14px";
       const q = document.createElement("div");
-      q.textContent = T2("\xBFC\xF3mo llegas hoy?", "How are you arriving today?", "\u4ECA\u65E5\u306F\u3069\u3093\u306A\u6C17\u5206\u3067\u3059\u304B\uFF1F");
+      q.textContent = T3("\xBFC\xF3mo llegas hoy?", "How are you arriving today?", "\u4ECA\u65E5\u306F\u3069\u3093\u306A\u6C17\u5206\u3067\u3059\u304B\uFF1F");
       q.style.cssText = "font:600 .95rem system-ui;opacity:.9";
       const row = document.createElement("div");
       row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;justify-content:center";
       const sub = document.createElement("div");
-      sub.textContent = T2("Es opcional. Solo ajusto el sonido o te ofrezco respirar. Es un juego de descanso, no sustituye ayuda profesional.", "Optional. I only adjust the sound or offer a breath. This is a game for rest, not a substitute for professional help.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002\u4F11\u606F\u306E\u305F\u3081\u306E\u30B2\u30FC\u30E0\u3067\u3001\u5C02\u9580\u5BB6\u306E\u52A9\u3051\u306E\u4EE3\u308F\u308A\u306B\u306F\u306A\u308A\u307E\u305B\u3093\u3002");
+      sub.textContent = T3("Es opcional. Solo ajusto el sonido o te ofrezco respirar. Es un juego de descanso, no sustituye ayuda profesional.", "Optional. I only adjust the sound or offer a breath. This is a game for rest, not a substitute for professional help.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002\u4F11\u606F\u306E\u305F\u3081\u306E\u30B2\u30FC\u30E0\u3067\u3001\u5C02\u9580\u5BB6\u306E\u52A9\u3051\u306E\u4EE3\u308F\u308A\u306B\u306F\u306A\u308A\u307E\u305B\u3093\u3002");
       sub.style.cssText = "font:400 .72rem system-ui;opacity:.6";
       let pick = null;
       const bs = {};
       [["calm", "Tranquilo", "Calm", "\u304A\u3060\u3084\u304B"], ["tired", "Cansado", "Tired", "\u3064\u304B\u308C\u305F"], ["rest", "Inquieto", "Restless", "\u305D\u308F\u305D\u308F"], ["think", "Con ganas de pensar", "In a thoughtful mood", "\u8003\u3048\u3054\u3068\u3092\u3057\u305F\u3044"]].forEach(([k, es, en, ja]) => {
         const b = document.createElement("button");
         b.type = "button";
-        b.textContent = T2(es, en, ja);
+        b.textContent = T3(es, en, ja);
         b.style.cssText = "min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid #5a609a;background:rgba(54,58,102,.7);color:#fbf1e0;font:500 .85rem system-ui;cursor:pointer";
         b.onclick = () => {
           pick = pick === k ? null : k;
@@ -5366,8 +5497,8 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         bs[k] = b;
         row.appendChild(b);
       });
-      box2.append(q, row, sub);
-      go.parentNode.insertBefore(box2, go);
+      box3.append(q, row, sub);
+      go.parentNode.insertBefore(box3, go);
       go.addEventListener("click", () => {
         ls.set("ux-mood", pick || "");
         if (pick === "tired") {
@@ -5375,7 +5506,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           if (+UX4.api.vol() > 0.7) UX4.api.setVol(".7");
           setTimeout(() => {
             try {
-              UX4.say(T2("Baj\xE9 el sonido y suavic\xE9 los agudos. Cuando quieras, cambia esto en \xABM\xE1s\xBB.", "I lowered the sound and softened the highs. Change it any time in \u201CMore\u201D.", "\u97F3\u3092\u5C0F\u3055\u304F\u3001\u9AD8\u97F3\u3092\u3084\u308F\u3089\u3052\u307E\u3057\u305F\u3002\u300C\u305D\u306E\u4ED6\u300D\u3067\u3044\u3064\u3067\u3082\u5909\u3048\u3089\u308C\u307E\u3059\u3002"));
+              UX4.say(T3("Baj\xE9 el sonido y suavic\xE9 los agudos. Cuando quieras, cambia esto en \xABM\xE1s\xBB.", "I lowered the sound and softened the highs. Change it any time in \u201CMore\u201D.", "\u97F3\u3092\u5C0F\u3055\u304F\u3001\u9AD8\u97F3\u3092\u3084\u308F\u3089\u3052\u307E\u3057\u305F\u3002\u300C\u305D\u306E\u4ED6\u300D\u3067\u3044\u3064\u3067\u3082\u5909\u3048\u3089\u308C\u307E\u3059\u3002"));
             } catch (e) {
             }
           }, 900);
@@ -5383,7 +5514,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         if (pick === "rest") setTimeout(() => breathe(), 600);
         if (pick === "think") setTimeout(() => {
           try {
-            UX4.say(T2("Sin prisa. Aqu\xED no hay nada que ganar ni perder.", "No hurry. There is nothing to win or lose here.", "\u6025\u304C\u306A\u304F\u3066\u5927\u4E08\u592B\u3002\u52DD\u3061\u3082\u8CA0\u3051\u3082\u3042\u308A\u307E\u305B\u3093\u3002"));
+            UX4.say(T3("Sin prisa. Aqu\xED no hay nada que ganar ni perder.", "No hurry. There is nothing to win or lose here.", "\u6025\u304C\u306A\u304F\u3066\u5927\u4E08\u592B\u3002\u52DD\u3061\u3082\u8CA0\u3051\u3082\u3042\u308A\u307E\u305B\u3093\u3002"));
           } catch (e) {
           }
         }, 900);
@@ -5490,6 +5621,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   updateHUD();
   requestAnimationFrame(frame);
   initCalm();
+  initPad({ set: (n, v) => {
+    keys[n] = v;
+  }, started: () => G.started, anchor: () => document.getElementById("game") });
   PZ2.ctx = () => A.ctx;
   PZ2.started = () => G.started;
   window.__jr = {
@@ -5529,12 +5663,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   };
   setupI18n();
   addAlbumTexts(UX3);
+  addPadTexts(UX3);
   var albBtn = document.createElement("button");
   albBtn.type = "button";
   albBtn.className = "btn";
   albBtn.textContent = "Cuaderno del r\xEDo";
   albBtn.onclick = () => openAlbum(UX3.tr);
-  PZ2.more(document.querySelector("header"), [albBtn, $("#breath-btn"), $("#mute"), $("#reset"), ...UX3.btns("btn")]);
+  PZ2.more(document.querySelector("header"), [albBtn, padButton("btn"), $("#breath-btn"), $("#mute"), $("#reset"), ...UX3.btns("btn")]);
   startI18n();
 })();
 
