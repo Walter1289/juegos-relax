@@ -1,0 +1,17 @@
+Sin Prisa — Copyright (c) 2026 Walter (Walter1289). All rights reserved.
+
+Permission is granted to play the games for free, in a web browser, and to share
+links to them. Reading the source code for personal study is allowed.
+
+Except as stated above, no part of this software, its code, texts, designs or
+generated art and audio may be copied, modified, redistributed, sublicensed,
+sold or used commercially without prior written permission from the copyright
+holder.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM OR DAMAGES ARISING
+FROM THE USE OF THE SOFTWARE.
+
+Third-party components keep their own licenses: three.js (MIT), esbuild (MIT, build
+tool only) and the Fredoka, Nunito, Shippori Mincho and Zen Maru Gothic typefaces
+(SIL Open Font License 1.1). See creditos.html and fonts/licenses/.

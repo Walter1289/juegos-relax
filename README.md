@@ -33,5 +33,11 @@ Son juegos en HTML5 (Canvas y Three.js), sin servidor. Se publican con GitHub Pa
 
 - `rio/` Río de Linternas · `cabana/` Cabaña del Acantilado
 - `rio3d/` Río 3D · `cabana3d/` Cabaña 3D (Three.js)
-- `dev/` código fuente; `rio3d/app.js` y `cabana3d/app.js` se generan con esbuild.
+- `dev/` código fuente (sin `node_modules`: ejecuta `npm install` dentro de `dev/rio3d-src`); `rio3d/app.js` y `cabana3d/app.js` se generan con esbuild.
 - `sw.js` es el service worker (modo sin conexión); para forzar una actualización se sube su `VERSION`.
+
+---
+
+## Legal
+
+© 2026 Walter. Todos los derechos reservados; se puede jugar gratis y compartir el enlace (ver [LICENSE](LICENSE)). Sin cuentas, anuncios ni rastreo: [privacidad](https://walter1289.github.io/juegos-relax/privacidad.html) · [créditos](https://walter1289.github.io/juegos-relax/creditos.html).

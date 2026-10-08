@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2b2d52">
+<meta name="description" content="Créditos y licencias de Sin Prisa.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>Créditos · Sin Prisa</title>
+<style>
+:root{--bg:#2b2d52;--panel:#363a66;--ink:#fbf1e0;--muted:#cbc8e8;--lamp:#ffc77a;--line:#5a609a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(120% 90% at 50% 0%,#4a4a86,var(--bg) 60%);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;line-height:1.6;padding:24px 16px 60px;min-height:100vh}
+main{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font:600 clamp(1.6rem,5vw,2.2rem)/1.15 'Fredoka',system-ui,sans-serif;margin:0}
+h2{font:600 1.15rem 'Fredoka',system-ui,sans-serif;margin:10px 0 0;color:var(--lamp)}
+p,li{color:var(--muted);margin:0}ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+a{color:var(--lamp)}
+.back{display:inline-block;margin-bottom:4px}
+button{min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:700 .9rem 'Nunito',system-ui,sans-serif;cursor:pointer}
+button:hover,button:focus-visible{border-color:var(--lamp);outline:none}
+button.warn{border-color:#d98b7a}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#msg{min-height:1.4em;color:var(--lamp)}
+[lang=en]{display:none}
+body.en [lang=es]{display:none}body.en [lang=en]{display:revert}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="./">← <span lang="es">Volver al menú</span><span lang="en">Back to menu</span></a>
+
+<h1><span lang="es">Créditos y licencias</span><span lang="en">Credits and licenses</span></h1>
+<p lang="es">Sin Prisa fue creado por Walter (<a href="https://github.com/Walter1289">Walter1289</a>) con la ayuda de Claude, de Anthropic. Los gráficos, la música y los sonidos se generan por código; no usan imágenes ni audios de terceros.</p>
+<p lang="en">Sin Prisa was created by Walter (<a href="https://github.com/Walter1289">Walter1289</a>) with help from Claude, by Anthropic. Graphics, music and sounds are generated in code; no third-party images or audio are used.</p>
+<h2 lang="es">Derechos</h2><h2 lang="en">Rights</h2>
+<p lang="es">© 2026 Walter. Todos los derechos reservados. Puedes jugar gratis y compartir el enlace. Copiar, redistribuir o usar comercialmente el juego o su código requiere permiso por escrito. Ver <a href="LICENSE">LICENSE</a>.</p>
+<p lang="en">© 2026 Walter. All rights reserved. You may play for free and share the link. Copying, redistributing or commercially using the game or its code requires written permission. See <a href="LICENSE">LICENSE</a>.</p>
+<h2 lang="es">Software de terceros</h2><h2 lang="en">Third-party software</h2>
+<ul>
+<li><b>three.js</b> — © 2010–2026 three.js authors, MIT License. <a href="https://threejs.org">threejs.org</a></li>
+<li><b>esbuild</b> (herramienta de compilación / build tool) — © Evan Wallace, MIT License.</li>
+</ul>
+<h2 lang="es">Fuentes tipográficas</h2><h2 lang="en">Typefaces</h2>
+<ul>
+<li><b>Fredoka</b> — © The Fredoka Project Authors, SIL OFL 1.1</li>
+<li><b>Nunito</b> — © The Nunito Project Authors, SIL OFL 1.1</li>
+<li><b>Shippori Mincho</b> — © The Shippori Mincho Project Authors, SIL OFL 1.1</li>
+<li><b>Zen Maru Gothic</b> — © The Zen Maru Gothic Project Authors, SIL OFL 1.1</li>
+</ul>
+<p lang="es"><small>Los textos completos de las licencias de las fuentes están en <a href="fonts/licenses/fredoka-LICENSE">fonts/licenses</a>.</small></p>
+<p lang="en"><small>Full font license texts are in <a href="fonts/licenses/fredoka-LICENSE">fonts/licenses</a>.</small></p>
+<h2 lang="es">Inspiración</h2><h2 lang="en">Inspiration</h2>
+<p lang="es">El castillo de la Garza Blanca y otros lugares están inspirados en la arquitectura y los paisajes tradicionales de Japón. Todos los personajes, cartas y textos son originales.</p>
+<p lang="en">The White Heron castle and other places are inspired by traditional Japanese architecture and landscapes. All characters, letters and texts are original.</p>
+
+</main>
+<script>try{var l=localStorage.getItem('rio3d-lang');if(l==='en'||l==='ja'){document.body.className='en';document.documentElement.lang='en'}}catch(e){}</script>
+
+</body>
+</html>

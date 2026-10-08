@@ -1,5 +1,5 @@
 /* Service worker: precarga todo y sirve sin conexión. Sube VERSION para forzar actualización. */
-const VERSION = 'v41';
+const VERSION = 'v42';
 const CACHE = 'respirar-' + VERSION;
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
@@ -7,6 +7,33 @@ const ASSETS = [
   './cabana/', './cabana/index.html',
   './rio3d/', './rio3d/index.html', './rio3d/app.js',
   './cabana3d/', './cabana3d/index.html', './cabana3d/app.js',
+  './privacidad.html',
+  './creditos.html',
+  './datos.html',
+  './shared/guard.js',
+  './fonts/fonts.css',
+  './fonts/fredoka-latin-500-normal.woff2',
+  './fonts/fredoka-latin-600-normal.woff2',
+  './fonts/fredoka-latin-ext-500-normal.woff2',
+  './fonts/fredoka-latin-ext-600-normal.woff2',
+  './fonts/nunito-latin-400-normal.woff2',
+  './fonts/nunito-latin-600-normal.woff2',
+  './fonts/nunito-latin-700-normal.woff2',
+  './fonts/nunito-latin-800-normal.woff2',
+  './fonts/nunito-latin-ext-400-normal.woff2',
+  './fonts/nunito-latin-ext-600-normal.woff2',
+  './fonts/nunito-latin-ext-700-normal.woff2',
+  './fonts/nunito-latin-ext-800-normal.woff2',
+  './fonts/shippori-mincho-latin-500-normal.woff2',
+  './fonts/shippori-mincho-latin-700-normal.woff2',
+  './fonts/shippori-mincho-latin-ext-500-normal.woff2',
+  './fonts/shippori-mincho-latin-ext-700-normal.woff2',
+  './fonts/zen-maru-gothic-latin-400-normal.woff2',
+  './fonts/zen-maru-gothic-latin-500-normal.woff2',
+  './fonts/zen-maru-gothic-latin-700-normal.woff2',
+  './fonts/zen-maru-gothic-latin-ext-400-normal.woff2',
+  './fonts/zen-maru-gothic-latin-ext-500-normal.woff2',
+  './fonts/zen-maru-gothic-latin-ext-700-normal.woff2',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
 ];
 self.addEventListener('install', e => {

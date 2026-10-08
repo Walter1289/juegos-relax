@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2b2d52">
+<meta name="description" content="Sin Prisa no recopila datos personales: todo se guarda solo en tu dispositivo.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>Privacidad · Sin Prisa</title>
+<style>
+:root{--bg:#2b2d52;--panel:#363a66;--ink:#fbf1e0;--muted:#cbc8e8;--lamp:#ffc77a;--line:#5a609a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(120% 90% at 50% 0%,#4a4a86,var(--bg) 60%);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;line-height:1.6;padding:24px 16px 60px;min-height:100vh}
+main{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font:600 clamp(1.6rem,5vw,2.2rem)/1.15 'Fredoka',system-ui,sans-serif;margin:0}
+h2{font:600 1.15rem 'Fredoka',system-ui,sans-serif;margin:10px 0 0;color:var(--lamp)}
+p,li{color:var(--muted);margin:0}ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+a{color:var(--lamp)}
+.back{display:inline-block;margin-bottom:4px}
+button{min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:700 .9rem 'Nunito',system-ui,sans-serif;cursor:pointer}
+button:hover,button:focus-visible{border-color:var(--lamp);outline:none}
+button.warn{border-color:#d98b7a}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#msg{min-height:1.4em;color:var(--lamp)}
+[lang=en]{display:none}
+body.en [lang=es]{display:none}body.en [lang=en]{display:revert}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="./">← <span lang="es">Volver al menú</span><span lang="en">Back to menu</span></a>
+
+<h1><span lang="es">Privacidad</span><span lang="en">Privacy</span></h1>
+<p lang="es"><b>Resumen:</b> Sin Prisa no tiene cuentas, no usa anuncios ni rastreadores y no envía tu progreso a ningún servidor.</p>
+<p lang="en"><b>In short:</b> Sin Prisa has no accounts, no ads and no trackers, and never sends your progress to any server.</p>
+<h2 lang="es">Qué se guarda y dónde</h2><h2 lang="en">What is stored and where</h2>
+<ul lang="es"><li>Tu avance (cabaña, recuerdos, lugares descubiertos, cartas, cuaderno) y tus ajustes (idioma, volumen, estación, ánimo del día) se guardan <b>solo en el almacenamiento local de tu navegador</b>, en tu dispositivo.</li><li>El modo sin conexión guarda una copia del juego en la caché del navegador.</li><li>Nada de eso llega a nosotros. No sabemos quién juega ni cuánto.</li></ul>
+<ul lang="en"><li>Your progress (cabin, keepsakes, discovered places, letters, notebook) and settings (language, volume, season, daily mood) are stored <b>only in your browser’s local storage</b>, on your device.</li><li>Offline mode keeps a copy of the game in the browser cache.</li><li>None of this reaches us. We do not know who plays or for how long.</li></ul>
+<h2 lang="es">Lo que no hacemos</h2><h2 lang="en">What we do not do</h2>
+<ul lang="es"><li>No pedimos nombre, correo ni ubicación. No usamos cookies de seguimiento ni analíticas.</li><li>No cargamos fuentes ni código de terceros: todo se sirve desde este mismo sitio.</li><li>El «ánimo del día» solo ajusta el sonido y ofrece respirar; no se registra ni se comparte.</li></ul>
+<ul lang="en"><li>We do not ask for your name, email or location. No tracking cookies or analytics.</li><li>We do not load third-party fonts or code: everything is served from this site.</li><li>The “mood of the day” only adjusts sound and offers breathing; it is not recorded or shared.</li></ul>
+<h2 lang="es">Tus datos, tu control</h2><h2 lang="en">Your data, your control</h2>
+<p lang="es">Desde <a href="datos.html">Mis datos</a> puedes guardar una copia de tu progreso, pasarla a otro dispositivo o borrarlo todo.</p>
+<p lang="en">From <a href="datos.html">My data</a> you can save a copy of your progress, move it to another device or erase everything.</p>
+<h2 lang="es">Bienestar</h2><h2 lang="en">Wellbeing</h2>
+<p lang="es">Sin Prisa es un juego de descanso. No es un producto médico ni de terapia y no sustituye la ayuda de un profesional de la salud.</p>
+<p lang="en">Sin Prisa is a game for rest. It is not a medical or therapy product and does not replace help from a health professional.</p>
+<h2 lang="es">Contacto</h2><h2 lang="en">Contact</h2>
+<p><a href="https://github.com/Walter1289/juegos-relax/issues">github.com/Walter1289/juegos-relax/issues</a></p>
+<p lang="es"><small>Última actualización: octubre de 2026.</small></p><p lang="en"><small>Last updated: October 2026.</small></p>
+
+</main>
+<script>try{var l=localStorage.getItem('rio3d-lang');if(l==='en'||l==='ja'){document.body.className='en';document.documentElement.lang='en'}}catch(e){}</script>
+
+</body>
+</html>
