@@ -82,8 +82,8 @@ export const water=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.S
     base=mix(base,base*.78,dk*.6);
     vec3 c=mix(base,refl,clamp(fr*.9+.26,0.,1.));
     c=mix(c,mix(hor,vec3(1.),.55),streak*(1.-night*.7)*.38);
-    float sp=smoothstep(.93,1.,wn(p*2.6+vec2(t*.5,-t*.3)));c+=sunCol*sp*.9;
-    vec3 h=normalize(sunDir+v);c+=sunCol*pow(max(dot(n,h),0.),90.)*1.4;
+    float sp=smoothstep(.9,1.,wn(p*2.6+vec2(t*.5,-t*.3)));c+=sunCol*sp*.38;   /* destellos del agua suaves a propósito (WCAG 2.3.1) */
+    vec3 h=normalize(sunDir+v);c+=sunCol*pow(max(dot(n,h),0.),90.)*.9;
     c=mix(c,fog,smoothstep(fogN,fogF,dist));
     gl_FragColor=vec4(c,1.);
 #include <colorspace_fragment>

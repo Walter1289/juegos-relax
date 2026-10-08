@@ -10,7 +10,7 @@ const FW={bursts:[],t:2,star:null,starT:25,seen:false,fin:5,qn:0,qt:0,sndT:0,hap
 try{FW.seen=localStorage.getItem('rio-de-linternas-fw')==='1'}catch(e){}
 const FW_COLS=[[255,150,190],[255,205,110],[120,235,215]];   // aldea: rosa, dorado, aguamarina
 const PAL=[[255,120,170],[255,205,110],[120,235,215],[150,185,255],[255,150,90],[190,140,255],[255,95,95],[160,255,150],[255,240,200]];
-const FW_MAX=7,FW_MAX_C=16;                                    // ráfagas simultáneas máximas (aldea / castillo)
+const FW_MAX=7,FW_MAX_C=8,FWA=window.__FWA||.6;   // FWA: opacidad de las chispas (baja a propósito: menos contraste entre chispas que pasan = sin destellos)                                    // ráfagas simultáneas máximas (aldea / castillo)
 const SPK=new Map();   // chispas: un sprite de brillo suave por color (un drawImage por partícula)
 function spark(col){
   let c=SPK.get(col);if(c)return c;
@@ -64,10 +64,10 @@ export function fwStep(dt){
     if(FW.t<=0){FW.t=.6+Math.random()*1.3;const n=Math.random()<.4?2:1;for(let i=0;i<n&&B.length<FW_MAX;i++)fwLaunch(1)}
   }else if(mode===2){
     FW.t-=dt;
-    if(FW.t<=0){FW.t=.16+Math.random()*.3;const n=1+Math.floor(Math.random()*3);for(let i=0;i<n&&B.length<FW_MAX_C;i++)fwLaunch(2)}
+    if(FW.t<=0){FW.t=.55+Math.random()*.6;const n=Math.random()<.3?2:1;for(let i=0;i<n&&B.length<FW_MAX_C;i++)fwLaunch(2)}
     FW.fin-=dt;
-    if(FW.fin<=0){FW.fin=11+Math.random()*5;FW.qn=9;FW.qt=0}
-    if(FW.qn>0){FW.qt-=dt;if(FW.qt<=0){FW.qt=.09;FW.qn--;if(B.length<FW_MAX_C+4)fwLaunch(2,[0,1,2,3][FW.qn%4]);if(FW.qn===0)hap([14,30,14,30,20])}}
+    if(FW.fin<=0){FW.fin=11+Math.random()*5;FW.qn=6;FW.qt=0}
+    if(FW.qn>0){FW.qt-=dt;if(FW.qt<=0){FW.qt=.4;FW.qn--;if(B.length<FW_MAX_C+4)fwLaunch(2,[0,1,2,3][FW.qn%4]);if(FW.qn===0)hap([14,30,14,30,20])}}
   }
   for(let i=B.length-1;i>=0;i--){
     const b=B[i];b.t+=dt;
@@ -99,7 +99,6 @@ export function drawFW(g){
       g.globalAlpha=.85;g.fillRect(x-1.2,y-1.2,2.4,2.4);g.globalAlpha=.3;g.fillRect(x-.7,y,1.4,16);continue;
     }
     const e=b.t-b.rise,fade=clamp(1-e/b.life,0,1),p=b.p,willow=b.kind===1;
-    if(e<.3&&!(window.UX&&UX.calm&&UX.calm())){g.globalAlpha=(1-e/.3)*.3;circ(g,b.x,b.y,26+e*110);g.fill()}
     // estelas cortas siguiendo la velocidad (en el sauce, largas y doradas)
     g.globalAlpha=Math.pow(fade,1.1)*(willow?.85:.55);g.strokeStyle=b.fill;g.lineWidth=willow?1.8:1.3;g.beginPath();
     const tl=willow?.2:.07;
@@ -109,8 +108,8 @@ export function drawFW(g){
     let sp=spark(b.fill);
     for(let j=0;j<p.length;j+=4){
       if(b.split&&j===b.split*4)sp=spark(b.fill2);
-      const tw=.75+.25*Math.sin(e*14+j);
-      g.globalAlpha=Math.min(1,Math.pow(fade,1.1)*tw*1.1);g.drawImage(sp,b.x+p[j]-9,b.y+p[j+1]-9,18,18);
+      const tw=.9+.1*Math.sin(e*6+j);
+      g.globalAlpha=Math.min(1,Math.pow(fade,1.1)*tw*FWA);g.drawImage(sp,b.x+p[j]-9,b.y+p[j+1]-9,18,18);
     }
   }
   if(st){

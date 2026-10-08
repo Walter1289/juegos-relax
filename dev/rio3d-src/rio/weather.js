@@ -58,7 +58,7 @@ export function weather(dt,s){
     const dx=sp.position.x-P.px,dz=sp.position.z-P.pz,d=Math.hypot(dx,dz);
     sp.material.opacity=f*.5*sm(6,22,d)*(1-sm(300,380,d))*(.7+.3*hash(i,5));sp.material.color.copy(scene.fog.color).multiplyScalar(1.05)}
   // lluvia
-  rainL.visible=W.rain>.03;rainM.opacity=.42*W.rain;
+  rainL.visible=W.rain>.03;rainM.opacity=.3*W.rain;
   if(rainL.visible){for(let i=0;i<RN;i++){const v=rv[i];v[1]-=16*dt;if(v[1]<0){v[1]=13+Math.random()*2;v[0]=Math.random()*40-20;v[2]=Math.random()*40-24}
     const x=P.px+v[0],z=P.pz+v[2];rainP.set([x,v[1],z,x-.05,v[1]+.65,z],i*6)}rainG.attributes.position.needsUpdate=true;
     if(Math.random()<dt*9*W.rain)spawnRipple(P.px+(Math.random()-.5)*28,P.pz-Math.random()*22+4)}

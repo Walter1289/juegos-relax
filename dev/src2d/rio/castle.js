@@ -573,7 +573,7 @@ export function castleStep(dt){
   // chispas y linternas que suelta al rugir
   if(DR.roar<2.4&&DR.vis){
     const m=DR.roar<.25?DR.roar/.25:DR.roar<1.7?1:Math.max(0,1-(DR.roar-1.7)/.7);
-    DR.acc=(DR.acc||0)+dt*110*m;
+    DR.acc=(DR.acc||0)+dt*60*m;
     while(DR.acc>=1){DR.acc--;const a=-Math.PI/2+(Math.random()-.5)*1.7,v=60+Math.random()*130;sparkSpawn(DR.mx+(Math.random()-.5)*14,DR.my,Math.cos(a)*v,Math.sin(a)*v,.7+Math.random()*.9,0)}
     DR.lac=(DR.lac||0)+dt*3*m;
     while(DR.lac>=1){DR.lac--;sparkSpawn(DR.mx+(Math.random()-.5)*50,DR.my-20,(Math.random()-.5)*30,-30-Math.random()*30,4+Math.random()*2.5,1)}

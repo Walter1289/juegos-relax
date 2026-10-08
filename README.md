@@ -40,6 +40,10 @@ Son juegos en HTML5 (Canvas y Three.js), sin servidor. Se publican con GitHub Pa
 
 ---
 
+## Accesibilidad: destellos
+
+Los juegos no tienen destellos peligrosos: se midió fotograma a fotograma (herramienta en `dev/rio3d-src/tools/flash/`) que ninguna zona de pantalla de ~1 % parpadea más de 3 veces por segundo en fuegos artificiales, festivales, lluvia, estrellas fugaces y celebraciones. Además, la opción «Menos movimiento y destellos» quita fogonazos y cámaras largas. Criterio: WCAG 2.3.1.
+
 ## Legal
 
 © 2026 Walter. Código abierto bajo licencia MIT (ver [LICENSE](LICENSE)); el nombre y los iconos no se licencian para obras derivadas. Contacto: waguilar1289@gmail.com. Sin cuentas, anuncios ni rastreo: [privacidad](https://walter1289.github.io/juegos-relax/privacidad.html) · [créditos](https://walter1289.github.io/juegos-relax/creditos.html).

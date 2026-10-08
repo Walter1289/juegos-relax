@@ -164,7 +164,9 @@ export function initExtras(C){
   addEventListener('keydown',e=>{if(e.code==='KeyP')setPhoto(!X.photo);if(e.code==='Escape'&&X.photo)setPhoto(false);if(e.code==='Enter'&&X.photo)shoot()});
   function shoot(){
     X.want=()=>{
-      if(!UX.calm()){flash.style.transition='none';flash.style.opacity=.35;requestAnimationFrame(()=>{flash.style.transition='opacity .5s';flash.style.opacity=0})};
+      /* WCAG 2.3.1: como mucho un destello cada 1,5 s aunque se mantenga pulsado Enter, y más suave (.22) */
+      const nowF=performance.now();
+      if(!UX.calm()&&nowF-(X._fl||-9999)>1500){X._fl=nowF;flash.style.transition='none';flash.style.opacity=.22;requestAnimationFrame(()=>{flash.style.transition='opacity .6s';flash.style.opacity=0})};
       const w=canvas.width,h=canvas.height;let out=canvas;
       if(frameOn){
         const m=Math.round(w*.03),band=Math.round(w*.065),c2=document.createElement('canvas');c2.width=w+2*m;c2.height=h+m+band;
