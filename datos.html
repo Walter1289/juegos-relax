@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2b2d52">
-<meta name="description" content="Guarda, restaura o borra tu progreso de Sin Prisa.">
+<meta name="description" content="Guarda, restaura o borra tu progreso de Tomoshibi.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<title>Mis datos · Sin Prisa</title>
+<title>Mis datos · Tomoshibi</title>
 <style>
 :root{--bg:#2b2d52;--panel:#363a66;--ink:#fbf1e0;--muted:#cbc8e8;--lamp:#ffc77a;--line:#5a609a}
 *{box-sizing:border-box}
@@ -51,14 +51,14 @@ var $=function(i){return document.getElementById(i)};var en=document.body.classN
 var T=function(es,e){return en?e:es};
 function say(m){$('msg').textContent=m}
 $('exp').onclick=function(){try{var d={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);d[k]=localStorage.getItem(k)}
-var o={app:'sin-prisa',v:1,exported:new Date().toISOString(),data:d};var b=new Blob([JSON.stringify(o)],{type:'application/json'});var a=document.createElement('a');
-a.href=URL.createObjectURL(b);a.download='sin-prisa-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+var o={app:'tomoshibi',v:1,exported:new Date().toISOString(),data:d};var b=new Blob([JSON.stringify(o)],{type:'application/json'});var a=document.createElement('a');
+a.href=URL.createObjectURL(b);a.download='tomoshibi-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
 say(T('Copia guardada ('+Object.keys(d).length+' datos).','Backup saved ('+Object.keys(d).length+' items).'))}catch(e){say(T('No se pudo exportar.','Could not export.'))}};
 $('imp').onclick=function(){$('file').click()};
 $('file').onchange=function(){var f=this.files[0];if(!f)return;if(f.size>2e6){say(T('Archivo demasiado grande.','File too large.'));return}
-var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||o.app!=='sin-prisa'||!o.data||typeof o.data!=='object')throw 0;var n=0;
+var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||(o.app!=='tomoshibi'&&o.app!=='sin-prisa')||!o.data||typeof o.data!=='object')throw 0;var n=0;
 Object.keys(o.data).forEach(function(k){var v=o.data[k];if(typeof v==='string'&&k.length<80&&v.length<1.5e6){localStorage.setItem(k,v);n++}});
-say(T('Progreso restaurado ('+n+' datos). Abre un juego para verlo.','Progress restored ('+n+' items). Open a game to see it.'))}catch(e){say(T('Ese archivo no es una copia de Sin Prisa.','That file is not a Sin Prisa backup.'))}};r.readAsText(f);this.value=''};
+say(T('Progreso restaurado ('+n+' datos). Abre un juego para verlo.','Progress restored ('+n+' items). Open a game to see it.'))}catch(e){say(T('Ese archivo no es una copia de Tomoshibi.','That file is not a Tomoshibi backup.'))}};r.readAsText(f);this.value=''};
 var armed=false,tm=0;
 $('del').onclick=function(){if(!armed){armed=true;$('del').textContent=T('Toca de nuevo para confirmar','Tap again to confirm');tm=setTimeout(function(){armed=false;$('del').textContent=T('Borrar todo mi progreso','Erase all my progress')},5000);return}
 clearTimeout(tm);try{localStorage.clear()}catch(e){}armed=false;$('del').textContent=T('Borrar todo mi progreso','Erase all my progress');say(T('Listo: todo se borró de este dispositivo.','Done: everything was erased from this device.'))};

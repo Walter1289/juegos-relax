@@ -1,6 +1,8 @@
 <div align="center">
 
-# Sin Prisa
+# Tomoshibi
+
+<sub>ともしび · Luz de lámpara · Juegos Sin Prisa</sub>
 
 **Juegos tranquilos, sin puntaje ni tiempo, para soltar la mente al final del día.**
 

@@ -12,8 +12,8 @@
 <title>Río de Linternas</title>
 <meta name="description" content="Guía una canoa por un río infinito, enciende linternas y descubre lugares. Sin puntaje ni tiempo.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Sin Prisa">
-<meta property="og:title" content="Río de Linternas · Sin Prisa">
+<meta property="og:site_name" content="Tomoshibi">
+<meta property="og:title" content="Río de Linternas · Tomoshibi">
 <meta property="og:description" content="Guía una canoa por un río infinito, enciende linternas y descubre lugares. Sin puntaje ni tiempo.">
 <meta property="og:image" content="https://walter1289.github.io/juegos-relax/icons/icon-512.png">
 <meta name="twitter:card" content="summary">
@@ -5286,7 +5286,10 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       b.style.cssText = "background:#363a66;color:#fbf1e0;border:1px solid #5a609a;border-radius:16px;padding:18px 20px;max-width:min(92vw,440px);max-height:84vh;overflow:auto;font:15px/1.5 system-ui,sans-serif";
       const h = document.createElement("h2");
       h.style.cssText = "margin:0 0 6px;font:600 1.2rem system-ui";
-      h.textContent = "Sin Prisa";
+      h.textContent = "Tomoshibi";
+      const tg = document.createElement("div");
+      tg.style.cssText = "margin:0 0 10px;opacity:.7;font-size:.85em";
+      tg.textContent = T2("\u3068\u3082\u3057\u3073 \xB7 Luz de l\xE1mpara \xB7 Juegos Sin Prisa", "\u3068\u3082\u3057\u3073 \xB7 Lamplight \xB7 No-Rush Games", "\u3068\u3082\u3057\u3073 \xB7 \u306E\u3093\u3073\u308A\u904A\u3079\u308B\u30B2\u30FC\u30E0");
       const p1 = document.createElement("p");
       p1.style.cssText = "margin:0 0 10px;opacity:.85";
       p1.textContent = T2("Juegos tranquilos, sin puntaje ni tiempo. Nada que ganar ni perder.", "Calm games with no score and no timer. Nothing to win or lose.", "\u30B9\u30B3\u30A2\u3082\u6642\u9593\u3082\u306A\u3044\u3001\u304A\u3060\u3084\u304B\u306A\u30B2\u30FC\u30E0\u3002\u52DD\u3061\u8CA0\u3051\u306F\u3042\u308A\u307E\u305B\u3093\u3002");
@@ -5307,7 +5310,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       c.textContent = T2("Cerrar", "Close", "\u9589\u3058\u308B");
       c.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#2b2d52;color:#fbf1e0;font:inherit;cursor:pointer";
       c.onclick = () => o.remove();
-      b.append(h, p1, p2, nav, c);
+      b.append(h, tg, p1, p2, nav, c);
       o.appendChild(b);
       o.onclick = (e) => {
         if (e.target === o) o.remove();
