@@ -14,7 +14,8 @@ addEventListener('keydown',e=>{if(e.code==='KeyC')setCam(1-S.camMode)});
 try{setCam(+localStorage.getItem('rio3d-cam')||0)}catch(e){}
 /* posiciona la cámara por fotograma; bob = balanceo de la canoa */
 export function updateCamera(dt,bob){
-  const sway=Math.sin(P.t*.5)*.01;
+  const cm=(window.UX&&UX.calm&&UX.calm())?.25:1;bob*=cm;
+  const sway=Math.sin(P.t*.5)*.01*cm;
   cam.position.set(P.px,1.18+bob,P.pz).addScaledVector(new THREE.Vector3(Math.sin(P.psi),0,-Math.cos(P.psi)),-.15);
   P.pitch+=((-IN.pitch*.22)-P.pitch)*2*dt;
   cam.rotation.set(P.pitch-.06,-P.psi+sway,-P.steer*.02,'YXZ');

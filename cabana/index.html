@@ -392,6 +392,16 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
           wb.textContent = wt();
           out.push(wb);
         }
+        const cb = mk2("uxCalm", () => {
+          UX3.setCalm(!UX3.calm());
+          cb.textContent = ct2();
+        });
+        const ct2 = () => UX3.calm() ? T3("Menos movimiento y destellos: s\xED", "Less motion and flashes: on", "\u52D5\u304D\u3068\u5149\u3092\u63A7\u3048\u308B: \u30AA\u30F3") : T3("Menos movimiento y destellos: no", "Less motion and flashes: off", "\u52D5\u304D\u3068\u5149\u3092\u63A7\u3048\u308B: \u30AA\u30D5");
+        cb.textContent = ct2();
+        out.push(cb);
+        const ab = mk2("uxAbout", () => UX3.about());
+        ab.textContent = T3("Acerca de", "About", "\u3053\u306E\u30B2\u30FC\u30E0\u306B\u3064\u3044\u3066");
+        out.push(ab);
         return out;
       },
       /* confirmación dentro del juego (en lugar de confirm() nativo) */
@@ -661,11 +671,73 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       };
       step();
     }
+    UX3.calm = () => {
+      const v = ls.get("ux-calm", null);
+      if (v === "1") return true;
+      if (v === "0") return false;
+      try {
+        return !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+      } catch (e) {
+        return false;
+      }
+    };
+    UX3.setCalm = (on) => {
+      ls.set("ux-calm", on ? "1" : "0");
+    };
+    UX3.about = () => {
+      const old = document.getElementById("uxAboutOv");
+      if (old) {
+        old.remove();
+        return;
+      }
+      const o = document.createElement("div");
+      o.id = "uxAboutOv";
+      o.setAttribute("role", "dialog");
+      o.setAttribute("aria-modal", "true");
+      o.style.cssText = "position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(14,16,36,.88);padding:12px";
+      const b = document.createElement("div");
+      b.style.cssText = "background:#363a66;color:#fbf1e0;border:1px solid #5a609a;border-radius:16px;padding:18px 20px;max-width:min(92vw,440px);max-height:84vh;overflow:auto;font:15px/1.5 system-ui,sans-serif";
+      const h = document.createElement("h2");
+      h.style.cssText = "margin:0 0 6px;font:600 1.2rem system-ui";
+      h.textContent = "Sin Prisa";
+      const p1 = document.createElement("p");
+      p1.style.cssText = "margin:0 0 10px;opacity:.85";
+      p1.textContent = T3("Juegos tranquilos, sin puntaje ni tiempo. Nada que ganar ni perder.", "Calm games with no score and no timer. Nothing to win or lose.", "\u30B9\u30B3\u30A2\u3082\u6642\u9593\u3082\u306A\u3044\u3001\u304A\u3060\u3084\u304B\u306A\u30B2\u30FC\u30E0\u3002\u52DD\u3061\u8CA0\u3051\u306F\u3042\u308A\u307E\u305B\u3093\u3002");
+      const p2 = document.createElement("p");
+      p2.style.cssText = "margin:0 0 10px;opacity:.85;font-size:.9em";
+      p2.textContent = T3("Es un juego de descanso: no es un producto m\xE9dico ni de terapia y no sustituye la ayuda de un profesional.", "This is a game for rest: it is not a medical or therapy product and does not replace professional help.", "\u3053\u308C\u306F\u4F11\u606F\u306E\u305F\u3081\u306E\u30B2\u30FC\u30E0\u3067\u3059\u3002\u533B\u7642\u3084\u30BB\u30E9\u30D4\u30FC\u306E\u88FD\u54C1\u3067\u306F\u306A\u304F\u3001\u5C02\u9580\u5BB6\u306E\u52A9\u3051\u306E\u4EE3\u308F\u308A\u306B\u306F\u306A\u308A\u307E\u305B\u3093\u3002");
+      const nav = document.createElement("div");
+      nav.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px";
+      [["privacidad.html", T3("Privacidad", "Privacy", "\u30D7\u30E9\u30A4\u30D0\u30B7\u30FC")], ["datos.html", T3("Mis datos", "My data", "\u30C7\u30FC\u30BF")], ["creditos.html", T3("Cr\xE9ditos y licencias", "Credits and licenses", "\u30AF\u30EC\u30B8\u30C3\u30C8\u3068\u30E9\u30A4\u30BB\u30F3\u30B9")]].forEach((x) => {
+        const a = document.createElement("a");
+        a.href = "../" + x[0];
+        a.textContent = x[1];
+        a.style.cssText = "color:#ffc77a;min-height:44px;display:inline-flex;align-items:center;padding:0 6px";
+        nav.appendChild(a);
+      });
+      const c = document.createElement("button");
+      c.type = "button";
+      c.textContent = T3("Cerrar", "Close", "\u9589\u3058\u308B");
+      c.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#2b2d52;color:#fbf1e0;font:inherit;cursor:pointer";
+      c.onclick = () => o.remove();
+      b.append(h, p1, p2, nav, c);
+      o.appendChild(b);
+      o.onclick = (e) => {
+        if (e.target === o) o.remove();
+      };
+      document.body.appendChild(o);
+      try {
+        c.focus();
+      } catch (e) {
+      }
+    };
     UX3.say = (m) => {
       let e = document.getElementById("uxsay");
       if (!e) {
         e = document.createElement("div");
         e.id = "uxsay";
+        e.setAttribute("role", "status");
+        e.setAttribute("aria-live", "polite");
         e.style.cssText = "position:fixed;left:50%;bottom:max(90px,calc(env(safe-area-inset-bottom) + 80px));transform:translateX(-50%);max-width:min(88vw,420px);background:rgba(20,22,48,.9);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:500 .85rem/1.35 system-ui;text-align:center;z-index:65;pointer-events:none;transition:opacity .5s;opacity:0";
         document.body.appendChild(e);
       }
@@ -688,7 +760,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       const row = document.createElement("div");
       row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;justify-content:center";
       const sub = document.createElement("div");
-      sub.textContent = T3("Es opcional. Solo ajusto el sonido o te ofrezco respirar.", "Optional. I only adjust the sound or offer you a breath.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002");
+      sub.textContent = T3("Es opcional. Solo ajusto el sonido o te ofrezco respirar. Es un juego de descanso, no sustituye ayuda profesional.", "Optional. I only adjust the sound or offer a breath. This is a game for rest, not a substitute for professional help.", "\u4EFB\u610F\u3067\u3059\u3002\u97F3\u306E\u8ABF\u6574\u3084\u6DF1\u547C\u5438\u306E\u63D0\u6848\u3060\u3051\u3092\u3057\u307E\u3059\u3002\u4F11\u606F\u306E\u305F\u3081\u306E\u30B2\u30FC\u30E0\u3067\u3001\u5C02\u9580\u5BB6\u306E\u52A9\u3051\u306E\u4EE3\u308F\u308A\u306B\u306F\u306A\u308A\u307E\u305B\u3093\u3002");
       sub.style.cssText = "font:400 .72rem system-ui;opacity:.6";
       let pick = null;
       const bs = {};

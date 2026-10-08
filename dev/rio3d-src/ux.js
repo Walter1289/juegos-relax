@@ -72,6 +72,9 @@
       const st=()=>UX.api.sleepMin()?T('Dormir: ','Sleep: ','おやすみ: ')+UX.api.sleepMin()+' min':T('Dormir: no','Sleep: off','おやすみ: オフ');sl.textContent=st();UX._sb=()=>{sl.textContent=st()};out.push(sl);
       if(opts.wear){const wb=mk('uxWear',()=>{ls.set('ux-wear',ls.get('ux-wear','0')==='1'?'0':'1');wb.textContent=wt()});
         const wt=()=>ls.get('ux-wear','0')==='1'?T('Desgaste por ausencia: sí','Wear while away: on','不在中の汚れ: オン'):T('Desgaste por ausencia: no','Wear while away: off','不在中の汚れ: オフ');wb.textContent=wt();out.push(wb)}
+      const cb=mk('uxCalm',()=>{UX.setCalm(!UX.calm());cb.textContent=ct()});
+      const ct=()=>UX.calm()?T('Menos movimiento y destellos: sí','Less motion and flashes: on','動きと光を控える: オン'):T('Menos movimiento y destellos: no','Less motion and flashes: off','動きと光を控える: オフ');cb.textContent=ct();out.push(cb);
+      const ab=mk('uxAbout',()=>UX.about());ab.textContent=T('Acerca de','About','このゲームについて');out.push(ab);
       return out;
     },
     /* confirmación dentro del juego (en lugar de confirm() nativo) */
@@ -153,14 +156,29 @@
       tm=setTimeout(()=>{if(!alive)return;lb.textContent=T('Exhala','Breathe out','吐いて');orb.style.transition='transform 6s ease-in-out';orb.style.transform='scale(.55)';tm=setTimeout(step,6000)},4000)};
     step();
   }
-  UX.say=m=>{let e=document.getElementById('uxsay');if(!e){e=document.createElement('div');e.id='uxsay';e.style.cssText='position:fixed;left:50%;bottom:max(90px,calc(env(safe-area-inset-bottom) + 80px));transform:translateX(-50%);max-width:min(88vw,420px);background:rgba(20,22,48,.9);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:500 .85rem/1.35 system-ui;text-align:center;z-index:65;pointer-events:none;transition:opacity .5s;opacity:0';document.body.appendChild(e)}e.textContent=m;e.style.opacity=1;clearTimeout(UX._st);UX._st=setTimeout(()=>e.style.opacity=0,4200)};
+  UX.calm=()=>{const v=ls.get('ux-calm',null);if(v==='1')return true;if(v==='0')return false;try{return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)}catch(e){return false}};
+  UX.setCalm=on=>{ls.set('ux-calm',on?'1':'0')};
+  UX.about=()=>{
+    const old=document.getElementById('uxAboutOv');if(old){old.remove();return}
+    const o=document.createElement('div');o.id='uxAboutOv';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');
+    o.style.cssText='position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(14,16,36,.88);padding:12px';
+    const b=document.createElement('div');b.style.cssText='background:#363a66;color:#fbf1e0;border:1px solid #5a609a;border-radius:16px;padding:18px 20px;max-width:min(92vw,440px);max-height:84vh;overflow:auto;font:15px/1.5 system-ui,sans-serif';
+    const h=document.createElement('h2');h.style.cssText='margin:0 0 6px;font:600 1.2rem system-ui';h.textContent='Sin Prisa';
+    const p1=document.createElement('p');p1.style.cssText='margin:0 0 10px;opacity:.85';p1.textContent=T('Juegos tranquilos, sin puntaje ni tiempo. Nada que ganar ni perder.','Calm games with no score and no timer. Nothing to win or lose.','スコアも時間もない、おだやかなゲーム。勝ち負けはありません。');
+    const p2=document.createElement('p');p2.style.cssText='margin:0 0 10px;opacity:.85;font-size:.9em';p2.textContent=T('Es un juego de descanso: no es un producto médico ni de terapia y no sustituye la ayuda de un profesional.','This is a game for rest: it is not a medical or therapy product and does not replace professional help.','これは休息のためのゲームです。医療やセラピーの製品ではなく、専門家の助けの代わりにはなりません。');
+    const nav=document.createElement('div');nav.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px';
+    [['privacidad.html',T('Privacidad','Privacy','プライバシー')],['datos.html',T('Mis datos','My data','データ')],['creditos.html',T('Créditos y licencias','Credits and licenses','クレジットとライセンス')]].forEach(x=>{const a=document.createElement('a');a.href='../'+x[0];a.textContent=x[1];a.style.cssText='color:#ffc77a;min-height:44px;display:inline-flex;align-items:center;padding:0 6px';nav.appendChild(a)});
+    const c=document.createElement('button');c.type='button';c.textContent=T('Cerrar','Close','閉じる');c.style.cssText='min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#2b2d52;color:#fbf1e0;font:inherit;cursor:pointer';c.onclick=()=>o.remove();
+    b.append(h,p1,p2,nav,c);o.appendChild(b);o.onclick=e=>{if(e.target===o)o.remove()};document.body.appendChild(o);try{c.focus()}catch(e){}
+  };
+  UX.say=m=>{let e=document.getElementById('uxsay');if(!e){e=document.createElement('div');e.id='uxsay';e.setAttribute('role','status');e.setAttribute('aria-live','polite');e.style.cssText='position:fixed;left:50%;bottom:max(90px,calc(env(safe-area-inset-bottom) + 80px));transform:translateX(-50%);max-width:min(88vw,420px);background:rgba(20,22,48,.9);color:#fbf1e0;padding:10px 16px;border-radius:14px;font:500 .85rem/1.35 system-ui;text-align:center;z-index:65;pointer-events:none;transition:opacity .5s;opacity:0';document.body.appendChild(e)}e.textContent=m;e.style.opacity=1;clearTimeout(UX._st);UX._st=setTimeout(()=>e.style.opacity=0,4200)};
   UX.breathe=breathe;UX.mood=()=>moodUI();
   function moodUI(){
     const go=document.getElementById('go');if(!go||document.getElementById('uxmood'))return;
     const box=document.createElement('div');box.id='uxmood';box.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 0 14px';
     const q=document.createElement('div');q.textContent=T('¿Cómo llegas hoy?','How are you arriving today?','今日はどんな気分ですか？');q.style.cssText='font:600 .95rem system-ui;opacity:.9';
     const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:8px;justify-content:center';
-    const sub=document.createElement('div');sub.textContent=T('Es opcional. Solo ajusto el sonido o te ofrezco respirar.','Optional. I only adjust the sound or offer you a breath.','任意です。音の調整や深呼吸の提案だけをします。');sub.style.cssText='font:400 .72rem system-ui;opacity:.6';
+    const sub=document.createElement('div');sub.textContent=T('Es opcional. Solo ajusto el sonido o te ofrezco respirar. Es un juego de descanso, no sustituye ayuda profesional.','Optional. I only adjust the sound or offer a breath. This is a game for rest, not a substitute for professional help.','任意です。音の調整や深呼吸の提案だけをします。休息のためのゲームで、専門家の助けの代わりにはなりません。');sub.style.cssText='font:400 .72rem system-ui;opacity:.6';
     let pick=null;const bs={};
     [['calm','Tranquilo','Calm','おだやか'],['tired','Cansado','Tired','つかれた'],['rest','Inquieto','Restless','そわそわ'],['think','Con ganas de pensar','In a thoughtful mood','考えごとをしたい']].forEach(([k,es,en,ja])=>{
       const b=document.createElement('button');b.type='button';b.textContent=T(es,en,ja);b.style.cssText='min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid #5a609a;background:rgba(54,58,102,.7);color:#fbf1e0;font:500 .85rem system-ui;cursor:pointer';

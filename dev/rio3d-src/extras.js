@@ -164,7 +164,7 @@ export function initExtras(C){
   addEventListener('keydown',e=>{if(e.code==='KeyP')setPhoto(!X.photo);if(e.code==='Escape'&&X.photo)setPhoto(false);if(e.code==='Enter'&&X.photo)shoot()});
   function shoot(){
     X.want=()=>{
-      flash.style.transition='none';flash.style.opacity=.35;requestAnimationFrame(()=>{flash.style.transition='opacity .5s';flash.style.opacity=0});
+      if(!UX.calm()){flash.style.transition='none';flash.style.opacity=.35;requestAnimationFrame(()=>{flash.style.transition='opacity .5s';flash.style.opacity=0})};
       const w=canvas.width,h=canvas.height;let out=canvas;
       if(frameOn){
         const m=Math.round(w*.03),band=Math.round(w*.065),c2=document.createElement('canvas');c2.width=w+2*m;c2.height=h+m+band;
@@ -244,6 +244,8 @@ export function initExtras(C){
     <div class="row"><span>Subtítulos de ambiente<br><small style="color:var(--muted)">Describe los sonidos con texto</small></span><select id="xsub"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Vibración suave<br><small style="color:var(--muted)">Si tu dispositivo la permite</small></span><select id="xhp"><option value="1">Sí</option><option value="0">No</option></select></div>
     <div class="row"><span>Modo una mano<br><small style="color:var(--muted)">Botones al alcance del pulgar</small></span><select id="xh"><option value="0">No</option><option value="r">Derecha</option><option value="l">Izquierda</option></select></div>
+    <div class="row"><span>Menos movimiento y destellos<br><small style="color:var(--muted)">Sin cámaras largas, destellos ni balanceo fuerte</small></span><select id="xcalm"><option value="0">No</option><option value="1">Sí</option></select></div>
+    <div class="row"><span>Acerca de<br><small style="color:var(--muted)">Privacidad, datos y créditos</small></span><button id="xabout" type="button">Abrir</button></div>
     <div class="row"><span>Cuaderno del río<br><small style="color:var(--muted)">Lo que has visto en el camino</small></span><button id="xalb" type="button">Abrir</button></div>
     <div class="row"><span>Tono suave<br><small style="color:var(--muted)">Suaviza los sonidos agudos</small></span><select id="xsoft"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Dormir<br><small style="color:var(--muted)">Baja el sonido y la luz poco a poco</small></span><select id="xsl"><option value="0">No</option><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option></select></div>`);
@@ -256,7 +258,7 @@ export function initExtras(C){
     const xs=m.querySelector('#xsub');xs.value=ls.get('rio3d-subs','0');xs.onchange=()=>ls.set('rio3d-subs',xs.value);
     const xp=m.querySelector('#xhp');xp.value=ls.get('rio3d-hap','1');xp.onchange=()=>ls.set('rio3d-hap',xp.value);
     const xso=m.querySelector('#xsoft');xso.value=UX.api.soft()?'1':'0';xso.onchange=()=>UX.api.setSoft(xso.value==='1');
-    m.querySelector('#xalb').onclick=()=>openAlbum(UX.tr);const xsl=m.querySelector('#xsl');xsl.value=String(UX.api.sleepMin());xsl.onchange=()=>UX.api.sleep(+xsl.value);
+    m.querySelector('#xalb').onclick=()=>openAlbum(UX.tr);m.querySelector('#xabout').onclick=()=>UX.about();const xcm=m.querySelector('#xcalm');xcm.value=UX.calm()?'1':'0';xcm.onchange=()=>UX.setCalm(xcm.value==='1');const xsl=m.querySelector('#xsl');xsl.value=String(UX.api.sleepMin());xsl.onchange=()=>UX.api.sleep(+xsl.value);
     const xh=m.querySelector('#xh');xh.value=ls.get('rio3d-hand','0');xh.onchange=()=>{ls.set('rio3d-hand',xh.value);document.body.classList.remove('hand-r','hand-l');if(xh.value!=='0')document.body.classList.add('hand-'+xh.value)};
   };
 

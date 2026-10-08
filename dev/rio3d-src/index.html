@@ -60,7 +60,7 @@ p{margin:0;color:var(--muted);line-height:1.55}
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
+<canvas id="c" role="img" aria-label="Río de niebla visto desde la canoa"></canvas>
 <div id="hud" hidden>
   <div id="hl"><a class="pill" href="../">← Menú</a><span class="pill">Linternas <b id="n">0</b> · <b id="m">0</b> m · Lugares <b id="places">0/11</b></span></div>
   <div id="hr">
@@ -72,7 +72,7 @@ p{margin:0;color:var(--muted);line-height:1.55}
 <div id="next"></div>
 <div id="places-row" hidden><span id="chips"></span></div>
 <div id="hint" hidden>La corriente te lleva · mantén presionado y desliza a los lados para dirigir</div>
-<div id="toast"></div>
+<div id="toast" role="status"></div>
 <div id="cap" aria-live="polite"></div>
 <div id="start">
   <div class="card">

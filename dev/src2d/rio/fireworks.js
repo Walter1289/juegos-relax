@@ -99,7 +99,7 @@ export function drawFW(g){
       g.globalAlpha=.85;g.fillRect(x-1.2,y-1.2,2.4,2.4);g.globalAlpha=.3;g.fillRect(x-.7,y,1.4,16);continue;
     }
     const e=b.t-b.rise,fade=clamp(1-e/b.life,0,1),p=b.p,willow=b.kind===1;
-    if(e<.3){g.globalAlpha=(1-e/.3)*.3;circ(g,b.x,b.y,26+e*110);g.fill()}
+    if(e<.3&&!(window.UX&&UX.calm&&UX.calm())){g.globalAlpha=(1-e/.3)*.3;circ(g,b.x,b.y,26+e*110);g.fill()}
     // estelas cortas siguiendo la velocidad (en el sauce, largas y doradas)
     g.globalAlpha=Math.pow(fade,1.1)*(willow?.85:.55);g.strokeStyle=b.fill;g.lineWidth=willow?1.8:1.3;g.beginPath();
     const tl=willow?.2:.07;

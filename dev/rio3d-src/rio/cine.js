@@ -7,7 +7,7 @@ import {cam} from './core.js';
 import {lmMade} from './lm-data.js';
 const cV=new THREE.Vector3(),cF=new THREE.Vector3(),cT=new THREE.PerspectiveCamera();
 const reduceMotion=matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-export function startCine(k){if(S.cine||reduceMotion||S.X.photo)return;const g=lmMade.get(k);if(!g)return;const s=lmPos(k),hwv=hw(s),type=lmType(k),side=type===6?1:(hash(k,9)>.5?1:-1);
+export function startCine(k){if(S.cine||reduceMotion||(window.UX&&UX.calm&&UX.calm())||S.X.photo)return;const g=lmMade.get(k);if(!g)return;const s=lmPos(k),hwv=hw(s),type=lmType(k),side=type===6?1:(hash(k,9)>.5?1:-1);
   const FO=[[0,5,0,0],[0,4,0,0],[0,5,0,0],[side*(hwv+10),4,0,1],[0,2.5,0,0],[side*(hwv+19),6,0,1],[side*(hwv+8),8,0,1],[side*(hwv-3),3,0,1],[0,8,0,0],[0,0,0,0],[side*(hwv+80),36,side*12,1]][type];
   const sided=FO[3]===1,R=sided?Math.abs(FO[0])+hwv*.3:[46,30,52,0,40,0,0,0,30,30,0][type];
   S.cine={k,g,t:0,dur:type===10?17:11.5,fx:FO[0],fy:FO[1],fz:FO[2],sd:side,sided,R:Math.max(30,R),h:[10,6,12,10,8,13,10,7,6,9,-26][type]}}
