@@ -40,4 +40,4 @@ Son juegos en HTML5 (Canvas y Three.js), sin servidor. Se publican con GitHub Pa
 
 ## Legal
 
-© 2026 Walter. Todos los derechos reservados; se puede jugar gratis y compartir el enlace (ver [LICENSE](LICENSE)). Sin cuentas, anuncios ni rastreo: [privacidad](https://walter1289.github.io/juegos-relax/privacidad.html) · [créditos](https://walter1289.github.io/juegos-relax/creditos.html).
+© 2026 Walter. Código abierto bajo licencia MIT (ver [LICENSE](LICENSE)); el nombre y los iconos no se licencian para obras derivadas. Contacto: waguilar1289@gmail.com. Sin cuentas, anuncios ni rastreo: [privacidad](https://walter1289.github.io/juegos-relax/privacidad.html) · [créditos](https://walter1289.github.io/juegos-relax/creditos.html).

@@ -1,17 +1,27 @@
-Sin Prisa — Copyright (c) 2026 Walter (Walter1289). All rights reserved.
+MIT License
 
-Permission is granted to play the games for free, in a web browser, and to share
-links to them. Reading the source code for personal study is allowed.
+Copyright (c) 2026 Walter (Walter1289)
 
-Except as stated above, no part of this software, its code, texts, designs or
-generated art and audio may be copied, modified, redistributed, sublicensed,
-sold or used commercially without prior written permission from the copyright
-holder.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM OR DAMAGES ARISING
-FROM THE USE OF THE SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-Third-party components keep their own licenses: three.js (MIT), esbuild (MIT, build
-tool only) and the Fredoka, Nunito, Shippori Mincho and Zen Maru Gothic typefaces
-(SIL Open Font License 1.1). See creditos.html and fonts/licenses/.
+Note: the name "Sin Prisa" and the icons are not licensed for use as the name
+or branding of derivative works. Third-party components keep their own
+licenses: three.js (MIT), esbuild (MIT, build tool only) and the Fredoka, Nunito,
+Shippori Mincho and Zen Maru Gothic typefaces (SIL Open Font License 1.1).
+See creditos.html and fonts/licenses/.
