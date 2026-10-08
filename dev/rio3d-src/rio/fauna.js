@@ -26,7 +26,7 @@ function mkFish(i){const g=new THREE.Group(),cs=fishCols[i%fishCols.length];
   const fin=new THREE.Mesh(new THREE.ConeGeometry(.08,.3,3),MT(cs[0]));fin.position.set(0,.2,.05);fin.rotation.x=-.3;g.add(fin);
   g.userData={tail,st:0,t:0,ph:Math.random()*6,sp:.7+Math.random()*.6,tx:0,tz:0,jt:0};scene.add(g);return g}
 for(let i=0;i<FISH;i++)fish.push(mkFish(i));
-function placeFish(f,ps){const s=ps+14+Math.random()*70,e=(Math.random()*2-1)*(hw(s)-3);f.position.set(cx(s)+e,-.05,-s);f.userData.st=0;f.userData.hd=tanAng(s)+(Math.random()-.5)*1.2;f.userData.jt=2+Math.random()*10;f.rotation.set(0,0,0);f.visible=true}
+function placeFish(f,ps){const s=ps+14+Math.random()*70,e=(Math.random()*2-1)*(hw(s)-3);f.position.set(cx(s)+e,-.05,-s);f.userData.st=0;f.userData.rest=0;f.userData.fol=0;f.userData.fmax=0;f.userData.hd=tanAng(s)+(Math.random()-.5)*1.2;f.userData.jt=2+Math.random()*10;f.rotation.set(0,0,0);f.visible=true}
 fish.forEach(f=>placeFish(f,30+Math.random()*60));
 export function updateFish(dt,ps){
   for(const f of fish){const u=f.userData;u.t+=dt;
@@ -36,15 +36,15 @@ export function updateFish(dt,ps){
       u.hd+=Math.sin(u.t*.6+u.ph)*.5*dt;
       const e=f.position.x-cx(s),lim=hw(s)-3;if(Math.abs(e)>lim)u.hd+=(tanAng(s)+(e>0?-1:1)*.9-u.hd)*dt*1.5;
       f.position.x+=Math.sin(u.hd)*u.sp*dt;f.position.z-=Math.cos(u.hd)*u.sp*dt;f.position.y=-.02+Math.sin(u.t*2+u.ph)*.01;
-      f.rotation.set(0,-u.hd+Math.PI,0);u.tail.rotation.y=Math.sin(u.t*7)*.5;
+      f.rotation.set(0,-u.hd,0);u.tail.rotation.y=Math.sin(u.t*7)*.5;
       if(Math.random()<dt*.03&&dz<-6&&dz>-45){f.userData.st=1;u.j=0;u.vx=Math.sin(u.hd)*2.6;u.vz=-Math.cos(u.hd)*2.6;splash(f.position.x,.1,f.position.z,5);A.plop((f.position.x-P.px)/25)}
       else if(Math.random()<dt*.05&&Math.abs(dz)<30&&Math.abs(dz)>5)spawnWake(f.position.x,f.position.z,0,0,.7);
     }else{ // salto
       u.j+=dt;const T=.95,k=u.j/T,h=Math.sin(Math.PI*k)*1.25;
       f.position.x+=u.vx*dt;f.position.z+=u.vz*dt;f.position.y=-.02+h;
-      const slope=Math.cos(Math.PI*k)*1.25*Math.PI/T;f.rotation.set(0,-u.hd+Math.PI,0);f.rotateX(Math.atan2(slope,2.6));
+      const slope=Math.cos(Math.PI*k)*1.25*Math.PI/T;f.rotation.set(0,-u.hd,0);f.rotateX(Math.atan2(slope,2.6));
       u.tail.rotation.y=Math.sin(u.t*26)*.6;
-      if(u.j>=T){f.userData.st=0;f.position.y=-.02;f.rotation.set(0,-u.hd+Math.PI,0);splash(f.position.x,.1,f.position.z,9);A.plop((f.position.x-P.px)/25)}}
+      if(u.j>=T){f.userData.st=0;f.position.y=-.02;f.rotation.set(0,-u.hd,0);splash(f.position.x,.1,f.position.z,9);A.plop((f.position.x-P.px)/25)}}
   }
   updateShoreFx(dt)
 }
@@ -92,7 +92,7 @@ export function updateFauna(dt,ps){
     else{u.neck.rotation.x=Math.sin(u.t*1.6)*.12;b.rotation.x=0;b.position.y=Math.sin(u.t*1.3)*.015;
       u.hd+=Math.sin(u.t*.4)*.3*dt;const e=b.position.x-cx(s);if(Math.abs(e)>hw(s)-5)u.hd+=(tanAng(s)+(e>0?-1:1)*.8-u.hd)*dt*1.2;
       b.position.x+=Math.sin(u.hd)*(u.spd||.35)*dt;b.position.z-=Math.cos(u.hd)*(u.spd||.35)*dt}
-    b.rotation.y=-u.hd+Math.PI}
+    b.rotation.y=-u.hd}
   for(const d of dfs){d.visible=vis;if(!vis)continue;const u=d.userData;u.t-=dt;if(dfLand(d,u,dt))continue;
     const dz=-d.position.z-ps;if(dz<-12||dz>90){placeDf(d,ps);continue}
     if(u.t<=0){u.t=.8+Math.random()*2.2;const s=-d.position.z+(Math.random()-.5)*8,e=d.position.x-cx(s);
@@ -129,7 +129,13 @@ export function updateCritters(dt,ps){
   for(const f of fish){const u=f.userData;if(u.st!==0)continue;if(u.sp0==null)u.sp0=u.sp;
     const dx=f.position.x-P.px,dz=f.position.z-P.pz,dist=Math.hypot(dx,dz);
     if(!calm&&dist<11){u.hd+=angD(Math.atan2(dx,-dz),u.hd)*Math.min(1,dt*6);u.sp=3.4;u.cur=0;continue}
+    if(u.rest>0){ // ya se cansó de seguir a la canoa: nada a lo suyo y se queda atrás
+      u.rest-=dt;u.sp=u.sp0;u.cur=0;
+      if(u.aw>0){u.aw-=dt;u.hd+=angD(Math.atan2(dx,-dz),u.hd)*Math.min(1,dt*1.1)}
+      continue}
     if(calm&&dist<26){
+      u.fol=(u.fol||0)+dt;if(!u.fmax)u.fmax=16+Math.random()*22;
+      if(u.fol>u.fmax){u.rest=60+Math.random()*60;u.aw=4;u.fol=0;u.fmax=0;u.dir=0;u.cur=0;continue}
       if(!u.dir)u.dir=Math.random()<.5?-1:1;
       const lon=-.4+Math.sin(P.t*.5+u.ph)*1.3,tx=P.px+cp*u.dir*2.7+sp*lon,tz=P.pz+sp*u.dir*2.7-cp*lon,ex=tx-f.position.x,ez=tz-f.position.z,d2=Math.hypot(ex,ez);
       u.hd+=angD(Math.atan2(ex,-ez),u.hd)*Math.min(1,dt*3.2);u.sp=Math.max(.7,Math.min(4,P.v+d2*.9));u.cur=1;

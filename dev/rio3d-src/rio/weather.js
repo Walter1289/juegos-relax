@@ -8,6 +8,7 @@ import {glowTex,scene,hemi,dir} from './core.js';
 import {env,water,sky} from './env.js';
 import {spawnRipple} from './ripples.js';
 import {toast} from './hud.js';
+import {FU,DITHER} from '../fogfx.js';
 /* ====== AMBIENTE: niebla por tramos, llovizna, montañas ====== */
 // bancos de niebla bajos
 const MS=16,mists=[];for(let i=0;i<MS;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,transparent:true,opacity:0,depthWrite:false,fog:false,color:0xffffff}));m.scale.set(70,24,1);m.renderOrder=3;scene.add(m);mists.push(m)}
@@ -31,6 +32,7 @@ const ridges=[[480,150,.55,3.1],[545,200,.4,7.7],[610,260,.28,12.9]].map(([r,hb,
     vertexShader:'varying float vY;void main(){vY=position.y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
     fragmentShader:`varying float vY;uniform vec3 col,hor;uniform float hm;void main(){vec3 c=mix(hor,col,smoothstep(hm*.04,hm*.75,vY));gl_FragColor=vec4(c,1.);
 #include <colorspace_fragment>
+${DITHER}
 }`}));
   m.renderOrder=-8;m.frustumCulled=false;m.userData.t=t;scene.add(m);return m});
 export const _c=new THREE.Color(),_c2=new THREE.Color();
@@ -46,6 +48,11 @@ export function weather(dt,s){
   const u=water.material.uniforms;u.fogN.value=scene.fog.near;u.fogF.value=scene.fog.far;u.fog.value.copy(scene.fog.color);
   sky.material.uniforms.hor.value.lerp(scene.fog.color,f*.8);sky.material.uniforms.top.value.lerp(scene.fog.color,f*.35);
   hemi.intensity*=1-.22*W.rain;dir.intensity*=1-.45*W.rain;
+  // niebla de calidad: parámetros compartidos por todos los materiales (ver fogfx.js)
+  {const sd=sky.material.uniforms.sunDir.value;FU.sunDir.value.copy(sd).normalize();
+    _c.copy(env.sun).convertLinearToSRGB();FU.sunCol.value.set(_c.r,_c.g,_c.b);
+    FU.misc.value.x=.55*(1-env.night)*clamp(1.25-Math.abs(FU.sunDir.value.y)*1.3,.25,1);
+    FU.misc.value.y=lerp(.15,.07,f);FU.misc.value.z=.5+.4*f;FU.misc.value.w=P.t}
   // montañas
   ridges.forEach(m=>{m.position.set(P.px,0,P.pz);const t=m.userData.t;
     _c.copy(env.hor);_c2.copy(env.top).multiplyScalar(.55).lerp(_c.set(0x7b86a8).multiplyScalar(1-env.night*.75),.45);
@@ -56,7 +63,7 @@ export function weather(dt,s){
   for(let j=0;j<MS;j++){const i=base+j,sp=mists[((i%MS)+MS)%MS],ss=i*25;
     const x=cx(ss)+(hash(i,3)-.5)*hw(ss)*1.5;sp.position.set(x+Math.sin(P.t*.05+i)*3,1.2+hash(i,4)*2.2,-ss);
     const dx=sp.position.x-P.px,dz=sp.position.z-P.pz,d=Math.hypot(dx,dz);
-    sp.material.opacity=f*.5*sm(6,22,d)*(1-sm(300,380,d))*(.7+.3*hash(i,5));sp.material.color.copy(scene.fog.color).multiplyScalar(1.05)}
+    sp.material.opacity=f*.38*sm(6,22,d)*(1-sm(300,380,d))*(.7+.3*hash(i,5));sp.material.color.copy(scene.fog.color).multiplyScalar(1.05)}
   // lluvia
   rainL.visible=W.rain>.03;rainM.opacity=.3*W.rain;
   if(rainL.visible){for(let i=0;i<RN;i++){const v=rv[i];v[1]-=16*dt;if(v[1]<0){v[1]=13+Math.random()*2;v[0]=Math.random()*40-20;v[2]=Math.random()*40-24}

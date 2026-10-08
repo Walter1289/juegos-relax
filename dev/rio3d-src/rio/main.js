@@ -1,5 +1,6 @@
 /* Río 3D: entrada fina — arranque, bucle de fotogramas y enlace entre módulos y extras. */
 /* OJO: el orden de estos imports es el orden de creación del escenario (afecta al orden de la escena y a la secuencia de Math.random/UUID); no reordenar. */
+import '../fogfx.js';
 import {A} from '../audio-rio.js';
 import {addVignette,addPaper} from '../style.js';
 import {SEAS,seasonIdx} from '../season.js';

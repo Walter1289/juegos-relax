@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {clamp,lerp} from './util.js';
 import {S} from './state.js';
 import {scene,spr,hemi,dir} from './core.js';
+import {FU,DITHER} from '../fogfx.js';
 /* ---------- cielo ---------- */
 export const sky=new THREE.Mesh(new THREE.SphereGeometry(700,24,16),new THREE.ShaderMaterial({
   side:THREE.BackSide,depthWrite:false,fog:false,
@@ -13,6 +14,7 @@ export const sky=new THREE.Mesh(new THREE.SphereGeometry(700,24,16),new THREE.Sh
    float s=max(dot(d,normalize(sunDir)),0.);c+=sunCol*(pow(s,18.)*.45+pow(s,200.)*.6)*glow;
    gl_FragColor=vec4(c,1.);
 #include <colorspace_fragment>
+   ${DITHER}
 }`}));
 sky.renderOrder=-10;scene.add(sky);
 const sunS=spr(0xffe2b0,140),moonS=spr(0xdfe6ff,70);scene.add(sunS,moonS);
@@ -61,9 +63,9 @@ export const todName=t=>t<.1?'Madrugada':t<.2?'Amanecer':t<.5?'Día':t<.68?'Atar
 /* ---------- agua ---------- */
 export const water=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.ShaderMaterial({
   uniforms:{t:{value:0},deep:{value:new THREE.Color('#5a8f9c')},shallow:{value:new THREE.Color('#a3c8c4')},hor:{value:new THREE.Color()},top:{value:new THREE.Color()},fog:{value:new THREE.Color()},
-    sunDir:{value:new THREE.Vector3(0,1,0)},sunCol:{value:new THREE.Color()},night:{value:0},fogN:{value:22},fogF:{value:250}},
+    sunDir:{value:new THREE.Vector3(0,1,0)},sunCol:{value:new THREE.Color()},night:{value:0},fogN:{value:22},fogF:{value:250},fogSunDir:FU.sunDir,fogSunCol:FU.sunCol,fogMisc:FU.misc},
   vertexShader:'varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
-  fragmentShader:`varying vec3 vW;uniform float t,night,fogN,fogF;uniform vec3 deep,shallow,hor,top,fog,sunDir,sunCol;
+  fragmentShader:`varying vec3 vW;uniform float t,night,fogN,fogF;uniform vec3 deep,shallow,hor,top,fog,sunDir,sunCol,fogSunDir,fogSunCol;uniform vec4 fogMisc;
   float hh(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}
   float wn(vec2 q){vec2 i=floor(q),f=fract(q);f=f*f*(3.-2.*f);return mix(mix(hh(i),hh(i+vec2(1,0)),f.x),mix(hh(i+vec2(0,1)),hh(i+vec2(1,1)),f.x),f.y);}
   void main(){
@@ -84,9 +86,14 @@ export const water=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.S
     c=mix(c,mix(hor,vec3(1.),.55),streak*(1.-night*.7)*.38);
     float sp=smoothstep(.9,1.,wn(p*2.6+vec2(t*.5,-t*.3)));c+=sunCol*sp*.38;   /* destellos del agua suaves a propósito (WCAG 2.3.1) */
     vec3 h=normalize(sunDir+v);c+=sunCol*pow(max(dot(n,h),0.),90.)*.9;
-    c=mix(c,fog,smoothstep(fogN,fogF,dist));
+    float tF=clamp((dist-fogN)/(fogF-fogN),0.,1.);float cF=tF*tF*(3.-2.*tF);float ffF=mix(cF,1.,smoothstep(.82,1.,tF));
+    {vec2 fwp=vW.xz;float ftt=fogMisc.w*.06;float fpn=.5+.3*sin(fwp.x*.021+sin(fwp.y*.017+ftt)*1.7+ftt*.7)+.2*sin(fwp.y*.037-fwp.x*.011-ftt*1.3);
+     ffF=clamp(ffF*mix(1.,.5+1.*fpn,fogMisc.z*(1.-smoothstep(.82,1.,tF))),0.,1.);}
+    float scF=pow(max(dot(normalize(vW-cameraPosition),fogSunDir),0.),5.)*fogMisc.x*ffF;
+    c=mix(c,mix(fog,pow(fogSunCol,vec3(2.2)),clamp(scF,0.,.8)),ffF);
     gl_FragColor=vec4(c,1.);
 #include <colorspace_fragment>
+    ${DITHER}
 }`}));
 water.rotation.x=-Math.PI/2;scene.add(water);
 
