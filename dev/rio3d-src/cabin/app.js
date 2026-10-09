@@ -76,4 +76,4 @@ trackPanelHeight();
 UX.init();
 requestAnimationFrame(frame);
 // ganchos para las pruebas
-window.__cab={shoot:shootStar,celebrar:()=>{fest.shown=false;startFest()},star,fest,fl2,get T(){return RT.T},cat,dirtyNear,resetCam,panBy,zoomBy,state,IT,ITEMS,C,attempt,measure,cleanOf,applyVisuals,updateUI,pick,cam,toast,get started(){return RT.started}};
+window.__cab={A,R,scene,shoot:shootStar,celebrar:()=>{fest.shown=false;startFest()},star,fest,fl2,get T(){return RT.T},cat,dirtyNear,resetCam,panBy,zoomBy,state,IT,ITEMS,C,attempt,measure,cleanOf,applyVisuals,updateUI,pick,cam,toast,get started(){return RT.started}};

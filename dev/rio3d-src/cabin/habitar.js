@@ -122,7 +122,7 @@ export function habStep(dt,T){
   if(H.teaT>0){H.teaT-=dt;if(H.teaT<=0&&H.tea)H.tea.visible=false;if(H.tea&&!H.models.porcheI)H.tea.visible=H.teaT>0}
   const day=1;for(const k in H.models){const g=H.models[k].g;g.userData.anim&&g.userData.anim(T);g.traverse(o=>{if(o.isSprite&&o.userData.gl!=null&&o.material)o.material.opacity=o.userData.gl*(.85+.15*Math.sin(T*3+g.id))})}
   if(H.tea&&H.tea.visible)H.tea.userData.anim(T);
-  if(H.vcur){const v=H.vcur;v.t+=dt;const a=Math.max(0.01,Math.min(1,v.t/1.5,(v.life-v.t)/1.5));v.g.scale.setScalar(a*(v.k==='mariposa'?3:2));v.g.userData.anim&&v.g.userData.anim(T);
+  if(H.vcur){const v=H.vcur;v.t+=dt;const a=Math.max(0.01,Math.min(1,v.t/1.5,(v.life-v.t)/1.5));v.g.scale.setScalar((a*a*(3-2*a))*(v.k==='mariposa'?1.7:1.1));v.g.userData.anim&&v.g.userData.anim(T);
     if(v.k==='mariposa'){v.g.position.set(v.base[0]+Math.sin(T*.6)*1.6,v.base[1]+Math.sin(T*.9)*.5,v.base[2]+Math.cos(T*.5)*.8)}
     if(v.t>=v.life){H.root.remove(v.g);H.vcur=null}}
   if(RT.started&&unlocked()&&!H.vcur){H.vnext-=dt;if(H.vnext<=0){H.vnext=80+Math.random()*70;spawn()}}

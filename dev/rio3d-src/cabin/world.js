@@ -4,7 +4,9 @@ import {scene} from './core.js';
 import {clamp,rng,spr,glowTex,puffTex} from './util.js';
 import {mat} from './mats.js';
 import {tex,toonGrad} from '../style.js';
-const mists=[],clouds=[];
+import {FU,DITHER} from '../fogfx.js';
+import {RT} from './core.js';
+const mists=[],clouds=[],banks=[];
 function ridge(z,col,h,seed,y0){
   const r=rng(seed),sh=new THREE.Shape();sh.moveTo(-340,-60);
   for(let x=-340;x<=340;x+=16)sh.lineTo(x,h*(.45+.55*Math.abs(Math.sin(x*.011+seed)+.5*Math.sin(x*.027+seed*2)))/1.5+r()*h*.08);
@@ -14,7 +16,7 @@ function buildSky(){
   const sky=new THREE.Mesh(new THREE.SphereGeometry(600,24,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
     uniforms:{top:{value:new THREE.Color('#2a3278')},hor:{value:new THREE.Color('#8a7cbc')}},
     vertexShader:'varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-    fragmentShader:'varying vec3 vP;uniform vec3 top,hor;void main(){float h=normalize(vP).y;vec3 c=mix(hor,top,pow(clamp(h,0.,1.),.55));gl_FragColor=vec4(c,1.);\n#include <colorspace_fragment>\n}'}));
+    fragmentShader:'varying vec3 vP;uniform vec3 top,hor;void main(){float h=normalize(vP).y;vec3 c=mix(hor,top,pow(clamp(h,0.,1.),.55));gl_FragColor=vec4(c,1.);\n#include <colorspace_fragment>\n'+DITHER+'}'}));
   sky.renderOrder=-10;scene.add(sky);
   {const sp=new Float32Array(500*3);for(let i=0;i<500;i++){const u=Math.random()*6.283,v=Math.random()*.85+.1,r=Math.sqrt(1-v*v);sp.set([Math.cos(u)*r*560,v*560,Math.sin(u)*r*560-0],i*3)}
    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(sp,3));
@@ -35,6 +37,9 @@ function buildFarland(){
    }
    m.count=n;scene.add(m)}
   for(let i=0;i<7;i++){const s=spr(puffTex,0xd8d2f4,60+i*8,.24);s.position.set(-70+i*30,-9+i*1.6,-10-i*6);s.scale.set(70+i*8,18,1);scene.add(s);mists.push(s)}
+  // bancos de bruma en el valle: capas a distintas profundidades que se desplazan en sentidos opuestos
+  {const r=rng(31);for(let i=0;i<14;i++){const d=i%2?1:-1,z=-18-r()*85,y=-12+r()*9,w=70+r()*70,s=spr(puffTex,i%3?0xcfc9f2:0xe0d6f4,60,.1+r()*.12);
+    s.position.set(-140+r()*280,y,z);s.scale.set(w,10+r()*12,1);s.userData.v=d*(.3+r()*.5);s.userData.ph=r()*6;s.userData.o=s.material.opacity;scene.add(s);banks.push(s)}}
   for(let i=0;i<6;i++){const s=spr(puffTex,0xc8c0ee,90,.3);s.position.set(-160+i*70,60+((i*37)%30),-200-(i%3)*30);s.scale.set(150,40,1);scene.add(s);clouds.push(s)}
 }
 function buildCliff(){
@@ -59,6 +64,9 @@ function buildCliff(){
 }
 export function buildWorld(){buildSky();buildFarland();buildCliff()}
 // niebla y nubes a la deriva
+const MOON=new THREE.Vector3(150,170,-420).normalize();
 export function worldStep(dt){
+  {const T=RT.T;FU.sunDir.value.copy(MOON);FU.sunCol.value.set(.80,.78,.95);FU.misc.value.set(.5,.05,.5,T);
+   banks.forEach(b=>{b.position.x+=dt*b.userData.v;if(b.position.x>160)b.position.x=-160;if(b.position.x<-160)b.position.x=160;b.material.opacity=b.userData.o*(.8+.2*Math.sin(T*.12+b.userData.ph))})}
   mists.forEach((m,i)=>{m.position.x+=dt*(.5+i*.08);if(m.position.x>110)m.position.x=-110});clouds.forEach((c,i)=>{c.position.x+=dt*(.4+i*.05);if(c.position.x>260)c.position.x=-260});
 }

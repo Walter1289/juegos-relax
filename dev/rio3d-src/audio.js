@@ -1,4 +1,4 @@
-// Audio generado (sin archivos): agua, drone, flauta tipo shakuhachi, campanillas, remo, grillos.
+// Audio generado (sin archivos): agua, drone, flauta tipo shakuhachi, campanillas, remo, ciudad lejana, fuego.
 const SC=[0,2,3,7,8]; // hirajoshi
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 /* subtítulo de ambiente (UX es global; si falta, no pasa nada) */
@@ -12,7 +12,7 @@ export const A={
     this.m=C.createGain();this.m.gain.value=.8;window.UX?UX.out(C,this.m):this.m.connect(C.destination);
     const len=C.sampleRate*2.6,ir=C.createBuffer(2,len,C.sampleRate);
     for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.4)}
-    this.rv=C.createConvolver();this.rv.buffer=ir;const rg=C.createGain();rg.gain.value=.55;this.rv.connect(rg);rg.connect(this.m);
+    this.rv=C.createConvolver();this.rv.buffer=ir;const rg=C.createGain();rg.gain.value=.7;this.rv.connect(rg);rg.connect(this.m);
     const nb=C.createBuffer(1,C.sampleRate*3,C.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;this.nb=nb;
     const loop=k=>{if(k&&window.UX&&UX.pinkSrc){const g=UX.pinkSrc(C,k);g.start(0,Math.random()*6);return g}const s=C.createBufferSource();s.buffer=nb;s.loop=true;s.start(0,Math.random()*2);return s};
     // agua del río
@@ -21,12 +21,14 @@ export const A={
     // murmullo agudo del arroyo
     const w2=loop(1.46),wf2=C.createBiquadFilter();wf2.type='bandpass';wf2.frequency.value=2200;wf2.Q.value=1.2;this.wg2=C.createGain();this.wg2.gain.value=.008;
     w2.connect(wf2);wf2.connect(this.wg2);this.wg2.connect(this.m);
-    // grillos de noche
-    const cr=loop(),cf=C.createBiquadFilter();cf.type='bandpass';cf.frequency.value=4300;cf.Q.value=4;this.cg=C.createGain();this.cg.gain.value=0;
-    const lfo=C.createOscillator(),lg=C.createGain();lfo.frequency.value=2.1;lg.gain.value=.5;lfo.connect(lg);lg.connect(this.cg.gain);lfo.start();
-    cr.connect(cf);cf.connect(this.cg);this.cg.connect(this.m);
+    // ciudad lejana: zumbido grave y suave (como luces y calles al fondo del valle), con oleaje lento
+    const ch=loop(.9),chf=C.createBiquadFilter();chf.type='lowpass';chf.frequency.value=240;chf.Q.value=.4;
+    const ch2=loop(1.2),chf2=C.createBiquadFilter();chf2.type='bandpass';chf2.frequency.value=680;chf2.Q.value=.7;
+    this.cityG=C.createGain();this.cityG.gain.value=.026;ch.connect(chf);chf.connect(this.cityG);
+    const c2g=C.createGain();c2g.gain.value=.3;ch2.connect(chf2);chf2.connect(c2g);c2g.connect(this.cityG);this.cityG.connect(this.m);
+    const cl=C.createOscillator(),clg=C.createGain();cl.frequency.value=.045;clg.gain.value=.005;cl.connect(clg);clg.connect(this.cityG.gain);cl.start();
     // drone
-    this.dg=C.createGain();this.dg.gain.value=.05;this.dg.connect(this.m);this.dg.connect(this.rv);
+    this.dg=C.createGain();this.dg.gain.value=.07;this.dg.connect(this.m);this.dg.connect(this.rv);
     [1,1.5,2.0].forEach((r,i)=>{const o=C.createOscillator();o.type='sine';o.frequency.value=73.42*r*(i===2?1.003:1);const g=C.createGain();g.gain.value=i===1?.5:.7;o.connect(g);g.connect(this.dg);o.start()});
     const dl=C.createOscillator(),dlg=C.createGain();dl.frequency.value=.07;dlg.gain.value=.02;dl.connect(dlg);dlg.connect(this.dg.gain);dl.start();
     // fregado (ruido filtrado cuyo volumen sigue el movimiento) y lluvia
@@ -39,7 +41,7 @@ export const A={
     const wl=C.createOscillator(),wlg=C.createGain();wl.frequency.value=.09;wlg.gain.value=.009;wl.connect(wlg);wlg.connect(this.wdg.gain);wl.start();
     const wl2=C.createOscillator(),wlg2=C.createGain();wl2.frequency.value=.023;wlg2.gain.value=180;wl2.connect(wlg2);wlg2.connect(wdf.frequency);wl2.start();
     wd.connect(wdf);wdf.connect(this.wdg);this.wdg.connect(this.m);
-    this.nextFlute=C.currentTime+10;
+    this.nextFlute=C.currentTime+6;this.nextKey=C.currentTime+4;
     this.initPad();
   },
   /* capa pad adaptativa: acordes hirajoshi (semitonos {0,2,3,7,8}) sobre re3 = 146.83 Hz */
@@ -59,8 +61,8 @@ export const A={
   setMood(prog,night){this.mood={prog:clamp(prog,0,1),night:night==null?1:night};if(this.pad&&this.ctx)this.padFilter()},
   padFilter(){
     const m=this.mood,t=this.ctx.currentTime,bright=m.prog*(1-.35*m.night);
-    this.pad.f.frequency.setTargetAtTime(520+bright*1000,t,2.5);
-    this.pad.pg.gain.setTargetAtTime(.04*(1+.15*(1-m.night)),t,2);
+    this.pad.f.frequency.setTargetAtTime(640+bright*1300,t,2.5);
+    this.pad.pg.gain.setTargetAtTime(.078*(1+.15*(1-m.night)),t,2);
   },
   padChord(first){
     const C=this.ctx,p=this.pad,t=C.currentTime,D=146.83,pr=this.mood.prog;
@@ -91,15 +93,81 @@ export const A={
     if(n>this.nextChord){this.nextChord=n+14+Math.random()*3;if(this.on)this.padChord()}
     // subtítulos de ambiente continuo (viento, grillos, agua), espaciados
     if(!this.nextAmb)this.nextAmb=n+6;
-    if(this.on&&n>this.nextAmb){this.nextAmb=n+18+Math.random()*10;const k=['Viento','Grillos','Murmullo de agua'][this.ambI=((this.ambI||0)+1)%3];cap(k,30000)}
+    if(this.on&&n>this.nextAmb){this.nextAmb=n+18+Math.random()*10;const k=['Viento','Ciudad a lo lejos','Murmullo de agua'][this.ambI=((this.ambI||0)+1)%3];cap(k,30000)}
     this.wg.gain.setTargetAtTime(.028+Math.min(speed,7)*.007,n,.3);
     this.wg2.gain.setTargetAtTime(.006+Math.min(speed,7)*.0016,n,.3);
-    this.cg.gain.setTargetAtTime(.002*night,n,1.5);
     if(!this.nextFrog)this.nextFrog=n+4;
     if(this.on&&n>this.nextFrog){this.nextFrog=n+2.5+Math.random()*(day?9:5);this.frog(Math.random()*1.6-.8,day)}
     if(!this.nextBell)this.nextBell=n+14;
     if(this.on&&n>this.nextBell){this.nextBell=n+30+Math.random()*35;this.bell()}
-    if(n>this.nextFlute){this.nextFlute=n+28+Math.random()*30;this.phrase()}
+    if(n>this.nextFlute){this.nextFlute=n+16+Math.random()*16;this.phrase()}
+    if(this.on)this.cityStep(n);
+  },
+  /* ---- melodía suave (teclas tipo caja de música) sobre el pad ---- */
+  key(deg,oct,when,vol,x){
+    const C=this.ctx,t=when,[p]=this.pan(x||0),f=hz(deg,oct);
+    [[1,1,2.8],[2,.16,1.6],[3.01,.05,.9]].forEach(([r,a,d])=>{
+      const o=C.createOscillator(),g=C.createGain();o.type=r===1?'triangle':'sine';o.frequency.value=f*r;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol*a,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+      o.connect(g);g.connect(p);g.connect(this.rv);o.start(t);o.stop(t+d+.1)});
+  },
+  motif(){
+    const t=this.ctx.currentTime+.1,n=2+((Math.random()*3)|0);let d=(this.kd==null?5+((Math.random()*5)|0):this.kd),tt=t;
+    for(let i=0;i<n;i++){d=clamp(d+((Math.random()*5)|0)-2,3,11);this.key(d,1+(d>=10?0:1),tt,.05,Math.random()*.8-.4);tt+=.55+Math.random()*.7}
+    this.kd=d;
+  },
+  /* ---- ciudad lejana y texturas ASMR: autos que pasan, tren, perro, tranvía, fuego ---- */
+  cityStep(n){
+    if(!this.nCar){this.nCar=n+7;this.nTrain=n+40;this.nDog=n+55;this.nTram=n+30;this.nCrk=n+2}
+    if(n>this.nextKey){this.nextKey=n+4.5+Math.random()*6;this.motif()}
+    if(n>this.nCar){this.nCar=n+9+Math.random()*14;this.car()}
+    if(n>this.nTrain){this.nTrain=n+75+Math.random()*60;this.train()}
+    if(n>this.nDog){this.nDog=n+45+Math.random()*60;this.dog()}
+    if(n>this.nTram){this.nTram=n+60+Math.random()*60;this.tram()}
+    const fire=clamp((this.mood.prog-.2)/.5,0,1);
+    if(fire>0&&n>this.nCrk){this.nCrk=n+.12+Math.random()*(1.1-.6*fire);this.crackle(fire)}
+  },
+  car(){
+    const C=this.ctx,t=C.currentTime+.05,dur=4+Math.random()*3,dir=Math.random()<.5?-1:1;cap('Autos a lo lejos',20000);
+    const s=C.createBufferSource();s.buffer=this.nb;s.loop=true;const f=C.createBiquadFilter();f.type='bandpass';f.Q.value=1.1;
+    f.frequency.setValueAtTime(380,t);f.frequency.linearRampToValueAtTime(950,t+dur*.45);f.frequency.linearRampToValueAtTime(340,t+dur);
+    const g=C.createGain(),pk=.03*(.6+Math.random()*.6);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk,t+dur*.45);g.gain.linearRampToValueAtTime(0,t+dur);
+    const p=C.createStereoPanner();p.pan.setValueAtTime(-dir*.9,t);p.pan.linearRampToValueAtTime(dir*.9,t+dur);
+    s.connect(f);f.connect(g);g.connect(p);p.connect(this.m);g.connect(this.rv);s.start(t,Math.random()*2);s.stop(t+dur+.1);
+  },
+  train(){
+    const C=this.ctx,t=C.currentTime+.1,dur=12,dir=Math.random()<.5?-1:1,N=34;cap('Tren a lo lejos',60000);
+    const p=C.createStereoPanner();p.pan.setValueAtTime(-dir*.85,t);p.pan.linearRampToValueAtTime(dir*.85,t+dur);p.connect(this.m);
+    // bocina suave al inicio
+    [261.6,311.1].forEach(fr=>{const o=C.createOscillator(),g=C.createGain(),lf=C.createBiquadFilter();o.type='triangle';o.frequency.value=fr;lf.type='lowpass';lf.frequency.value=900;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.018,t+.25);g.gain.setTargetAtTime(0,t+1.3,.35);o.connect(lf);lf.connect(g);g.connect(p);g.connect(this.rv);o.start(t);o.stop(t+3.2)});
+    // traqueteo de las ruedas: pares de golpes que crecen y se alejan
+    for(let i=0;i<N;i++){const u=i/N,v=.035*Math.pow(Math.sin(Math.PI*(.04+.92*u)),1.4);
+      [0,.1].forEach((off,k)=>{const tt=t+.6+i*.3+off,s=C.createBufferSource();s.buffer=this.nb;const f=C.createBiquadFilter();f.type='bandpass';f.frequency.value=k?650:900;f.Q.value=.9;
+        const g=C.createGain();g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(v*(k?.7:1),tt+.004);g.gain.exponentialRampToValueAtTime(.0001,tt+.07);
+        s.connect(f);f.connect(g);g.connect(p);s.start(tt,Math.random()*2);s.stop(tt+.1)})}
+    // rumor grave
+    {const s=C.createBufferSource();s.buffer=this.nb;s.loop=true;const f=C.createBiquadFilter();f.type='lowpass';f.frequency.value=170;const g=C.createGain();
+     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+dur*.5);g.gain.linearRampToValueAtTime(0,t+dur);s.connect(f);f.connect(g);g.connect(p);s.start(t,Math.random()*2);s.stop(t+dur+.1)}
+  },
+  dog(){
+    const C=this.ctx,t=C.currentTime+.1,[p]=this.pan(Math.random()*1.4-.7),n=2+((Math.random()*2)|0);cap('Perro a lo lejos',40000);
+    for(let i=0;i<n;i++){const tt=t+i*(.42+Math.random()*.12),o=C.createOscillator(),f=C.createBiquadFilter(),lf=C.createBiquadFilter(),g=C.createGain();o.type='sawtooth';
+      o.frequency.setValueAtTime(330,tt);o.frequency.exponentialRampToValueAtTime(210,tt+.14);f.type='bandpass';f.frequency.value=800;f.Q.value=2.4;lf.type='lowpass';lf.frequency.value=1500;
+      g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(.02,tt+.015);g.gain.exponentialRampToValueAtTime(.0001,tt+.17);
+      o.connect(f);f.connect(lf);lf.connect(g);g.connect(p);g.connect(this.rv);o.start(tt);o.stop(tt+.2)}
+  },
+  tram(){
+    const C=this.ctx,t=C.currentTime+.1,[p]=this.pan(Math.random()*1.2-.6);cap('Tranvía a lo lejos',60000);
+    [0,.34].forEach(off=>[[1760,1,1.1],[2637,.3,.6]].forEach(([fr,a,d])=>{const o=C.createOscillator(),g=C.createGain(),tt=t+off;o.type='sine';o.frequency.value=fr;
+      g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(.012*a,tt+.004);g.gain.exponentialRampToValueAtTime(.0001,tt+d);o.connect(g);g.connect(p);g.connect(this.rv);o.start(tt);o.stop(tt+d+.1)}));
+  },
+  crackle(lvl){
+    const C=this.ctx,t=C.currentTime,[p]=this.pan(-.35+Math.random()*.2);if(lvl>.3)cap('Crepitar del fuego',30000);
+    const n=1+((Math.random()*3)|0);
+    for(let i=0;i<n;i++){const tt=t+Math.random()*.2,s=C.createBufferSource();s.buffer=this.nb;const f=C.createBiquadFilter();f.type='bandpass';f.frequency.value=1400+Math.random()*3200;f.Q.value=1.4;
+      const g=C.createGain(),v=(.01+Math.random()*.03)*lvl;g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(v,tt+.002);g.gain.exponentialRampToValueAtTime(.0001,tt+.02+Math.random()*.05);
+      s.connect(f);f.connect(g);g.connect(p);s.start(tt,Math.random()*2);s.stop(tt+.12)}
   },
   pan(x){const p=this.ctx.createStereoPanner();p.pan.value=Math.max(-1,Math.min(1,x));p.connect(this.m);const s=this.ctx.createGain();s.gain.value=.55;s.connect(this.rv);return[p]},
   pluck(f,when,vol,x){
@@ -127,7 +195,7 @@ export const A={
   phrase(){
     if(!this.on)return;cap('Flauta shakuhachi');const t=this.ctx.currentTime+.2;let tt=t;
     const seq=[[0,2,2.6],[2,2,1.8],[1,2,1.6],[4,1,3.4]].slice(0,2+Math.floor(Math.random()*3));
-    seq.forEach(([d,o,du])=>{this.flute(d,o+1,tt,du,.035);tt+=du*.9});
+    seq.forEach(([d,o,du])=>{this.flute(d,o+1,tt,du,.05);tt+=du*.9});
   },
   frog(x,day){
     cap('Croar de ranas',14000);

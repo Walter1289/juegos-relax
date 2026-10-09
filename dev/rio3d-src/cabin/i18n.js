@@ -36,6 +36,7 @@ UX.add([
  ['¿Reiniciar la cabaña desde cero?','Restart the cabin from scratch?','小屋を最初からやり直しますか？'],
  ['Los farolillos suben al cielo','Lanterns drift up into the sky','ランタンが夜空へ昇っていきます'],
  // subtítulos de ambiente propios de la cabaña
+ ['Ciudad a lo lejos','Distant city','遠くの街'],['Autos a lo lejos','Cars far away','遠くの車'],['Tren a lo lejos','Distant train','遠くの電車'],['Perro a lo lejos','Distant dog','遠くの犬'],['Tranvía a lo lejos','Distant tram','遠くの路面電車'],['Crepitar del fuego','Crackling fire','薪のはぜる音'],
  ['Campanita','Little bell','小さな鈴'],['Lluvia en el techo','Rain on the roof','屋根の雨音'],['Croar de ranas','Frogs croaking','カエルの鳴き声'],['Murmullo de agua','Water murmur','水のせせらぎ'],['Maullido suave','Soft meow','やさしい鳴き声'],
 ]);
 const lcn=(x,i)=>{const r=LCN.get(x);return r?r[i]:x};
