@@ -1,16 +1,16 @@
 /* i18n.js — diccionario es/en/ja de la cabaña: el texto fuente está en español y se traduce al vuelo con UX.add / UX.rx */
-const NM=[['Piso','Floor','床'],['Escalera','Stairs','階段'],['Barandal','Railing','手すり'],['Techo','Roof','屋根'],['Panel solar','Solar panel','ソーラーパネル'],['Ventana','Window','窓'],['Librero','Bookshelf','本棚'],['Cama','Bed','ベッド'],['Lámpara del techo','Ceiling lamp','天井ランプ'],['Luces de cuerda','String lights','ライトの飾り'],['Cuadro','Painting','絵'],['Plantas','Plants','植物'],['Nichos de pared','Wall niches','壁のくぼみ']];
+const NM=[['Piso','Floor','床'],['Escalera','Stairs','階段'],['Barandal laqueado','Lacquered railing','漆の手すり'],['Tejado','Tiled roof','瓦屋根'],['Lucernario','Skylight','天窓'],['Shoji','Shoji screen','障子'],['Librero','Bookshelf','本棚'],['Futón','Futon','布団'],['Farol de papel','Paper lantern','紙の行灯'],['Farolillos','Paper lanterns','提灯'],['Pergamino','Hanging scroll','掛け軸'],['Bonsáis','Bonsai','盆栽'],['Nichos de piedra','Stone niches','石のくぼみ']];
 const RW=[['Cepillo ancho','Wide brush','幅広ブラシ'],['Limpias con un cepillo más grande','You clean with a bigger brush','大きなブラシで掃除できます'],
  ['Mochila de herramientas','Tool backpack','道具リュック'],['Ganas 10% más de tablas al limpiar','You earn 10% more planks when cleaning','掃除で得られる板が10%増えます'],
  ['Farol de mano','Hand lantern','手持ちランタン'],['Ilumina el área mientras limpias','Lights up the area while you clean','掃除中に周りを照らします'],
  ['Cubeta de lluvia','Rain bucket','雨のバケツ'],['Suena lluvia suave sobre el techo','Soft rain plays on the roof','屋根にやさしい雨音が響きます'],
- ['Batería solar','Solar battery','ソーラーバッテリー'],['Energía guardada para la noche','Energy stored for the night','夜のために蓄えた電力'],
- ['Cortinas de lino','Linen curtains','麻のカーテン'],['Entra la luz de la luna','Moonlight comes in','月の光が差し込みます'],
+ ['Brasero de carbón','Charcoal brazier','火鉢'],['Calor guardado para la noche','Warmth stored for the night','夜のために蓄えたぬくもり'],
+ ['Papel washi','Washi paper','和紙'],['Entra la luz del atardecer','Sunset light comes in','夕暮れの光が差し込みます'],
  ['Novela de montaña','Mountain novel','山の小説'],['Un libro para las noches','A book for the evenings','夜のための一冊'],
  ['Manta tejida','Woven blanket','手編みのブランケット'],['Para las noches frías','For cold nights','寒い夜のために'],
- ['Foco cálido','Warm bulb','あたたかい電球'],['Una luz amplia sobre la cama','A broad light over the bed','ベッドを広く照らす光'],
- ['Bombillas de colores','Colored bulbs','カラフルな電球'],['Las luces se vuelven de colores','The lights turn colorful','ライトが色とりどりになります'],
- ['Pincel de acuarela','Watercolor brush','水彩の筆'],['Un recuerdo de la montaña','A memory of the mountain','山の思い出'],
+ ['Mecha de aceite','Oil wick','油の灯芯'],['Una luz amplia sobre la cama','A broad light over the bed','ベッドを広く照らす光'],
+ ['Farolillos de colores','Colored lanterns','色とりどりの提灯'],['Las luces se vuelven de colores','The lights turn colorful','ライトが色とりどりになります'],
+ ['Pincel de tinta sumi-e','Sumi-e ink brush','墨絵の筆'],['Un recuerdo de la montaña','A memory of the mountain','山の思い出'],
  ['Semillas de lavanda','Lavender seeds','ラベンダーの種'],['Huele a campo','Smells like the countryside','野原の香りがします'],
  ['Luciérnagas en frasco','Fireflies in a jar','瓶の中のホタル'],['Más luciérnagas afuera','More fireflies outside','外にもっとホタルが飛びます']];
 const ZN=[['el piso','the floor','床'],['la terraza y la escalera','the terrace and the stairs','テラスと階段'],['el interior','the interior','室内'],['el techo y los nichos','the roof and the niches','屋根と壁のくぼみ']];

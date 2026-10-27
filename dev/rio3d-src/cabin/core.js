@@ -12,7 +12,7 @@ R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
 // rendimiento (iPad): la sombra de la luna es casi estática; se recalcula sólo cuando cambian los objetos (reparar/cargar)
 R.shadowMap.autoUpdate=false;R.shadowMap.needsUpdate=true;
 export const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(new THREE.Color('#7f75b4'),45,230);
+scene.fog=new THREE.Fog(new THREE.Color('#e3a9a0'),40,240);
 export const cam=new THREE.PerspectiveCamera(50,1,.1,900);
 export function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);R.shadowMap.needsUpdate=true;cam.aspect=w/h;cam.fov=w/h<1.15?66:50;cam.updateProjectionMatrix()}
 addEventListener('resize',resize);resize();

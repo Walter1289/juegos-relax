@@ -23,7 +23,7 @@ export function initAmbient(){
 export function ambientStep(dt,prog,nichos){
   const T=RT.T;
   // humo
-  smoke.forEach((s,i)=>{const ph=(T*.07+s.userData.ph)%1;s.position.set(-1.2+ph*3.2+Math.sin(T*.6+i)*.3,11.6+ph*5.5,-1.8+Math.sin(T*.4+i*2)*.2);const sz=1+ph*4.2;s.scale.set(sz,sz,1);s.material.opacity=.38*(1-ph)*Math.min(1,ph*8)*lit.smoke});
+  smoke.forEach((s,i)=>{const ph=(T*.07+s.userData.ph)%1;s.position.set(4.4+ph*3.2+Math.sin(T*.6+i)*.3,9.4+ph*5.5,-.2+Math.sin(T*.4+i*2)*.2);const sz=1+ph*4.2;s.scale.set(sz,sz,1);s.material.opacity=.38*(1-ph)*Math.min(1,ph*8)*lit.smoke});
   // lluvia
   rain.material.opacity=.28*lit.rain;rain.visible=lit.rain>.02;
   if(rain.visible){for(let i=0;i<RN;i++){const v=rv[i];v[1]-=15*dt;if(v[1]<-2){v[1]=17+Math.random()*3;v[0]=Math.random()*34-14;v[2]=Math.random()*20-9}
