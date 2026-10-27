@@ -39,9 +39,9 @@ function paint(kind){
     for(let i=0;i<70;i++){const x=r()*S;g.strokeStyle='rgba(60,45,40,'+(.12+r()*.25)+')';g.lineWidth=1+r()*3;g.beginPath();g.moveTo(x,0);g.bezierCurveTo(x+8,S*.3,x-8,S*.6,x+3,S);g.stroke()}
   }else if(kind==='leaf'){
     g.fillStyle='#ecebe4';g.fillRect(0,0,S,S);
-    for(let i=0;i<260;i++){const x=r()*S,y=r()*S,rad=6+r()*14,v=r()>.45?(215+r()*40|0):(120+r()*60|0);
+    for(let i=0;i<640;i++){const x=r()*S,y=r()*S,rad=3.5+r()*8,v=r()>.45?(215+r()*40|0):(120+r()*60|0);
       for(const ox of[-S,0,S])for(const oy of[-S,0,S]){if(x+ox<-30||x+ox>S+30||y+oy<-30||y+oy>S+30)continue;g.fillStyle=`rgba(${v},${v},${v-6},${.35+r()*.4})`;g.beginPath();g.ellipse(x+ox,y+oy,rad,rad*.62,r()*3.14,0,7);g.fill()}}
-    for(let i=0;i<120;i++){const x=r()*S,y=r()*S;g.fillStyle='rgba(70,80,60,.28)';g.beginPath();g.ellipse(x,y+9,9,4,0,0,7);g.fill();g.fillStyle='rgba(255,255,235,.5)';g.beginPath();g.ellipse(x-1,y-3,6,2.4,-.5,0,7);g.fill()}
+    for(let i=0;i<260;i++){const x=r()*S,y=r()*S;g.fillStyle='rgba(70,80,60,.3)';g.beginPath();g.ellipse(x,y+5,5,2.4,0,0,7);g.fill();g.fillStyle='rgba(255,255,235,.5)';g.beginPath();g.ellipse(x-1,y-2,3.6,1.5,-.5,0,7);g.fill()}
   }else if(kind==='cloth'){
     g.fillStyle='#e6e6e8';g.fillRect(0,0,S,S);
     for(let i=0;i<S;i+=4){g.fillStyle='rgba(90,95,110,'+(.07+r()*.06)+')';g.fillRect(i,0,1.6,S);g.fillStyle='rgba(255,255,255,'+(.1+r()*.08)+')';g.fillRect(0,i,S,1.6)}
@@ -63,12 +63,12 @@ function paint(kind){
       g.strokeStyle=`rgba(${v},${v},${v-10},${.45+r()*.4})`;g.lineWidth=2+r()*2;g.lineCap='round';g.beginPath();g.moveTo(xx,y0);g.lineTo(xx+r()*8-4,y0+l);g.stroke()}
       g.strokeStyle='rgba(50,70,50,.3)';g.lineWidth=3;g.beginPath();g.moveTo(0,y0+S/8-2);g.lineTo(S,y0+S/8-2);g.stroke()}
   }
-  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t;
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t;
 }
 export const tex=k=>cache[k]||(cache[k]=paint(k));
 
 // degradado de sombreado: pocas bandas suaves, como un dibujo animado pintado
-export const toonGrad=(()=>{const d=new Uint8Array([112,160,208,255]);const t=new THREE.DataTexture(d,4,1,THREE.RedFormat);t.minFilter=t.magFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;return t})();
+export const toonGrad=(()=>{const d=new Uint8Array([104,138,172,206,236,255]);const t=new THREE.DataTexture(d,6,1,THREE.RedFormat);t.minFilter=t.magFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;return t})();
 
 // escala los UV de una caja según su tamaño real, así las texturas no se estiran
 export function boxUV(g,w,h,d,dens){

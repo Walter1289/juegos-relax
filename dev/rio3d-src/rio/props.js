@@ -21,14 +21,14 @@ function shadeGeo(g,uvs,lo,hi){g=g.index?g.toNonIndexed():g;const uv=g.attribute
   g.computeBoundingBox();const y0=g.boundingBox.min.y,y1=g.boundingBox.max.y,p=g.attributes.position,c=new Float32Array(p.count*3);
   for(let i=0;i<p.count;i++){const k=lo+(hi-lo)*((p.getY(i)-y0)/(y1-y0||1));c[i*3]=c[i*3+1]=c[i*3+2]=k}
   g.setAttribute('color',new THREE.BufferAttribute(c,3));return g}
-const pineGeo=mergeGeometries([[2.0,2.6,.8],[1.6,2.5,2.4],[1.2,2.3,3.9],[.75,2.0,5.3]].map(([r,h,y])=>shadeGeo(new THREE.ConeGeometry(r,h,8,1).translate(0,y+h/2,0),[4,2],.72,1.18)).map(g=>{g.deleteAttribute('normal');return g}));
+const pineGeo=mergeGeometries([[2.1,2.4,.7],[1.8,2.3,1.9],[1.45,2.2,3.1],[1.1,2.0,4.3],[.7,1.8,5.4]].map(([r,h,y])=>shadeGeo(new THREE.ConeGeometry(r,h,11,2).translate(0,y+h/2,0),[4,2],.64,1.26)).map(g=>{g.deleteAttribute('normal');return g}));
 pineGeo.computeVertexNormals();
-const crownGeo=mergeGeometries([[1.9,0,4.3,0],[1.4,1.3,4.9,.5],[1.35,-1.2,4.7,-.6],[1.2,.2,5.7,.3]].map(([r,x,y,z])=>{const g=new THREE.IcosahedronGeometry(r,1);g.translate(x,y,z);g.deleteAttribute('normal');return shadeGeo(g,[3,3],.82,1.22)}));
+const crownGeo=mergeGeometries([[1.9,0,4.3,0],[1.4,1.3,4.9,.5],[1.35,-1.2,4.7,-.6],[1.2,.2,5.7,.3],[1.0,-.6,5.2,1.2],[1.05,.9,4.2,-1.1],[.8,1.7,4.1,.9]].map(([r,x,y,z])=>{const g=new THREE.IcosahedronGeometry(r,1);g.translate(x,y,z);g.deleteAttribute('normal');return shadeGeo(g,[3,3],.7,1.3)}));
 crownGeo.computeVertexNormals();
 const LEAFM=()=>new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,map:tex('leaf')});
 export const pineM=new THREE.InstancedMesh(pineGeo,new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,map:tex('needle')}),MAXT);
 export const crownM=new THREE.InstancedMesh(crownGeo,LEAFM(),MAXT);
-export const trunkM=new THREE.InstancedMesh(new THREE.CylinderGeometry(.2,.34,4.2,6).translate(0,2.1,0),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0x8a6a5c,map:tex('bark')}),MAXT);
+export const trunkM=new THREE.InstancedMesh(new THREE.CylinderGeometry(.19,.36,4.2,9,3).translate(0,2.1,0),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0x8a6a5c,map:tex('bark')}),MAXT);
 export const padM=new THREE.InstancedMesh(new THREE.CircleGeometry(.7,10).rotateX(-Math.PI/2),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff}),500);
 export const lotM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.28,0).translate(0,.2,0),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff}),160);
 [pineM,crownM,trunkM,padM,lotM].forEach(m=>{m.frustumCulled=false;scene.add(m)});
@@ -36,7 +36,7 @@ export const lotM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.28,0).t
 export const swayU={value:0};
 function swayMat(m){m.onBeforeCompile=sh=>{sh.uniforms.uSw=swayU;sh.vertexShader='uniform float uSw;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
  vec4 wp0=modelMatrix*instanceMatrix*vec4(position,1.);float hh=clamp(position.y/1.8,0.,1.);transformed.x+=sin(uSw*1.6+wp0.x*.7+wp0.z*.5)*.2*hh*hh;transformed.z+=cos(uSw*1.3+wp0.z*.6)*.1*hh*hh;`)};return m}
-export const bladeGeo=(()=>{const gs=[];for(let i=0;i<9;i++){const a=i/9*6.28+hash(i,1),h=.9+hash(i,2)*1.3,l=.07,x=Math.cos(a)*.25*hash(i,3),z=Math.sin(a)*.25*hash(i,3),lean=(hash(i,4)-.5)*.9;
+export const bladeGeo=(()=>{const gs=[];for(let i=0;i<14;i++){const a=i/14*6.28+hash(i,1),h=.8+hash(i,2)*1.7,l=.05,x=Math.cos(a)*.25*hash(i,3),z=Math.sin(a)*.25*hash(i,3),lean=(hash(i,4)-.5)*.9;
     const g=new THREE.BufferGeometry(),p=new Float32Array([-l,0,0,l,0,0,lean*.5-l*.5,h*.6,0,lean*.5+l*.5,h*.6,0,lean,h,0]);g.setAttribute('position',new THREE.BufferAttribute(p,3));
     g.setIndex([0,1,2,1,3,2,2,3,4]);g.computeVertexNormals();const col=new Float32Array(15);const cs=[[.28,.2,.12],[.28,.2,.12],[.62,.5,.24],[.62,.5,.24],[.92,.78,.4]];cs.forEach((c,k)=>col.set(c,k*3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
     g.rotateY(a);g.translate(x,0,z);gs.push(g)}return mergeGeometries(gs)})();
@@ -52,7 +52,7 @@ export const UMB=['#5d7a64','#4f6b5c','#6a8a6e','#566f5d'],REED=['#ffffff','#f0e
 export const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),V3=new THREE.Vector3(),S3=new THREE.Vector3(),UP=new THREE.Vector3(0,1,0);
 export const cSeasG=new THREE.Color(SE.gnd);
 export const PINE=SE.pine,BLOS=SE.blos,SBLOS=SAKURA.blos,SBBLOS=SAKURA.bblos;
-export const bushM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1).scale(1,.72,1).translate(0,.45,0),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,map:tex('leaf')}),1700);bushM.frustumCulled=false;scene.add(bushM);
+export const bushM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,2).scale(1,.72,1).translate(0,.45,0),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,map:tex('leaf')}),1700);bushM.frustumCulled=false;scene.add(bushM);
 export const BUSH=['#6fa383','#7fb592','#5f957a','#8cc09a'],BBLOS=SE.bblos;
 const bambGeo=(()=>{const g=new THREE.CylinderGeometry(.11,.15,1,5,8,true).translate(0,.5,0).toNonIndexed();const p=g.attributes.position,c=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){const y=p.getY(i),k=(Math.round(y*8)%3===0)?.68:1;c[i*3]=k;c[i*3+1]=k;c[i*3+2]=k*.95}g.setAttribute('color',new THREE.BufferAttribute(c,3));g.deleteAttribute('uv');g.computeVertexNormals();return g})();
 export const bambM=new THREE.InstancedMesh(bambGeo,new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true}),2000);
