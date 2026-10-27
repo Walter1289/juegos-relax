@@ -27,9 +27,12 @@ export function signs(g,gy,hwv,ch,rope,bg){for(const sd of[-1,1]){nobori(g,gy,sd
 export function roof(g,R,hh,y,col,sq=1){const r=new THREE.Mesh(new THREE.ConeGeometry(R,hh,4),MT(col));r.rotation.y=Math.PI/4;r.position.y=y;r.scale.z=sq;g.add(r);
   const q=R*.707;[[1,1],[-1,1],[1,-1],[-1,-1]].forEach(([a,b])=>{const t=new THREE.Mesh(new THREE.ConeGeometry(.32,1.3,5),MT(col));t.position.set(a*q,y-hh/2+.55,b*q*sq);t.rotation.set(b*.7,0,-a*.7);g.add(t)})}
 export function pagoda(g,x,y,z){const h=new THREE.Group();h.position.set(x,y,z);g.add(h);bx(h,6.4,1.2,6.4,0x8f8c88,0,.5,0);let yy=1.1;
-  for(let i=0;i<4;i++){const w=4.3-i*.75;bx(h,w,2.3,w,i%2?0xf1e6d3:0xe9ddc8,0,yy+1.15,0);bx(h,w+.12,.18,w+.12,0xb5473a,0,yy+.1,0);for(const [a,b]of[[1,1],[-1,1],[1,-1],[-1,-1]])cyl(h,.1,.1,2.3,0xb5473a,a*w/2,yy+1.15,b*w/2,6);roof(h,(w/2+.95)/.707,1.5,yy+2.9,0x55505e);yy+=3.1}
+  for(let i=0;i<4;i++){const w=4.3-i*.75;bx(h,w,2.3,w,i%2?0xf1e6d3:0xe9ddc8,0,yy+1.15,0);bx(h,w+.12,.18,w+.12,0xb5473a,0,yy+.1,0);for(const [a,b]of[[1,1],[-1,1],[1,-1],[-1,-1]])cyl(h,.1,.1,2.3,0xb5473a,a*w/2,yy+1.15,b*w/2,6);roof(h,(w/2+.95)/.707,1.5,yy+2.9,0x55505e);
+    for(const [a,b,ry]of[[1,0,1],[-1,0,1],[0,1,0],[0,-1,0]]){const wn=bx(h,ry?.12:w*.42,1.0,ry?w*.42:.12,0x3a2f2c,a*(w/2+.02),yy+1.3,b*(w/2+.02));bx(h,ry?.16:w*.5,.1,ry?w*.5:.16,0xb5473a,a*(w/2+.03),yy+1.88,b*(w/2+.03))}
+    bx(h,w+.9,.1,w+.9,0xb5473a,0,yy+.32,0);for(const sd of[-1,1]){bx(h,w+.9,.07,.07,0xd9a85a,0,yy+.75,sd*(w+.9)/2);bx(h,.07,.07,w+.9,0xd9a85a,sd*(w+.9)/2,yy+.75,0)}yy+=3.1}
   cyl(h,.1,.18,4.6,0xd9a85a,0,yy+1.3,0,6);for(let i=0;i<6;i++)cyl(h,.55-i*.07,.55-i*.07,.12,0xd9a85a,0,yy+.2+i*.62,0,8);gl(h,0xffc77a,5,0,3,3.4,.7);return h}
-export function torii(g,x,y,z,sc,col){const h=new THREE.Group();h.position.set(x,y,z);h.scale.setScalar(sc);g.add(h);[-2.2,2.2].forEach(sx=>cyl(h,.3,.36,6,col,sx,3,0,8));bx(h,6.8,.4,.55,0x2c2a2e,0,6.4,0);bx(h,5.6,.35,.4,col,0,5.4,0);bx(h,.5,.9,.4,col,0,5.85,0);return h}
+export function torii(g,x,y,z,sc,col){const h=new THREE.Group();h.position.set(x,y,z);h.scale.setScalar(sc);g.add(h);[-2.2,2.2].forEach(sx=>cyl(h,.3,.36,6,col,sx,3,0,8));bx(h,6.4,.4,.55,0x2c2a2e,0,6.4,0);[-1,1].forEach(sd=>{const e=bx(h,1.1,.36,.55,0x2c2a2e,sd*3.55,6.55,0);e.rotation.z=sd*.28});
+  [-2.2,2.2].forEach(sx=>cyl(h,.42,.46,.5,0xb9b5ad,sx,.25,0,8));bx(h,5.6,.35,.4,col,0,5.4,0);bx(h,.5,.9,.4,col,0,5.85,0);return h}
 export function mkHeron(sc,ph){const h=new THREE.Group(),w=0xf6f3ee,w2=0xe9e4da;
   const b=new THREE.Mesh(new THREE.SphereGeometry(.5,10,8),MT(w));b.scale.set(1,.8,1.5);b.position.y=1.35;h.add(b);
   const tl=new THREE.Mesh(new THREE.ConeGeometry(.2,.7,5),MT(w2));tl.rotation.x=-Math.PI/2-.3;tl.position.set(0,1.35,-.85);h.add(tl);
