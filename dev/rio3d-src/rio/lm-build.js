@@ -102,13 +102,15 @@ function buildLM0(k){
     const pg=pagoda(h,0,1.5,-3.5);pg.position.set(side>0?-11.5:11.5,1.5,-2.5);pg.scale.setScalar(1.1);
     if(camino()){
       /* camino de piedras y faroles hasta la cabaña de la colina; al inicio, su maqueta */
-      const x0=side*(hwv+33),pz=z=>Math.sin(z*.0)*0;
-      for(let i=0;i<18;i++){const t=i/17,x=x0+side*t*62,z=Math.sin(t*3.4)*9*t-1.5*(1-t);const st=cyl(g,.95,1.05,.2,0xaaa69d,x,gy(x,z)+.12,z,8);
+      const x0=side*(hwv+33),pts=[];
+      for(let i=0;i<24;i++){const t=i/23,x=x0+side*t*40,z=Math.sin(t*5.2)*20*Math.min(1,t*3);pts.push([x,z]);const st=cyl(g,.95,1.05,.2,0xaaa69d,x,gy(x,z)+.12,z,8);
         if(i%3===1)tourou(g,gy,x,z+(i%2?2.4:-2.4),.8)}
+      g.userData.path=pts;
       const mx=side*(hwv+30.5),my=gy(mx,0);bx(g,3.6,.9,3.6,0x9d9c9a,mx,my+.35,0);bx(g,3.2,.2,3.2,0xc2bfb8,mx,my+.9,0);
       const mq=new THREE.Group();mq.scale.setScalar(.3);mq.position.set(mx,my+1+(-8.5*.3),0);mq.rotation.y=-side*Math.PI/2;g.add(mq);farCabin(mq,k+500,false);
       gl(g,0xffc77a,6,mx,my+2.4,0,.8);
-      const xe=side*(hwv+96),ze=Math.sin(3.4)*9,hc=new THREE.Group();hc.position.set(xe,gy(xe,ze)-1,ze);hc.rotation.y=-side*Math.PI/2*0;g.add(hc);hc.scale.setScalar(2.6);farCabin(hc,k+700)}}
+      const pe=pts[23],pq=pts[22],tl=Math.hypot(pe[0]-pq[0],pe[1]-pq[1]),xe=pe[0]+(pe[0]-pq[0])/tl*66,ze=pe[1]+(pe[1]-pq[1])/tl*66,hc=new THREE.Group();hc.position.set(xe,gy(xe,ze)-1,ze);hc.rotation.y=Math.atan2(pq[0]-pe[0],pq[1]-pe[1])+Math.PI*0;g.add(hc);hc.scale.setScalar(2.6);g.userData.hill=[xe,ze];
+      farCabin(hc,k+700)}}
   else if(type===6){
     const lx=side*(hwv+3.6),y=gy(lx,0),h=new THREE.Group();h.position.set(lx,y,0);g.add(h);signs(g,gy,hwv,'滝',false,'#3f7a8a');
     const rc=(c)=>MT(c);for(let i=0;i<22;i++){const rr=3+hash(k,i)*3.5,rx=side*(7.8+hash(k,i+5)*9),ry=hash(k,i+9)*15+(rx*side<8?3:0),rz=(hash(k,i+13)-.5)*17;const r=new THREE.Mesh(new THREE.IcosahedronGeometry(rr,1),rc(i%3?0x7a8a7e:0x6c8f78));r.position.set(rx,ry,rz);r.scale.y=1.2;h.add(r);

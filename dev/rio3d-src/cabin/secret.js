@@ -1,11 +1,12 @@
 /* secret.js — estanque secreto de la cabaña: una maqueta circular del Río con sus lugares; se despierta al descifrar todo el cartel */
 import * as THREE from 'three';
-import {scene} from './core.js';
+import {scene,canvas,cam} from './core.js';
+import {A} from '../audio.js';
 import {Y0,spr,glowTex} from './util.js';
 import {mat} from './mats.js';
 import {secreto,descubiertos} from '../lightmsg.js';
 export const SPX=-8.8,SPZ=.3,SPR=5;
-let ring=null,boats=[];
+let ring=null,boats=[],surge=0,ang=0,lastT=null,wake=[],waterM=null;
 export function buildSecret(){
   if(!secreto())return;
   const found=new Set(descubiertos());
@@ -17,7 +18,7 @@ export function buildSecret(){
   const bank=new THREE.Mesh(new THREE.RingGeometry(3.25,4.3,40),mat('#7fa06a'));bank.rotation.x=-Math.PI/2;bank.position.y=.29;G.add(bank);
   const wc=document.createElement('canvas');wc.width=256;wc.height=32;{const g=wc.getContext('2d');const gr=g.createLinearGradient(0,0,256,0);gr.addColorStop(0,'#bfe3ea');gr.addColorStop(.5,'#9ccbd8');gr.addColorStop(1,'#bfe3ea');g.fillStyle=gr;g.fillRect(0,0,256,32);g.fillStyle='rgba(255,255,255,.35)';for(let i=0;i<30;i++)g.fillRect(Math.random()*256,Math.random()*32,10+Math.random()*30,1)}
   const wt=new THREE.CanvasTexture(wc);wt.colorSpace=THREE.SRGBColorSpace;
-  const water=new THREE.Mesh(new THREE.RingGeometry(1.8,3.3,48,1),new THREE.MeshBasicMaterial({map:wt,transparent:true,opacity:.92}));water.rotation.x=-Math.PI/2;water.position.y=.31;G.add(water);
+  const water=new THREE.Mesh(new THREE.RingGeometry(1.8,3.3,48,1),new THREE.MeshBasicMaterial({map:wt,transparent:true,opacity:.92}));water.rotation.x=-Math.PI/2;water.position.y=.31;G.add(water);waterM=water;
   G.add(M(new THREE.CylinderGeometry(1.75,1.9,.5,32),mat('#7fa06a'),0,.4,0));
   const col=(c,on)=>on?c:'#8d8b94',lit=(g,c,x,y,z,s=1.1)=>{const L=spr(glowTex,c,s,.5,true);L.position.set(x,y,z);g.add(L)};
   /* castillo de la Garza Blanca en la isla (siempre; es el destino del río) */
@@ -51,4 +52,19 @@ export function buildSecret(){
   /* mojón de piedra con una luz en el camino de entrada */
   const lamp=new THREE.Mesh(new THREE.CylinderGeometry(.12,.16,.9,6),mat('#a9a4b0'));lamp.position.set(3.2,.75,-4.3);G.add(lamp);lit(G,0xffc27a,3.2,1.3,-4.3,1.6);
 }
-export const secretStep=t=>{if(ring)ring.rotation.y=-t*.1};
+/* tocar el agua despierta la corriente: las canoas aceleran y la fuerza se va apagando sola */
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();let dn=null;
+function bindTap(){
+  canvas.addEventListener('pointerdown',e=>{dn={x:e.clientX,y:e.clientY,t:performance.now()}});
+  canvas.addEventListener('pointerup',e=>{if(!dn||!waterM)return;const mv=Math.hypot(e.clientX-dn.x,e.clientY-dn.y),dt=performance.now()-dn.t;dn=null;if(mv>8||dt>450)return;
+    const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);
+    const h=ray.intersectObject(waterM,false)[0];if(!h)return;
+    surge=Math.min(1.4,surge+.8);try{A.chime(0,2)}catch(x){}try{navigator.vibrate&&navigator.vibrate(12)}catch(x){}
+    const g=new THREE.Mesh(new THREE.RingGeometry(.08,.14,24),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.7,side:THREE.DoubleSide,depthWrite:false}));
+    g.rotation.x=-Math.PI/2;g.position.copy(waterM.parent.worldToLocal(h.point.clone()));g.position.y=.33;waterM.parent.add(g);wake.push({g,a:0})});
+}
+let bound=false;
+export const secretStep=t=>{if(!ring)return;if(!bound){bound=true;bindTap()}
+  const dt=lastT==null?.016:Math.min(.05,Math.max(0,t-lastT));lastT=t;
+  surge*=Math.exp(-dt*.38);ang+=(.1+surge*.85)*dt;ring.rotation.y=-ang;
+  for(let i=wake.length-1;i>=0;i--){const w=wake[i];w.a+=dt;const k=w.a/1.6;w.g.scale.setScalar(1+k*14);w.g.material.opacity=.7*(1-k);if(k>=1){w.g.parent.remove(w.g);w.g.geometry.dispose();w.g.material.dispose();wake.splice(i,1)}}};

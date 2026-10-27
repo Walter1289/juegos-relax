@@ -35,6 +35,7 @@ import {updateCritters,updateFish,updateFauna} from './fauna.js';
 import {updateRocks,updateFarBoats,updateMassifs,massMistMat} from './scenery.js';
 import {updatePetals,updateFW,updateAur} from './moments.js';
 import {installDebug} from './debug.js';
+import {walkStep} from './walk.js';
 let last=performance.now();
 addVignette();addPaper();
 /* ---------- bucle ---------- */
@@ -50,7 +51,7 @@ function frame(now,manual){
   updatePaddles();
   updateCharacter(dt);
   updateCamera(dt,bob);
-  cineStep(dt);if(window.__fc)window.__fc();
+  cineStep(dt);walkStep(dt);if(window.__fc)window.__fc();
   // mundo
   if(S.started&&!X.photo)S.tod=(S.tod+dt/900)%1;
   applyEnv(P.px,P.pz);weather(dt,s);
