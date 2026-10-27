@@ -8,7 +8,7 @@ import {spr,glowTex,scene} from './core.js';
 import {spawnRipple} from './ripples.js';
 import {toast} from './hud.js';
 import {dayPending,dayTake,dayRand} from '../daylamp.js';
-import {camino,UMBRAL} from '../lightmsg.js';
+import {camino,UMBRAL,iman} from '../lightmsg.js';
 import {lang} from '../i18n.js';
 /* ---------- linternas flotantes ---------- */
 const LSP=38;const lanterns=new Map(),pool=[];let collected=new Set();try{JSON.parse(localStorage.getItem('rio3d-coll')||'[]').forEach(i=>collected.add(i))}catch(e){}try{S.count=+localStorage.getItem('rio3d-lant')||0}catch(e){}
@@ -43,7 +43,7 @@ export function updateLanterns(t,ps){
 /* recoge las linternas cercanas (antes dentro del bucle de fotogramas) */
 export function collectLanterns(){
   for(const [k,o] of lanterns){if(o.userData.collecting)continue;const [x,z]=lanternPos(k);const dx=x-P.px,dz=z-P.pz;
-    if(dx*dx+dz*dz<27){collected.add(k);S.count++;try{localStorage.setItem('rio3d-lant',String(S.count));localStorage.setItem('rio3d-coll',JSON.stringify([...collected]))}catch(e){}o.userData.collecting=true;
+    if(dx*dx+dz*dz<iman()){collected.add(k);S.count++;try{localStorage.setItem('rio3d-lant',String(S.count));localStorage.setItem('rio3d-coll',JSON.stringify([...collected]))}catch(e){}o.userData.collecting=true;
       const ang=Math.atan2(dx,-dz)-P.psi;A.lantern(Math.sin(ang));spawnRipple(x,z);el('n').textContent=S.count;
       if(S.count===UMBRAL&&!camino()){toast(({es:'Llevas 33 luces, como los 33 templos de Kannon. Cierra tu vuelta en el templo de la campana',en:'You carry 33 lights, like the 33 temples of Kannon. Close your lap at the bell temple',ja:'33の灯を携えました。観音霊場三十三所のように。鐘の寺で一周を締めくくりましょう'}[lang()])||'')}
       else if(S.count===1)toast('Cada linterna es una nota. Sigue el río a tu ritmo.')

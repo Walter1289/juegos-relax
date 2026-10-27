@@ -19,6 +19,7 @@ import {placeBoat,updatePaddles,updateCharacter,bowLight,blGlow,bl} from './boat
 import {updateRipples,spawnRipple} from './ripples.js';
 import './input.js';
 import {updateHud,toast,savePos} from './hud.js';
+import {proaDorada} from '../lightmsg.js';
 import {updateLanterns,collectLanterns,mkLantern,updateDayLamp} from './lanterns.js';
 import {weather} from './weather.js';
 import {stepPlayer} from './player.js';
@@ -59,7 +60,7 @@ function frame(now,manual){
   ensureTerrain(P.px,P.pz,buildFoam);
   swayU.value=P.t;water.position.set(P.px,0,P.pz);water.material.uniforms.t.value=P.t;
   const night=env.night;
-  bowLight.intensity=S.glowK*3.2;blGlow.material.opacity=.3+.35*S.glowK;
+  bowLight.intensity=S.glowK*3.2;if(!window.__bd&&proaDorada()){window.__bd=1;bowLight.color.set(0xffd27a)}blGlow.material.opacity=.3+.35*S.glowK;
   bl.material.color.set(0xffe2a8);
   updateRocks(dt,P.dist||s);updateFarBoats(dt,P.dist||s);updateMassifs(P.dist||s);massMistMat.color.copy(scene.fog.color).multiplyScalar(1.05);updateCritters(dt,P.dist||s);updateFish(dt,P.dist||s);updateFauna(dt,P.dist||s);foamMat.opacity=.55+.15*Math.sin(P.t*.8);foam.position.y=Math.sin(P.t*.9)*.01;
   updateLanterns(P.t,P.dist||s);updateLandmarks(P.dist||s);

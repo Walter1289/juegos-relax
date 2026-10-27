@@ -14,7 +14,12 @@ export const setLapK=k=>{try{localStorage.setItem('rio3d-lapk',String(k))}catch(
 export const liberadas=()=>{try{return Math.max(0,+localStorage.getItem('rio3d-rel')||0)}catch(e){return 0}};
 export const disponibles=()=>luces();
 export const camino=()=>{try{return localStorage.getItem('rio3d-camino')==='1'}catch(e){return false}};
-export function ceremonia(n,abre){try{localStorage.setItem('rio3d-rel',String(liberadas()+n));localStorage.setItem('rio3d-lant','0');localStorage.setItem('rio3d-cer',String(ceremonias()+1));if(abre)localStorage.setItem('rio3d-camino','1')}catch(e){}}
+export const GRAN=108;
+export const grandes=()=>{try{return Math.max(0,+localStorage.getItem('rio3d-gran')||0)}catch(e){return 0}};
+/* Recompensas por vuelta: 2 ceremonias = luz de proa dorada; 3 = las linternas te atraen desde más lejos; 108 o más en una vuelta = Gran ceremonia (campanas y cielo dorado) */
+export const proaDorada=()=>ceremonias()>=2;
+export const iman=()=>ceremonias()>=3?40:27;
+export function ceremonia(n,abre){try{if(n>=GRAN)localStorage.setItem('rio3d-gran',String(grandes()+1));localStorage.setItem('rio3d-rel',String(liberadas()+n));localStorage.setItem('rio3d-lant','0');localStorage.setItem('rio3d-cer',String(ceremonias()+1));if(abre)localStorage.setItem('rio3d-camino','1')}catch(e){}}
 /* cartel: dos fragmentos (una línea) por ceremonia */
 export const found=()=>Math.min(8,ceremonias()*2);
 export const joiner=()=>lang()==='ja'?'':' ';

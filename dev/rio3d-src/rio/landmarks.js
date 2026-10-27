@@ -14,7 +14,7 @@ import {castleStep} from './castle.js';
 import {env} from './env.js';
 import {taskTick} from '../tasks.js';
 import {albumSee} from '../album.js';
-import {disponibles,camino,UMBRAL,ceremonia,ceremonias,lapK,setLapK,parts,joiner} from '../lightmsg.js';
+import {disponibles,camino,UMBRAL,GRAN,ceremonia,ceremonias,lapK,setLapK,parts,joiner} from '../lightmsg.js';
 import {lang} from '../i18n.js';
 import {startCeremony} from './ceremony.js';
 import {NL} from './world.js';
@@ -39,11 +39,14 @@ export function updateLandmarks(ps){
     window.__cerK=k;setLapK(k);const n=disponibles();
     if(n<1){toast(T3({es:'Vuelta completa. Sin linternas que liberar: la próxima vuelta llevará más luz',en:'Lap complete. No lanterns to release: the next lap will carry more light',ja:'一周しました。放つランタンがありません。次の一周は、もっと灯を運びましょう'}));continue}
     const abre=n>=UMBRAL&&!camino();ceremonia(n,abre);S.count=0;try{el('n').textContent=0}catch(e){}
-    startCeremony(n);
+    const gran=n>=GRAN;startCeremony(n,gran);
     const cer=ceremonias(),p=parts(),fr=cer<=4?p[(cer-1)*2]+joiner()+p[(cer-1)*2+1]:'';
     let msg=T3({es:'Ceremonia de liberación: '+n+' linternas suben al cielo',en:'Release ceremony: '+n+' lanterns rise into the sky',ja:'放灯の儀式：'+n+'のランタンが空へのぼります'});
     if(fr&&(abre||camino()))msg+=T3({es:' · el cartel de la cabaña descifra: «'+fr+'»',en:' · the cabin sign deciphers: “'+fr+'”',ja:' · 小屋の看板が読み解いた言葉：「'+fr+'」'});
     toast(msg);
+    if(gran)setTimeout(()=>toast(T3({es:'¡Gran ceremonia! '+n+' luces, 108 o más, como las campanadas del templo en Año Nuevo',en:'Great ceremony! '+n+' lights, one for each of the 108 bell strokes',ja:'大放灯！'+n+'の灯。除夜の鐘と同じ百八つ以上'})),4500);
+    if(cer===2)setTimeout(()=>toast(T3({es:'Recompensa: la luz de tu proa ahora es dorada',en:'Reward: your bow light is now golden',ja:'褒美：舳先の灯が金色になりました'})),9500);
+    if(cer===3)setTimeout(()=>toast(T3({es:'Recompensa: las linternas se acercan a ti desde más lejos',en:'Reward: lanterns are drawn to you from farther away',ja:'褒美：ランタンが遠くから寄ってきます'})),9500);
     if(abre){setCaminoOn(true);const g0=lmMade.get(k);if(g0){if(g0.parent)scene.remove(g0);disposeLM(g0);lmMade.delete(k)}
       setTimeout(()=>toast(T3({es:'33 luces, como los 33 templos del peregrinaje de Kannon: se abrió un camino hacia la colina',en:'33 lights, like the 33 temples of the Kannon pilgrimage: a path opened toward the hill',ja:'33の灯。観音霊場三十三所にちなみ、丘へ続く道が開きました'})),7500)}
     else if(!camino())setTimeout(()=>toast(T3({es:'Algo despertará si llegas con 33 luces en una misma vuelta, como los 33 templos de Kannon',en:'Something will awaken if you arrive with 33 lights in one lap, like the 33 temples of Kannon',ja:'一周で33の灯を携えて戻ると、何かが目覚めます。観音霊場三十三所にちなんで'})),7500)

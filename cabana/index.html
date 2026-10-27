@@ -1163,7 +1163,7 @@ canvas{display:block;touch-action:none;border-radius:14px;box-shadow:0 10px 40px
       g3.fillStyle = "#e9d3a3";
       g3.font = "700 22px serif";
       g3.textAlign = "center";
-      g3.fillText("\u706F", x, y - 6);
+      g3.fillText((+localStorage.getItem("rio3d-cer") || 0) >= 4 ? "\u706F" : "\uFF1F", x, y - 6);
       g3.textAlign = "left";
       g3.fillStyle = "#3b2a24";
       g3.fillRect(x - 34, y - 34, 68, 5);
