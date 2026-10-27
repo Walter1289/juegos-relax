@@ -97,6 +97,16 @@ export function initExtras(C){
     try{rt=new THREE.WebGLRenderTarget(_v.x,_v.y,{samples:4,type:THREE.HalfFloatType,depthBuffer:true})}
     catch(e){rt=new THREE.WebGLRenderTarget(_v.x,_v.y,{samples:4,depthBuffer:true})}
   }
+  /* Contador de rendimiento opcional: abre el juego con ?perf=1 (útil para medir en el iPad real). */
+  const PERF=/[?&]perf=1/.test(location.search);let pEl=null,pT=performance.now(),pN=0,pMax=0,pLast=performance.now();
+  function perfTick(){
+    const n=performance.now(),d=n-pLast;pLast=n;pN++;if(d>pMax)pMax=d;
+    if(n-pT<1000)return;
+    if(!pEl){pEl=document.createElement('div');pEl.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99999;font:12px/1.35 monospace;color:#fff;background:rgba(0,0,0,.55);padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(pEl)}
+    const i=R.info.render;
+    pEl.textContent=Math.round(pN*1000/(n-pT))+' fps · peor '+Math.round(pMax)+' ms\n'+i.calls+' llamadas · '+Math.round(i.triangles/1000)+'k tri\nratio '+R.getPixelRatio().toFixed(2)+' · '+R.info.memory.geometries+' geo';
+    pT=n;pN=0;pMax=0;
+  }
   X.render=function(){
     const f=filters[fk];
     if(X.photo&&f.t){
@@ -105,6 +115,7 @@ export function initExtras(C){
       u.sat.value=f.sat;u.con.value=f.con;u.lift.value=f.lift;u.vig.value=f.vig;u.glow.value=f.glow;u.grain.value=f.grain;u.time.value=P.t%10;
       R.render(qScene,qCam);
     }else R.render(scene,cam);
+    if(PERF)perfTick();
     if(X.want){const w=X.want;X.want=null;try{w()}catch(e){console.error('want',e&&e.message)}}
   };
 

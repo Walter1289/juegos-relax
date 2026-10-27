@@ -1,5 +1,5 @@
 /* Service worker: precarga todo y sirve sin conexión. Sube VERSION para forzar actualización. */
-const VERSION = 'v69';
+const VERSION = 'v70';
 const CACHE = 'respirar-' + VERSION;
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
@@ -7,6 +7,7 @@ const ASSETS = [
   './cabana/', './cabana/index.html',
   './rio3d/', './rio3d/index.html', './rio3d/app.js',
   './cabana3d/', './cabana3d/index.html', './cabana3d/app.js',
+  './cabana/app.js', './shared/three-2U5FELNC.js',
   './privacidad.html',
   './creditos.html',
   './datos.html',
@@ -37,7 +38,15 @@ const ASSETS = [
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
 ];
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => Promise.all(ASSETS.map(u => fetch(new Request(u, {cache: 'reload'})).then(r => { if (!r.ok) throw new Error(u); return c.put(u, r); })))).then(() => self.skipWaiting()));
+  e.waitUntil((async () => {
+    const c = await caches.open(CACHE);
+    const old = (await caches.keys()).filter(k => k.startsWith('respirar-') && k !== CACHE && k !== 'respirar-fonts');
+    await Promise.all(ASSETS.map(async u => {
+      if (/three-[A-Za-z0-9]+\.js$/.test(u)) { for (const k of old) { const hit = await (await caches.open(k)).match(u); if (hit) return c.put(u, hit); } }
+      const r = await fetch(new Request(u, {cache: 'reload'})); if (!r.ok) throw new Error(u); return c.put(u, r);
+    }));
+    self.skipWaiting();
+  })());
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('respirar-') && k !== CACHE && k !== 'respirar-fonts').map(k => caches.delete(k)))).then(() => self.clients.claim()));
