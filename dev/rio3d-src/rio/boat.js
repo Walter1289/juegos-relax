@@ -79,7 +79,7 @@ const torso=new THREE.Group();torso.position.y=.3;me.add(torso);
 const head=new THREE.Group();head.position.y=1.0;torso.add(head);
 const hatG=new THREE.Group();hatG.position.y=.2;head.add(hatG);
 const armPivot=[];
-{const indigo=MTc(0x26365a,{map:tex('cloth')}),indigoL=MTc(0x4d6590,{map:tex('cloth')}),pants=MTc(0x2a3148,{map:tex('cloth')}),skin=MTc(0xd9a982),
+{const indigo=MTc(0x2b4a82,{map:tex('cloth')}),indigoL=MTc(0x6f8fc4,{map:tex('cloth')}),pants=MTc(0x2a3148,{map:tex('cloth')}),skin=MTc(0xd9a982),
   kasa=MTc(0xe4c27e,{map:tex('straw'),side:THREE.DoubleSide}),kasaD=MTc(0xb48a4a,{map:tex('straw'),side:THREE.DoubleSide}),hair=MTc(0x24212a),mino=MTc(0xb8944f,{map:tex('straw'),side:THREE.DoubleSide}),minoD=MTc(0x8f6f3a,{map:tex('straw'),side:THREE.DoubleSide}),cord=MTc(0xa83a2c),wrap=MTc(0xd8d0bc,{map:tex('cloth')});
   // piernas cruzadas con pantalón recogido y tobillos envueltos
   const lg=new THREE.Mesh(new THREE.SphereGeometry(.5,16,12),pants);lg.scale.set(1.2,.42,.85);lg.position.y=-.1;me.add(lg);
@@ -89,24 +89,28 @@ const armPivot=[];
   // torso: chaqueta añil con solapa cruzada (happi) y faja de cuerda
   const bd=new THREE.Mesh(new THREE.CylinderGeometry(.3,.4,.8,14),indigo);bd.position.y=.42;torso.add(bd);
   const obi=new THREE.Mesh(new THREE.TorusGeometry(.37,.05,6,18),wrap);obi.rotation.x=Math.PI/2;obi.position.y=.1;torso.add(obi);
-  const knot=new THREE.Mesh(new THREE.SphereGeometry(.06,6,5),wrap);knot.position.set(.1,.1,.37);torso.add(knot);
-  [-1,1].forEach(sd=>{const lp=new THREE.Mesh(new THREE.BoxGeometry(.1,.62,.04),indigoL);lp.position.set(sd*.08,.5,.33);lp.rotation.z=sd*.45;torso.add(lp)});
+  const knot=new THREE.Mesh(new THREE.SphereGeometry(.06,6,5),wrap);knot.position.set(.1,.1,-.37);torso.add(knot);
+  [-1,1].forEach(sd=>{const lp=new THREE.Mesh(new THREE.BoxGeometry(.1,.62,.04),indigoL);lp.position.set(sd*.08,.5,-.33);lp.rotation.z=sd*.45;torso.add(lp)});
   const sd2=new THREE.Mesh(new THREE.SphereGeometry(.44,14,10),indigo);sd2.scale.set(1,.45,.7);sd2.position.y=.78;torso.add(sd2);
   const nk=new THREE.Mesh(new THREE.CylinderGeometry(.09,.1,.16,8),skin);nk.position.y=.95;torso.add(nk);
-  // mino: capa de paja en capas sobre hombros y espalda
-  [[.88,.5,.3],[.66,.58,.34],[.44,.66,.36],[.24,.72,.34]].forEach(([y,r,h],i)=>{const m=new THREE.Mesh(new THREE.ConeGeometry(r,h,24,1,true),i%2?minoD:mino);m.position.set(0,y,-.1);m.rotation.x=-.12;m.scale.set(1,1,.85);torso.add(m)});
+  // espalda: emblema blanco (mon) y dobladillo claro, como un hanten de pescador
+  const wm=MTc(0xf2efe6,{side:THREE.DoubleSide});
+  const mon=new THREE.Mesh(new THREE.RingGeometry(.07,.15,24),wm);mon.position.set(0,.55,.352);torso.add(mon);
+  const hem=new THREE.Mesh(new THREE.CylinderGeometry(.385,.405,.07,16,1,true),wm);hem.position.y=.07;torso.add(hem);
+  const tcol=new THREE.Mesh(new THREE.TorusGeometry(.15,.04,6,14),wm);tcol.rotation.x=Math.PI/2;tcol.position.y=.9;torso.add(tcol);
   // cabeza: cara, moño y cinta
   const hd=new THREE.Mesh(new THREE.SphereGeometry(.21,16,12),skin);hd.position.y=.2;head.add(hd);
-  const hr=new THREE.Mesh(new THREE.SphereGeometry(.22,16,10,0,Math.PI*2,0,Math.PI*.55),hair);hr.position.set(0,.2,-.02);hr.rotation.x=-.45;head.add(hr);
-  const tk=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),hair);tk.position.set(0,.42,-.12);head.add(tk);
-  [-1,1].forEach(sd=>{const ey=new THREE.Mesh(new THREE.SphereGeometry(.022,6,4),hair);ey.position.set(sd*.07,.2,.195);head.add(ey)});
+  const hr=new THREE.Mesh(new THREE.SphereGeometry(.22,16,10,0,Math.PI*2,0,Math.PI*.55),hair);hr.position.set(0,.2,.03);hr.rotation.x=.45;head.add(hr);
+  const hb=new THREE.Mesh(new THREE.TorusGeometry(.205,.03,6,18),wm);hb.rotation.x=Math.PI/2;hb.position.y=.3;head.add(hb);
+  const tk=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),hair);tk.position.set(0,.43,.0);head.add(tk);
+  [-1,1].forEach(sd=>{const ey=new THREE.Mesh(new THREE.SphereGeometry(.022,6,4),hair);ey.position.set(sd*.07,.2,-.195);head.add(ey)});
   // kasa: sombrero cónico ancho, con anillos de bambú y cordón rojo bajo la barbilla
   const ht=new THREE.Mesh(new THREE.ConeGeometry(.7,.4,32,1,true),kasa);ht.position.y=.12;hatG.add(ht);
   [.2,.38,.56,.74].forEach(f=>{const r=new THREE.Mesh(new THREE.TorusGeometry(.7*f+.02,.009,4,32),kasaD);r.rotation.x=Math.PI/2;r.position.y=.12+.2-.4*f+.002;hatG.add(r)});
   const tp=new THREE.Mesh(new THREE.ConeGeometry(.07,.07,8),kasaD);tp.position.y=.34;hatG.add(tp);
   const rim=new THREE.Mesh(new THREE.TorusGeometry(.695,.02,6,32),kasaD);rim.rotation.x=Math.PI/2;rim.position.y=-.08;hatG.add(rim);
   [-1,1].forEach(s2=>{const st=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,.34,4),cord);st.position.set(s2*.17,-.2,.05);st.rotation.z=s2*.12;hatG.add(st)});
-  const kn=new THREE.Mesh(new THREE.SphereGeometry(.03,6,5),cord);kn.position.set(0,-.34,.16);hatG.add(kn);
+  const kn=new THREE.Mesh(new THREE.SphereGeometry(.03,6,5),cord);kn.position.set(0,-.34,-.16);hatG.add(kn);
   [-1,1].forEach(side=>{const p=new THREE.Group();p.position.set(side*.42,.75,0);torso.add(p);
     const a=new THREE.Mesh(new THREE.CylinderGeometry(.1,.075,.6,10),indigo);a.position.y=-.3;p.add(a);
     const h=new THREE.Mesh(new THREE.SphereGeometry(.085,10,8),skin);h.position.y=-.63;p.add(h);
