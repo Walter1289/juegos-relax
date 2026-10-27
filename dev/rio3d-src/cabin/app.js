@@ -10,6 +10,7 @@ import {buildWorld,worldStep} from './world.js';
 import {initAmbient,ambientStep,initParts,partsStep} from './fx.js';
 import {buildStruct} from './struct.js';
 import {buildSecret,secretStep} from './secret.js';
+import {initSign} from './sign.js';
 import {secreto,secretoVisto,setSecretoVisto} from '../lightmsg.js';
 import {W} from './kit.js';
 import {buildItemsA} from './items-a.js';
@@ -53,12 +54,13 @@ bindHud(askReset);
 el('go').onclick=()=>{try{A.init();A.resume();A.rain(RT.rainOn);A.setMood(progress(),1)}catch(e){}el('start').hidden=true;RT.started=true;
   {const n=luces(),o=offered();if(n>o){setOffered(n);const d=n-o;setTimeout(()=>toast(({es:'La cabaña recibió '+d+(d>1?' luces':' luz')+' del río',en:'The cabin received '+d+(d>1?' lights':' light')+' from the river',ja:'小屋は川から'+d+'つの灯を受け取りました'}[lang()])||''),1800)}}
   if(secreto()&&!secretoVisto()){setSecretoVisto();setTimeout(()=>toast(({es:'El cartel se completó: algo despertó en el jardín del acantilado',en:'The sign is complete: something woke in the cliff garden',ja:'看板が完成しました：崖の庭で何かが目覚めました'}[lang()])||''),4800)}
+  signStart();
   if(doneCount()===ITEMS.length)fest.armT=RT.T+3;
   setTimeout(()=>{el('hint').style.opacity=0},12000);};
 bindKeys();
 initSpecial();
 makeWin();
-addHabTexts(UX);addStoryTexts(UX);addSeasonTexts(UX);initHabitar();window.__habReset=resetHab;
+const signStart=initSign(toast);addHabTexts(UX);addStoryTexts(UX);addSeasonTexts(UX);initHabitar();window.__habReset=resetHab;
 
 /* ================= bucle ================= */
 let last=performance.now(),hudT=0,perfAcc=0,perfN=0,slowN=0,pr=Math.min(devicePixelRatio||1,1.5);

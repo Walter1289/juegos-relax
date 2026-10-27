@@ -11,8 +11,8 @@ import {dayPending,dayTake,dayRand} from '../daylamp.js';
 import {parts,disponibles,camino,CAMINO} from '../lightmsg.js';
 import {lang} from '../i18n.js';
 /* ---------- linternas flotantes ---------- */
-const LSP=46;const lanterns=new Map(),pool=[];let collected=new Set();try{JSON.parse(localStorage.getItem('rio3d-coll')||'[]').forEach(i=>collected.add(i))}catch(e){}try{S.count=+localStorage.getItem('rio3d-lant')||0}catch(e){}
-export const lanternPos=k=>{const s=70+k*LSP+hash(k,1)*20,e=(hash(k,2)*2-1)*.6*hw(s);return[cx(s)+e,-s]};
+const LSP=38;const lanterns=new Map(),pool=[];let collected=new Set();try{JSON.parse(localStorage.getItem('rio3d-coll')||'[]').forEach(i=>collected.add(i))}catch(e){}try{S.count=+localStorage.getItem('rio3d-lant')||0}catch(e){}
+export const lanternPos=k=>{const s=70+k*LSP+hash(k,1)*20,e=(hash(k,2)*2-1)*.5*hw(s);return[cx(s)+e,-s]};
 export function mkLantern(){
   const g=new THREE.Group();
   const body=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.55,10),new THREE.MeshBasicMaterial({color:0xffd9a0}));body.position.y=.38;
@@ -23,7 +23,9 @@ export function mkLantern(){
   refl.scale.set(5,1,5);refl.position.y=.04;
   g.add(body,cap,base,glow,refl);g.userData={glow,refl,body};return g;
 }
+let hint0=false;
 export function updateLanterns(t,ps){
+  if(!hint0&&S.started&&S.count===0&&t>40){hint0=true;toast(({es:'Pasa cerca de una linterna del agua para recogerla: guardan luz para la cabaña',en:'Pass close to a lantern on the water to collect it: they hold light for the cabin',ja:'水面のランタンに近づくと集められます。小屋のための灯です'}[lang()])||'')}
   const k0=Math.max(0,Math.floor((ps-120)/LSP)),k1=Math.floor((ps+320)/LSP);
   for(const [k,o] of lanterns)if(k<k0||k>k1){scene.remove(o);pool.push(o);lanterns.delete(k)}
   for(let k=k0;k<=k1;k++){
@@ -41,11 +43,12 @@ export function updateLanterns(t,ps){
 /* recoge las linternas cercanas (antes dentro del bucle de fotogramas) */
 export function collectLanterns(){
   for(const [k,o] of lanterns){if(o.userData.collecting)continue;const [x,z]=lanternPos(k);const dx=x-P.px,dz=z-P.pz;
-    if(dx*dx+dz*dz<17){collected.add(k);S.count++;try{localStorage.setItem('rio3d-lant',String(S.count));localStorage.setItem('rio3d-coll',JSON.stringify([...collected]))}catch(e){}o.userData.collecting=true;
+    if(dx*dx+dz*dz<27){collected.add(k);S.count++;try{localStorage.setItem('rio3d-lant',String(S.count));localStorage.setItem('rio3d-coll',JSON.stringify([...collected]))}catch(e){}o.userData.collecting=true;
       const ang=Math.atan2(dx,-dz)-P.psi;A.lantern(Math.sin(ang));spawnRipple(x,z);el('n').textContent=S.count;
       if(S.count<=32&&S.count%4===0){const p=parts(),w=p[S.count/4-1],L=lang();toast(({es:'La linterna trae una frase: «',en:'The lantern carries a phrase: “',ja:'ランタンの言葉：「'}[L]||'')+w+({es:'»',en:'”',ja:'」'}[L]||'')+({es:' · el cartel de la cabaña la recordará',en:' · the cabin sign will remember it',ja:' · 小屋の看板が覚えています'}[L]||''))}
       else if(disponibles()>=CAMINO&&!camino()&&!window.__hint25){window.__hint25=1;toast(({es:'Reuniste 25 luces: libéralas en el templo de la campana',en:'You gathered 25 lights: release them at the bell temple',ja:'25の灯が集まりました：鐘の寺で放しましょう'}[lang()])||'')}
-      else if(S.count===1)toast('Cada linterna es una nota. Sigue el río a tu ritmo.')}}
+      else if(S.count===1)toast('Cada linterna es una nota. Sigue el río a tu ritmo.')
+      else if(S.count===3)toast(({es:'Las linternas guardan luz: llévala a la cabaña del acantilado, su cartel te hablará',en:'Lanterns hold light: bring it to the cliff cabin, its sign will speak to you',ja:'ランタンは灯を宿します。崖の小屋へ運ぶと、看板が語りかけます'}[lang()])||'')}}
 }
 
 /* Farolillo del día: uno dorado y más grande, una vez por día real (aparece delante de ti al empezar) */

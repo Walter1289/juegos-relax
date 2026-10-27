@@ -7,6 +7,8 @@ import {W,makeRoot,S,WOOD,WOOD2,DECK,DARK,STONE,TEAL} from './kit.js';
 import {LT} from './lights.js';
 import {lang} from '../i18n.js';
 import {lines,stairLit} from '../lightmsg.js';
+import {ground,zc} from './terrain.js';
+import {SIGN} from './sign.js';
 export function buildStruct(){
 makeRoot();scene.add(W);
 /* ---- estructura fija ---- */
@@ -57,9 +59,9 @@ box(.2,.2,6.8,DARK,-3.3,7.15,-1,W);box(.2,.2,6.8,DARK,6.3,7.15,-1,W);
 // escalera: largueros siempre visibles
 {const x0=8.2,y0=Y0,x1=15.1,y1=Y0-5.9,L=Math.hypot(x1-x0,y1-y0),a=Math.atan2(y1-y0,x1-x0);
  [2.15,3.45].forEach(z=>{const b=box(L,.22,.14,'#8f6f66',(x0+x1)/2,(y0+y1)/2-.3,z,W);b.rotation.z=a;S(b)});
- box(2,.2,2.2,DECK,15.7,Y0-6.1,2.8,W);[[15.1,2],[16.4,3.6]].forEach(([x,z])=>box(.3,12,.3,'#9a7a70',x,Y0-12,z,W))}
+ box(2.4,.2,2.4,DECK,15.9,Y0-6.1,2.8,W)}
 // torii bermellón al pie de la escalera
-{const tr=new THREE.Group();tr.position.set(16.6,Y0-6.2,2.8);W.add(tr);const rd='#a8392b';
+{const tr=new THREE.Group();tr.position.set(22,ground(22,zc(22)),zc(22));W.add(tr);const rd='#a8392b';
  [-1.7,1.7].forEach(z=>{const p=new THREE.Mesh(new THREE.CylinderGeometry(.18,.22,4.4,8),mat(rd));p.position.set(0,2.2,z);tr.add(p)});
  const kb=new THREE.Mesh(new THREE.BoxGeometry(.5,.3,4.6),mat('#2f2a2e'));kb.position.set(0,4.5,0);tr.add(kb);
  const nk=new THREE.Mesh(new THREE.BoxGeometry(.3,.24,3.7),mat(rd));nk.position.set(0,3.8,0);tr.add(nk)}
@@ -73,7 +75,7 @@ box(.2,.2,6.8,DARK,-3.3,7.15,-1,W);box(.2,.2,6.8,DARK,6.3,7.15,-1,W);
  MSG.forEach((t,i)=>{g.fillStyle=t.includes('···')?'#b8996a':'#f6e3b4';g.fillText(t,256,86+i*58)});
  
  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=8;
- const sg=new THREE.Group();sg.position.set(15.7,Y0-6.2,5.1);sg.rotation.y=.18;W.add(sg);
+ const sg=new THREE.Group();sg.position.set(17.6,ground(17.6,6.6),6.6);sg.rotation.y=.3;sg.scale.setScalar(1.4);W.add(sg);SIGN.g=sg;
  [-.95,.95].forEach(x=>{const p=new THREE.Mesh(new THREE.BoxGeometry(.16,1.9,.16),mat('#4b342a'));p.position.set(x,.95,0);sg.add(p)});
  const bd=new THREE.Mesh(new THREE.BoxGeometry(2.4,1.5,.1),mat('#6b4a36'));bd.position.set(0,1.45,0);sg.add(bd);
  const fc=new THREE.Mesh(new THREE.PlaneGeometry(2.3,1.44),new THREE.MeshBasicMaterial({map:tx}));fc.position.set(0,1.45,.056);sg.add(fc);

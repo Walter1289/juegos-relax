@@ -9,7 +9,7 @@ import {tex,toonGrad} from '../style.js';
 import {FU,DITHER} from '../fogfx.js';
 import {RT} from './core.js';
 const mists=[],clouds=[],banks=[];
-const RIV=z=>12+16*Math.sin(z*.021+.6)+8*Math.sin(z*.047),RY=-13.6;
+import {RIV,RY,ground,nearPath,buildTerrain,buildPath} from './terrain.js';
 function ridge(z,col,h,seed,y0){
   const r=rng(seed),sh=new THREE.Shape();sh.moveTo(-340,-60);
   for(let x=-340;x<=340;x+=16)sh.lineTo(x,h*(.45+.55*Math.abs(Math.sin(x*.011+seed)+.5*Math.sin(x*.027+seed*2)))/1.5+r()*h*.08);
@@ -30,30 +30,32 @@ function buildSky(){
 }
 function buildFarland(){
   ridge(-190,'#a38aa8',70,1,-24);ridge(-150,'#9a82a6',60,6,-24);ridge(-110,'#8f7ca4',46,5,-24);ridge(-78,'#82749f',34,9,-22);
-  const ground=new THREE.Mesh(new THREE.CircleGeometry(260,32).rotateX(-Math.PI/2),mat('#86906f'));ground.position.y=-14;scene.add(ground);
+  const floor=new THREE.Mesh(new THREE.CircleGeometry(260,32).rotateX(-Math.PI/2),mat('#86906f'));floor.position.y=-14.05;scene.add(floor);
   const PINEC=['#6d8466','#7a936f','#5f7a5d','#86a077'];
   /* bosque diverso: cedros (sugi), pinos, matsu de copa en nubes, arces rojos (momiji), ginkgos dorados, bambú, arbustos de azalea y matas de hierba */
   {const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),P=new THREE.Vector3(),c=new THREE.Color(),r=rng(77);
    const mk=(geo,n)=>{const m=new THREE.InstancedMesh(geo,mat('#ffffff'),n);m.count=0;scene.add(m);return m};
    const add=(m,x,y,z,sx,sy,sz,col,ry=0)=>{const i=m.count++;Q.setFromEuler(new THREE.Euler(0,ry,0));P.set(x,y,z);S.set(sx,sy,sz);M.compose(P,Q,S);m.setMatrixAt(i,M);m.setColorAt(i,c.set(col))};
-   const sugi=mk(new THREE.ConeGeometry(1.15,10,7).translate(0,5,0),260),pine=mk(new THREE.ConeGeometry(1.9,7.5,6).translate(0,3.8,0),300),
-     tr=mk(new THREE.CylinderGeometry(.18,.3,3.2,5).translate(0,1.6,0),260),pad=mk(new THREE.IcosahedronGeometry(1,1),700),
+   const sugi=mk(new THREE.ConeGeometry(1.15,10,7).translate(0,5,0),520),pine=mk(new THREE.ConeGeometry(1.9,7.5,6).translate(0,3.8,0),520),
+     tr=mk(new THREE.CylinderGeometry(.18,.3,3.2,5).translate(0,1.6,0),520),pad=mk(new THREE.IcosahedronGeometry(1,1),1500),
      bam=mk(new THREE.CylinderGeometry(.07,.09,8,5).translate(0,4,0),220),bleaf=mk(new THREE.IcosahedronGeometry(.9,0),260),
      bush=mk(new THREE.IcosahedronGeometry(1,1),240),grass=mk(new THREE.ConeGeometry(.35,1.3,4).translate(0,.65,0),420);
    const G={sugi:['#4f6b52','#5c7a5a','#476048'],pine:['#6d8466','#7a936f','#5f7a5d','#86a077'],matsu:['#4f7254','#5b8160','#44654a'],maple:['#d9573a','#e8793a','#c9432f','#f0a042'],gink:['#f0c44a','#e8b53a','#f6d46a'],bam:['#8fb06a','#9cc17a','#7fa05f'],bl:['#a6c47a','#94b56a'],bush:['#5f8a60','#6e9a68','#e58aa8','#d9708f','#f3a9c0'],gr:['#9bb070','#b3b87a','#86a068']};
    const pk=a=>a[(r()*a.length)|0];
-   for(let i=0;i<9000;i++){
-     const ang=r()*6.283,d=14+Math.sqrt(r())*150,x=Math.cos(ang)*d+2,z=Math.sin(ang)*d-12;
+   for(let i=0;i<12000;i++){
+     let x,z;if(i%3===0){x=-110+r()*95;z=-62+r()*95}else{const ang=r()*6.283,d=14+Math.sqrt(r())*150;x=Math.cos(ang)*d+2;z=Math.sin(ang)*d-12}
      if(x>-16&&x<17&&z>-10&&z<9)continue;
      if(Math.abs(x-RIV(z))<(10+Math.max(0,-z)*.16+6))continue;
-     const y=-14+Math.max(0,-z-30)*.05,k=r();
-     if(k<.2&&sugi.count<260){const sc=.8+r()*.8;add(sugi,x,y,z,sc*.8,sc*(.9+r()*.7),sc*.8,pk(G.sugi))}
-     else if(k<.38&&pine.count<300){const sc=.7+r()*1.1;add(pine,x,y,z,sc,sc*(.8+r()*.8),sc,pk(G.pine))}
-     else if(k<.5&&tr.count<260&&pad.count<690){const sc=.9+r()*.8;add(tr,x,y,z,sc,sc,sc,'#4b342a');const lean=(r()-.5)*1.2;
+     if(x>14&&x<50&&nearPath(x,z,4.2))continue;
+     if(x>-40&&x<-14&&z>6&&z<40&&r()<.9)continue;
+     const y=ground(x,z)+(ground(x,z)<-13.9?Math.max(0,-z-30)*.05:0),k=r();
+     if(k<.2&&sugi.count<520){const sc=.8+r()*.8;add(sugi,x,y,z,sc*.8,sc*(.9+r()*.7),sc*.8,pk(G.sugi))}
+     else if(k<.38&&pine.count<520){const sc=.7+r()*1.1;add(pine,x,y,z,sc,sc*(.8+r()*.8),sc,pk(G.pine))}
+     else if(k<.5&&tr.count<520&&pad.count<1490){const sc=.9+r()*.8;add(tr,x,y,z,sc,sc,sc,'#4b342a');const lean=(r()-.5)*1.2;
        [[0,3.6,0,2.2,.7],[lean*1.3,4.5,.7,1.7,.6],[-lean,5.3,-.5,1.3,.5]].forEach(([dx,dy,dz,rad,fl])=>add(pad,x+dx*sc,y+dy*sc,z+dz*sc,rad*sc,fl*sc,rad*sc*.9,pk(G.matsu)))}
-     else if(k<.64&&tr.count<260&&pad.count<695){const sc=.9+r()*.9;add(tr,x,y,z,sc,sc,sc,'#5a3d33');const col=pk(G.maple);
+     else if(k<.64&&tr.count<520&&pad.count<1495){const sc=.9+r()*.9;add(tr,x,y,z,sc,sc,sc,'#5a3d33');const col=pk(G.maple);
        [[0,4.2,0,1.9],[1.1,3.6,.5,1.4],[-1.0,3.7,-.4,1.3]].forEach(([dx,dy,dz,rad],j)=>add(pad,x+dx*sc,y+dy*sc,z+dz*sc,rad*sc,rad*sc*.85,rad*sc,j?pk(G.maple):col))}
-     else if(k<.7&&tr.count<260&&pad.count<695){const sc=.9+r()*.8;add(tr,x,y,z,sc,sc*1.1,sc,'#6b5040');
+     else if(k<.7&&tr.count<520&&pad.count<1495){const sc=.9+r()*.8;add(tr,x,y,z,sc,sc*1.1,sc,'#6b5040');
        [[0,4.8,0,1.4,2.2],[.5,6.3,.2,1.0,1.7]].forEach(([dx,dy,dz,rw,rh])=>add(pad,x+dx*sc,y+dy*sc,z+dz*sc,rw*sc,rh*sc,rw*sc,pk(G.gink)))}
      else if(k<.82&&bam.count<200){const n=6+((r()*8)|0);for(let q=0;q<n&&bam.count<220;q++){const bx=x+(r()-.5)*5,bz=z+(r()-.5)*5,h=.8+r()*.7;add(bam,bx,y,bz,1,h,1,pk(G.bam));
        if(bleaf.count<258){add(bleaf,bx,y+7.6*h,bz,1.1,.45,1.1,pk(G.bl))}}}
@@ -136,7 +138,7 @@ function buildCliff(){
   // rocas al pie
   {const r=rng(5);for(let i=0;i<8;i++){const s=1+r()*2;const m=new THREE.Mesh(new THREE.IcosahedronGeometry(s,0),mat('#7b6a70'));m.position.set(-14+r()*12,-13,6+r()*3);m.rotation.set(r()*3,r()*3,0);scene.add(m)}}
 }
-export function buildWorld(){buildSky();buildFarland();buildValley();buildCliff()}
+export function buildWorld(){buildSky();buildFarland();buildTerrain();buildPath();buildValley();buildCliff()}
 // niebla y nubes a la deriva
 const MOON=SUN.clone().normalize();
 export function worldStep(dt){
