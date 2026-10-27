@@ -4,6 +4,7 @@ import {Y0,rng,mkTex} from './util.js';
 import {mat,box} from './mats.js';
 import {scatter} from './blobs.js';
 import {mk,ASSET,CORAL,GREY,PITCH,slopeY} from './kit.js';
+import {buildInterior} from './interior.js';
 export function buildItemsA(){
 // --- piso ---
 {const it=mk('piso'),r=rng(21);
@@ -12,6 +13,7 @@ export function buildItemsA(){
    if(r()>.27){const L=7*(.55+.45*r());const m=box(.46,.14,L,['#a8978c','#9d8c82','#b0a095'][i%3],x,Y0-.07+(r()-.5)*.1,.5+(7-L)*(r()>.5?.5:-.5),it.b);m.rotation.y=(r()-.5)*.06;m.rotation.z=(r()-.5)*.05}}
  // tatami: esteras de igusa con orilla verde oscuro en el interior
  for(let ix=0;ix<4;ix++)for(let iz=0;iz<5;iz++){const x=-1.35+ix*1.9,z=-2.25+iz*.95;box(1.9,.05,.95,'#56633f',x,Y0+.03,z,it.f);box(1.78,.06,.83,'#d2c58e',x,Y0+.035,z,it.f)}
+ buildInterior(it.f);
  scatter(it,14,31,r=>[-3.5+r()*11,Y0+.04,-1+r()*4.6],.35,.75)}
 
 // --- barandal ---
