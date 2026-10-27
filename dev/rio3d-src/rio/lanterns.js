@@ -8,6 +8,8 @@ import {spr,glowTex,scene} from './core.js';
 import {spawnRipple} from './ripples.js';
 import {toast} from './hud.js';
 import {dayPending,dayTake,dayRand} from '../daylamp.js';
+import {parts,joiner} from '../lightmsg.js';
+import {lang} from '../i18n.js';
 /* ---------- linternas flotantes ---------- */
 const LSP=46;const lanterns=new Map(),pool=[];let collected=new Set();try{JSON.parse(localStorage.getItem('rio3d-coll')||'[]').forEach(i=>collected.add(i))}catch(e){}try{S.count=+localStorage.getItem('rio3d-lant')||0}catch(e){}
 export const lanternPos=k=>{const s=70+k*LSP+hash(k,1)*20,e=(hash(k,2)*2-1)*.6*hw(s);return[cx(s)+e,-s]};
@@ -41,7 +43,8 @@ export function collectLanterns(){
   for(const [k,o] of lanterns){if(o.userData.collecting)continue;const [x,z]=lanternPos(k);const dx=x-P.px,dz=z-P.pz;
     if(dx*dx+dz*dz<17){collected.add(k);S.count++;try{localStorage.setItem('rio3d-lant',String(S.count));localStorage.setItem('rio3d-coll',JSON.stringify([...collected]))}catch(e){}o.userData.collecting=true;
       const ang=Math.atan2(dx,-dz)-P.psi;A.lantern(Math.sin(ang));spawnRipple(x,z);el('n').textContent=S.count;
-      if(S.count===1)toast('Cada linterna es una nota. Sigue el río a tu ritmo.')}}
+      if(S.count<=8){const p=parts(),w=p[S.count-1];toast(({es:'La linterna trae una frase: «',en:'The lantern carries a phrase: “',ja:'ランタンの言葉：「'}[lang()]||'')+w+({es:'»',en:'”',ja:'」'}[lang()]||'')+({es:' · llévale tu luz a la cabaña',en:' · bring your light to the cabin',ja:' · 灯を小屋へ'}[lang()]||''))}
+      else if(S.count===1)toast('Cada linterna es una nota. Sigue el río a tu ritmo.')}}
 }
 
 /* Farolillo del día: uno dorado y más grande, una vez por día real (aparece delante de ti al empezar) */
