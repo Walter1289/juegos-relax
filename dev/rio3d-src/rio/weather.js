@@ -9,6 +9,7 @@ import {env,water,sky} from './env.js';
 import {spawnRipple} from './ripples.js';
 import {toast} from './hud.js';
 import {FU,DITHER} from '../fogfx.js';
+import {SU} from './skyfx.js';
 /* ====== AMBIENTE: niebla por tramos, llovizna, montañas ====== */
 // bancos de niebla bajos
 const MS=16,mists=[];for(let i=0;i<MS;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,transparent:true,opacity:0,depthWrite:false,fog:false,color:0xffffff}));m.scale.set(70,24,1);m.renderOrder=3;scene.add(m);mists.push(m)}
@@ -47,6 +48,7 @@ export function weather(dt,s){
   _c.set(0xe6e4ee).multiplyScalar(1-env.night*.7);scene.fog.color.copy(env.fog).lerp(_c,f*.55);
   const u=water.material.uniforms;u.fogN.value=scene.fog.near;u.fogF.value=scene.fog.far;u.fog.value.copy(scene.fog.color);
   sky.material.uniforms.hor.value.lerp(scene.fog.color,f*.8);sky.material.uniforms.top.value.lerp(scene.fog.color,f*.35);
+  SU.mist.value=f;SU.cover.value=clamp(.24+.16*Math.sin(P.t*.012)+W.rain*.55+f*.2);   // nubes: cielo más cubierto con llovizna y bruma
   hemi.intensity*=1-.22*W.rain;dir.intensity*=1-.45*W.rain;
   // niebla de calidad: parámetros compartidos por todos los materiales (ver fogfx.js)
   {const sd=sky.material.uniforms.sunDir.value;FU.sunDir.value.copy(sd).normalize();
