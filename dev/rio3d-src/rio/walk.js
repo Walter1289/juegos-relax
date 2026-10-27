@@ -11,13 +11,14 @@ import {toast} from './hud.js';
 import {lang} from '../i18n.js';
 import {camino} from '../lightmsg.js';
 const T3=(a)=>a[lang()]||a.es;
-let btn=null,back=null,W=null,wasStill=false,pt=[],cum=[],len=0,tempG=null,vel=0,yawOff=0,arrived=false,bobT=0,arrP=0;
+let btn=null,back=null,enter=null,W=null,wasStill=false,pt=[],cum=[],len=0,tempG=null,vel=0,yawOff=0,arrived=false,bobT=0,arrP=0;
 const V=new THREE.Vector3();
 S.walk=false;
 const mkBtn=(id,css)=>{const b=document.createElement('button');b.type='button';b.id=id;b.style.cssText='position:fixed;z-index:58;min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #8a6a40;background:rgba(60,38,26,.86);color:#fbf1e0;font:600 .88rem system-u'+'i,sans-serif;display:none;'+css;document.body.appendChild(b);return b};
 function init(){
   btn=mkBtn('walkBtn','left:50%;transform:translateX(-50%);bottom:max(150px,calc(env(safe-area-inset-bottom) + 142px));');
   back=mkBtn('walkBack','left:50%;transform:translateX(-50%);bottom:max(96px,calc(env(safe-area-inset-bottom) + 88px));');
+  enter=mkBtn('walkEnter','left:50%;transform:translateX(-50%);bottom:max(204px,calc(env(safe-area-inset-bottom) + 196px));background:rgba(120,70,40,.92);');enter.onclick=()=>{location.href='../cabana3d/'};
   btn.onclick=start;back.onclick=stop;
 }
 /* temple con camino cercano (en coordenadas del río) */
@@ -39,6 +40,7 @@ export function walkStep(dt){
   tempG=show?templeNear(P.dist||-P.pz):null;
   btn.style.display=tempG?'block':'none';if(tempG)btn.textContent=T3({es:'Caminar hacia la colina',en:'Walk to the hill',ja:'丘へ歩く'});
   back.style.display=S.walk?'block':'none';if(S.walk)back.textContent=T3({es:'Volver a la canoa',en:'Back to the canoe',ja:'カヌーに戻る'});
+  enter.style.display=S.walk&&arrived?'block':'none';if(S.walk&&arrived)enter.textContent=T3({es:'Entrar a la cabaña',en:'Enter the cabin',ja:'小屋に入る'});
   if(!S.walk||!W)return;
   const hold=P.hold||P.key.up,go=hold&&!arrived;
   vel+=((go?2.3:0)-vel)*Math.min(1,dt*3);W.u=Math.min(1,W.u+vel*dt/len);

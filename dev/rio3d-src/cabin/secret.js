@@ -4,7 +4,7 @@ import {scene,canvas,cam} from './core.js';
 import {A} from '../audio.js';
 import {Y0,spr,glowTex} from './util.js';
 import {mat} from './mats.js';
-import {secreto,descubiertos} from '../lightmsg.js';
+import {secreto,descubiertos,ceremonias} from '../lightmsg.js';
 export const SPX=-8.8,SPZ=.3,SPR=5;
 let ring=null,boats=[],surge=0,ang=0,lastT=null,wake=[],waterM=null;
 export function buildSecret(){
@@ -20,14 +20,15 @@ export function buildSecret(){
   const wt=new THREE.CanvasTexture(wc);wt.colorSpace=THREE.SRGBColorSpace;
   const water=new THREE.Mesh(new THREE.RingGeometry(1.8,3.3,48,1),new THREE.MeshBasicMaterial({map:wt,transparent:true,opacity:.92}));water.rotation.x=-Math.PI/2;water.position.y=.31;G.add(water);waterM=water;
   G.add(M(new THREE.CylinderGeometry(1.75,1.9,.5,32),mat('#7fa06a'),0,.4,0));
-  const col=(c,on)=>on?c:'#8d8b94',lit=(g,c,x,y,z,s=1.1)=>{const L=spr(glowTex,c,s,.5,true);L.position.set(x,y,z);g.add(L)};
+  const col=(c,on)=>c,lit=(g,c,x,y,z,s=1.1)=>{const L=spr(glowTex,c,s,.5,true);L.position.set(x,y,z);g.add(L)};
   /* castillo de la Garza Blanca en la isla (siempre; es el destino del río) */
-  {const on=found.has(10),c=new THREE.Group();c.position.y=.65;G.add(c);
+  if(found.has(10)){const on=true,c=new THREE.Group();c.position.y=.65;G.add(c);
    [[1.05,.42,0],[.78,.4,.42],[.55,.36,.8]].forEach(([w,h,y],i)=>{c.add(M(new THREE.BoxGeometry(w,h,w),mat(col('#efe6d2',on)),0,y+h/2,0));c.add(M(new THREE.ConeGeometry(w*.82,.26,4),mat(col('#4f4a58',on)),0,y+h+.1,0)).rotation.y=Math.PI/4;c.children[c.children.length-1].rotation.y=Math.PI/4});
    if(on)lit(c,0xffd9a0,0,.7,.2,1.6)}
   const types=[0,1,2,3,4,5,6,7,8,9];
   types.forEach((t,i)=>{
-    const on=found.has(t),a=-Math.PI/2+i/10*Math.PI*2,r=t===9?2.5:(t===0?2.55:3.75),x=Math.cos(a)*r,z=Math.sin(a)*r;
+    if(!found.has(t))return;
+    const on=true,a=-Math.PI/2+i/10*Math.PI*2,r=t===9?2.5:(t===0?2.55:3.75),x=Math.cos(a)*r,z=Math.sin(a)*r;
     const g=new THREE.Group();g.position.set(x,t===9||t===0?.31:.3,z);g.rotation.y=-a-Math.PI/2;G.add(g);
     const m=(c)=>mat(col(c,on));
     if(t===0){/* puente arqueado sobre el anillo de agua, hacia la isla */
@@ -58,7 +59,7 @@ function bindTap(){
   canvas.addEventListener('pointerdown',e=>{dn={x:e.clientX,y:e.clientY,t:performance.now()}});
   canvas.addEventListener('pointerup',e=>{if(!dn||!waterM)return;const mv=Math.hypot(e.clientX-dn.x,e.clientY-dn.y),dt=performance.now()-dn.t;dn=null;if(mv>8||dt>450)return;
     const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);
-    const h=ray.intersectObject(waterM,false)[0];if(!h)return;
+    if(ceremonias()<1)return;const h=ray.intersectObject(waterM,false)[0];if(!h)return;
     surge=Math.min(1.4,surge+.8);try{A.chime(0,2)}catch(x){}try{navigator.vibrate&&navigator.vibrate(12)}catch(x){}
     const g=new THREE.Mesh(new THREE.RingGeometry(.08,.14,24),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.7,side:THREE.DoubleSide,depthWrite:false}));
     g.rotation.x=-Math.PI/2;g.position.copy(waterM.parent.worldToLocal(h.point.clone()));g.position.y=.33;waterM.parent.add(g);wake.push({g,a:0})});

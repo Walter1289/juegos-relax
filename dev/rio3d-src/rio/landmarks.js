@@ -14,8 +14,12 @@ import {castleStep} from './castle.js';
 import {env} from './env.js';
 import {taskTick} from '../tasks.js';
 import {albumSee} from '../album.js';
-import {disponibles,camino,CAMINO,liberar} from '../lightmsg.js';
+import {disponibles,camino,UMBRAL,ceremonia,ceremonias,lapK,setLapK,parts,joiner} from '../lightmsg.js';
 import {lang} from '../i18n.js';
+import {startCeremony} from './ceremony.js';
+import {NL} from './world.js';
+import {el} from './util.js';
+const T3=a=>a[lang()]||a.es;
 const dragons=new Map();try{window.__dragons=dragons}catch(e){}
 function updateDragons(ps,k0,k1){
   for(const [k,g] of dragons){const s=g.userData.dragon.s;if(s<ps-140||s>ps+380){scene.remove(g);disposeLM(g);dragons.delete(k)}}
@@ -27,9 +31,23 @@ export function updateLandmarks(ps){
   for(const [k,g] of lmMade)if(k<k0||k>k1){if(g.parent)scene.remove(g);disposeLM(g);lmMade.delete(k)}
   for(let k=k0;k<=k1;k++){let g=lmMade.get(k);if(!g){g=buildLM(k);lmMade.set(k,g)}if(!g.parent)scene.add(g);
     {const t=lmType(k);if(lmPos(k)-ps<(t===2?70:t===10?130:55)&&ps-lmPos(k)<25&&(!lmFound.has(t)||(!S.X.hasSnap(t)&&!retaken.has(t)))){const first=!lmFound.has(t);lmFound.add(t);retaken.add(t);lmSeen.add(k);startCine(k);if(t===4)albumSee('garza');if(t===9)albumSee('loto');if(first){toast('Descubriste: '+LM[t]);try{A.chime(0,k%5)}catch(e){}saveFound();updateDiary(ps);S.X.found(t)}}}}
-  if(!camino()&&disponibles()>=CAMINO){for(let k=k0;k<=k1;k++){if(lmType(k)!==5||Math.abs(lmPos(k)-ps)>30||lmPos(k)-ps<-20)continue;
-    liberar();setCaminoOn(true);const g0=lmMade.get(k);if(g0){if(g0.parent)scene.remove(g0);disposeLM(g0);lmMade.delete(k)}
-    toast(({es:'Liberas 25 luces en el templo: un camino se enciende hacia la colina',en:'You release 25 lights at the temple: a path lights up toward the hill',ja:'寺で25の灯を放つと、丘へ続く道がともりました'}[lang()])||'');try{A.chime(0,1);setTimeout(()=>A.chime(0,3),400)}catch(e){}break}}
+  /* vuelta al río: la primera vez que llegas al templo empieza tu vuelta; al regresar a un templo once lugares después, se celebra la ceremonia */
+  for(let k=k0;k<=k1;k++){if(lmType(k)!==5||lmPos(k)-ps>30||ps-lmPos(k)>20||window.__cerK===k)continue;
+    const lk=lapK();
+    if(lk<0){window.__cerK=k;setLapK(k);toast(T3({es:'Aquí empieza tu vuelta al río. Vuelve a este templo tras recorrerlo entero y tus linternas se liberarán en una ceremonia',en:'Your lap of the river begins here. Return to this temple after travelling it all and your lanterns will be released in a ceremony',ja:'ここから川の一周が始まります。一周して寺に戻ると、ランタンは儀式で放たれます'}));continue}
+    if(k<lk+NL)continue;
+    window.__cerK=k;setLapK(k);const n=disponibles();
+    if(n<1){toast(T3({es:'Vuelta completa. Sin linternas que liberar: la próxima vuelta llevará más luz',en:'Lap complete. No lanterns to release: the next lap will carry more light',ja:'一周しました。放つランタンがありません。次の一周は、もっと灯を運びましょう'}));continue}
+    const abre=n>=UMBRAL&&!camino();ceremonia(n,abre);S.count=0;try{el('n').textContent=0}catch(e){}
+    startCeremony(n);
+    const cer=ceremonias(),p=parts(),fr=cer<=4?p[(cer-1)*2]+joiner()+p[(cer-1)*2+1]:'';
+    let msg=T3({es:'Ceremonia de liberación: '+n+' linternas suben al cielo',en:'Release ceremony: '+n+' lanterns rise into the sky',ja:'放灯の儀式：'+n+'のランタンが空へのぼります'});
+    if(fr&&(abre||camino()))msg+=T3({es:' · el cartel de la cabaña descifra: «'+fr+'»',en:' · the cabin sign deciphers: “'+fr+'”',ja:' · 小屋の看板が読み解いた言葉：「'+fr+'」'});
+    toast(msg);
+    if(abre){setCaminoOn(true);const g0=lmMade.get(k);if(g0){if(g0.parent)scene.remove(g0);disposeLM(g0);lmMade.delete(k)}
+      setTimeout(()=>toast(T3({es:'33 luces, como los 33 templos del peregrinaje de Kannon: se abrió un camino hacia la colina',en:'33 lights, like the 33 temples of the Kannon pilgrimage: a path opened toward the hill',ja:'33の灯。観音霊場三十三所にちなみ、丘へ続く道が開きました'})),7500)}
+    else if(!camino())setTimeout(()=>toast(T3({es:'Algo despertará si llegas con 33 luces en una misma vuelta, como los 33 templos de Kannon',en:'Something will awaken if you arrive with 33 lights in one lap, like the 33 temples of Kannon',ja:'一周で33の灯を携えて戻ると、何かが目覚めます。観音霊場三十三所にちなんで'})),7500)
+    break}
   {let nt=null;for(let k=k0;k<=k1;k++){if(Math.abs(lmPos(k)-ps)<60){nt=lmType(k);break}}taskTick(nt,()=>{try{A.chime(0,2)}catch(e){}})}
   for(const [,g] of lmMade){if(g.userData.job){const t0=performance.now();let r;do{r=g.userData.job.next()}while(!r.done&&performance.now()-t0<5);if(r.done){g.userData.job=null;optimizeLM(g)}}else if(g.userData.cas)castleStep(g,env.night,.016)}
   for(const s of lmG){s.material.opacity=s.userData.base*(.3+.7*S.glowK)}glowMat.uniforms.k.value=S.glowK;

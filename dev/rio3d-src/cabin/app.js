@@ -24,7 +24,7 @@ import {cat,makeCat,catStep} from './cat.js';
 import {makeRing,bindInput,isIdle,handStep,pick} from './input.js';
 import {attempt,askReset} from './actions.js';
 import {initHabitar,habStep,resetHab,addHabTexts,addStoryTexts,addSeasonTexts} from './habitar.js';
-import {luces,offered,setOffered} from '../lightmsg.js';
+import {liberadas as luces,offered,setOffered} from '../lightmsg.js';
 import {lang} from '../i18n.js';
 import {star,fest,initSpecial,shootStar,starStep,startFest,festStep,fl2} from './special.js';
 
@@ -53,7 +53,7 @@ PZ.ctx=()=>A.ctx;PZ.started=()=>RT.started;
 bindHud(askReset);
 el('go').onclick=()=>{try{A.init();A.resume();A.rain(RT.rainOn);A.setMood(progress(),1)}catch(e){}el('start').hidden=true;RT.started=true;
   {const n=luces(),o=offered();if(n>o){setOffered(n);const d=n-o;setTimeout(()=>toast(({es:'La cabaña recibió '+d+(d>1?' luces':' luz')+' del río',en:'The cabin received '+d+(d>1?' lights':' light')+' from the river',ja:'小屋は川から'+d+'つの灯を受け取りました'}[lang()])||''),1800)}}
-  if(secreto()&&!secretoVisto()){setSecretoVisto();setTimeout(()=>toast(({es:'El cartel se completó: algo despertó en el jardín del acantilado',en:'The sign is complete: something woke in the cliff garden',ja:'看板が完成しました：崖の庭で何かが目覚めました'}[lang()])||''),4800)}
+  if(secreto()&&!secretoVisto()){setSecretoVisto();setTimeout(()=>toast(({es:'Tu llegada despertó un estanque en el jardín del acantilado: la maqueta del río',en:'Your arrival woke a pond in the cliff garden: a model of the river',ja:'あなたの到着で崖の庭に池が目覚めました：川の模型です'}[lang()])||''),4800)}
   signStart();
   if(doneCount()===ITEMS.length)fest.armT=RT.T+3;
   setTimeout(()=>{el('hint').style.opacity=0},12000);};

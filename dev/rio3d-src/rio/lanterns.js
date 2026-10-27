@@ -8,7 +8,7 @@ import {spr,glowTex,scene} from './core.js';
 import {spawnRipple} from './ripples.js';
 import {toast} from './hud.js';
 import {dayPending,dayTake,dayRand} from '../daylamp.js';
-import {parts,disponibles,camino,CAMINO} from '../lightmsg.js';
+import {camino,UMBRAL} from '../lightmsg.js';
 import {lang} from '../i18n.js';
 /* ---------- linternas flotantes ---------- */
 const LSP=38;const lanterns=new Map(),pool=[];let collected=new Set();try{JSON.parse(localStorage.getItem('rio3d-coll')||'[]').forEach(i=>collected.add(i))}catch(e){}try{S.count=+localStorage.getItem('rio3d-lant')||0}catch(e){}
@@ -25,7 +25,7 @@ export function mkLantern(){
 }
 let hint0=false;
 export function updateLanterns(t,ps){
-  if(!hint0&&S.started&&S.count===0&&t>40){hint0=true;toast(({es:'Pasa cerca de una linterna del agua para recogerla: guardan luz para la cabaña',en:'Pass close to a lantern on the water to collect it: they hold light for the cabin',ja:'水面のランタンに近づくと集められます。小屋のための灯です'}[lang()])||'')}
+  if(!hint0&&S.started&&S.count===0&&t>40){hint0=true;toast(({es:'Pasa cerca de una linterna del agua para recogerla: cada una guarda un poco de luz',en:'Pass close to a lantern on the water to collect it: each one holds a little light',ja:'水面のランタンに近づくと集められます。ひとつひとつが小さな灯を宿しています'}[lang()])||'')}
   const k0=Math.max(0,Math.floor((ps-120)/LSP)),k1=Math.floor((ps+320)/LSP);
   for(const [k,o] of lanterns)if(k<k0||k>k1){scene.remove(o);pool.push(o);lanterns.delete(k)}
   for(let k=k0;k<=k1;k++){
@@ -45,10 +45,9 @@ export function collectLanterns(){
   for(const [k,o] of lanterns){if(o.userData.collecting)continue;const [x,z]=lanternPos(k);const dx=x-P.px,dz=z-P.pz;
     if(dx*dx+dz*dz<27){collected.add(k);S.count++;try{localStorage.setItem('rio3d-lant',String(S.count));localStorage.setItem('rio3d-coll',JSON.stringify([...collected]))}catch(e){}o.userData.collecting=true;
       const ang=Math.atan2(dx,-dz)-P.psi;A.lantern(Math.sin(ang));spawnRipple(x,z);el('n').textContent=S.count;
-      if(S.count<=32&&S.count%4===0){const p=parts(),w=p[S.count/4-1],L=lang();toast(({es:'La linterna trae una frase: «',en:'The lantern carries a phrase: “',ja:'ランタンの言葉：「'}[L]||'')+w+({es:'»',en:'”',ja:'」'}[L]||'')+({es:' · el cartel de la cabaña la recordará',en:' · the cabin sign will remember it',ja:' · 小屋の看板が覚えています'}[L]||''))}
-      else if(disponibles()>=CAMINO&&!camino()&&!window.__hint25){window.__hint25=1;toast(({es:'Reuniste 25 luces: libéralas en el templo de la campana',en:'You gathered 25 lights: release them at the bell temple',ja:'25の灯が集まりました：鐘の寺で放しましょう'}[lang()])||'')}
+      if(S.count===UMBRAL&&!camino()){toast(({es:'Llevas 33 luces, como los 33 templos de Kannon. Cierra tu vuelta en el templo de la campana',en:'You carry 33 lights, like the 33 temples of Kannon. Close your lap at the bell temple',ja:'33の灯を携えました。観音霊場三十三所のように。鐘の寺で一周を締めくくりましょう'}[lang()])||'')}
       else if(S.count===1)toast('Cada linterna es una nota. Sigue el río a tu ritmo.')
-      else if(S.count===3)toast(({es:'Las linternas guardan luz: llévala a la cabaña del acantilado, su cartel te hablará',en:'Lanterns hold light: bring it to the cliff cabin, its sign will speak to you',ja:'ランタンは灯を宿します。崖の小屋へ運ぶと、看板が語りかけます'}[lang()])||'')}}
+      else if(S.count===3)toast(({es:'Las linternas guardan luz. Reúnelas: quizá tengan un destino',en:'Lanterns hold light. Gather them: perhaps they have a destination',ja:'ランタンは灯を宿します。集めてみましょう。行き先があるかもしれません'}[lang()])||'')}}
 }
 
 /* Farolillo del día: uno dorado y más grande, una vez por día real (aparece delante de ti al empezar) */

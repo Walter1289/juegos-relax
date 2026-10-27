@@ -82,8 +82,7 @@ small{color:var(--muted);opacity:.8}
         n.childNodes.forEach(walk);
       };
       walk(document.body);
-      new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')walk(m.target);else m.addedNodes.forEach(walk)}}).observe(document.body,{childList:true,subtree:true,characterData:true});
-    },
+        },
     /* háptica suave: vibración del navegador donde exista (iPadOS no la expone a las webs) */
     hap(p){
       if(ls.get('rio3d-hap','1')==='0')return;
@@ -151,6 +150,18 @@ UX.init();
 <script>
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(r=>{
   navigator.serviceWorker.ready.then(()=>{const i=document.getElementById('inst');i.hidden=false;i.textContent='Listo para usarse sin conexión. Para instalarlo: en el menú del navegador elige «Añadir a pantalla de inicio» o «Instalar».'})}).catch(()=>{});
+</script>
+<script>
+/* La Cabaña 3D se descubre desde el Río: al cerrar una vuelta completa con 33 luces se abre el camino. */
+(function(){try{
+  var ok=localStorage.getItem('rio3d-camino')==='1';if(ok)return;
+  var a=document.querySelector('a.card[href="cabana3d/"]');if(!a)return;
+  var L=localStorage.getItem('rio3d-lang')||'es';var T={es:['Cabaña 3D','Aún por descubrir. Dicen que el río guarda un camino hacia ella.','Bloqueada'],en:['3D Cabin','Yet to be discovered. They say the river keeps a path to it.','Locked'],ja:['3D小屋','まだ見つかっていません。川にはそこへ続く道があるそうです。','ロック中']}[L]||null;
+  if(!T)return;a.setAttribute('href','#');a.setAttribute('aria-disabled','true');a.style.opacity='.55';a.style.cursor='default';
+  a.querySelector('b').textContent=T[0];a.querySelector('span').textContent=T[1];a.querySelector('i').textContent='🔒 '+T[2];
+  a.addEventListener('click',function(e){e.preventDefault()});
+  new MutationObserver(function(){var b=a.querySelector('b');if(b&&b.textContent!==T[0]&&L==='es'){b.textContent=T[0];a.querySelector('span').textContent=T[1];a.querySelector('i').textContent='🔒 '+T[2]}}).observe(a,{subtree:true,childList:true,characterData:true});
+}catch(e){}})();
 </script>
 </body>
 </html>

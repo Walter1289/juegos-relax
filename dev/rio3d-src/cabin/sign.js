@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import {canvas,cam,RT} from './core.js';
 import {C} from './camera.js';
 import {lang} from '../i18n.js';
-import {lines,found,luces} from '../lightmsg.js';
+import {lines,found,ceremonias,liberadas} from '../lightmsg.js';
 export const SIGN={g:null};
 const T=a=>a[lang()]||a.es;
 let panel=null,btn=null;
@@ -16,8 +16,8 @@ function open(){
   if(!panel)return;focus();setSeen(found());if(btn)btn.style.outline='none';
   const n=found(),L=lines(),done=n>=8;
   panel.querySelector('.lines').innerHTML=L.map(t=>'<div>'+t+'</div>').join('');
-  panel.querySelector('.meta').textContent=T({es:'Fragmentos descifrados: '+n+' / 8 · luces del río: '+luces(),en:'Fragments deciphered: '+n+' / 8 · river lights: '+luces(),ja:'解読した断片：'+n+' / 8 ・川の灯：'+luces()});
-  panel.querySelector('.hint').textContent=done?T({es:'El cartel está completo. Algo despertó en el jardín del acantilado.',en:'The sign is complete. Something woke in the cliff garden.',ja:'看板が完成しました。崖の庭で何かが目覚めました。'}):T({es:'Cada 4 linternas que recoges en el Río descifran un fragmento. Sigue el agua y deja que te lleve.',en:'Every 4 lanterns you collect in the River deciphers a fragment. Follow the water and let it carry you.',ja:'川でランタンを4つ集めるごとに断片がひとつ解読されます。水の流れに身をまかせましょう。'});
+  panel.querySelector('.meta').textContent=T({es:'Fragmentos descifrados: '+n+' / 8 · ceremonias: '+ceremonias()+' · luces liberadas: '+liberadas(),en:'Fragments deciphered: '+n+' / 8 · ceremonies: '+ceremonias()+' · lights released: '+liberadas(),ja:'解読した断片：'+n+' / 8 ・儀式：'+ceremonias()+' ・放った灯：'+liberadas()});
+  panel.querySelector('.hint').textContent=done?T({es:'El cartel está completo. Gracias por cada luz que liberaste al cielo.',en:'The sign is complete. Thank you for every light you released into the sky.',ja:'看板が完成しました。空へ放ったすべての灯に感謝します。'}):T({es:'Cada vuelta completa al Río termina con una ceremonia de liberación que descifra una línea. Sigue el agua y deja que te lleve.',en:'Each full lap of the River ends with a release ceremony that deciphers one line. Follow the water and let it carry you.',ja:'川を一周するたびに放灯の儀式が行われ、一行が解読されます。水の流れに身をまかせましょう。'});
   panel.style.display='flex';
 }
 export function initSign(toast){
@@ -37,5 +37,5 @@ export function initSign(toast){
     if(ray.intersectObject(SIGN.g,true).length)open()});
   /* al empezar: avisa si hay frases nuevas (sin mover la cámara); resalta el botón con un contorno fijo */
   return ()=>{if(signNew()){btn.style.outline='2px solid #ffc27a';btn.style.outlineOffset='2px';setTimeout(()=>toast(T({es:'El cartel de la entrada descifró algo nuevo · toca «Cartel» para leerlo',en:'The entrance sign deciphered something new · tap “Sign” to read it',ja:'入口の看板に新しい言葉が現れました ・「看板」をタップして読みましょう'})),3200)}
-    else if(luces()===0)setTimeout(()=>toast(T({es:'Junto a la entrada hay un cartel. Toca «Cartel» para leerlo',en:'There is a sign by the entrance. Tap “Sign” to read it',ja:'入口のそばに看板があります。「看板」をタップして読みましょう'})),3600)}
+    else if(ceremonias()===0)setTimeout(()=>toast(T({es:'Junto a la entrada hay un cartel. Toca «Cartel» para leerlo',en:'There is a sign by the entrance. Tap “Sign” to read it',ja:'入口のそばに看板があります。「看板」をタップして読みましょう'})),3600)}
 }
