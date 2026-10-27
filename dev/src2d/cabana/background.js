@@ -76,6 +76,10 @@ export function buildBackground(){
   g.strokeStyle='#5a3d2e';g.lineWidth=5;line(g,222,552,6,712);
   g.fillStyle='#9a3d2e';[1,4,7].forEach(i=>{const x=215-i*24,y=556+i*19;g.fillRect(x-2,y-60,4,60)});
   g.strokeStyle='rgba(190,170,140,.5)';g.lineWidth=2;line(g,191,495,119,609);line(g,119,609,47,666);
+  // cartel de madera junto a la escalera: un mensaje que se descubrirá más adelante
+  {const x=150,y=612;g.fillStyle='#4b342a';g.fillRect(x-24,y-2,5,26);g.fillRect(x+19,y-2,5,26);g.fillStyle='#6b4a36';rr(g,x-30,y-30,60,32,3);g.fill();
+   g.strokeStyle='#3b261b';g.lineWidth=2;g.strokeRect(x-28,y-28,56,28);g.fillStyle='#e9d3a3';g.font='700 22px serif';g.textAlign='center';g.fillText('灯',x,y-6);g.textAlign='left';
+   g.fillStyle='#3b2a24';g.fillRect(x-34,y-34,68,5)}
   // pilotes de madera oscura bajo la terraza y farol de piedra (tōrō)
   g.fillStyle='#4b342a';[820,895].forEach(x=>g.fillRect(x-5,566,10,150));g.strokeStyle='#4b342a';g.lineWidth=5;line(g,820,640,895,600);line(g,820,600,895,640);
   {const x=862,y=520;g.fillStyle='#aaa59d';g.fillRect(x-16,y-6,32,6);g.fillRect(x-5,y-40,10,34);g.fillRect(x-13,y-48,26,8);

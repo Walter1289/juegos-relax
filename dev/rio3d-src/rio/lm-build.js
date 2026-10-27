@@ -104,22 +104,70 @@ function buildLM0(k){
     const rc=(c)=>MT(c);for(let i=0;i<22;i++){const rr=3+hash(k,i)*3.5,rx=side*(7.8+hash(k,i+5)*9),ry=hash(k,i+9)*15+(rx*side<8?3:0),rz=(hash(k,i+13)-.5)*17;const r=new THREE.Mesh(new THREE.IcosahedronGeometry(rr,1),rc(i%3?0x7a8a7e:0x6c8f78));r.position.set(rx,ry,rz);r.scale.y=1.2;h.add(r);
       const mo=new THREE.Mesh(new THREE.IcosahedronGeometry(rr*.75,1),rc(0x7fb36a));mo.position.set(rx,ry+rr*.65,rz);mo.scale.set(1.05,.45,1.05);h.add(mo)}
     for(let i=0;i<10;i++){const rr=1+hash(k,i+60)*1.2,r=new THREE.Mesh(new THREE.IcosahedronGeometry(rr,0),rc(0x7a8a7e));r.position.set(-side*(.5+hash(k,i+70)*3),rr*.4,(hash(k,i+80)-.5)*12);h.add(r)}
-    const fw=new THREE.Mesh(new THREE.PlaneGeometry(7,19,1,1),fallMat);fw.position.set(-side*.5,9.6,0);fw.rotation.y=Math.PI/2;h.add(fw);
+    /* caída escalonada en tres repisas de roca, con estratos, helechos y una soga sagrada */
+    [[19,13.4,-.2,3.6],[13.4,7,-1.5,5.6],[7,0,-2.9,7.2]].forEach(([ya,yb,xo,wd],i)=>{
+      const f=new THREE.Mesh(new THREE.PlaneGeometry(wd,ya-yb,1,1),fallMat);f.position.set(-side*(.5+i*1.35),(ya+yb)/2,0);f.rotation.y=Math.PI/2;h.add(f);
+      const lg=bx(h,2.6,.9,wd+1.6,i%2?0x7a8a7e:0x6c8f78,-side*(.5+i*1.35-1.1),yb-.2,0);lg.scale.y=1;
+      const mo=bx(h,2.4,.22,wd+1.2,0x7fb36a,-side*(.5+i*1.35-1.1),yb+.32,0)});
+    for(let i=0;i<7;i++){const f=new THREE.Mesh(new THREE.ConeGeometry(.28,1.1+hash(k,i+120)*.8,4),MT(i%2?0x6fa86a:0x8cc27a));f.position.set(side*(5.5+hash(k,i+130)*7),3+hash(k,i+140)*12,(hash(k,i+150)-.5)*14);f.rotation.z=(hash(k,i)-.5)*.8;h.add(f)}
+    {const br=new THREE.Mesh(new THREE.IcosahedronGeometry(2.2,1),MT(0x77857a));br.position.set(-side*7.2,1.4,3.6);br.scale.y=1.15;h.add(br);
+     const rp=new THREE.Mesh(new THREE.TorusGeometry(2.3,.1,5,16),MT(0xe6d8a0));rp.position.set(-side*7.2,1.9,3.6);rp.rotation.x=Math.PI/2;h.add(rp);
+     for(let i=0;i<6;i++){const sh=new THREE.Mesh(new THREE.PlaneGeometry(.34,.8),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,side:THREE.DoubleSide}));const an=i/6*6.283;sh.position.set(-side*7.2+Math.cos(an)*2.3,1.45,3.6+Math.sin(an)*2.3);h.add(sh)}}
+    for(let i=0;i<5;i++){const st=cyl(h,.55+hash(k,i+160)*.25,.6,.22,0x9d9c9a,-side*(2+i*1.7),.12,-3.4+i*.4,8)}
+    for(let i=0;i<4;i++){const ft=spr(0xffffff,4);ft.material.blending=THREE.NormalBlending;ft.material.opacity=.55;ft.position.set(-side*(3+i*1.3),.5,(hash(k,i+170)-.5)*6);h.add(ft)}
     const fw2=new THREE.Mesh(new THREE.PlaneGeometry(3,14,1,1),fallMat);fw2.position.set(-side*.7,7,-5.6);fw2.rotation.y=Math.PI/2;fw2.rotation.z=.04;h.add(fw2);
     const pool=new THREE.Mesh(new THREE.CircleGeometry(6.5,24).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xcfeef2,transparent:true,opacity:.6,depthWrite:false}));pool.position.set(-side*3.6,.1,0);h.add(pool);
     const st=new THREE.Mesh(new THREE.PlaneGeometry(3.4,4.6).rotateX(-Math.PI/2),fallMat);st.rotation.y=side>0?Math.PI/2:-Math.PI/2;st.position.set(-side*3.4,.12,0);h.add(st);
     for(let i=0;i<6;i++){const f=spr(0xffffff,5+hash(k,i)*3);f.material.blending=THREE.NormalBlending;f.material.opacity=.5;f.position.set(-side*(1+hash(k,i+3)*4),.5+hash(k,i)*.8,(hash(k,i+9)-.5)*7);h.add(f)}
     const mist=spr(0xffffff,26);mist.material.blending=THREE.NormalBlending;mist.material.opacity=.5;mist.position.set(-side*3,4,0);h.add(mist)}
   else if(type===7){signs(g,gy,hwv,'茶',true,'#a9453a');
-    const lx=side*(hwv-3),h=new THREE.Group();h.position.set(lx,0,0);g.add(h);
-    for(const x of[-2.4,2.4])for(const z of[-2,2])cyl(h,.12,.12,3,dark,x,-.2,z,5);
-    bx(h,6,.3,5,wood,0,1.3,0);bx(h,4.6,2.4,3.6,0xe8d3b6,0,2.6,0);bx(h,4.8,.2,3.8,0x5b4a4a,0,3.9,0);bx(h,4.7,.15,3.7,0x5b4a4a,0,1.45,0);
-    const r=new THREE.Mesh(new THREE.ConeGeometry(4.6,2,4),MT(0x8f6a5f));r.rotation.y=Math.PI/4;r.position.y=4.8;h.add(r);
-    bx(h,1.2,1.1,.1,0xffe0a0,0,2.7,1.85).material=new THREE.MeshBasicMaterial({color:0xffe0a0});gl(h,0xffc77a,4,0,2.7,2.1,.9);
+    const lx=side*(hwv-3),h=new THREE.Group();h.position.set(lx,0,0);g.add(h);g.userData.lx=lx;
+    const pl={map:tex('plank')},pw=0x4b342a;
+    /* cimiento de piedra, pilotes y engawa (terraza) con barandilla y escalones */
+    bx(h,7.4,.6,6.4,0x9d9c9a,0,.1,0);for(const x of[-3.2,0,3.2])for(const z of[-2.7,2.7])cyl(h,.14,.16,1.2,pw,x,.4,z,6);
+    bx(h,7.2,.26,6.2,wood,0,1.15,0,pl);
+    for(const sd of[-1,1]){bx(h,.14,.12,6,0xb5473a,sd*3.5,1.95,0);bx(h,7,.12,.14,0xb5473a,0,1.95,sd*3);for(let i=-3;i<=3;i+=1.5){bx(h,.1,.8,.1,0xb5473a,sd*3.5,1.55,i);}}
+    for(let i=0;i<3;i++)bx(h,2.6-i*.1,.28,.7,0xaaa69d,0,.85-i*.38,3.9+i*.62);
+    /* edificio: base de yeso, entramado oscuro y shoji con celosía */
+    bx(h,5.2,2.5,4.2,0xe8d3b6,0,2.65,-.3);for(const x of[-2.6,-1.3,0,1.3,2.6])bx(h,.18,2.5,.18,pw,x,2.65,1.85);
+    bx(h,5.3,.2,.2,pw,0,3.85,1.85);bx(h,5.3,.14,.2,pw,0,1.5,1.85);
+    for(const x of[-1.95,1.95]){bx(h,1.0,1.5,.08,0xfff0d0,x,2.5,1.93).material=new THREE.MeshBasicMaterial({color:0xffe8b8});for(const q of[-.25,.25]){bx(h,1.0,.05,.1,pw,x,2.5+q*2,1.97);bx(h,.05,1.5,.1,pw,x+q*2,2.5,1.97)}}
+    for(const z of[-1.1,.5])for(const sd of[-1,1])bx(h,.08,1.2,1.0,0xfff0d0,sd*2.62,2.6,z).material=new THREE.MeshBasicMaterial({color:0xffe8b8});
+    /* tejado de dos aleros */
+    bx(h,6.1,.14,5.1,0x4b3b3f,0,3.95,-.3);const r1=new THREE.Mesh(new THREE.ConeGeometry(4.9,1.5,4),MT(0x5b4a4f));r1.rotation.y=Math.PI/4;r1.position.y=4.8;r1.scale.z=.88;h.add(r1);
+    const r2=new THREE.Mesh(new THREE.ConeGeometry(3.3,1.3,4),MT(0x66545a));r2.rotation.y=Math.PI/4;r2.position.y=5.9;r2.scale.z=.8;h.add(r2);cyl(h,.05,.12,.9,0xd9a85a,0,6.8,0,5);
+    /* noren, entrada con luz cálida y farolillos */
     for(const x of[-.55,.55]){const nr=new THREE.Mesh(new THREE.PlaneGeometry(1,1.4),new THREE.MeshToonMaterial({gradientMap:toonGrad,map:kanjiTex('茶','#2f3f6b','#ffffff',128,160),side:THREE.DoubleSide}));nr.position.set(x,2.9,1.93);h.add(nr)}
-    for(const x of[-2.4,2.4]){const ln=new THREE.Mesh(new THREE.SphereGeometry(.3,8,6),MT(0xd9604a,{emissive:0x7a2a1a}));ln.scale.y=1.3;ln.position.set(x,3.2,2.3);h.add(ln);gl(h,0xff9a6a,2.6,x,3.2,2.3,.8)}
-    cyl(h,.05,.05,2.6,wood,3.4,2.2,3.2,5);const um=new THREE.Mesh(new THREE.ConeGeometry(1.7,.7,12),MT(0xc23f33));um.position.set(3.4,3.6,3.2);h.add(um);bx(h,1.8,.15,.6,wood,3.4,1.5,3.2);bx(h,1.8,.05,.62,0xc23f33,3.4,1.6,3.2);
-    for(const sd2 of[-1,1]){const t=tourou(g,gy,lx+sd2*6,5,1);t.position.y=gy(lx+sd2*6,5)}}
+    bx(h,1.2,1.1,.1,0xffe0a0,0,2.7,1.8).material=new THREE.MeshBasicMaterial({color:0xffe0a0});gl(h,0xffc77a,4,0,2.7,2.3,.9);
+    for(const x of[-2.4,2.4]){const ln=new THREE.Mesh(new THREE.SphereGeometry(.3,8,6),MT(0xd9604a,{emissive:0x7a2a1a}));ln.scale.y=1.3;ln.position.set(x,3.3,2.6);h.add(ln);gl(h,0xff9a6a,2.6,x,3.3,2.6,.8)}
+    /* sombrilla roja con banco, bonsái y arbustos de té */
+    cyl(h,.05,.05,2.6,wood,3.9,2.2,4.2,5);const um=new THREE.Mesh(new THREE.ConeGeometry(1.7,.7,12),MT(0xc23f33));um.position.set(3.9,3.6,4.2);h.add(um);bx(h,1.8,.15,.6,wood,3.9,1.5,4.2);bx(h,1.8,.05,.62,0xc23f33,3.9,1.6,4.2);
+    cyl(h,.1,.14,.8,pw,-4.4,.9,2.4,5);for(const [y,r] of[[1.5,.7],[1.9,.5]]){const bn=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),MT(0x4f7254));bn.position.set(-4.4,y,2.4);bn.scale.y=.6;h.add(bn)}
+    for(let i=0;i<7;i++){const t=new THREE.Mesh(new THREE.IcosahedronGeometry(.7,1),MT(i%2?0x6fa86a:0x5f9a62));t.position.set(-3.2+i*1.1,.7,-3.9);t.scale.set(1.2,.8,1);h.add(t)}
+    for(let i=0;i<6;i++)cyl(h,.5,.55,.14,0xaaa69d,-.6+Math.sin(i*1.1)*.6,.1,6.2+i*1.25,7);
+    for(const sd2 of[-1,1]){const t=tourou(g,gy,lx+sd2*7.5,5,1);t.position.y=gy(lx+sd2*7.5,5)}
+    /* mirador hacia el valle: terraza elevada con banco y, a lo lejos, la cabaña del acantilado */
+    {const mx=side*10.5,mh=new THREE.Group();mh.position.set(mx,0,-1);h.add(mh);
+     bx(mh,5.4,.3,5.4,wood,0,1.15,0,pl);for(const x of[-2.4,2.4])for(const z of[-2.4,2.4])cyl(mh,.13,.16,1.3,pw,x,.5,z,5);
+     bx(mh,5.4,.12,.12,0xb5473a,0,1.95,2.6);bx(mh,5.4,.12,.12,0xb5473a,0,1.95,-2.6);bx(mh,.12,.12,5.4,0xb5473a,-side*2.6,1.95,0);bx(mh,.12,.12,5.4,0xb5473a,side*2.6,1.95,0);
+     bx(mh,2.2,.14,.7,wood,0,1.75,-1.6);bx(mh,2.2,.5,.1,wood,0,2.1,-1.95);cyl(mh,.08,.08,.5,pw,-.9,1.5,-1.6,4);cyl(mh,.08,.08,.5,pw,.9,1.5,-1.6,4);
+     const tl=tourou(mh,gy,2,2,.9);tl.position.set(side*1.8,1.3,1.6);
+     for(let i=0;i<3;i++)cyl(h,.5,.55,.14,0xaaa69d,side*(5+i*1.15),.1,-.4,7);
+     /* cabaña lejana sobre un risco */
+     const fx=side*66,fz=-27,c=new THREE.Group();c.position.set(fx,gy(fx,fz)-1,fz);h.add(c);c.scale.setScalar(2.9);
+     const rk=new THREE.Mesh(new THREE.CylinderGeometry(5.2,9,12,7),MT(0x8f6e60));rk.position.y=4;c.add(rk);
+     const rk2=new THREE.Mesh(new THREE.CylinderGeometry(5.6,5.2,1.4,7),MT(0xa5826f));rk2.position.y=7.4;rk2.rotation.y=.4;c.add(rk2);
+     const gr=new THREE.Mesh(new THREE.CylinderGeometry(5.7,5.6,.7,7),MT(0x7a9a62));gr.position.y=8.4;c.add(gr);
+     for(const [x,z] of[[-2.6,-1.6],[2.6,-1.6],[-2.6,1.6],[2.6,1.6]])cyl(c,.14,.18,3,0x4b342a,x,10,z,5);
+     bx(c,7.4,.3,4.6,0xb8946c,0,11.5,0);
+     bx(c,5.4,2.4,3.4,0xe8d3b6,0,12.8,-.2);for(const x of[-2.7,2.7])bx(c,.2,2.4,.2,0x4b342a,x,12.8,1.4);
+     bx(c,2.2,1.4,.1,0xffd9a0,-.9,12.9,1.55).material=new THREE.MeshBasicMaterial({color:0xffd9a0});bx(c,1.4,1.4,.1,0xffd9a0,1.6,12.9,1.55).material=new THREE.MeshBasicMaterial({color:0xffe6b8});
+     const cr=new THREE.Mesh(new THREE.ConeGeometry(4.8,1.8,4),MT(0x4f4a58));cr.rotation.y=Math.PI/4;cr.position.set(0,14.8,-.2);cr.scale.z=.8;c.add(cr);
+     for(const x of[-3.4,3.4]){const ob=new THREE.Mesh(new THREE.SphereGeometry(.22,6,5),MT(0xd9a85a));ob.position.set(x,15.5,-.2);c.add(ob)}
+     gl(c,0xffc77a,12,0,12.8,2.4,.8);
+     for(let i=0;i<5;i++){const pn=new THREE.Mesh(new THREE.ConeGeometry(1.2,3.4,6),MT(i%2?0x5c7a58:0x6d8466));pn.position.set(-3.6+i*.5+(i>2?5.6:0),10+hash(k,i+210)*.6,-1.4+(hash(k,i+220)-.5)*3);c.add(pn)}
+     const bl=new THREE.Mesh(new THREE.IcosahedronGeometry(1.5,1),MT(0xf3bccb));bl.position.set(-4.4,10.4,.8);bl.scale.y=.9;c.add(bl)}
+    }
   else if(type===8){signs(g,gy,hwv,'竹林',false,'#4f8a5a');
     for(const sd of[-1,1])for(let i=0;i<6;i++)tourou(g,gy,sd*(hwv+3+hash(k,i)*2.5),-45+i*18+hash(k,i+3)*4);
     for(let i=0;i<12;i++){const sd=i%2?1:-1,lx=sd*(hwv+4+hash(k,i)*12),lz=(hash(k,i+20)-.5)*110;const m2=new THREE.Mesh(new THREE.PlaneGeometry(3.6,22),new THREE.MeshBasicMaterial({map:glowTex,color:0xfff0b0,transparent:true,opacity:.14,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));m2.position.set(lx,gy(lx,lz)+10,lz);m2.rotation.set(0,hash(k,i+9)*3,sd*.25);g.add(m2)}}

@@ -5,6 +5,7 @@ import {Y0,spr,glowTex} from './util.js';
 import {mat,box} from './mats.js';
 import {W,makeRoot,S,WOOD,WOOD2,DECK,DARK,STONE,TEAL} from './kit.js';
 import {LT} from './lights.js';
+import {lang} from '../i18n.js';
 export function buildStruct(){
 makeRoot();scene.add(W);
 /* ---- estructura fija ---- */
@@ -61,6 +62,22 @@ box(.2,.2,6.8,DARK,-3.3,7.15,-1,W);box(.2,.2,6.8,DARK,6.3,7.15,-1,W);
  [-1.7,1.7].forEach(z=>{const p=new THREE.Mesh(new THREE.CylinderGeometry(.18,.22,4.4,8),mat(rd));p.position.set(0,2.2,z);tr.add(p)});
  const kb=new THREE.Mesh(new THREE.BoxGeometry(.5,.3,4.6),mat('#2f2a2e'));kb.position.set(0,4.5,0);tr.add(kb);
  const nk=new THREE.Mesh(new THREE.BoxGeometry(.3,.24,3.7),mat(rd));nk.position.set(0,3.8,0);tr.add(nk)}
+/* cartel de madera a la entrada: un mensaje enigmático que se descubrirá más adelante */
+{const MSG={es:['Cuando el río','te entregue su luz,','la cabaña recordará','tu nombre.'],en:['When the river','hands you its light,','the cabin will','remember your name.'],ja:['川が灯を','授けるとき、','小屋はあなたの','名を思い出す。']}[lang()]||[];
+ const c=document.createElement('canvas');c.width=512;c.height=320;const g=c.getContext('2d');
+ g.fillStyle='#6b4a36';g.fillRect(0,0,512,320);
+ for(let i=0;i<46;i++){g.fillStyle='rgba(40,22,14,'+(.05+Math.random()*.08)+')';g.fillRect(0,Math.random()*320,512,1+Math.random()*2)}
+ g.strokeStyle='#3b261b';g.lineWidth=10;g.strokeRect(5,5,502,310);
+ g.fillStyle='#e9d3a3';g.textAlign='center';g.font='italic 600 40px "Noto Serif JP","Georgia",serif';
+ MSG.forEach((t,i)=>g.fillText(t,256,86+i*58));
+ 
+ const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=8;
+ const sg=new THREE.Group();sg.position.set(15.7,Y0-6.2,5.1);sg.rotation.y=.18;W.add(sg);
+ [-.95,.95].forEach(x=>{const p=new THREE.Mesh(new THREE.BoxGeometry(.16,1.9,.16),mat('#4b342a'));p.position.set(x,.95,0);sg.add(p)});
+ const bd=new THREE.Mesh(new THREE.BoxGeometry(2.4,1.5,.1),mat('#6b4a36'));bd.position.set(0,1.45,0);sg.add(bd);
+ const fc=new THREE.Mesh(new THREE.PlaneGeometry(2.3,1.44),new THREE.MeshBasicMaterial({map:tx}));fc.position.set(0,1.45,.056);sg.add(fc);
+ const rf=new THREE.Mesh(new THREE.BoxGeometry(2.7,.1,.5),mat('#3b2a24'));rf.position.set(0,2.28,0);rf.rotation.x=.1;sg.add(rf);
+ const lt=spr(glowTex,0xffc27a,2.2,.35,true);lt.position.set(0,1.6,.6);sg.add(lt)}
 // peldaños de piedra al pie y farol
 {const L=spr(glowTex,0xffc27a,3,.55,true);L.position.set(16.5,Y0-5.2,3.5);W.add(L);box(.08,1.1,.08,'#6a5058',16.5,Y0-5.7,3.5,W)}
 }
