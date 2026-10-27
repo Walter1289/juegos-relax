@@ -3,7 +3,7 @@ import {toonGrad,tex} from '../style.js';
 import * as THREE from 'three';
 import {clamp} from './util.js';
 import {P,S} from './state.js';
-import {MT,scene,spr} from './core.js';
+import {MT,scene,spr,R,cam} from './core.js';
 const MTc=MT;
 /* ---------- canoa en primera persona ---------- */
 /* Inspirada en las barcas fluviales japonesas: casco de tablones con proa alta que se curva hacia arriba, popa baja y recta, borda clara, farol de papel colgante. */
@@ -138,7 +138,13 @@ export function updatePaddles(){
   });
 }
 /* personaje y remo en 3ª persona */
+let warmed=false;
+/* precalienta lo que solo se ve en 3ª persona (shaders y texturas) para que el primer cambio de cámara no dé un tirón */
+function warmUp(){warmed=true;try{const vs=[me,cPad,...cargoMs];vs.forEach(o=>o.visible=true);R.compile(scene,cam);
+  vs.forEach(o=>o.traverse(m=>{if(m.isMesh){const mm=m.material;if(mm&&mm.map)R.initTexture(mm.map)}}));
+  me.visible=cPad.visible=false;cargoMs.forEach(n=>n.visible=false)}catch(e){}}
 export function updateCharacter(dt){
+  if(!warmed)warmUp();
   {const tp=S.camK>.45||S.cineW>.15;me.visible=tp;cargoMs.forEach(n=>n.visible=tp);cPad.visible=tp;paddles.forEach(w=>w.visible=!tp);
    if(tp){if(P.steer>.2)padX=Math.min(1,padX+dt*3);else if(P.steer<-.2)padX=Math.max(-1,padX-dt*3);
     lagS+=(P.steer-lagS)*Math.min(1,dt*2.2);const br=Math.sin(P.t*1.4);
