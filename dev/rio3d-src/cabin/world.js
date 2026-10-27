@@ -1,3 +1,5 @@
+import {secreto} from '../lightmsg.js';
+import {SPX,SPZ,SPR} from './secret.js';
 /* world.js — entorno: cielo nocturno, luna, montañas, bosque, niebla, nubes y el acantilado con sus pinos y rocas */
 import * as THREE from 'three';
 import {scene} from './core.js';
@@ -126,9 +128,10 @@ function buildCliff(){
      const lf=new THREE.Mesh(new THREE.IcosahedronGeometry(.6,0),mat('#a6c47a'));lf.scale.set(1,.5,1);lf.position.set(bx,4.2+h,bz);sg.add(lf)}
    for(let q=0;q<26;q++){const gx=-13.6+rr()*9,gz=-5+rr()*9;const f=new THREE.Mesh(new THREE.ConeGeometry(.22,.9+rr()*.6,4),mat(['#9bb070','#b3b87a','#86a068'][q%3]));f.position.set(gx,4.2+.5,gz);f.rotation.z=(rr()-.5)*.5;sg.add(f)}
    for(let q=0;q<6;q++){const k=new THREE.Mesh(new THREE.IcosahedronGeometry(.45+rr()*.5,0),mat(['#7e7a74','#8a8a7c','#6f7d68'][q%3]));k.position.set(-13+rr()*8.5,4.3,-5+rr()*9);k.scale.y=.6;sg.add(k)}
-   for(let q=0;q<7;q++){const az=new THREE.Mesh(new THREE.IcosahedronGeometry(.5+rr()*.3,1),mat(['#e58aa8','#d9708f','#f3a9c0','#6e9a68'][q%4]));az.position.set(-13.5+rr()*9,4.5,-4.5+rr()*9);az.scale.y=.7;sg.add(az)}}
+   for(let q=0;q<7;q++){const az=new THREE.Mesh(new THREE.IcosahedronGeometry(.5+rr()*.3,1),mat(['#e58aa8','#d9708f','#f3a9c0','#6e9a68'][q%4]));az.position.set(-13.5+rr()*9,4.5,-4.5+rr()*9);az.scale.y=.7;sg.add(az)}
+   if(secreto())sg.children.filter(o=>Math.hypot(o.position.x-SPX,o.position.z-SPZ)<SPR).forEach(o=>sg.remove(o))}
   // sakura sobre el acantilado
-  {const sg=new THREE.Group();sg.position.set(-12.2,4.2,1.8);scene.add(sg);const tm=new THREE.Mesh(new THREE.CylinderGeometry(.22,.38,3,6),mat('#5a3d33'));tm.position.y=1.5;tm.rotation.z=.08;sg.add(tm);
+  if(!secreto()){const sg=new THREE.Group();sg.position.set(-12.2,4.2,1.8);scene.add(sg);const tm=new THREE.Mesh(new THREE.CylinderGeometry(.22,.38,3,6),mat('#5a3d33'));tm.position.y=1.5;tm.rotation.z=.08;sg.add(tm);
    [[0,3.6,0,1.7],[1.2,3.2,.4,1.3],[-1.1,3.3,-.3,1.2],[.2,4.4,.2,1.1]].forEach(([x,y,z,r],i)=>{const c=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),mat(['#f3bccb','#eea9bd','#f8d0da','#e99fb4'][i]));c.position.set(x,y,z);sg.add(c)})}
   // rocas al pie
   {const r=rng(5);for(let i=0;i<8;i++){const s=1+r()*2;const m=new THREE.Mesh(new THREE.IcosahedronGeometry(s,0),mat('#7b6a70'));m.position.set(-14+r()*12,-13,6+r()*3);m.rotation.set(r()*3,r()*3,0);scene.add(m)}}

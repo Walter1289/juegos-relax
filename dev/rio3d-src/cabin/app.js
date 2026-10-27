@@ -9,6 +9,8 @@ import {initLights,makeHand,makeWin,lightStep} from './lights.js';
 import {buildWorld,worldStep} from './world.js';
 import {initAmbient,ambientStep,initParts,partsStep} from './fx.js';
 import {buildStruct} from './struct.js';
+import {buildSecret,secretStep} from './secret.js';
+import {secreto,secretoVisto,setSecretoVisto} from '../lightmsg.js';
 import {W} from './kit.js';
 import {buildItemsA} from './items-a.js';
 import {buildItemsB} from './items-b.js';
@@ -31,6 +33,7 @@ initTex();
 buildWorld();
 initAmbient();
 buildStruct();
+buildSecret();
 buildItemsA();
 buildItemsB();
 W.traverse(o=>{if(o.isMesh&&!o.userData.item){o.castShadow=true;o.receiveShadow=true}});
@@ -49,6 +52,7 @@ PZ.ctx=()=>A.ctx;PZ.started=()=>RT.started;
 bindHud(askReset);
 el('go').onclick=()=>{try{A.init();A.resume();A.rain(RT.rainOn);A.setMood(progress(),1)}catch(e){}el('start').hidden=true;RT.started=true;
   {const n=luces(),o=offered();if(n>o){setOffered(n);const d=n-o;setTimeout(()=>toast(({es:'La cabaña recibió '+d+(d>1?' luces':' luz')+' del río',en:'The cabin received '+d+(d>1?' lights':' light')+' from the river',ja:'小屋は川から'+d+'つの灯を受け取りました'}[lang()])||''),1800)}}
+  if(secreto()&&!secretoVisto()){setSecretoVisto();setTimeout(()=>toast(({es:'El cartel se completó: algo despertó en el jardín del acantilado',en:'The sign is complete: something woke in the cliff garden',ja:'看板が完成しました：崖の庭で何かが目覚めました'}[lang()])||''),4800)}
   if(doneCount()===ITEMS.length)fest.armT=RT.T+3;
   setTimeout(()=>{el('hint').style.opacity=0},12000);};
 bindKeys();
@@ -69,7 +73,7 @@ function frame(now){
   camStep(dt,isIdle());
   lightStep(dt);handStep(dt);
   ambientStep(dt,progress(),!!state.repaired.nichos);
-  worldStep(dt);partsStep(dt);catStep(dt,RT.T);habStep(dt,RT.T);
+  worldStep(dt);secretStep(RT.T);partsStep(dt);catStep(dt,RT.T);habStep(dt,RT.T);
   // refresco periódico de la interfaz y del ánimo del audio
   hudT-=dt;if(hudT<=0){hudT=.5;updateUI();updateNext();A.setMood(progress(),1)}
   A.update(-3,1,RT.T);

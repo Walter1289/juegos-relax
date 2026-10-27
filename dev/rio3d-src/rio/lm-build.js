@@ -7,7 +7,8 @@ import {SAKURA} from '../season.js';
 import {castleJob} from './castle.js';
 import {MT,spr,glowTex} from './core.js';
 import {bladeGeo,reedM,V3,Q,UP,S3,M4,tmp,REED} from './props.js';
-import {optimizeLM,bx,gl,cyl,roof,signs,mkHeron,tourou,torii,pagoda,fallMat,kanjiTex} from './lm-parts.js';
+import {camino} from '../lightmsg.js';
+import {optimizeLM,bx,gl,cyl,roof,signs,farCabin,mkHeron,tourou,torii,pagoda,fallMat,kanjiTex} from './lm-parts.js';
 /* el castillo se construye por trozos (g.userData.job); landmarks.js lo termina y lo optimiza */
 export function buildLM(k){const g=buildLM0(k);return g.userData.job?g:optimizeLM(g)}
 function buildLM0(k){
@@ -98,7 +99,16 @@ function buildLM0(k){
     for(const x of[-4,4])for(const z of[3.4,-3.4]){const ln=new THREE.Mesh(new THREE.SphereGeometry(.34,8,6),MT(0xd9604a,{emissive:0x8a2a1a}));ln.scale.y=1.3;ln.position.set(x*1.12,6.2,z*1.05);h.add(ln);gl(h,0xff9a6a,3,x*1.12,6.2,z*1.05,.85)}
     for(const x of[-3.4,3.4])for(const z of[10.4,14.5])tourou(h,()=>0,x,z,1.15).position.y=-.1;
     for(let i=0;i<5;i++)bx(h,2.6,.12,1.6,stn,0,-.3,10+i*2.1);torii(h,0,-.4,17.5,1.1,0xc23f33);
-    const pg=pagoda(h,0,1.5,-3.5);pg.position.set(side>0?-11.5:11.5,1.5,-2.5);pg.scale.setScalar(1.1)}
+    const pg=pagoda(h,0,1.5,-3.5);pg.position.set(side>0?-11.5:11.5,1.5,-2.5);pg.scale.setScalar(1.1);
+    if(camino()){
+      /* camino de piedras y faroles hasta la cabaña de la colina; al inicio, su maqueta */
+      const x0=side*(hwv+33),pz=z=>Math.sin(z*.0)*0;
+      for(let i=0;i<18;i++){const t=i/17,x=x0+side*t*62,z=Math.sin(t*3.4)*9*t-1.5*(1-t);const st=cyl(g,.95,1.05,.2,0xaaa69d,x,gy(x,z)+.12,z,8);
+        if(i%3===1)tourou(g,gy,x,z+(i%2?2.4:-2.4),.8)}
+      const mx=side*(hwv+30.5),my=gy(mx,0);bx(g,3.6,.9,3.6,0x9d9c9a,mx,my+.35,0);bx(g,3.2,.2,3.2,0xc2bfb8,mx,my+.9,0);
+      const mq=new THREE.Group();mq.scale.setScalar(.3);mq.position.set(mx,my+1+(-8.5*.3),0);mq.rotation.y=-side*Math.PI/2;g.add(mq);farCabin(mq,k+500,false);
+      gl(g,0xffc77a,6,mx,my+2.4,0,.8);
+      const xe=side*(hwv+96),ze=Math.sin(3.4)*9,hc=new THREE.Group();hc.position.set(xe,gy(xe,ze)-1,ze);hc.rotation.y=-side*Math.PI/2*0;g.add(hc);hc.scale.setScalar(2.6);farCabin(hc,k+700)}}
   else if(type===6){
     const lx=side*(hwv+3.6),y=gy(lx,0),h=new THREE.Group();h.position.set(lx,y,0);g.add(h);signs(g,gy,hwv,'滝',false,'#3f7a8a');
     const rc=(c)=>MT(c);for(let i=0;i<22;i++){const rr=3+hash(k,i)*3.5,rx=side*(7.8+hash(k,i+5)*9),ry=hash(k,i+9)*15+(rx*side<8?3:0),rz=(hash(k,i+13)-.5)*17;const r=new THREE.Mesh(new THREE.IcosahedronGeometry(rr,1),rc(i%3?0x7a8a7e:0x6c8f78));r.position.set(rx,ry,rz);r.scale.y=1.2;h.add(r);
@@ -155,18 +165,7 @@ function buildLM0(k){
      for(let i=0;i<3;i++)cyl(h,.5,.55,.14,0xaaa69d,side*(5+i*1.15),.1,-.4,7);
      /* cabaña lejana sobre un risco */
      const fx=side*66,fz=-27,c=new THREE.Group();c.position.set(fx,gy(fx,fz)-1,fz);h.add(c);c.scale.setScalar(2.9);
-     const rk=new THREE.Mesh(new THREE.CylinderGeometry(5.2,9,12,7),MT(0x8f6e60));rk.position.y=4;c.add(rk);
-     const rk2=new THREE.Mesh(new THREE.CylinderGeometry(5.6,5.2,1.4,7),MT(0xa5826f));rk2.position.y=7.4;rk2.rotation.y=.4;c.add(rk2);
-     const gr=new THREE.Mesh(new THREE.CylinderGeometry(5.7,5.6,.7,7),MT(0x7a9a62));gr.position.y=8.4;c.add(gr);
-     for(const [x,z] of[[-2.6,-1.6],[2.6,-1.6],[-2.6,1.6],[2.6,1.6]])cyl(c,.14,.18,3,0x4b342a,x,10,z,5);
-     bx(c,7.4,.3,4.6,0xb8946c,0,11.5,0);
-     bx(c,5.4,2.4,3.4,0xe8d3b6,0,12.8,-.2);for(const x of[-2.7,2.7])bx(c,.2,2.4,.2,0x4b342a,x,12.8,1.4);
-     bx(c,2.2,1.4,.1,0xffd9a0,-.9,12.9,1.55).material=new THREE.MeshBasicMaterial({color:0xffd9a0});bx(c,1.4,1.4,.1,0xffd9a0,1.6,12.9,1.55).material=new THREE.MeshBasicMaterial({color:0xffe6b8});
-     const cr=new THREE.Mesh(new THREE.ConeGeometry(4.8,1.8,4),MT(0x4f4a58));cr.rotation.y=Math.PI/4;cr.position.set(0,14.8,-.2);cr.scale.z=.8;c.add(cr);
-     for(const x of[-3.4,3.4]){const ob=new THREE.Mesh(new THREE.SphereGeometry(.22,6,5),MT(0xd9a85a));ob.position.set(x,15.5,-.2);c.add(ob)}
-     gl(c,0xffc77a,12,0,12.8,2.4,.8);
-     for(let i=0;i<5;i++){const pn=new THREE.Mesh(new THREE.ConeGeometry(1.2,3.4,6),MT(i%2?0x5c7a58:0x6d8466));pn.position.set(-3.6+i*.5+(i>2?5.6:0),10+hash(k,i+210)*.6,-1.4+(hash(k,i+220)-.5)*3);c.add(pn)}
-     const bl=new THREE.Mesh(new THREE.IcosahedronGeometry(1.5,1),MT(0xf3bccb));bl.position.set(-4.4,10.4,.8);bl.scale.y=.9;c.add(bl)}
+     farCabin(c,k)}
     }
   else if(type===8){signs(g,gy,hwv,'竹林',false,'#4f8a5a');
     for(const sd of[-1,1])for(let i=0;i<6;i++)tourou(g,gy,sd*(hwv+3+hash(k,i)*2.5),-45+i*18+hash(k,i+3)*4);

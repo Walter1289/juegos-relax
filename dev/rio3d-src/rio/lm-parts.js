@@ -5,6 +5,7 @@ import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {MT,spr,glowTex} from './core.js';
 import {reedM} from './props.js';
 import {lmG,lmAnim} from './lm-data.js';
+import {hash} from './util.js';
 /* ---- primitivas ---- */
 export const bx=(g,w,h,d,c,x,y,z,o)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),MT(c,o));m.position.set(x,y,z);g.add(m);return m};
 export const cyl=(g,r1,r2,h,c,x,y,z,seg=7,o)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,seg),MT(c,o));m.position.set(x,y,z);g.add(m);return m};
@@ -80,3 +81,19 @@ export function disposeLM(g){const sh=new Set([glowMat,fallMat,reedM.material]);
     if(o.geometry)o.geometry.dispose();const ms=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];ms.forEach(x=>{if(!sh.has(x))x.dispose()})});
   for(let i=lmAnim.length-1;i>=0;i--){const q=lmAnim[i],ob=q.b||q.nk;let p=ob;while(p&&p!==g)p=p.parent;if(p===g)lmAnim.splice(i,1)}
   for(let i=lmG.length-1;i>=0;i--){let p=lmG[i];while(p&&p!==g)p=p.parent;if(p===g)lmG.splice(i,1)}}
+
+/* la cabaña del acantilado a escala de paisaje: risco, terraza sobre pilotes, ventanas encendidas, pinos y un cerezo */
+export function farCabin(c,k,rock=true){
+if(rock){const rk=new THREE.Mesh(new THREE.CylinderGeometry(5.2,9,12,7),MT(0x8f6e60));rk.position.y=4;c.add(rk);
+const rk2=new THREE.Mesh(new THREE.CylinderGeometry(5.6,5.2,1.4,7),MT(0xa5826f));rk2.position.y=7.4;rk2.rotation.y=.4;c.add(rk2);
+const gr=new THREE.Mesh(new THREE.CylinderGeometry(5.7,5.6,.7,7),MT(0x7a9a62));gr.position.y=8.4;c.add(gr);}
+for(const [x,z] of[[-2.6,-1.6],[2.6,-1.6],[-2.6,1.6],[2.6,1.6]])cyl(c,.14,.18,3,0x4b342a,x,10,z,5);
+bx(c,7.4,.3,4.6,0xb8946c,0,11.5,0);
+bx(c,5.4,2.4,3.4,0xe8d3b6,0,12.8,-.2);for(const x of[-2.7,2.7])bx(c,.2,2.4,.2,0x4b342a,x,12.8,1.4);
+bx(c,2.2,1.4,.1,0xffd9a0,-.9,12.9,1.55).material=new THREE.MeshBasicMaterial({color:0xffd9a0});bx(c,1.4,1.4,.1,0xffd9a0,1.6,12.9,1.55).material=new THREE.MeshBasicMaterial({color:0xffe6b8});
+const cr=new THREE.Mesh(new THREE.ConeGeometry(4.8,1.8,4),MT(0x4f4a58));cr.rotation.y=Math.PI/4;cr.position.set(0,14.8,-.2);cr.scale.z=.8;c.add(cr);
+for(const x of[-3.4,3.4]){const ob=new THREE.Mesh(new THREE.SphereGeometry(.22,6,5),MT(0xd9a85a));ob.position.set(x,15.5,-.2);c.add(ob)}
+gl(c,0xffc77a,12,0,12.8,2.4,.8);
+for(let i=0;i<5;i++){const pn=new THREE.Mesh(new THREE.ConeGeometry(1.2,3.4,6),MT(i%2?0x5c7a58:0x6d8466));pn.position.set(-3.6+i*.5+(i>2?5.6:0),10+hash(k,i+210)*.6,-1.4+(hash(k,i+220)-.5)*3);c.add(pn)}
+
+  const bl=new THREE.Mesh(new THREE.IcosahedronGeometry(1.5,1),MT(0xf3bccb));bl.position.set(-4.4,10.4,.8);bl.scale.y=.9;c.add(bl)}
