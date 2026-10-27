@@ -19,9 +19,19 @@ export function buildBackground(){
   // bosque de pinos nublado en capas
   const pine=(x,y,h,col)=>{g.fillStyle=col;g.beginPath();g.moveTo(x,y-h);for(let k=1;k<=5;k++){const yy=y-h+k*h/5,ww=k*h*.075;g.lineTo(x+ww,yy);g.lineTo(x+ww*.55,yy)}
     g.lineTo(x+h*.04,y);g.lineTo(x-h*.04,y);for(let k=5;k>=1;k--){const yy=y-h+k*h/5,ww=k*h*.075;g.lineTo(x-ww*.55,yy);g.lineTo(x-ww,yy)}g.closePath();g.fill()};
+  const sugi=(x,y,h,col)=>{g.fillStyle=col;g.beginPath();g.moveTo(x,y-h*1.1);g.lineTo(x+h*.09,y-h*.3);g.lineTo(x+h*.12,y);g.lineTo(x-h*.12,y);g.lineTo(x-h*.09,y-h*.3);g.closePath();g.fill()};
+  const blob=(x,y,h,col,L)=>{g.fillStyle='#5a3d33';g.fillRect(x-1.5,y-h*.7,3,h*.7);g.fillStyle=col;[[0,-1,.5],[-.35,-.8,.38],[.35,-.82,.4]].forEach(([dx,dy,r])=>{g.beginPath();g.ellipse(x+dx*h,y+dy*h,r*h,r*h*.85,0,0,7);g.fill()})};
+  const bamboo=(x,y,h,L)=>{g.strokeStyle='#8fb06a';g.lineWidth=2;for(let q=-1;q<=1;q++){const bx=x+q*5;g.beginPath();g.moveTo(bx,y);g.lineTo(bx+q,y-h*(.9+q*.1));g.stroke();g.fillStyle='#9cc17a';g.beginPath();g.ellipse(bx+q,y-h*(.9+q*.1),7,2.4,0,0,7);g.fill()}};
+  const shrub=(x,y,h,col)=>{g.fillStyle=col;g.beginPath();g.ellipse(x,y-h*.4,h*1.1,h*.7,0,0,7);g.fill()};
   [[560,'#b78aa8',90,.55],[620,'#9c7a9c',120,.7],[680,'#7d7a84',150,.85]].forEach(([base,col,hh,al],L)=>{
     g.fillStyle=col;g.globalAlpha=al;poly(g,[[300,720],[420,base+60],[540,base+20],[680,base+50],[820,base],[960,base+30],[960,720]]);g.fill();
-    for(let x=330+R()*20;x<W+20;x+=16+R()*14){const hh2=hh*(.5+R()*.6);pine(x,base+40+L*30+R()*20,hh2,col)}
+    for(let x=330+R()*20;x<W+20;x+=16+R()*14){const hh2=hh*(.5+R()*.6),yy0=base+40+L*30+R()*20,k=R();
+      if(k<.45)pine(x,yy0,hh2,col);
+      else if(k<.62)sugi(x,yy0,hh2,col);
+      else if(k<.78)blob(x,yy0,hh2*.6,['#c9553a','#e07a3a','#d9573a','#e8a042'][(R()*4)|0],L);
+      else if(k<.86)blob(x,yy0,hh2*.6,['#e9c25a','#f0cf6e'][(R()*2)|0],L);
+      else if(k<.94)bamboo(x,yy0,hh2*.8,L);
+      else shrub(x,yy0,hh2*.25,['#8aa86a','#e58aa8','#d9708f'][(R()*3)|0])}
     g.globalAlpha=1;
     const mg=g.createLinearGradient(0,base-40,0,base+90);mg.addColorStop(0,'rgba(255,205,190,0)');mg.addColorStop(.5,'rgba(255,205,190,.32)');mg.addColorStop(1,'rgba(255,205,190,0)');
     g.fillStyle=mg;g.fillRect(300,base-40,660,130)});

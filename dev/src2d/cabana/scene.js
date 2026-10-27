@@ -45,7 +45,7 @@ function drawPanel(g,f){
     g.fillStyle='#2c2748';g.fillRect(4,-34,104,30);
     g.fillStyle='#7a6a5e';g.save();g.rotate(-.4);g.fillRect(20,-30,64,8);g.restore();g.save();g.rotate(.5);g.fillRect(50,-26,52,8);g.restore();
   }
-  g.restore();
+  g.restore();g.restore();
 }
 function drawWindow(g,f){
   /* shoji: papel translúcido con celosía de madera */
@@ -101,7 +101,7 @@ function drawBed(g,f){
     g.fillStyle='#8d86a0';g.beginPath();g.moveTo(x+60,y+10);g.quadraticCurveTo(x+100,y-6,x+150,y+10);g.closePath();g.fill();
     g.fillStyle='rgba(40,50,30,.4)';g.beginPath();g.arc(x+70,y+14,7,0,7);g.arc(x+130,y+14,5,0,7);g.fill();
   }
-  g.restore();
+  g.restore();g.restore();
 }
 function drawPainting(g,f){
   /* kakejiku: pergamino colgante con rodillos */
@@ -121,7 +121,7 @@ function drawPainting(g,f){
   }
   g.fillStyle='#5a3d2e';g.fillRect(x-9,y-8,w+18,6);g.fillRect(x-9,y+h+2,w+18,6);
   g.fillStyle='#c9a14a';g.fillRect(x-11,y-9,3,8);g.fillRect(x+w+8,y-9,3,8);
-  g.restore();
+  g.restore();g.restore();
 }
 function drawHangLamp(g,f,lit){
   g.strokeStyle='#6b4a35';g.lineWidth=2;
@@ -141,12 +141,32 @@ function drawFloor(g,f){
   if(f){
     /* tatami: esteras de igusa con orilla verde */
     for(let x=232;x<770;x+=90){g.fillStyle='#56633f';g.fillRect(x,512,90,9);g.fillStyle='#d2c58e';g.fillRect(x+3,513,84,6);g.fillStyle='rgba(255,255,230,.25)';g.fillRect(x+3,513,84,1.5)}
-    g.fillStyle='rgba(255,230,190,.07)';g.fillRect(215,522,690,6);return}
+    g.fillStyle='rgba(255,230,190,.07)';g.fillRect(215,522,690,6);drawInterior(g);return}
   g.fillStyle='#444e91';
   [[298,44],[520,38],[642,30],[830,46]].forEach(([x,w])=>{g.fillRect(x,520,w,34);poly(g,[[x,520],[x+w,520],[x+w-6,512],[x+8,514]]);g.fill()});
   g.fillStyle='#8c6a44';
   [[290,525,14],[560,528,12],[668,524,16]].forEach(([x,y,w])=>{g.save();g.translate(x,y);g.rotate(.35);g.fillRect(0,0,w,5);g.restore()});
   g.strokeStyle='#7a5a40';g.lineWidth=3;line(g,380,521,430,526);line(g,720,522,770,520);
+}
+/* mobiliario japonés sobre el tatami: tansu, chabudai con cojines zabuton, té */
+function drawInterior(g){
+  const Y=514;g.save();g.translate(0,Y);g.scale(1,1);g.translate(0,-Y);
+  const Z=(cx,k)=>{g.translate(cx,Y);g.scale(k,k);g.translate(-cx,-Y)};
+  /* tansu */
+  g.save();Z(386,1.5);g.translate(14,0);
+  g.fillStyle='#7a4a30';g.fillRect(372,Y-40,30,40);g.fillStyle='#8f5a3a';g.fillRect(374,Y-38,26,12);g.fillRect(374,Y-24,26,10);g.fillRect(374,Y-12,26,10);
+  g.fillStyle='#d9b45a';[[387,-32],[387,-19],[387,-7]].forEach(([x,y])=>g.fillRect(x-3,Y+y,6,2));
+  g.fillStyle='#5a3d2e';g.fillRect(372,Y-42,30,3);
+  g.restore();g.save();Z(655,1.3);
+  /* zabuton */
+  g.fillStyle='#3d4f8a';rr(g,610,Y-7,34,7,3);g.fill();g.fillStyle='#c9553a';rr(g,686,Y-7,32,7,3);g.fill();
+  /* chabudai */
+  g.fillStyle='#6b4a35';g.fillRect(648,Y-22,5,22);g.fillRect(684,Y-22,5,22);
+  g.fillStyle='#a47850';rr(g,640,Y-27,58,6,2);g.fill();g.fillStyle='rgba(255,230,190,.25)';g.fillRect(642,Y-27,54,1.5);
+  g.fillStyle='#2f2a2a';rr(g,646,Y-32,22,5,2);g.fill();
+  g.fillStyle='#3a4a6a';g.beginPath();g.ellipse(657,Y-38,6,6,0,0,7);g.fill();g.fillRect(662,Y-40,5,2);
+  g.fillStyle='#f3ead2';[[676,0],[686,0]].forEach(([x])=>{g.beginPath();g.ellipse(x,Y-30,3.5,2.2,0,0,7);g.fill()});
+  g.restore();g.restore();
 }
 function drawStairs(g,f){
   if(f)return;
