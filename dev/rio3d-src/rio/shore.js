@@ -18,9 +18,10 @@ export function buildFoam(as){const s0=as-60;
       for(let k=0;k<4;k++){fPos.set([xs[k],.05,z],(b+k)*3);fCol.set([1,1,1,as_[k]],(b+k)*4)}}}
   fG.attributes.position.needsUpdate=fG.attributes.color.needsUpdate=true}
 // estela: manchas de espuma planas que se abren detrás de la canoa
-const WK=36,wake=[];for(let i=0;i<WK;i++){const m=new THREE.Mesh(new THREE.CircleGeometry(.5,20).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false}));m.position.y=.045;m.userData={age:9,vx:0,vz:0};scene.add(m);wake.push(m)}
+const wkTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,.55)');r.addColorStop(.55,'rgba(255,255,255,.4)');r.addColorStop(.85,'rgba(255,255,255,.18)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,64,64);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t})();
+const WK=96,wake=[];for(let i=0;i<WK;i++){const m=new THREE.Mesh(new THREE.CircleGeometry(.5,20).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xffffff,map:wkTex,transparent:true,opacity:0,depthWrite:false}));m.position.y=.045;m.userData={age:9,vx:0,vz:0};scene.add(m);wake.push(m)}
 let wkI=0,wkT=0;
-export function spawnWake(x,z,vx,vz,sc){const m=wake[wkI++%WK];m.position.set(x,.045,z);m.userData={age:0,vx,vz,sc};m.scale.setScalar(.4)}
+export function spawnWake(x,z,vx,vz,sc,life=3.2,mx=.38){const m=wake[wkI++%WK];m.position.set(x,.045,z);m.userData={age:0,vx,vz,sc,life,mx};m.scale.setScalar(.4)}
 // gotas
 const DN=60,dropG=new THREE.BufferGeometry(),dropP=new Float32Array(DN*3),drops=[];for(let i=0;i<DN;i++){drops.push({l:0,x:0,y:-9,z:0,vx:0,vy:0,vz:0})}
 dropG.setAttribute('position',new THREE.BufferAttribute(dropP,3));
@@ -34,6 +35,9 @@ export function updateShoreFx(dt){
   dropG.attributes.position.needsUpdate=true;
   wkT-=dt;if(wkT<=0&&S.started){wkT=.11;const sp=Math.min(P.v,5);const sdx=Math.cos(P.psi),sdz=Math.sin(P.psi),bx_=P.px-Math.sin(P.psi)*1.5,bz_=P.pz+Math.cos(P.psi)*1.5;
     // popa
-    for(const sd of[-1,1])spawnWake(bx_+sdx*.5*sd,bz_+sdz*.5*sd,sdx*sd*.5,sdz*sd*.5,1)}
-  wake.forEach(m=>{const u=m.userData;if(u.age>=3.2){m.material.opacity=0;return}u.age+=dt;const a=u.age/3.2;m.position.x+=(u.vx||0)*dt;m.position.z+=(u.vz||0)*dt;m.scale.setScalar((.4+a*2.6)*(u.sc||1));m.material.opacity=.38*(1-a)*(1-a)})
+    for(const sd of[-1,1])spawnWake(bx_+sdx*.5*sd,bz_+sdz*.5*sd,sdx*sd*.5,sdz*sd*.5,.7+sp*.12)
+    // proa: ola en V que se abre hacia los lados y se desvanece pronto
+    if(sp>.8){const fx=P.px+Math.sin(P.psi)*2.9,fz=P.pz-Math.cos(P.psi)*2.9,k=Math.min(sp/4,1);
+      for(const sd of[-1,1])spawnWake(fx+sdx*.25*sd,fz+sdz*.25*sd,sdx*sd*(.9+k*.5)-Math.sin(P.psi)*.4,sdz*sd*(.9+k*.5)+Math.cos(P.psi)*.4,.3+k*.3,1.7,.2*k+.08)}}
+  wake.forEach(m=>{const u=m.userData,L=u.life||3.2;if(u.age>=L){m.material.opacity=0;return}u.age+=dt;const a=u.age/L;m.position.x+=(u.vx||0)*dt;m.position.z+=(u.vz||0)*dt;m.scale.setScalar((.4+a*2.6)*(u.sc||1));m.material.opacity=(u.mx||.38)*1.5*(1-a)*(1-a)})
 }
