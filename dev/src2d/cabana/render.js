@@ -13,18 +13,16 @@ export function render(t){
   g.setTransform(DPR,0,0,DPR,0,0);g.globalCompositeOperation='source-over';
   g.drawImage(sceneC,0,0,W,H);
   g.drawImage(dirt,0,0,W,H);
-  // chimenea
-  g.fillStyle='#8f8aa0';g.fillRect(296,150,28,64);g.fillStyle='#7d7892';g.fillRect(292,146,36,8);
-  g.strokeStyle='rgba(60,50,80,.3)';g.lineWidth=1.5;for(let y=162;y<214;y+=13)line(g,296,y,324,y);
-  if(state.repaired.techo){for(let i=0;i<9;i++){const ph=((t*.09+i/9)%1),x=310+Math.sin(t*.7+i*1.7)*10*ph+ph*34,y=146-ph*120,r=7+ph*20;
-    g.globalAlpha=.34*(1-ph);g.fillStyle='#e6e0f2';g.beginPath();g.arc(x,y,r,0,7);g.fill()}g.globalAlpha=1}
+  // humo ligero que sale por el lucernario
+  if(state.repaired.techo){for(let i=0;i<9;i++){const ph=((t*.09+i/9)%1),x=610+Math.sin(t*.7+i*1.7)*10*ph+ph*30,y=146-ph*120,r=7+ph*20;
+    g.globalAlpha=.3*(1-ph);g.fillStyle='#f4e2da';g.beginPath();g.arc(x,y,r,0,7);g.fill()}g.globalAlpha=1}
   drawDecor(g,t);
   // neblina que deriva
   for(let i=0;i<4;i++){const x=((t*(5+i*2)+i*260)%1300)-200,y=520+i*58;
-    const mg=g.createRadialGradient(x,y,0,x,y,170);mg.addColorStop(0,'rgba(215,210,240,.20)');mg.addColorStop(1,'rgba(215,210,240,0)');
+    const mg=g.createRadialGradient(x,y,0,x,y,170);mg.addColorStop(0,'rgba(255,214,200,.20)');mg.addColorStop(1,'rgba(255,214,200,0)');
     g.save();g.translate(x,y);g.scale(1,.22);g.translate(-x,-y);g.fillStyle=mg;g.fillRect(x-170,y-170,340,340);g.restore()}
   lctx.setTransform(1,0,0,1,0,0);lctx.globalCompositeOperation='source-over';lctx.clearRect(0,0,DW,DH);
-  lctx.fillStyle='rgba(54,46,104,.46)';lctx.fillRect(0,0,DW,DH);
+  lctx.fillStyle='rgba(78,44,84,.38)';lctx.fillRect(0,0,DW,DH);
   lctx.globalCompositeOperation='destination-out';
   const fl=.92+.05*Math.sin(t*9)+.03*Math.sin(t*23);
   const lg=state.repaired.techo?.8*fl:0;const holes=[[236,300,120,lg],[763,300,120,lg],[849,458,230,fl*lit.tab],[505,340,270,lit.lamp],[690,366,200,.35*lit.moon]];
@@ -39,7 +37,7 @@ export function render(t){
   });
   g.drawImage(lightC,0,0,W,H);
   g.globalCompositeOperation='lighter';
-  [[236,300,60,.35*lg,'255,190,100'],[763,300,60,.35*lg,'255,190,100'],[849,458,140,.30*fl*lit.tab,'255,170,70'],[505,340,170,.28*lit.lamp,'255,180,90'],[690,366,120,.12*lit.moon,'130,170,255']].forEach(([x,y,r,a,c])=>{
+  [[236,300,60,.35*lg,'255,190,100'],[763,300,60,.35*lg,'255,190,100'],[849,458,140,.30*fl*lit.tab,'255,170,70'],[505,340,170,.28*lit.lamp,'255,180,90'],[690,366,120,.14*lit.moon,'255,200,130']].forEach(([x,y,r,a,c])=>{
     if(a<=.005)return;
     const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba('+c+','+a+')');gr.addColorStop(1,'rgba('+c+',0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);
   });

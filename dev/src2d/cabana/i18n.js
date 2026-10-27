@@ -10,7 +10,7 @@ export function initI18n(){
     ['El avance se guarda en este dispositivo.','Your progress is saved on this device.','進行状況はこの端末に保存されます。'],
     ['Tocar para empezar','Tap to start','タップしてはじめる'],
     ['Progreso de la cabaña','Cabin progress','小屋の進み具合'],
-    ['Cabaña en un acantilado, de noche','A cabin on a cliff, at night','夜の崖の上の小屋'],
+    ['Cabaña en un acantilado, al atardecer','A cabin on a cliff, at sunset','夕暮れの崖の上の小屋'],
     ['Empieza limpiando el piso. Arrastra para lavar.','Start by cleaning the floor. Drag to wash.','まず床を掃除しましょう。なぞって洗います。'],
     ['Empieza limpiando el piso','Start by cleaning the floor','まず床を掃除しましょう'],
     ['Esencial','Essential','必須'],['Funcional','Functional','機能'],['Decoración','Decoration','飾り'],
@@ -32,19 +32,19 @@ export function initI18n(){
   ]);
   /* Objetos reparables (nombre, y minúsculas porque nameOf() las usa dentro de frases) y recompensas con su efecto */
   [
-    ['Piso','Floor','床'],['Escalera','Stairs','階段'],['Barandal','Railing','手すり'],['Techo','Roof','屋根'],['Panel solar','Solar panel','ソーラーパネル'],['Ventana','Window','窓'],
-    ['Librero','Bookcase','本棚'],['Cama','Bed','ベッド'],['Lámpara del techo','Ceiling lamp','天井ランプ'],['Luces de cuerda','String lights','ストリングライト'],['Cuadro','Picture','絵'],['Plantas','Plants','観葉植物'],['Nichos de pared','Wall niches','壁のくぼみ'],
+    ['Piso','Floor','床'],['Escalera','Stairs','階段'],['Barandal laqueado','Lacquered railing','漆の手すり'],['Tejado','Tiled roof','瓦屋根'],['Lucernario','Skylight','天窓'],['Shoji','Shoji screen','障子'],
+    ['Librero','Bookcase','本棚'],['Futón','Futon','布団'],['Farol de papel','Paper lantern','紙の行灯'],['Luces de cuerda','String lights','ストリングライト'],['Cuadro','Picture','絵'],['Plantas','Plants','観葉植物'],['Nichos de piedra','Stone niches','石のくぼみ'],
   ].forEach(r=>ux.add([r,[r[0].toLowerCase(),r[1].toLowerCase(),r[2]]]));
   ux.add([
     ['Cepillo ancho','Wide brush','幅広ブラシ'],['Limpias con un cepillo más grande','You scrub with a bigger brush','より大きなブラシで掃除できます'],
     ['Mochila de herramientas','Tool backpack','道具リュック'],['Ganas 10% más de tablas al limpiar','You earn 10% more planks when cleaning','掃除で板材が10%多く手に入ります'],
     ['Farol de mano','Hand lantern','手持ちランタン'],['Ilumina el área mientras limpias','Lights the area while you clean','掃除中にまわりを照らします'],
     ['Cubeta de lluvia','Rain bucket','雨水バケツ'],['Suena lluvia suave sobre el techo','Soft rain sounds on the roof','屋根にやさしい雨音が響きます'],
-    ['Batería solar','Solar battery','ソーラーバッテリー'],['Energía guardada para la noche','Energy stored for the night','夜のために電力をためておきます'],
-    ['Cortinas de lino','Linen curtains','麻のカーテン'],['Entra la luz de la luna','Moonlight comes in','月明かりが差し込みます'],
+    ['Brasero de carbón','Charcoal brazier','火鉢'],['Energía guardada para la noche','Energy stored for the night','夜のために電力をためておきます'],
+    ['Papel washi','Washi paper','和紙'],['Entra la luz de la luna','Moonlight comes in','月明かりが差し込みます'],
     ['Novela de montaña','Mountain novel','山の小説'],['Un libro para las noches','A book for the nights','夜のための一冊'],
     ['Manta tejida','Woven blanket','編みの毛布'],['Para las noches frías','For cold nights','寒い夜のために'],
-    ['Foco cálido','Warm bulb','あたたかい電球'],['Una luz amplia sobre la cama','A wide light over the bed','ベッドの上を広く照らす光'],
+    ['Mecha de aceite','Oil wick','油の灯芯'],['Una luz amplia sobre la cama','A wide light over the bed','ベッドの上を広く照らす光'],
     ['Bombillas de colores','Colored bulbs','カラー電球'],['Las luces se vuelven de colores','The lights turn colorful','明かりがカラフルになります'],
     ['Pincel de acuarela','Watercolor brush','水彩筆'],['Un recuerdo de la montaña','A memory of the mountain','山の思い出'],
     ['Semillas de lavanda','Lavender seeds','ラベンダーの種'],['Huele a campo','Smells like the countryside','野原の香りがします'],
