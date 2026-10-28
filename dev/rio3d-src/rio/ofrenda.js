@@ -26,7 +26,7 @@ export function openOfrenda(cer){
     q=w?{es:'Dejaste «'+W(w)+'» en la primera vuelta. ¿Sigue siendo cierto?',en:'You left “'+PALABRAS[w].en+'” on the first lap. Is it still true?',ja:'最初の一周で「'+PALABRAS[w].ja+'」を置いていきました。今もそうですか。'}
       :{es:'Esto es lo que dejaste atrás al empezar. ¿Sigue siendo cierto?',en:'This is what you left behind when you set out. Is it still true?',ja:'歩き出すときに置いてきたものです。今もそうですか。'}}
   const ov=document.createElement('div');ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');
-  ov.style.cssText='position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(20,22,48,.42);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);font-family:system-ui,-apple-system,sans-serif;color:#fbf1e0';
+  ov.style.cssText='position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(20,22,48,.62);font-family:system-ui,-apple-system,sans-serif;color:#fbf1e0';
   const card=document.createElement('div');card.style.cssText='max-width:440px;width:100%;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;padding:22px 20px;border-radius:18px;background:rgba(43,45,82,.93);border:1px solid #5a609a;box-shadow:0 10px 40px rgba(0,0,0,.35)';
   const h=document.createElement('div');h.style.cssText='font:600 .8rem system-ui;letter-spacing:.08em;color:#ffc77a';h.textContent=a.k+' · '+L(a)+' · '+cer+' / 4';
   const t=document.createElement('div');t.style.cssText='font:600 1.12rem/1.4 system-ui';t.textContent=L(q);

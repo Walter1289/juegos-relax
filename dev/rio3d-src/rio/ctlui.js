@@ -18,7 +18,7 @@ st.textContent=`
 #joy{position:fixed;z-index:27;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;border:2px solid rgba(251,241,224,.35);background:rgba(43,45,82,.28);pointer-events:none;display:none}
 #joy i{position:absolute;left:30px;top:30px;width:44px;height:44px;border-radius:50%;background:rgba(255,226,168,.62);border:1px solid rgba(251,241,224,.6)}
 #abox{position:fixed;z-index:28;right:max(14px,env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:190px;height:190px;display:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-#abox button{position:absolute;width:60px;height:60px;border-radius:50%;border:1px solid #5a609a;background:rgba(43,45,82,.74);color:#fbf1e0;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font:600 24px/1 system-ui,sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+#abox button{position:absolute;width:60px;height:60px;border-radius:50%;border:1px solid #5a609a;background:rgba(43,45,82,.74);color:#fbf1e0;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font:600 24px/1 system-ui,sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
 #abox button small{font:600 9.5px/1.1 system-ui,sans-serif;margin-top:2px;opacity:.85;letter-spacing:.02em}
 #abox button.press{background:rgba(255,199,122,.5)}
 #abox button.off{opacity:.42}
