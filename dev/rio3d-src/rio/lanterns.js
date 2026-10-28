@@ -8,7 +8,7 @@ import {spr,glowTex,scene} from './core.js';
 import {spawnRipple} from './ripples.js';
 import {toast} from './hud.js';
 import {dayPending,dayTake,dayRand} from '../daylamp.js';
-import {camino,UMBRAL,iman} from '../lightmsg.js';
+import {camino,UMBRAL,iman,acto,ofrendas,PALABRAS} from '../lightmsg.js';
 import {lang} from '../i18n.js';
 import {reward} from './rewards.js';
 /* ---------- linternas flotantes ---------- */
@@ -45,11 +45,14 @@ export function updateLanterns(t,ps){
 }
 
 /* recoge las linternas cercanas (antes dentro del bucle de fotogramas) */
+const reenc=v=>{try{if(v){localStorage.setItem('rio3d-reenc','1');return 1}return localStorage.getItem('rio3d-reenc')==='1'}catch(e){return false}};
 export function collectLanterns(){
   for(const [k,o] of lanterns){if(o.userData.collecting)continue;const [x,z]=lanternPos(k);const dx=x-P.px,dz=z-P.pz;
     if(dx*dx+dz*dz<iman()){collected.add(k);S.count++;try{localStorage.setItem('rio3d-lant',String(S.count));localStorage.setItem('rio3d-coll',JSON.stringify([...collected]))}catch(e){}o.userData.collecting=true;
       const ang=Math.atan2(dx,-dz)-P.psi;A.lantern(Math.sin(ang));spawnRipple(x,z);el('n').textContent=S.count;
-      if(S.count===UMBRAL&&!camino()){toast(({es:'Llevas 33 luces, como los 33 templos de Kannon. Cierra tu vuelta en el templo de la campana',en:'You carry 33 lights, like the 33 temples of Kannon. Close your lap at the bell temple',ja:'33の灯を携えました。観音霊場三十三所のように。鐘の寺で一周を締めくくりましょう'}[lang()])||'')}
+      if(S.count===5&&acto()===3&&!reenc()){reenc(1);const w=(ofrendas().find(x=>x[0]===1)||[])[1],W=w&&PALABRAS[w];
+        reward({pulse:6,audio:true,n:3,msg:W?{es:'Reconoces esta luz: es la de «'+W.es+'», la que dejaste al salir',en:'You know this light: the one of “'+W.en+'” you left when you set out',ja:'この灯に見覚えがあります。歩き出すときに置いた「'+W.ja+'」の灯です'}:{es:'Reconoces esta luz: es de las primeras que soltaste',en:'You know this light: one of the first you let go',ja:'この灯に見覚えがあります。最初のころに流した灯です'}})}
+      else if(S.count===UMBRAL&&!camino()){toast(({es:'Llevas 33 luces, como los 33 templos de Kannon. Cierra tu vuelta en el templo de la campana',en:'You carry 33 lights, like the 33 temples of Kannon. Close your lap at the bell temple',ja:'33の灯を携えました。観音霊場三十三所のように。鐘の寺で一周を締めくくりましょう'}[lang()])||'')}
       else if(S.count===1)toast('Cada linterna es una nota. Sigue el río a tu ritmo.')
       else if(S.count===11)reward({pulse:8,audio:true,n:1,msg:{es:'11 luces: tu proa respira con más fuerza',en:'11 lights: your bow glows a little stronger',ja:'11の灯。舳先の灯が少し強くなりました'}})
       else if(S.count===22)reward({pulse:8,audio:true,n:2,msg:{es:'22 luces: ya casi llevas las que el templo espera',en:'22 lights: you almost carry what the temple awaits',ja:'22の灯。寺が待つ数にあと少しです'}})
