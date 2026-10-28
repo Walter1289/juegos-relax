@@ -18,6 +18,7 @@ import {updateFireflies} from './fireflies.js';
 import {placeBoat,updatePaddles,updateCharacter,bowLight,blGlow,bl} from './boat.js';
 import {updateRipples,spawnRipple} from './ripples.js';
 import './input.js';
+import {pollPad} from './ctlui.js';
 import {updateHud,toast,savePos} from './hud.js';
 import {proaDorada} from '../lightmsg.js';
 import {updateLanterns,collectLanterns,mkLantern,updateDayLamp} from './lanterns.js';
@@ -44,7 +45,7 @@ addVignette();addPaper();
 function frame(now,manual){
   if(!manual)requestAnimationFrame(frame);
   if(PZ.on&&!manual){last=now;return}
-  const dt=Math.max(0,Math.min(.05,(now-last)/1000));X.tick(Math.max(0,(now-last)/1000));last=now;P.t+=dt;
+  const dt=Math.max(0,Math.min(.05,(now-last)/1000));X.tick(Math.max(0,(now-last)/1000));last=now;P.t+=dt;pollPad(dt);
   const s=-P.pz;
   stepPlayer(dt,s);
   // canoa, pétalos, remos, personaje y cámara

@@ -10,7 +10,7 @@ const tpQ=new THREE.Quaternion(),fpQ=new THREE.Quaternion(),tmpCam=new THREE.Per
 const camBtn=el('cam');
 export function setCam(m){S.camMode=m;camBtn.textContent=m?'Vista 3ª':'Vista 1ª';try{localStorage.setItem('rio3d-cam',m)}catch(e){}}
 camBtn.onclick=()=>setCam(1-S.camMode);
-const lookBtn=el('look');
+const lookBtn=el('look');window.__setLook=on=>setLook(on);
 function setLook(on){LOOK.on=on;LOOK.drag=false;if(on){P.hold=false;IN.steer=0}lookBtn.textContent=on?'Mirando':'Mirar';lookBtn.setAttribute('aria-pressed',on?'true':'false');lookBtn.classList.toggle('on',on)}
 lookBtn.onclick=()=>setLook(!LOOK.on);
 addEventListener('keydown',e=>{if(e.code==='KeyL')setLook(!LOOK.on)});
@@ -22,7 +22,8 @@ export function updateCamera(dt,bob){
   const sway=Math.sin(P.t*.5)*.01*cm;
   cam.position.set(P.px,1.18+bob,P.pz).addScaledVector(new THREE.Vector3(Math.sin(P.psi),0,-Math.cos(P.psi)),-.15);
   /* mirada libre: con inercia suave mientras está activa; al desactivar vuelve al frente */
-  if(LOOK.on||LOOK.drag){if(!LOOK.drag){LOOK.yaw+=LOOK.vy*dt;LOOK.vy*=Math.exp(-dt*2.6)}}
+  LOOK.t+=dt;
+  if(LOOK.on||LOOK.drag||(LOOK.auto&&LOOK.t<3.5)){if(!LOOK.drag){LOOK.yaw+=LOOK.vy*dt;LOOK.vy*=Math.exp(-dt*2.6)}}
   else{const k=Math.exp(-dt*2.4);LOOK.yaw*=k;LOOK.pitch*=k;LOOK.vy=0}
   if(LOOK.yaw>Math.PI)LOOK.yaw-=2*Math.PI;else if(LOOK.yaw<-Math.PI)LOOK.yaw+=2*Math.PI;
   P.pitch+=((-IN.pitch*.22)-P.pitch)*2*dt;
