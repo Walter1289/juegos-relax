@@ -19,6 +19,8 @@ import {lang} from '../i18n.js';
 import {startCeremony} from './ceremony.js';
 import {NL} from './world.js';
 import {reward,hintStill} from './rewards.js';
+import {openOfrenda} from './ofrenda.js';
+import {setOfrendaPend,ofrendaPend} from '../lightmsg.js';
 import {LETTER_FIRST} from '../story.js';
 import {el} from './util.js';
 const T3=a=>a[lang()]||a.es;
@@ -28,6 +30,7 @@ function updateDragons(ps,k0,k1){
   for(let k=Math.max(0,k0-1);k<=k1+2;k++){if(lmType(k)!==10||dragons.has(k))continue;const s=dragonS(k);if(s<ps-140||s>ps+380)continue;const g=buildDragon(k);dragons.set(k,g);scene.add(g)}
   for(const [,g] of dragons){const d=g.userData.dragon;if(!d.roared&&ps>d.s-60&&ps<d.s+20){d.roared=true;try{A.roar()}catch(e){}toast('El dragón anuncia el Castillo de la Garza Blanca')}}}
 export function updateLandmarks(ps){
+  if(!window.__ofrChk&&S.started&&P.t>6){window.__ofrChk=1;const pn=ofrendaPend();if(pn)openOfrenda(pn)}
   const k0=Math.max(0,Math.floor((ps-140)/LMS)),k1=Math.floor((ps+340)/LMS);
   updateDragons(ps,k0,k1);
   for(const [k,g] of lmMade)if(k<k0||k>k1){if(g.parent)scene.remove(g);disposeLM(g);lmMade.delete(k)}
@@ -50,7 +53,7 @@ export function updateLandmarks(ps){
     window.__cerK=k;setLapK(k);const n=disponibles();
     if(n<1){toast(T3({es:'Vuelta completa. Sin linternas que liberar: la próxima vuelta llevará más luz',en:'Lap complete. No lanterns to release: the next lap will carry more light',ja:'一周しました。放つランタンがありません。次の一周は、もっと灯を運びましょう'}));continue}
     const abre=n>=UMBRAL&&!camino();ceremonia(n,abre);S.count=0;try{el('n').textContent=0}catch(e){}
-    const gran=n>=GRAN;startCeremony(n,gran);
+    const gran=n>=GRAN;startCeremony(n,gran);{const cn=ceremonias();if(cn<=4){setOfrendaPend(cn);setTimeout(()=>openOfrenda(cn),gran?14000:9000)}}
     const cer=ceremonias(),p=parts(),fr=cer<=4?p[(cer-1)*2]+joiner()+p[(cer-1)*2+1]:'';
     let msg=T3({es:'Ceremonia de liberación: '+n+' linternas suben al cielo',en:'Release ceremony: '+n+' lanterns rise into the sky',ja:'放灯の儀式：'+n+'のランタンが空へのぼります'});
     if(fr&&(abre||camino()))msg+=T3({es:' · el cartel de la cabaña descifra: «'+fr+'»',en:' · the cabin sign deciphers: “'+fr+'”',ja:' · 小屋の看板が読み解いた言葉：「'+fr+'」'});

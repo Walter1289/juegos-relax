@@ -40,7 +40,9 @@ export const tasks2Left=()=>{const o=g2();return o.day===dayK()?Math.max(0,V_PER
 export const TASK_TXT=type=>T[type]||null;
 const get=()=>{try{return JSON.parse(localStorage.getItem(TKEY)||'{}')}catch(e){return{}}};
 export const tasksDone=get;
-export const tasksActive=()=>foundTypes().has(10);
+/* Acto 2 (tras la primera ceremonia): los encargos de Mara se abren. En el Río 2D, que no tiene vueltas, se mantiene la regla antigua (llegar al castillo). */
+const cerN=()=>{try{return +localStorage.getItem('rio3d-cer')||0}catch(e){return 0}},lapN=()=>{try{return localStorage.getItem('rio3d-lapk')!=null}catch(e){return false}};
+export const tasksActive=()=>cerN()>=1||(!lapN()&&foundTypes().has(10));
 export function addTaskTexts(ux){ux.add(T.map(x=>[x[0],x[1],x[2]]));ux.add(T.map(x=>[x[3],x[4],x[5]]));ux.add(V.map(x=>[x[0],x[1],x[2]]));ux.add(V.map(x=>[x[3],x[4],x[5]]));ux.add([['Carta de vuelta','Letter back','返事の手紙'],['Hoy ya diste dos vueltas. Mañana, más.','You have already done two returns today. More tomorrow.','今日はもう二回ふり返りました。続きは明日。']]);ux.add([['Mantén pulsado para hacerlo','Press and hold to do it','長押しで実行'],['Hecho. Un recuerdo más para la cabaña.','Done. One more keepsake for the cabin.','できました。小屋に思い出がひとつ増えました。'],['Encargo de Mara','Mara’s errand','マラのお願い'],['En el margen','In the margin','余白に']])}
 let box,bar,txt,cur=null,curV=0,hold=0,raf=0,t0=0,did=false,chimeFn=null;
 function mk(){
