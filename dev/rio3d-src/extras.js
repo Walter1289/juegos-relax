@@ -43,10 +43,10 @@ export function initExtras(C){
   document.head.appendChild(st);
 
   /* ---------- 1. calidad adaptativa ---------- */
-  const dpr=Math.min(devicePixelRatio||1,2),LV=[.7,.85,1,1.25,1.5];
+  const dpr=Math.min(devicePixelRatio||1,2),LV=[.85,1,1.25,1.5,1.75,2];
   let maxL=0;LV.forEach((v,i)=>{if(v<=dpr+.001)maxL=i});
-  let qmode=ls.get('rio3d-q','auto'),lvl=Math.min(maxL,3),ceil=maxL,ema=1/60,tAcc=0,cool=5,good=0,bad=0,lastUp=0,curRatio=0;
-  const FIX={hi:1.5,mid:1,lo:.7};
+  let qmode=ls.get('rio3d-q','auto'),lvl=Math.max(0,maxL-1),ceil=maxL,ema=1/60,tAcc=0,cool=5,good=0,bad=0,lastUp=0,curRatio=0;
+  const FIX={hi:2,mid:1.25,lo:.85};
   const ratioFor=()=>X.photo?Math.min(dpr,1.75):qmode==='auto'?Math.min(LV[lvl],dpr):Math.min(FIX[qmode]||1,dpr);
   function applyRatio(){const r=ratioFor();if(Math.abs(r-curRatio)>.01){curRatio=r;R.setPixelRatio(r);R.setSize(innerWidth,innerHeight,false);rtSize()}}
   X.tick=function(d){
@@ -98,11 +98,11 @@ export function initExtras(C){
     catch(e){rt=new THREE.WebGLRenderTarget(_v.x,_v.y,{samples:4,depthBuffer:true})}
   }
   /* Contador de rendimiento opcional: abre el juego con ?perf=1 (útil para medir en el iPad real). */
-  const PERF=/[?&]perf=1/.test(location.search);let pEl=null,pT=performance.now(),pN=0,pMax=0,pLast=performance.now();
+  let PERF=/[?&]perf=1/.test(location.search)||ls.get('rio3d-perf','0')==='1';let pEl=null,pT=performance.now(),pN=0,pMax=0,pLast=performance.now();
   function perfTick(){
     const n=performance.now(),d=n-pLast;pLast=n;pN++;if(d>pMax)pMax=d;
     if(n-pT<1000)return;
-    if(!pEl){pEl=document.createElement('div');pEl.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99999;font:12px/1.35 monospace;color:#fff;background:rgba(0,0,0,.55);padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(pEl)}
+    if(pEl)pEl.style.display='';if(!pEl){pEl=document.createElement('div');pEl.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99999;font:12px/1.35 monospace;color:#fff;background:rgba(0,0,0,.55);padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(pEl)}
     const i=R.info.render;
     pEl.textContent=Math.round(pN*1000/(n-pT))+' fps · peor '+Math.round(pMax)+' ms\n'+i.calls+' llamadas · '+Math.round(i.triangles/1000)+'k tri\nratio '+R.getPixelRatio().toFixed(2)+' · '+R.info.memory.geometries+' geo';
     pT=n;pN=0;pMax=0;
@@ -253,6 +253,7 @@ export function initExtras(C){
     const m=modal(`<h2>Ajustes</h2>
     <div class="row"><span>Calidad<br><small style="color:var(--muted)" id="xql"></small></span><select id="xq"><option value="auto">Automática</option><option value="hi">Alta</option><option value="mid">Media</option><option value="lo">Baja (más fluida)</option></select></div>
     <div class="row"><span>Volumen</span><input type="range" id="xv" min="0" max="1" step=".05" style="width:55%;accent-color:#ffc77a"></div>
+    <div class="row"><span>Mostrar rendimiento<br><small style="color:var(--muted)">Fps y carga, abajo a la izquierda</small></span><select id="xperf"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Estación<br><small style="color:var(--muted)">Cambiarla recarga el río</small></span><select id="xs"><option value="auto">Según la fecha</option><option value="0">Primavera</option><option value="1">Verano</option><option value="2">Otoño</option><option value="3">Invierno</option></select></div>
     <div class="row"><span>Idioma</span><select id="xl"><option value="es">Español</option><option value="en">English</option><option value="ja">日本語</option></select></div>
     <div class="row"><span>Subtítulos de ambiente<br><small style="color:var(--muted)">Describe los sonidos con texto</small></span><select id="xsub"><option value="0">No</option><option value="1">Sí</option></select></div>
@@ -268,6 +269,7 @@ export function initExtras(C){
     const xv=m.querySelector('#xv');xv.value=A.vol;xv.oninput=()=>{A.setVol(+xv.value);ls.set('rio3d-vol',xv.value)};
     q.value=qmode;s.value=ls.get('rio3d-season','auto');ql.textContent=qLabel();
     q.onchange=()=>{qmode=q.value;ls.set('rio3d-q',qmode);cool=3;applyRatio();ql.textContent=qLabel()};
+    const xpf=m.querySelector('#xperf');xpf.value=PERF?'1':'0';xpf.onchange=()=>{PERF=xpf.value==='1';ls.set('rio3d-perf',xpf.value);if(pEl)pEl.style.display=PERF?'':'none'};
     s.onchange=()=>{ls.set('rio3d-season',s.value);try{C.savePos()}catch(e){}location.reload()};
     const xl=m.querySelector('#xl');xl.value=lang();xl.onchange=()=>{setLang(xl.value);try{C.savePos()}catch(e){}location.reload()};
     const xs=m.querySelector('#xsub');xs.value=ls.get('rio3d-subs','0');xs.onchange=()=>ls.set('rio3d-subs',xs.value);

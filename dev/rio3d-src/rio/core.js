@@ -5,7 +5,7 @@ import * as THREE from 'three';
 /* ---------- renderer / escena ---------- */
 export const canvas=document.getElementById('c');
 export const R=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
-R.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
+R.setPixelRatio(Math.min(devicePixelRatio||1,2));
 export const scene=new THREE.Scene();
 scene.fog=new THREE.Fog(0xcccccc,22,250);
 export const cam=new THREE.PerspectiveCamera(68,1,.05,900);

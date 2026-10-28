@@ -1,5 +1,5 @@
 /* Service worker: precarga todo y sirve sin conexión. Sube VERSION para forzar actualización. */
-const VERSION = 'v70';
+const VERSION = 'v71';
 const CACHE = 'respirar-' + VERSION;
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
@@ -7,7 +7,7 @@ const ASSETS = [
   './cabana/', './cabana/index.html',
   './rio3d/', './rio3d/index.html', './rio3d/app.js',
   './cabana3d/', './cabana3d/index.html', './cabana3d/app.js',
-  './cabana/app.js', './shared/three-2U5FELNC.js',
+  './cabana/app.js', './shared/three-33BVN4KF.js',
   './privacidad.html',
   './creditos.html',
   './datos.html',

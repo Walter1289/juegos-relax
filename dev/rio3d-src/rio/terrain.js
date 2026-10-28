@@ -5,10 +5,11 @@ import {COLS,ROWS,DX,DZ,bambooAt,gardenAt,forestAt,H,cx,hw,SE,clearAt,castleClea
 import {tmp,cBed,cG1,cG2,cSand,cHi,cTop,cBam,cSeasG,cGold,cGold2,cPetal,cGravel,MAXT,V3,Q,UP,S3,M4,crownM,trunkM,BLOS,SBLOS,SBBLOS,BRD,umbM,UMB,pineM,PINE,bushM,BBLOS,BUSH,bambM,BAMB,bleafM,BLEAF,reedM,REED,padM,lotM,tPos,tCol,tGeo} from './props.js';
 let anchor={a:1e9,b:1e9};
 const tPosS=new Float32Array(COLS*ROWS*3),tColS=new Float32Array(COLS*ROWS*3),STG=new Map();
+const FULL=new Map();let cullDirty=true;
 function stg(mesh){let s=STG.get(mesh);if(!s){const n=mesh.instanceMatrix.array.length;s={m:new Float32Array(n),c:new Float32Array(n/16*3)};STG.set(mesh,s)}return s}
 const stM=(mesh,i,M)=>{M.toArray(stg(mesh).m,i*16)};
 const stC=(mesh,i,c)=>{const S=stg(mesh);S.hc=1;const a=S.c;a[i*3]=c.r;a[i*3+1]=c.g;a[i*3+2]=c.b};
-function commitInst(mesh,n){const s=stg(mesh);mesh.instanceMatrix.array.set(s.m.subarray(0,n*16));mesh.instanceMatrix.needsUpdate=true;if(s.hc){if(!mesh.instanceColor)mesh.setColorAt(0,tmp);mesh.instanceColor.array.set(s.c.subarray(0,n*3));mesh.instanceColor.needsUpdate=true}mesh.count=n}
+function commitInst(mesh,n){const s=stg(mesh);mesh.instanceMatrix.array.set(s.m.subarray(0,n*16));mesh.instanceMatrix.needsUpdate=true;if(s.hc){if(!mesh.instanceColor)mesh.setColorAt(0,tmp);mesh.instanceColor.array.set(s.c.subarray(0,n*3));mesh.instanceColor.needsUpdate=true}mesh.count=n;FULL.set(mesh,n);cullDirty=true}
 function* rebuild(ax,as){
   const cm=[];
   const x0=ax-(COLS/2)*DX,s0=as-60*1;
@@ -92,6 +93,40 @@ function* rebuild(ax,as){
 
   for(const [mm,n] of cm)commitInst(mm,n);tPos.set(tPosS);tCol.set(tColS);tGeo.attributes.position.needsUpdate=true;tGeo.attributes.color.needsUpdate=true;tGeo.computeVertexNormals();
 }
+
+/* Recorte por vista: las instancias (árboles, arbustos, bambú…) que quedan detrás de la cámara, fuera de pantalla o más allá de la niebla no se dibujan.
+   Libera mucha carga de la GPU, y con ella el juego puede mantener la resolución nativa del iPad en vez de bajarla. */
+const CR=new Map([[pineM,16],[crownM,14],[umbM,12],[bambM,26],[bushM,4],[reedM,4],[padM,2.5],[lotM,2.5]]);
+const PAIR=new Map([[crownM,trunkM],[bambM,bleafM]]);
+const _mc=new THREE.PerspectiveCamera(),_pm=new THREE.Matrix4(),_fr=new THREE.Frustum(),_lp=new THREE.Vector3(1e9,0,0),_lq=new THREE.Quaternion(),_cp=new THREE.Vector3(),_cq=new THREE.Quaternion();
+export function cullInstances(cam,fogFar){
+  cam.getWorldPosition(_cp);cam.getWorldQuaternion(_cq);
+  if(!cullDirty&&_cp.distanceToSquared(_lp)<16&&Math.abs(_cq.dot(_lq))>.9986&&Math.abs(fogFar-_lf)<8)return;
+  cullDirty=false;_lp.copy(_cp);_lq.copy(_cq);_lf=fogFar;
+  /* frustum ensanchado (margen para giros rápidos) */
+  _mc.fov=Math.min(150,cam.fov*1.4);_mc.aspect=cam.aspect*1.15;_mc.near=cam.near;_mc.far=cam.far;_mc.updateProjectionMatrix();
+  _mc.matrixWorld.copy(cam.matrixWorld);_mc.matrixWorldInverse.copy(cam.matrixWorldInverse);
+  _pm.multiplyMatrices(_mc.projectionMatrix,_mc.matrixWorldInverse);_fr.setFromProjectionMatrix(_pm);
+  const pl=_fr.planes,far=fogFar+30;
+  for(const [mesh,r] of CR){
+    const n=FULL.get(mesh);if(!n)continue;const st=stg(mesh),m=st.m,dst=mesh.instanceMatrix.array;
+    const mate=PAIR.get(mesh),st2=mate&&FULL.get(mate)?stg(mate):null;
+    let k=0;
+    for(let i=0;i<n;i++){
+      const o=i*16,x=m[o+12],y=m[o+13],z=m[o+14];
+      const dx=x-_cp.x,dz=z-_cp.z;if(dx*dx+dz*dz>(far+r)*(far+r))continue;
+      let vis=true;for(let q=0;q<6;q++){const pn=pl[q];if(pn.normal.x*x+pn.normal.y*y+pn.normal.z*z+pn.constant<-r){vis=false;break}}
+      if(!vis)continue;
+      const d=k*16;for(let c=0;c<16;c++)dst[d+c]=m[o+c];
+      if(st.hc){const ic=mesh.instanceColor.array;ic[k*3]=st.c[i*3];ic[k*3+1]=st.c[i*3+1];ic[k*3+2]=st.c[i*3+2]}
+      if(st2){const da=mate.instanceMatrix.array;for(let c=0;c<16;c++)da[d+c]=st2.m[o+c];if(st2.hc){const ic2=mate.instanceColor.array;ic2[k*3]=st2.c[i*3];ic2[k*3+1]=st2.c[i*3+1];ic2[k*3+2]=st2.c[i*3+2]}}
+      k++;
+    }
+    mesh.count=k;mesh.instanceMatrix.needsUpdate=true;if(st.hc&&mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
+    if(mate){mate.count=k;mate.instanceMatrix.needsUpdate=true;if(mate.instanceColor)mate.instanceColor.needsUpdate=true}
+  }
+}
+let _lf=0;
 let rbGen=null,rbAs=0,rbDone=false;
 export function ensureTerrain(px,pz,buildFoam){
   const as=Math.floor(-pz/(DZ*BLOCK))*DZ*BLOCK,ax=Math.round(px/(DX*BLOCK))*DX*BLOCK;

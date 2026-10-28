@@ -13,7 +13,7 @@ import {lmPos,LMS,cx,hw,lmType} from './world.js';
 import {scene,R,cam,canvas} from './core.js';
 import {applyEnv,water,env,todName} from './env.js';
 import {swayU} from './props.js';
-import {ensureTerrain} from './terrain.js';
+import {ensureTerrain,cullInstances} from './terrain.js';
 import {updateFireflies} from './fireflies.js';
 import {placeBoat,updatePaddles,updateCharacter,bowLight,blGlow,bl} from './boat.js';
 import {updateRipples,spawnRipple} from './ripples.js';
@@ -71,6 +71,7 @@ function frame(now,manual){
   A.update(P.v+Math.abs(P.steer)*1.5,night,P.t);
   updateHud(dt,s);
   X.camAdjust();X.update(dt,P.dist||s);
+  cam.updateMatrixWorld();cullInstances(cam,scene.fog.far);
   if(!manual)X.render();
 }
 /* ---------- enlace con los extras (calidad, modo foto, diario con fotos, ajustes) ---------- */

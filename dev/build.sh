@@ -17,4 +17,5 @@ sed 's#<script src="app.js"></script>#<script type="module" src="app.js"></scrip
 sed 's#<script src="app.js"></script>#<script type="module" src="app.js"></script>#' cabin.html > "$R/cabana3d/index.html"
 # 2D
 python3 "$D/tools/b2d.py" "$R"
+sed -i "s#\./shared/three-[A-Za-z0-9]*\.js#./shared/$CN#" "$R/sw.js"
 echo "ok · chunk: $CN"
