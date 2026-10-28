@@ -7,7 +7,7 @@ export const setLang=v=>{try{localStorage.setItem('rio3d-lang',v)}catch(e){}};
 // [es, en, ja]
 const D=[
 ['← Menú','← Menu','← メニュー'],['Linternas','Lanterns','ランタン'],['m · Lugares','m · Places','m · 場所'],
-['Vista 1ª','View 1st','一人称'],['Vista 3ª','View 3rd','三人称'],['Más','More','その他'],['Pausa','Pause','一時停止'],['Continuar','Resume','再開'],
+['Mirar','Look','見回す'],['Mirando','Looking','見回し中'],['Vista 1ª','View 1st','一人称'],['Vista 3ª','View 3rd','三人称'],['Más','More','その他'],['Pausa','Pause','一時停止'],['Continuar','Resume','再開'],
 ['Foto','Photo','写真'],['Diario','Journal','日記'],['Ajustes','Settings','設定'],['Reiniciar','Restart','最初から'],['Sonido: sí','Sound: on','音: オン'],['Sonido: no','Sound: off','音: オフ'],
 ['Amanecer','Dawn','夜明け'],['Día','Day','昼'],['Atardecer','Dusk','夕暮れ'],['Noche','Night','夜'],['Madrugada','Predawn','明け方'],
 ['La corriente te lleva · mantén presionado y desliza a los lados para dirigir','The current carries you · press and slide sideways to steer','流れに身をまかせて · 長押ししたまま左右にスライドして操作'],

@@ -44,7 +44,7 @@ export function castleClear(x,s){const I=castleNear(s);if(!I||Math.abs(s-I.s0)>1
 export function dragonS(k){const c=lmPos(k),sk=lmPos(k-1);return sk-80>=c-360?sk-80:sk+80}
 
 /* malla del terreno por ventana */
-export const COLS=150,ROWS=120,DX=2.6,DZ=3,BLOCK=8;
+export const COLS=150,ROWS=170,BACK=170,DX=2.6,DZ=3,BLOCK=8;
 /* estación activa */
 export const SE=SEAS[seasonIdx()];
 /* separación entre lugares y su posición a lo largo del río */

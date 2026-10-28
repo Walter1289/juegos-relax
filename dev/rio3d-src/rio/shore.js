@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import {vn} from './util.js';
 import {S,P} from './state.js';
-import {ROWS,DZ,hw,cx} from './world.js';
+import {ROWS,BACK,DZ,hw,cx} from './world.js';
 import {scene} from './core.js';
 import {spawnRipple} from './ripples.js';
 export const foamMat=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.7,depthWrite:false,side:THREE.DoubleSide});
@@ -10,7 +10,7 @@ const FN=ROWS;const fPos=new Float32Array(FN*4*2*3),fCol=new Float32Array(FN*4*2
 fG.setAttribute('position',new THREE.BufferAttribute(fPos,3));fG.setAttribute('color',new THREE.BufferAttribute(fCol,4));
 {const idx=[];for(let side=0;side<2;side++)for(let j=0;j<FN-1;j++){const b=(side*FN+j)*4;idx.push(b,b+1,b+4,b+1,b+5,b+4,b+1,b+2,b+5,b+2,b+6,b+5,b+2,b+3,b+6,b+3,b+7,b+6)}fG.setIndex(idx)}
 export const foam=new THREE.Mesh(fG,foamMat);foam.frustumCulled=false;foam.renderOrder=1;scene.add(foam);
-export function buildFoam(as){const s0=as-60;
+export function buildFoam(as){const s0=as-BACK;
   for(let side=0;side<2;side++){const sg=side?1:-1;
     for(let j=0;j<FN;j++){const s=s0+j*DZ,e=hw(s)-1.0+(vn(s*.08,side*9)-.5)*.9,w=.9+vn(s*.2,side)*1.2,x=cx(s)+sg*e,z=-s,al=Math.max(.06,Math.min(.85,.1+.85*(vn(s*.11+side*30,5)*.6+vn(s*.5,side*7+3)*.5)-.12));
       const b=(side*FN+j)*4;
