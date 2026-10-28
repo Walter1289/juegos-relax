@@ -1,5 +1,5 @@
 /* Service worker: precarga todo y sirve sin conexión. Sube VERSION para forzar actualización. */
-const VERSION = 'v73';
+const VERSION = 'v74';
 const CACHE = 'respirar-' + VERSION;
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
@@ -51,7 +51,10 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('respirar-') && k !== CACHE && k !== 'respirar-fonts').map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
-/* Caché primero, con actualización en segundo plano (stale-while-revalidate) solo para mismo origen. */
+/* Estrategia por tipo de archivo:
+   - páginas y código (html, js, css, json): primero la red (máx. 4 s) y, si no hay conexión, el caché. Así cada vez que se abre el juego se ve lo último publicado y nunca se mezclan páginas viejas con código nuevo.
+   - lo demás (fuentes, iconos, el fragmento de Three.js con hash en su nombre): caché primero, con actualización en segundo plano. */
+const FRESH = /\.(html|js|css|json|webmanifest)$|\/$/;
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -66,9 +69,26 @@ self.addEventListener('fetch', e => {
     }
     return;
   }
+  const hashed = /three-[A-Za-z0-9]+\.js$/.test(url.pathname);
+  if (!hashed && (req.mode === 'navigate' || FRESH.test(url.pathname))) {
+    e.respondWith(caches.open(CACHE).then(async c => {
+      try {
+        const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 4000);
+        const r = await fetch(req, {signal: ctl.signal, cache: 'no-cache'}); clearTimeout(t);
+        if (r && r.ok) { c.put(req, r.clone()); return r; }
+        throw new Error('bad');
+      } catch (err) {
+        const hit = await c.match(req, {ignoreSearch: true});
+        return hit || (req.mode === 'navigate' ? c.match('./index.html') : Response.error());
+      }
+    }));
+    return;
+  }
   e.respondWith(caches.open(CACHE).then(async c => {
     const hit = await c.match(req, {ignoreSearch: true});
-    const net = fetch(req).then(r => { if (r && r.ok) c.put(req, r.clone()); return r }).catch(() => null);
-    return hit || (await net) || (req.mode === 'navigate' ? c.match('./index.html') : Response.error());
+    if (hit) { if (!hashed) fetch(req).then(r => { if (r && r.ok) c.put(req, r.clone()) }).catch(() => {}); return hit; }
+    const r = await fetch(req).catch(() => null);
+    if (r && r.ok) c.put(req, r.clone());
+    return r || Response.error();
   }));
 });

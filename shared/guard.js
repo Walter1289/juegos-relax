@@ -33,3 +33,20 @@
   addEventListener('unhandledrejection',function(){});
   addEventListener('pointerdown',function f(){removeEventListener('pointerdown',f);try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}},{once:true});
 })();
+
+/* Aviso de actualización: si el juego se actualizó mientras estaba abierto, ofrece recargar (sin cortar nada). */
+(function(){
+  if(!('serviceWorker' in navigator)||!navigator.serviceWorker.controller)return;
+  var L='es';try{var l=localStorage.getItem('rio3d-lang');if(l==='en'||l==='ja')L=l}catch(e){}
+  var T={es:'El juego se actualizó · toca para recargar',en:'The game was updated · tap to reload',ja:'ゲームが更新されました · タップで再読み込み'}[L];
+  var done=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(done)return;done=true;
+    function add(){
+      var b=document.createElement('button');b.type='button';b.textContent=T;
+      b.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));z-index:998;min-height:44px;padding:10px 18px;border-radius:99px;border:1px solid #ffc77a;background:rgba(43,45,82,.95);color:#fbf1e0;font:600 .85rem system-ui,sans-serif;cursor:pointer';
+      b.onclick=function(){location.reload()};document.body.appendChild(b);setTimeout(function(){b.remove()},15000);
+    }
+    if(document.body)add();else document.addEventListener('DOMContentLoaded',add);
+  });
+})();
