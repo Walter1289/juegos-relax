@@ -10,6 +10,7 @@ import {toast} from './hud.js';
 import {dayPending,dayTake,dayRand} from '../daylamp.js';
 import {camino,UMBRAL,iman} from '../lightmsg.js';
 import {lang} from '../i18n.js';
+import {reward} from './rewards.js';
 /* ---------- linternas flotantes ---------- */
 const LSP=38;const lanterns=new Map(),pool=[];let collected=new Set();try{JSON.parse(localStorage.getItem('rio3d-coll')||'[]').forEach(i=>collected.add(i))}catch(e){}try{S.count=+localStorage.getItem('rio3d-lant')||0}catch(e){}
 export const lanternPos=k=>{const s=70+k*LSP+hash(k,1)*20,e=(hash(k,2)*2-1)*.5*hw(s);return[cx(s)+e,-s]};
@@ -32,8 +33,11 @@ export function updateLanterns(t,ps){
     if(collected.has(k)||lanterns.has(k))continue;
     const o=pool.pop()||mkLantern();o.userData.fade=1;o.scale.setScalar(1);scene.add(o);lanterns.set(k,o);
   }
+  /* primer minuto: quien aún no ha recogido ninguna ve la más cercana más grande y dorada, para entender sin texto qué hacer */
+  let gk=-1;if(collected.size===0&&S.count===0){for(const [k] of lanterns)if(lanternPos(k)[1]<-ps+4&&(gk<0||k<gk))gk=k}
   for(const [k,o] of lanterns){
     const [x,z]=lanternPos(k);o.position.set(x,Math.sin(t*1.1+k)*.04,z);o.rotation.z=Math.sin(t*.8+k*2)*.08;
+    {const g=o.userData.glow,on=k===gk;if(g.userData.gd!==on){g.userData.gd=on;g.scale.set(on?6:3.2,on?6:3.2,1);g.material.color.set(on?0xffd27a:0xffc77a)}}
     o.userData.glow.material.opacity=(.5+.25*S.glowK)*(.8+.2*Math.sin(t*3+k));o.userData.refl.material.opacity=(.25+.3*S.glowK)*(.85+.15*Math.sin(t*2+k));
     if(o.userData.collecting){o.userData.fade-=.016;o.scale.setScalar(1+(1-o.userData.fade)*.6);o.userData.glow.material.opacity*=Math.max(0,o.userData.fade);o.userData.refl.material.opacity*=Math.max(0,o.userData.fade);
       if(o.userData.fade<=0){scene.remove(o);lanterns.delete(k);pool.push(o);o.userData.collecting=false}}
@@ -47,6 +51,8 @@ export function collectLanterns(){
       const ang=Math.atan2(dx,-dz)-P.psi;A.lantern(Math.sin(ang));spawnRipple(x,z);el('n').textContent=S.count;
       if(S.count===UMBRAL&&!camino()){toast(({es:'Llevas 33 luces, como los 33 templos de Kannon. Cierra tu vuelta en el templo de la campana',en:'You carry 33 lights, like the 33 temples of Kannon. Close your lap at the bell temple',ja:'33の灯を携えました。観音霊場三十三所のように。鐘の寺で一周を締めくくりましょう'}[lang()])||'')}
       else if(S.count===1)toast('Cada linterna es una nota. Sigue el río a tu ritmo.')
+      else if(S.count===11)reward({pulse:8,audio:true,n:1,msg:{es:'11 luces: tu proa respira con más fuerza',en:'11 lights: your bow glows a little stronger',ja:'11の灯。舳先の灯が少し強くなりました'}})
+      else if(S.count===22)reward({pulse:8,audio:true,n:2,msg:{es:'22 luces: ya casi llevas las que el templo espera',en:'22 lights: you almost carry what the temple awaits',ja:'22の灯。寺が待つ数にあと少しです'}})
       else if(S.count===3)toast(({es:'Las linternas guardan luz. Reúnelas: quizá tengan un destino',en:'Lanterns hold light. Gather them: perhaps they have a destination',ja:'ランタンは灯を宿します。集めてみましょう。行き先があるかもしれません'}[lang()])||'')}}
 }
 

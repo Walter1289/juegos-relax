@@ -20,6 +20,8 @@ const L=[ // [lugar(es), es, en, ja]
 ];
 export const LM_ES=L.map(x=>x[0]);
 export const LETTERS=L.map(x=>x[1]);
+/* primera frase de la carta de cada lugar, en los tres idiomas (para el primer vistazo al descubrirlo) */
+export const LETTER_FIRST=L.map(x=>{const f=t=>(t||'').split(/(?<=[.!?。])\s*/)[0];return{es:f(x[1]),en:f(x[2]),ja:f(x[3])}});
 export const foundTypes=()=>{const s=new Set();for(const k of ['rio3d-found',LKEY]){try{JSON.parse(localStorage.getItem(k)||'[]').forEach(i=>s.add(i))}catch(e){}}return s};
 export function addStoryTexts(ux){addAlbumTexts(ux);addTaskTexts(ux);addMileTexts(ux);addZenTexts(ux);
   ux.add(L.map(x=>[x[1],x[2],x[3]]));

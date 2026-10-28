@@ -170,6 +170,8 @@ export const A={
     o.connect(gn);gn.connect(pn);o.start(t);o.stop(t+.35);
   },
   discover(){hap([14,70,14]);if(!this.ok())return;this.cap('Nota de linterna');const t=this.ctx.currentTime;[0,3,5,6].forEach((i,j)=>this.pluck(SC[i],.12,t+j*.2));this.bell(SC[8],t+.9,.07)},
+  /* mojón del camino: frase breve de koto que sube y una campana suave; n cambia la altura para que no suene siempre igual */
+  milestone(n){hap([10,60,10]);if(!this.ok())return;this.cap('Koto y campana');const t=this.ctx.currentTime+.05,b=Math.max(0,Math.min(3,n|0));for(let j=0;j<5;j++)this.pluck(SC[Math.min(9,b+j)],.08,t+j*.24,0,-2);this.bell(146.83*(b%2?1.5:1),t+1.4,.06,true,0,-8)},
   music(){
     const c=this.ctx;
     // bordón grave y suave

@@ -18,6 +18,8 @@ import {disponibles,camino,UMBRAL,GRAN,ceremonia,ceremonias,lapK,setLapK,parts,j
 import {lang} from '../i18n.js';
 import {startCeremony} from './ceremony.js';
 import {NL} from './world.js';
+import {reward,hintStill} from './rewards.js';
+import {LETTER_FIRST} from '../story.js';
 import {el} from './util.js';
 const T3=a=>a[lang()]||a.es;
 const dragons=new Map();try{window.__dragons=dragons}catch(e){}
@@ -30,7 +32,16 @@ export function updateLandmarks(ps){
   updateDragons(ps,k0,k1);
   for(const [k,g] of lmMade)if(k<k0||k>k1){if(g.parent)scene.remove(g);disposeLM(g);lmMade.delete(k)}
   for(let k=k0;k<=k1;k++){let g=lmMade.get(k);if(!g){g=buildLM(k);lmMade.set(k,g)}if(!g.parent)scene.add(g);
-    {const t=lmType(k);if(lmPos(k)-ps<(t===2?70:t===10?130:55)&&ps-lmPos(k)<25&&(!lmFound.has(t)||(!S.X.hasSnap(t)&&!retaken.has(t)))){const first=!lmFound.has(t);lmFound.add(t);retaken.add(t);lmSeen.add(k);startCine(k);if(t===4)albumSee('garza');if(t===9)albumSee('loto');if(first){toast('Descubriste: '+LM[t]);try{A.chime(0,k%5)}catch(e){}saveFound();updateDiary(ps);S.X.found(t)}}}}
+    {const t=lmType(k);if(lmPos(k)-ps<(t===2?70:t===10?130:55)&&ps-lmPos(k)<25&&(!lmFound.has(t)||(!S.X.hasSnap(t)&&!retaken.has(t)))){const first=!lmFound.has(t);lmFound.add(t);retaken.add(t);lmSeen.add(k);startCine(k);if(t===4)albumSee('garza');if(t===9)albumSee('loto');if(first){toast('Descubriste: '+LM[t]);try{A.chime(0,k%5)}catch(e){}saveFound();updateDiary(ps);S.X.found(t);const lf=LETTER_FIRST[t];if(lf)reward({msg:{es:'Mara: «'+lf.es+'»',en:'Mara: “'+lf.en+'”',ja:'マラ：「'+lf.ja+'」'},delay:3200})}}}}
+  /* recompensas intermedias por lugar de la vuelta: mojón (3.º, 6.º y 9.º lugar) y descanso a mitad de camino (5.º) */
+  {const lk=lapK();if(lk>=0)for(let k=Math.max(k0,lk+1);k<=k1;k++){
+    if(k<=(window.__rwK||(window.__rwK=+(localStorage.getItem('rio3d-rwk')||-1))))continue;
+    if(lmPos(k)-ps>30||ps-lmPos(k)>25)continue;
+    window.__rwK=k;try{localStorage.setItem('rio3d-rwk',String(k))}catch(e){}
+    const i=k-lk;
+    if(i===3||i===6||i===9)reward({audio:true,n:i/3,pulse:6,msg:{es:'Un mojón del camino: ya llevas '+i+' lugares de esta vuelta',en:'A waymarker on the road: '+i+' places of this lap behind you',ja:'道標です。この一周で'+i+'か所を過ぎました'},delay:1500});
+    else if(i===5)reward({fx:hintStill,msg:{es:'Mitad del camino: un buen sitio para quedarse quieto un rato',en:'Halfway along: a good place to stay still for a while',ja:'道のなかば。しばらくじっとするのによい場所です'},delay:1500});
+  }}
   /* vuelta al río: la primera vez que llegas al templo empieza tu vuelta; al regresar a un templo once lugares después, se celebra la ceremonia */
   for(let k=k0;k<=k1;k++){if(lmType(k)!==5||lmPos(k)-ps>30||ps-lmPos(k)>20||window.__cerK===k)continue;
     const lk=lapK();

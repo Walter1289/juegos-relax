@@ -22,6 +22,7 @@ st.textContent=`
 #abox button small{font:600 9.5px/1.1 system-ui,sans-serif;margin-top:2px;opacity:.85;letter-spacing:.02em}
 #abox button.press{background:rgba(255,199,122,.5)}
 #abox button.off{opacity:.42}
+#abox button.hint{box-shadow:0 0 0 3px rgba(255,199,122,.6)}
 #abx{left:65px;top:130px}#abo{left:130px;top:65px}#abs{left:0;top:65px}#abt{left:65px;top:0}
 body.ctl-std #look,body.ctl-std #cam,body.ctl-std #lantB,body.ctl-std #stillBtn{display:none!important}
 body.photo #abox,body.photo #joy{display:none!important}
