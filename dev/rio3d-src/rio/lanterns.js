@@ -11,6 +11,7 @@ import {dayPending,dayTake,dayRand} from '../daylamp.js';
 import {camino,UMBRAL,iman,acto,ofrendas,PALABRAS} from '../lightmsg.js';
 import {lang} from '../i18n.js';
 import {reward} from './rewards.js';
+import {glowEvento} from './calendario.js';
 /* ---------- linternas flotantes ---------- */
 const LSP=38;const lanterns=new Map(),pool=[];let collected=new Set();try{JSON.parse(localStorage.getItem('rio3d-coll')||'[]').forEach(i=>collected.add(i))}catch(e){}try{S.count=+localStorage.getItem('rio3d-lant')||0}catch(e){}
 export const lanternPos=k=>{const s=70+k*LSP+hash(k,1)*20,e=(hash(k,2)*2-1)*.5*hw(s);return[cx(s)+e,-s]};
@@ -37,7 +38,7 @@ export function updateLanterns(t,ps){
   let gk=-1;if(collected.size===0&&S.count===0){for(const [k] of lanterns)if(lanternPos(k)[1]<-ps+4&&(gk<0||k<gk))gk=k}
   for(const [k,o] of lanterns){
     const [x,z]=lanternPos(k);o.position.set(x,Math.sin(t*1.1+k)*.04,z);o.rotation.z=Math.sin(t*.8+k*2)*.08;
-    {const g=o.userData.glow,on=k===gk;if(g.userData.gd!==on){g.userData.gd=on;g.scale.set(on?6:3.2,on?6:3.2,1);g.material.color.set(on?0xffd27a:0xffc77a)}}
+    {const g=o.userData.glow,on=k===gk;if(g.userData.gd!==on){g.userData.gd=on;g.scale.set(on?6:3.2*glowEvento,on?6:3.2*glowEvento,1);g.material.color.set(on?0xffd27a:0xffc77a)}}
     o.userData.glow.material.opacity=(.5+.25*S.glowK)*(.8+.2*Math.sin(t*3+k));o.userData.refl.material.opacity=(.25+.3*S.glowK)*(.85+.15*Math.sin(t*2+k));
     if(o.userData.collecting){o.userData.fade-=.016;o.scale.setScalar(1+(1-o.userData.fade)*.6);o.userData.glow.material.opacity*=Math.max(0,o.userData.fade);o.userData.refl.material.opacity*=Math.max(0,o.userData.fade);
       if(o.userData.fade<=0){scene.remove(o);lanterns.delete(k);pool.push(o);o.userData.collecting=false}}

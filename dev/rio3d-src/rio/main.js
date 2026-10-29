@@ -20,6 +20,7 @@ import {updateRipples,spawnRipple} from './ripples.js';
 import './input.js';
 import {pollPad} from './ctlui.js';
 import {pulse,rewardTick} from './rewards.js';
+import {calendarioTick} from './calendario.js';
 import {updateHud,toast,savePos} from './hud.js';
 import {proaDorada} from '../lightmsg.js';
 import {updateLanterns,collectLanterns,mkLantern,updateDayLamp} from './lanterns.js';
@@ -62,7 +63,7 @@ function frame(now,manual){
   ensureTerrain(P.px,P.pz,buildFoam);
   swayU.value=P.t;water.position.set(P.px,0,P.pz);water.material.uniforms.t.value=P.t;
   const night=env.night;
-  rewardTick(dt);const pk=1+.7*Math.min(1,pulse.t/2);bowLight.intensity=S.glowK*3.2*pk;if(!window.__bd&&proaDorada()){window.__bd=1;bowLight.color.set(0xffd27a)}blGlow.material.opacity=Math.min(1,(.3+.35*S.glowK)*pk);
+  rewardTick(dt);calendarioTick();const pk=1+.7*Math.min(1,pulse.t/2);bowLight.intensity=S.glowK*3.2*pk;if(!window.__bd&&proaDorada()){window.__bd=1;bowLight.color.set(0xffd27a)}blGlow.material.opacity=Math.min(1,(.3+.35*S.glowK)*pk);
   bl.material.color.set(0xffe2a8);
   updateRocks(dt,P.dist||s);updateFarBoats(dt,P.dist||s);updateMassifs(P.dist||s);massMistMat.color.copy(scene.fog.color).multiplyScalar(1.05);updateCritters(dt,P.dist||s);updateFish(dt,P.dist||s);updateFauna(dt,P.dist||s);foamMat.opacity=.55+.15*Math.sin(P.t*.8);foam.position.y=Math.sin(P.t*.9)*.01;
   updateLanterns(P.t,P.dist||s);updateLandmarks(P.dist||s);
