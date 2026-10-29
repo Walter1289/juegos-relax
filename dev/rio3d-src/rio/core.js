@@ -8,7 +8,7 @@ export const R=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'h
 R.setPixelRatio(Math.min(devicePixelRatio||1,2));
 export const scene=new THREE.Scene();
 scene.fog=new THREE.Fog(0xcccccc,22,250);
-export const cam=new THREE.PerspectiveCamera(68,1,.05,900);
+export const cam=new THREE.PerspectiveCamera(68,1,.25,900);
 function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=w/h<1?82:68;cam.updateProjectionMatrix()}
 addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,250));resize();
 document.addEventListener('visibilitychange',()=>{try{if(A.ctx){if(document.hidden)A.ctx.suspend();else if(A.on&&!PZ.on)A.ctx.resume()}}catch(e){}});

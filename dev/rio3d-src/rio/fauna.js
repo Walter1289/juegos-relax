@@ -26,9 +26,14 @@ function mkFish(i){const g=new THREE.Group(),cs=fishCols[i%fishCols.length];
   const fin=new THREE.Mesh(new THREE.ConeGeometry(.08,.3,3),MT(cs[0]));fin.position.set(0,.2,.05);fin.rotation.x=-.3;g.add(fin);
   g.userData={tail,st:0,t:0,ph:Math.random()*6,sp:.7+Math.random()*.6,tx:0,tz:0,jt:0};scene.add(g);return g}
 for(let i=0;i<FISH;i++)fish.push(mkFish(i));
-function placeFish(f,ps){const s=ps+14+Math.random()*70,e=(Math.random()*2-1)*(hw(s)-3);f.position.set(cx(s)+e,-.05,-s);f.userData.st=0;f.userData.rest=0;f.userData.fol=0;f.userData.fmax=0;f.userData.hd=tanAng(s)+(Math.random()-.5)*1.2;f.userData.jt=2+Math.random()*10;f.rotation.set(0,0,0);f.visible=true}
+const GROW=new Set();
+function appear(o){if(o.userData.bs==null)o.userData.bs=o.scale.x;o.userData.born=P.t;o.scale.setScalar(o.userData.bs*.02);GROW.add(o)}
+export function growTick(){for(const o of GROW){const k=Math.min(1,(P.t-o.userData.born)/1.8);o.scale.setScalar(o.userData.bs*Math.max(.02,k*k*(3-2*k)));if(k>=1)GROW.delete(o)}}
+function _placeFish(f,ps){const s=ps+14+Math.random()*70,e=(Math.random()*2-1)*(hw(s)-3);f.position.set(cx(s)+e,-.05,-s);f.userData.st=0;f.userData.rest=0;f.userData.fol=0;f.userData.fmax=0;f.userData.hd=tanAng(s)+(Math.random()-.5)*1.2;f.userData.jt=2+Math.random()*10;f.rotation.set(0,0,0);f.visible=true}
+const placeFish=(o,ps)=>{_placeFish(o,ps);appear(o)},placeWB=(o,ps)=>{_placeWB(o,ps);appear(o)},placeBird=(o,ps)=>{_placeBird(o,ps);appear(o)},placeDf=(o,ps)=>{_placeDf(o,ps);appear(o)};
 fish.forEach(f=>placeFish(f,30+Math.random()*60));
 export function updateFish(dt,ps){
+  growTick();
   for(const f of fish){const u=f.userData;u.t+=dt;
     const dz=f.position.z-P.pz,s=-f.position.z;
     if(s<ps-12||s>ps+120){placeFish(f,ps);continue}
@@ -77,10 +82,10 @@ function mkWB(i){const g=new THREE.Group(),c=i%2?0x6f6a5c:0xe9e4d8,c2=i%2?0x4a4a
   const hd=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),MT(i%2?0x35342e:c));hd.position.set(0,.34,-.03);neck.add(hd);
   const bk=new THREE.Mesh(new THREE.ConeGeometry(.04,.16,5),MT(0xe8a24a));bk.rotation.x=-Math.PI/2;bk.position.set(0,.33,-.15);neck.add(bk);
   g.scale.setScalar(1.15);g.userData={neck,t:Math.random()*6,dip:0,nd:3+Math.random()*5,hd:Math.random()*6.28,tx:0,tz:0};scene.add(g);return g}
-function placeWB(b,ps){const s=ps+14+Math.random()*60,e=(Math.random()*2-1)*(hw(s)-6);b.position.set(cx(s)+e,0,-s);b.userData.hd=tanAng(s)+(Math.random()-.5)*2}
+function _placeWB(b,ps){const s=ps+14+Math.random()*60,e=(Math.random()*2-1)*(hw(s)-6);b.position.set(cx(s)+e,0,-s);b.userData.hd=tanAng(s)+(Math.random()-.5)*2}
 for(let i=0;i<4;i++){const b=mkWB(i);if(i>=2)b.scale.setScalar(.72);wbirds.push(b)}wbirds.forEach(b=>placeWB(b,30));
-function placeBird(b,ps){const s=ps+30+Math.random()*130;b.position.set(cx(s)+b.userData.off,b.userData.h,-s);b.userData.hd=tanAng(s)+(Math.random()-.5)*.5;b.userData.fl=Math.random()*3}
-function placeDf(d,ps){const s=ps+8+Math.random()*60,e=(Math.random()*2-1)*(hw(s)+2);d.position.set(cx(s)+e,.6+Math.random()*1.1,-s);d.userData.tx=d.position.x;d.userData.ty=d.position.y;d.userData.tz=d.position.z}
+function _placeBird(b,ps){const s=ps+30+Math.random()*130;b.position.set(cx(s)+b.userData.off,b.userData.h,-s);b.userData.hd=tanAng(s)+(Math.random()-.5)*.5;b.userData.fl=Math.random()*3}
+function _placeDf(d,ps){const s=ps+8+Math.random()*60,e=(Math.random()*2-1)*(hw(s)+2);d.position.set(cx(s)+e,.6+Math.random()*1.1,-s);d.userData.tx=d.position.x;d.userData.ty=d.position.y;d.userData.tz=d.position.z}
 dfs.forEach(d=>placeDf(d,30));
 export function updateFauna(dt,ps){
   const day=1-clamp(env.night*1.5,0,1)*1,vis=day>.15&&W.rain<.6;
