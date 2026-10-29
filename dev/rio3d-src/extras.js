@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {openAlbum} from './album.js';
+import {openSellos,sellosCount} from './sellos.js';
 import {padOn,setPad} from './steerpad.js';
 import {tr,lang,setLang} from './i18n.js';
 
@@ -264,6 +265,7 @@ export function initExtras(C){
     <div class="row"><span>Botones de dirección<br><small style="color:var(--muted)">Alternativa a arrastrar</small></span><select id="xpad"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Acerca de<br><small style="color:var(--muted)">Privacidad, datos y créditos</small></span><button id="xabout" type="button">Abrir</button></div>
     <div class="row"><span>Cuaderno del río<br><small style="color:var(--muted)">Lo que has visto en el camino</small></span><button id="xalb" type="button">Abrir</button></div>
+    <div class="row"><span>Libro de sellos<br><small style="color:var(--muted)">Lo que te llevas de cada lugar</small></span><button id="xsel" type="button">Abrir</button></div>
     <div class="row"><span>Tono suave<br><small style="color:var(--muted)">Suaviza los sonidos agudos</small></span><select id="xsoft"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Dormir<br><small style="color:var(--muted)">Baja el sonido y la luz poco a poco</small></span><select id="xsl"><option value="0">No</option><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option></select></div>`);
     const q=m.querySelector('#xq'),s=m.querySelector('#xs'),ql=m.querySelector('#xql');
@@ -277,7 +279,7 @@ export function initExtras(C){
     const xs=m.querySelector('#xsub');xs.value=ls.get('rio3d-subs','0');xs.onchange=()=>ls.set('rio3d-subs',xs.value);
     const xp=m.querySelector('#xhp');xp.value=ls.get('rio3d-hap','1');xp.onchange=()=>ls.set('rio3d-hap',xp.value);
     const xso=m.querySelector('#xsoft');xso.value=UX.api.soft()?'1':'0';xso.onchange=()=>UX.api.setSoft(xso.value==='1');
-    m.querySelector('#xalb').onclick=()=>openAlbum(UX.tr);m.querySelector('#xabout').onclick=()=>UX.about();const xpd=m.querySelector('#xpad');xpd.value=padOn()?'1':'0';xpd.onchange=()=>setPad(xpd.value==='1');const xcm=m.querySelector('#xcalm');xcm.value=UX.calm()?'1':'0';xcm.onchange=()=>UX.setCalm(xcm.value==='1');const xsl=m.querySelector('#xsl');xsl.value=String(UX.api.sleepMin());xsl.onchange=()=>UX.api.sleep(+xsl.value);
+    m.querySelector('#xalb').onclick=()=>openAlbum(UX.tr);m.querySelector('#xsel').onclick=()=>openSellos(UX.tr);m.querySelector('#xabout').onclick=()=>UX.about();const xpd=m.querySelector('#xpad');xpd.value=padOn()?'1':'0';xpd.onchange=()=>setPad(xpd.value==='1');const xcm=m.querySelector('#xcalm');xcm.value=UX.calm()?'1':'0';xcm.onchange=()=>UX.setCalm(xcm.value==='1');const xsl=m.querySelector('#xsl');xsl.value=String(UX.api.sleepMin());xsl.onchange=()=>UX.api.sleep(+xsl.value);
     const xh=m.querySelector('#xh');xh.value=ls.get('rio3d-hand','0');xh.onchange=()=>{ls.set('rio3d-hand',xh.value);document.body.classList.remove('hand-r','hand-l');if(xh.value!=='0')document.body.classList.add('hand-'+xh.value)};
   };
 

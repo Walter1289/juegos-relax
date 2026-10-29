@@ -20,6 +20,7 @@ import {startCeremony} from './ceremony.js';
 import {NL} from './world.js';
 import {reward,hintStill} from './rewards.js';
 import {openOfrenda} from './ofrenda.js';
+import {sellar} from '../sellos.js';
 import {setOfrendaPend,ofrendaPend} from '../lightmsg.js';
 import {LETTER_FIRST} from '../story.js';
 import {el} from './util.js';
@@ -42,13 +43,14 @@ export function updateLandmarks(ps){
     if(lmPos(k)-ps>30||ps-lmPos(k)>25)continue;
     window.__rwK=k;try{localStorage.setItem('rio3d-rwk',String(k))}catch(e){}
     const i=k-lk;
+    if(sellar(Math.min(3,ceremonias()+1),lmType(k)))setTimeout(()=>toast(T3({es:'Sello nuevo en tu libro: '+LM[lmType(k)],en:'New stamp in your book: '+UX.tr(LM[lmType(k)]),ja:'御朱印帳に新しい印：'+UX.tr(LM[lmType(k)])})),4200);
     if(i===3||i===6||i===9)reward({audio:true,n:i/3,pulse:6,msg:{es:'Un mojón del camino: ya llevas '+i+' lugares de esta vuelta',en:'A waymarker on the road: '+i+' places of this lap behind you',ja:'道標です。この一周で'+i+'か所を過ぎました'},delay:1500});
     else if(i===5)reward({fx:hintStill,msg:{es:'Mitad del camino: un buen sitio para quedarse quieto un rato',en:'Halfway along: a good place to stay still for a while',ja:'道のなかば。しばらくじっとするのによい場所です'},delay:1500});
   }}
   /* vuelta al río: la primera vez que llegas al templo empieza tu vuelta; al regresar a un templo once lugares después, se celebra la ceremonia */
   for(let k=k0;k<=k1;k++){if(lmType(k)!==5||lmPos(k)-ps>30||ps-lmPos(k)>20||window.__cerK===k)continue;
     const lk=lapK();
-    if(lk<0){window.__cerK=k;setLapK(k);toast(T3({es:'Aquí empieza tu vuelta al río. Vuelve a este templo tras recorrerlo entero y tus linternas se liberarán en una ceremonia',en:'Your lap of the river begins here. Return to this temple after travelling it all and your lanterns will be released in a ceremony',ja:'ここから川の一周が始まります。一周して寺に戻ると、ランタンは儀式で放たれます'}));continue}
+    if(lk<0){window.__cerK=k;setLapK(k);reward({audio:true,pulse:9,n:1,delay:6000,msg:{es:'La campana suena por primera vez para ti. Tu peregrinación ha empezado',en:'The bell rings for you for the first time. Your pilgrimage has begun',ja:'鐘があなたのために初めて鳴りました。巡礼のはじまりです'}});toast(T3({es:'Aquí empieza tu vuelta al río. Vuelve a este templo tras recorrerlo entero y tus linternas se liberarán en una ceremonia',en:'Your lap of the river begins here. Return to this temple after travelling it all and your lanterns will be released in a ceremony',ja:'ここから川の一周が始まります。一周して寺に戻ると、ランタンは儀式で放たれます'}));continue}
     if(k<lk+NL)continue;
     window.__cerK=k;setLapK(k);const n=disponibles();
     if(n<1){toast(T3({es:'Vuelta completa. Sin linternas que liberar: la próxima vuelta llevará más luz',en:'Lap complete. No lanterns to release: the next lap will carry more light',ja:'一周しました。放つランタンがありません。次の一周は、もっと灯を運びましょう'}));continue}
