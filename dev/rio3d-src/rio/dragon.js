@@ -7,12 +7,12 @@ import {H,cx,hw,tanAng,dragonS} from './world.js';
 import {Batch,tint} from './batch.js';
 import {gl} from './lm-parts.js';
 import {C,seg,tourouB} from './castle.js';
-const JADE=0x2f9e7a,JADE2=0x3fb98f,GOLD=0xe4b852,RED=0xc23f33,IVORY=0xf3eee0;
+const JADE=0xb98a2e,JADE2=0xdcb04a,GOLD=0xffd774,RED=0xc23f33,IVORY=0xf3eee0;
 export function buildDragon(k){
   const s=dragonS(k),a=tanAng(s),side=hash(k,9)>.5?1:-1,hwv=hw(s),g=new THREE.Group();
   g.position.set(cx(s),0,-s);g.rotation.y=-a;
   const gyf=(lx,lz)=>{const th=-a;return H(cx(s)+lx*Math.cos(th)+lz*Math.sin(th),s-(-lx*Math.sin(th)+lz*Math.cos(th)))};
-  const lx=side*(hwv+14),gy0=Math.max(gyf(lx,0),.4),h=new THREE.Group();h.position.set(lx,gy0,0);h.scale.setScalar(1.5);g.add(h);
+  const lx=side*(hwv+14),gy0=Math.max(gyf(lx,0),.4),h=new THREE.Group();h.position.set(lx,gy0,0);h.scale.setScalar(1.4);g.add(h);
   const S=new Batch(),G=new Batch(),E=new Batch(),CL=new Batch(),X={S,E,h};
   /* pedestal escalonado de piedra con farolillos */
   S.boxB(11,1.1,11,C.stone,0,-1,0).boxB(9,1.2,9,tint(C.stone,1.08),0,.1,0).boxB(7,1.3,7,tint(C.stone,.95),0,1.3,0).boxB(6.2,.3,6.2,C.gravel,0,2.6,0);
@@ -20,7 +20,7 @@ export function buildDragon(k){
   for(const [px,pz] of[[-4.6,-4.6],[4.6,-4.6],[-4.6,4.6],[4.6,4.6]])tourouB(X,px,.2,pz,1);
   for(const sx of[-1,1])for(let i=0;i<4;i++)S.boxB(.5,.5,.5,tint(C.stone,.9),sx*5.7,.1+1.0*0,-3.5+i*2.3,false);
   /* cuerpo: curva serpenteante, anillos de sección redonda */
-  const BASE=2.9,cv=new THREE.CatmullRomCurve3([[0,.4,-9],[-3.2,1.6,-6.8],[-.8,3.4,-5.4],[3.1,5.4,-4],[1.4,8,-3.1],[-2.2,10.2,-1.6],[-.6,12.2,.4],[0,13.0,2.4],[0,12.5,4.2]].map(p=>new THREE.Vector3(p[0],p[1]+BASE-.4,p[2])));
+  const BASE=2.9,cv=new THREE.CatmullRomCurve3([[0,.4,-9],[-3.2,1.6,-6.8],[-.8,3.4,-5.4],[3.1,5.4,-4],[1.4,8,-3.1],[-2.2,10.2,-1.6],[-.6,12.2,.4],[0,13.0,2.4],[0,12.5,4.2]].map(q=>[q[0]*1.35,q[1]*.42+.2,q[2]*1.15]).map(p=>new THREE.Vector3(p[0],p[1]+BASE-.4,p[2])));
   const N=64,pts=cv.getPoints(N),rings=[],up=new THREE.Vector3(0,1,0),rad=t=>.2+.98*Math.pow(Math.sin(Math.min(1,t*1.5)*Math.PI/2),.7)*(1-.32*t);
   for(let j=0;j<=N;j++){const t=j/N,p=pts[j],tg=cv.getTangent(t),u=new THREE.Vector3().crossVectors(up,tg);if(u.lengthSq()<1e-4)u.set(1,0,0);u.normalize();const v=new THREE.Vector3().crossVectors(tg,u).normalize(),r=rad(t),ring=[];
     for(let i=0;i<8;i++){const q=i/8*6.2832,c=Math.cos(q),sn=Math.sin(q);ring.push([p.x+(u.x*c+v.x*sn)*r,p.y+(u.y*c+v.y*sn)*r,p.z+(u.z*c+v.z*sn)*r])}rings.push(ring)}
