@@ -120,12 +120,12 @@ const cPad=new THREE.Group();boat.add(cPad);
 {const m1=MTc(0xb98a56,{map:tex('woodV')}),m2=MTc(0xcf8d74,{map:tex('plank')});const sh=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,2.1,6),m1);sh.rotation.x=Math.PI/2;sh.position.z=1.05;cPad.add(sh);
   const bl=new THREE.Mesh(new THREE.BoxGeometry(.22,.04,.55),m2);bl.position.z=2.0;cPad.add(bl);
   const gr=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.05),m1);gr.position.z=-.03;cPad.add(gr)}
-let padX=1,lagS=0;
+let padX=1,lagS=0,phi=0;
 const pv=new THREE.Vector3();
 /* coloca la canoa en el agua con su vaivén; devuelve el balanceo (bob) que usa la cámara */
 export function placeBoat(){
   const bob=Math.sin(P.t*.9)*.03+Math.sin(P.t*1.7)*.012;
-  boat.position.set(P.px,bob*.6,P.pz);boat.rotation.set(0,-P.psi,-P.steer*.025+Math.sin(P.t*.7)*.008);boat.updateMatrixWorld(true);
+  boat.position.set(P.px,bob*.6,P.pz);boat.rotation.order='YXZ';{const yr=P.yawr||0;boat.rotation.set(-Math.abs(yr)*.045+Math.sin(P.t*.8)*.004,-P.psi,-P.steer*.05-yr*.11+Math.sin(P.t*.7)*.008)}boat.updateMatrixWorld(true);
   return bob}
 /* remos en primera persona (el del lado hacia el que giras se hunde como timón) */
 export function updatePaddles(){
@@ -151,8 +151,12 @@ export function updateCharacter(dt){
     torso.rotation.z=-P.steer*.2+Math.sin(P.t*.6)*.02;torso.rotation.y=-P.steer*.28;torso.rotation.x=.05+br*.012+Math.abs(P.steer)*.06;
     head.rotation.y=-P.steer*.38+Math.sin(P.t*.35)*.08;head.rotation.x=.04+Math.sin(P.t*.5)*.03;
     hatG.rotation.z=(P.steer-lagS)*.45;hatG.rotation.x=-Math.abs(P.steer-lagS)*.12;
-    const hand=pv.set(padX*.5,.8,.5),dip=Math.abs(P.steer)>.2?1:0,
-      tipT=new THREE.Vector3(padX*(.7+dip*.55),-.2,1.35+Math.sin(P.t*1.2)*.12*(1-dip)+dip*.1);
+    /* remada: entra delante, tira hacia atrás en el agua y se recupera en el aire; al girar se hunde como timón */
+    phi+=dt*(.9+Math.min(P.v,3)*.55);if(phi>6.2832)phi-=6.2832;
+    const dip=Math.abs(P.steer)>.2?1:0,sn=Math.sin(phi),pull=sn>0,u=pull?phi/Math.PI:(phi-Math.PI)/Math.PI,
+      tz=pull?1.55-1.45*u:.1+1.45*u,ty=pull?-.28:-.28+.5*Math.sin(u*Math.PI),
+      hand=pv.set(padX*.46,.62+.1*Math.cos(phi),.48+.16*Math.cos(phi)),
+      tipT=new THREE.Vector3(padX*(.62+dip*.5),dip?-.25:ty,dip?1.0+Math.sin(P.t*1.2)*.12:tz);
     const d2=tipT.clone().sub(hand).normalize();cPad.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),d2);cPad.position.copy(hand);
     // brazos hacia el remo (mano alta en el mango, mano baja en el eje)
     const grips=[hand.clone().addScaledVector(d2,.75),hand.clone()];if(padX<0)grips.reverse();

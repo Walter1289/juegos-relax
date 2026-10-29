@@ -4,9 +4,9 @@ import {scene,canvas,cam} from './core.js';
 import {A} from '../audio.js';
 import {Y0,spr,glowTex} from './util.js';
 import {mat} from './mats.js';
-import {secreto,descubiertos,ceremonias} from '../lightmsg.js';
+import {secreto,descubiertos,ceremonias,ofrendas} from '../lightmsg.js';
 export const SPX=-8.8,SPZ=.3,SPR=5;
-let ring=null,boats=[],surge=0,ang=0,lastT=null,wake=[],waterM=null;
+let stars=[],ring=null,boats=[],surge=0,ang=0,lastT=null,wake=[],waterM=null;
 export function buildSecret(){
   if(!secreto())return;
   const found=new Set(descubiertos());
@@ -50,6 +50,8 @@ export function buildSecret(){
   for(let i=0;i<5;i++){const a=i/5*Math.PI*2,b=new THREE.Group();b.position.set(Math.cos(a)*2.45,.36,Math.sin(a)*2.45);b.rotation.y=-a;ring.add(b);
     b.add(M(new THREE.BoxGeometry(.3,.06,.1),mat('#6b4a36'),0,0,0));b.add(M(new THREE.SphereGeometry(.07,6,5),new THREE.MeshBasicMaterial({color:0xffd9a0}),0,.12,0));const L=spr(glowTex,0xffc27a,.7,.6,true);L.position.y=.14;b.add(L)}
   boats.push(ring);
+  /* constelación de ofrendas: una estrella sobre el estanque por cada palabra que dejaste en tus vueltas (brillo lento, sin parpadeo) */
+  stars=[];ofrendas().slice(0,4).sort((a,b)=>a[0]-b[0]).forEach(([c],i,arr)=>{const q=(i-(arr.length-1)/2)*.55,L=spr(glowTex,0xfff0c4,.95,.8,true);L.position.set(Math.sin(q)*2.2,3.1+Math.cos(q*2)*.35,Math.cos(q)*-.4);L.userData.ph=i*1.7;G.add(L);stars.push(L)});
   /* mojón de piedra con una luz en el camino de entrada */
   const lamp=new THREE.Mesh(new THREE.CylinderGeometry(.12,.16,.9,6),mat('#a9a4b0'));lamp.position.set(3.2,.75,-4.3);G.add(lamp);lit(G,0xffc27a,3.2,1.3,-4.3,1.6);
 }
@@ -67,5 +69,7 @@ function bindTap(){
 let bound=false;
 export const secretStep=t=>{if(!ring)return;if(!bound){bound=true;bindTap()}
   const dt=lastT==null?.016:Math.min(.05,Math.max(0,t-lastT));lastT=t;
-  surge*=Math.exp(-dt*.38);ang+=(.1+surge*.85)*dt;ring.rotation.y=-ang;
+  surge*=Math.exp(-dt*.38);ang+=(.1+surge*.85)*dt;ring.rotation.y=-ang;tickStars(t);
   for(let i=wake.length-1;i>=0;i--){const w=wake[i];w.a+=dt;const k=w.a/1.6;w.g.scale.setScalar(1+k*14);w.g.material.opacity=.7*(1-k);if(k>=1){w.g.parent.remove(w.g);w.g.geometry.dispose();w.g.material.dispose();wake.splice(i,1)}}};
+
+export function tickStars(t){for(const L of stars)L.material.opacity=.55+.3*Math.sin(t*.6+L.userData.ph)}

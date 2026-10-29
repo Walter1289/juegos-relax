@@ -27,7 +27,7 @@ export function updateCamera(dt,bob){
   else{const k=Math.exp(-dt*2.4);LOOK.yaw*=k;LOOK.pitch*=k;LOOK.vy=0}
   if(LOOK.yaw>Math.PI)LOOK.yaw-=2*Math.PI;else if(LOOK.yaw<-Math.PI)LOOK.yaw+=2*Math.PI;
   P.pitch+=((-IN.pitch*.22)-P.pitch)*2*dt;
-  cam.rotation.set(P.pitch-.13+LOOK.pitch,-P.psi+LOOK.yaw+sway,-P.steer*.02,'YXZ');
+  cam.rotation.set(P.pitch-.13+LOOK.pitch,-P.psi+LOOK.yaw+sway,-P.steer*.035-(P.yawr||0)*.07,'YXZ');
   S.camK+=((S.camMode?1:0)-S.camK)*Math.min(1,dt*2.2);if(S.camK<.01)psiC=P.psi;
   {const bf=innerWidth/innerHeight<1?82:68,nf=bf*(1-.3*S.camK*S.camK*(3-2*S.camK));if(Math.abs(cam.fov-nf)>.05){cam.fov=nf;cam.updateProjectionMatrix()}}
   if(S.camK>.003){const k=S.camK*S.camK*(3-2*S.camK);fpQ.copy(cam.quaternion);

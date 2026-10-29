@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import {canvas,cam,RT} from './core.js';
 import {C} from './camera.js';
 import {lang} from '../i18n.js';
-import {lines,found,ceremonias,liberadas} from '../lightmsg.js';
+import {lines,found,ceremonias,liberadas,cartaUmbral,ofrendas,PALABRAS} from '../lightmsg.js';
 export const SIGN={g:null};
 const T=a=>a[lang()]||a.es;
 let panel=null,btn=null;
@@ -15,7 +15,8 @@ function focus(){const g=SIGN.g;if(!g)return;C.gx=g.position.x;C.gy=g.position.y
 function open(){
   if(!panel)return;focus();setSeen(found());if(btn)btn.style.outline='none';
   const n=found(),L=lines(),done=n>=8;
-  panel.querySelector('.lines').innerHTML=L.map(t=>'<div>'+t+'</div>').join('');
+  const cs=[];for(let c=1;c<=Math.min(4,ceremonias());c++){const o=ofrendas().find(x=>x[0]===c),w=o&&PALABRAS[o[1]];cs.push('<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(246,227,180,.25);font-size:.92em;font-style:italic;opacity:.92">'+cartaUmbral(c)+(w?'<div style="font-style:normal;font-size:.8em;opacity:.7;margin-top:4px">· '+(w[lang()]||w.es)+'</div>':'')+'</div>')}
+  panel.querySelector('.lines').innerHTML=L.map(t=>'<div>'+t+'</div>').join('')+cs.join('');
   panel.querySelector('.meta').textContent=T({es:'Fragmentos descifrados: '+n+' / 8 · ceremonias: '+ceremonias()+' · luces liberadas: '+liberadas(),en:'Fragments deciphered: '+n+' / 8 · ceremonies: '+ceremonias()+' · lights released: '+liberadas(),ja:'解読した断片：'+n+' / 8 ・儀式：'+ceremonias()+' ・放った灯：'+liberadas()});
   panel.querySelector('.hint').textContent=done?T({es:'El cartel está completo. Gracias por cada luz que liberaste al cielo.',en:'The sign is complete. Thank you for every light you released into the sky.',ja:'看板が完成しました。空へ放ったすべての灯に感謝します。'}):T({es:'Cada vuelta completa al Río termina con una ceremonia de liberación que descifra una línea. Sigue el agua y deja que te lleve.',en:'Each full lap of the River ends with a release ceremony that deciphers one line. Follow the water and let it carry you.',ja:'川を一周するたびに放灯の儀式が行われ、一行が解読されます。水の流れに身をまかせましょう。'});
   panel.style.display='flex';
@@ -25,7 +26,7 @@ export function initSign(toast){
   btn.style.cssText='position:fixed;right:max(10px,env(safe-area-inset-right));top:216px;z-index:6;min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:600 .85rem system-ui;cursor:pointer;touch-action:manipulation';
   btn.onclick=e=>{e.stopPropagation();open()};document.body.appendChild(btn);
   panel=document.createElement('div');panel.style.cssText='position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(30,20,28,.55);padding:20px';
-  panel.innerHTML='<div style="max-width:420px;width:100%;background:#5a3d2e;border:6px solid #3b261b;border-radius:10px;padding:22px 20px;color:#f6e3b4;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.45)"><div class="lines" style="font:italic 600 1.45rem/1.5 Georgia,serif;margin-bottom:14px"></div><div class="meta" style="font:600 .78rem system-ui;opacity:.8;margin-bottom:6px"></div><div class="hint" style="font:.82rem/1.4 system-ui;opacity:.85;margin-bottom:14px"></div><button type="button" class="x" style="min-height:44px;padding:8px 22px;border-radius:99px;border:1px solid #b8996a;background:#3b261b;color:#f6e3b4;font:600 .9rem system-ui;cursor:pointer"></button></div>';
+  panel.innerHTML='<div style="max-width:420px;width:100%;max-height:88vh;overflow:auto;background:#5a3d2e;border:6px solid #3b261b;border-radius:10px;padding:22px 20px;color:#f6e3b4;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.45)"><div class="lines" style="font:italic 600 1.45rem/1.5 Georgia,serif;margin-bottom:14px"></div><div class="meta" style="font:600 .78rem system-ui;opacity:.8;margin-bottom:6px"></div><div class="hint" style="font:.82rem/1.4 system-ui;opacity:.85;margin-bottom:14px"></div><button type="button" class="x" style="min-height:44px;padding:8px 22px;border-radius:99px;border:1px solid #b8996a;background:#3b261b;color:#f6e3b4;font:600 .9rem system-ui;cursor:pointer"></button></div>';
   panel.querySelector('.x').textContent=T({es:'Cerrar',en:'Close',ja:'閉じる'});
   panel.onclick=e=>{if(e.target===panel||e.target.classList.contains('x'))panel.style.display='none'};
   document.body.appendChild(panel);

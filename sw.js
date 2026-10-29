@@ -1,5 +1,5 @@
 /* Service worker: precarga todo y sirve sin conexión. Sube VERSION para forzar actualización. */
-const VERSION = 'v80';
+const VERSION = 'v82';
 const CACHE = 'respirar-' + VERSION;
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
