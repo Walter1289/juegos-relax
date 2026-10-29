@@ -27,3 +27,8 @@ export function openSellos(tr){
   const c=document.createElement('button');c.type='button';c.textContent=tr('Cerrar');c.style.cssText='margin-top:14px;min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #5a609a;background:#2b2d52;color:#fbf1e0;font:inherit;cursor:pointer';c.onclick=()=>ov.remove();
   b.appendChild(c);ov.appendChild(b);ov.onclick=e=>{if(e.target===ov)ov.remove()};document.body.appendChild(ov);try{c.focus()}catch(e){}
 }
+
+/* botón «Sellos» en el menú Start (junto al Diario) */
+function addBtn(){const m=document.getElementById('menu');if(!m||document.getElementById('sellB'))return;const b=document.createElement('button');b.type='button';b.id='sellB';b.textContent=(window.UX?UX.tr('Sellos'):'Sellos');b.onclick=()=>openSellos();const sn=document.getElementById('snd');m.insertBefore(b,sn||null)}
+try{UX.add([['Sellos','Stamps','印帳']])}catch(e){}
+setInterval(addBtn,1500);

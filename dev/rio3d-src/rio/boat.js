@@ -78,7 +78,7 @@ const me=new THREE.Group();boat.add(me);me.position.set(0,.42,.55);me.scale.setS
 const torso=new THREE.Group();torso.position.y=.3;me.add(torso);
 const head=new THREE.Group();head.position.y=1.0;torso.add(head);
 const hatG=new THREE.Group();hatG.position.y=.2;head.add(hatG);
-const armPivot=[];
+const armPivot=[];try{window.__arm=armPivot}catch(e){}
 {const indigo=MTc(0x2b4a82,{map:tex('cloth')}),indigoL=MTc(0x6f8fc4,{map:tex('cloth')}),pants=MTc(0x2a3148,{map:tex('cloth')}),skin=MTc(0xd9a982),
   kasa=MTc(0xe4c27e,{map:tex('straw'),side:THREE.DoubleSide}),kasaD=MTc(0xb48a4a,{map:tex('straw'),side:THREE.DoubleSide}),hair=MTc(0x24212a),mino=MTc(0xb8944f,{map:tex('straw'),side:THREE.DoubleSide}),minoD=MTc(0x8f6f3a,{map:tex('straw'),side:THREE.DoubleSide}),cord=MTc(0xa83a2c),wrap=MTc(0xd8d0bc,{map:tex('cloth')});
   // piernas cruzadas con pantalón recogido y tobillos envueltos
@@ -148,19 +148,21 @@ export function updateCharacter(dt){
   {const tp=S.camK>.45||S.cineW>.15;me.visible=tp;cargoMs.forEach(n=>n.visible=tp);cPad.visible=tp;paddles.forEach(w=>w.visible=!tp);
    if(tp){if(P.steer>.2)padX=Math.min(1,padX+dt*3);else if(P.steer<-.2)padX=Math.max(-1,padX-dt*3);
     lagS+=(P.steer-lagS)*Math.min(1,dt*2.2);const br=Math.sin(P.t*1.4);
-    torso.rotation.z=-P.steer*.2+Math.sin(P.t*.6)*.02;torso.rotation.y=-P.steer*.28;torso.rotation.x=.05+br*.012+Math.abs(P.steer)*.06;
+    torso.rotation.z=-P.steer*.2+Math.sin(P.t*.6)*.02-padX*Math.sin(phi)*.07;torso.rotation.y=-P.steer*.28+padX*Math.cos(phi)*.16;torso.rotation.x=.05+br*.012+Math.abs(P.steer)*.06+.1*Math.cos(phi);
     head.rotation.y=-P.steer*.38+Math.sin(P.t*.35)*.08;head.rotation.x=.04+Math.sin(P.t*.5)*.03;
     hatG.rotation.z=(P.steer-lagS)*.45;hatG.rotation.x=-Math.abs(P.steer-lagS)*.12;
     /* remada: entra delante, tira hacia atrás en el agua y se recupera en el aire; al girar se hunde como timón */
     phi+=dt*(.9+Math.min(P.v,3)*.55);if(phi>6.2832)phi-=6.2832;
-    const dip=Math.abs(P.steer)>.2?1:0,sn=Math.sin(phi),pull=sn>0,u=pull?phi/Math.PI:(phi-Math.PI)/Math.PI,
-      tz=pull?1.55-1.45*u:.1+1.45*u,ty=pull?-.28:-.28+.5*Math.sin(u*Math.PI),
-      hand=pv.set(padX*.46,.62+.1*Math.cos(phi),.48+.16*Math.cos(phi)),
-      tipT=new THREE.Vector3(padX*(.62+dip*.5),dip?-.25:ty,dip?1.0+Math.sin(P.t*1.2)*.12:tz);
+    const dip=Math.abs(P.steer)>.2?1:0,sn=Math.sin(phi),cs=Math.cos(phi),pull=sn>0,u=pull?phi/Math.PI:(phi-Math.PI)/Math.PI,
+      tz=pull?.25+1.35*u:1.6-1.35*u,ty=pull?-.28:-.28+.5*Math.sin(u*Math.PI);
+    /* los hombros mandan: la mano de arriba trabaja junto al pecho (al alcance del brazo) y el remo sale de ella */
+    const s0=boat.worldToLocal(armPivot[0].getWorldPosition(new THREE.Vector3())),s1=boat.worldToLocal(armPivot[1].getWorldPosition(new THREE.Vector3()));
+    const cx0=(s0.x+s1.x)/2,cy0=(s0.y+s1.y)/2,cz0=(s0.z+s1.z)/2;
+    const hand=new THREE.Vector3(cx0-padX*.08,cy0-.36+.1*cs,cz0-.3-.24*cs),
+      tipT=new THREE.Vector3(padX*(.62+dip*.45),dip?-.25:ty,cz0+(dip?.9+Math.sin(P.t*1.2)*.12:tz));
     const d2=tipT.clone().sub(hand).normalize();cPad.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),d2);cPad.position.copy(hand);
-    // brazos hacia el remo (mano alta en el mango, mano baja en el eje)
-    const grips=[hand.clone().addScaledVector(d2,.75),hand.clone()];if(padX<0)grips.reverse();
-    armPivot.forEach((p,i)=>{const sp=p.getWorldPosition(new THREE.Vector3());const tgt=boat.localToWorld(grips[i].clone());const dv=tgt.sub(sp);const len=dv.length();
-      p.parent.worldToLocal(tgt.copy(sp).add(dv));const loc=tgt.sub(p.position);
-      p.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0),loc.clone().normalize());p.scale.y=clamp(loc.length()/.66,.7,1.5)})}}
+    /* brazos hacia el remo (mano alta en el mango, mano baja en el eje) */
+    const grips=[hand.clone(),hand.clone().addScaledVector(d2,.62)];if(padX<0)grips.reverse();
+    armPivot.forEach((p,i)=>{const wt=p.parent.worldToLocal(boat.localToWorld(grips[i].clone()));const loc=wt.sub(p.position);
+      p.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0),loc.clone().normalize());p.scale.y=clamp(loc.length()/.66,.75,1.3)})}}
 }

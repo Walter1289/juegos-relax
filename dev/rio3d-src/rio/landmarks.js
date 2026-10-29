@@ -33,6 +33,12 @@ function updateDragons(ps,k0,k1){
 export function updateLandmarks(ps){
   if(!window.__ofrChk&&S.started&&P.t>6){window.__ofrChk=1;const pn=ofrendaPend();if(pn)openOfrenda(pn)}
   const k0=Math.max(0,Math.floor((ps-140)/LMS)),k1=Math.floor((ps+340)/LMS);
+  if(S.started&&!window.__goalT&&P.t>30){window.__goalT=1;let g0=1;try{g0=localStorage.getItem('rio3d-goal')}catch(e){}if(!g0){try{localStorage.setItem('rio3d-goal','1')}catch(e){}
+    toast(T3({es:'Tu camino: reúne linternas hasta el Templo de la campana. Allí empieza tu vuelta; al volver, una ceremonia las libera y la cabaña de la colina te espera',en:'Your path: gather lanterns up to the Bell Temple. Your lap starts there; when you return, a ceremony releases them and the hill cabin awaits',ja:'旅の道すじ：鐘の寺までランタンを集めます。そこから一周が始まり、戻ると儀式で灯が放たれ、丘の小屋があなたを待ちます'}))}}
+  /* sellos antes de empezar la vuelta: se anotan en la vuelta 1 al pasar por cada lugar */
+  if(lapK()<0)for(let k=k0;k<=k1;k++){const t=lmType(k);if(lmPos(k)-ps>30||ps-lmPos(k)>25)continue;if(sellar(1,t))setTimeout(()=>toast(T3({es:'Sello nuevo: '+LM[t]+' · lo ves en Start › Sellos',en:'New stamp: '+UX.tr(LM[t])+' · see it in Start › Stamps',ja:'新しい印：'+UX.tr(LM[t])+' · スタート › 印帳で見られます'})),4200)}
+  /* la vuelta se cierra en el templo: aviso unos metros antes */
+  {const lk=lapK();if(lk>=0){const kc=lk+NL;if(window.__clsK!==kc&&lmPos(kc)-ps<260&&lmPos(kc)-ps>60){window.__clsK=kc;toast(T3({es:'Se acerca el Templo de la campana: aquí cierras tu vuelta y tus linternas suben al cielo',en:'The Bell Temple is near: here you close your lap and your lanterns rise to the sky',ja:'鐘の寺が近づきます。ここで一周を締めくくり、ランタンが空へのぼります'}))}}}
   updateDragons(ps,k0,k1);
   for(const [k,g] of lmMade)if(k<k0||k>k1){if(g.parent)scene.remove(g);disposeLM(g);lmMade.delete(k)}
   for(let k=k0;k<=k1;k++){let g=lmMade.get(k);if(!g){g=buildLM(k);lmMade.set(k,g)}if(!g.parent)scene.add(g);
@@ -59,7 +65,7 @@ export function updateLandmarks(ps){
     const cer=ceremonias(),p=parts(),fr=cer<=4?p[(cer-1)*2]+joiner()+p[(cer-1)*2+1]:'';
     let msg=T3({es:'Ceremonia de liberación: '+n+' linternas suben al cielo',en:'Release ceremony: '+n+' lanterns rise into the sky',ja:'放灯の儀式：'+n+'のランタンが空へのぼります'});
     if(fr&&(abre||camino()))msg+=T3({es:' · el cartel de la cabaña descifra: «'+fr+'»',en:' · the cabin sign deciphers: “'+fr+'”',ja:' · 小屋の看板が読み解いた言葉：「'+fr+'」'});
-    toast(msg);
+    toast(msg);setTimeout(()=>toast(T3({es:'Mara te dejó una carta en el cartel de la cabaña. Ve cuando quieras: ← Menú te lleva a casa',en:'Mara left you a letter on the cabin sign. Go whenever you like: ← Menu takes you home',ja:'マラが小屋の看板に手紙を残しました。いつでもどうぞ。← メニューで小屋へ'})),16000);
     if(gran)setTimeout(()=>toast(T3({es:'¡Gran ceremonia! '+n+' luces, 108 o más, como las campanadas del templo en Año Nuevo',en:'Great ceremony! '+n+' lights, one for each of the 108 bell strokes',ja:'大放灯！'+n+'の灯。除夜の鐘と同じ百八つ以上'})),4500);
     if(cer===2)setTimeout(()=>toast(T3({es:'Recompensa: la luz de tu proa ahora es dorada',en:'Reward: your bow light is now golden',ja:'褒美：舳先の灯が金色になりました'})),9500);
     if(cer===3)setTimeout(()=>toast(T3({es:'Recompensa: las linternas se acercan a ti desde más lejos',en:'Reward: lanterns are drawn to you from farther away',ja:'褒美：ランタンが遠くから寄ってきます'})),9500);
