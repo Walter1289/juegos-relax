@@ -7,7 +7,7 @@ const ASSETS = [
   './cabana/', './cabana/index.html',
   './rio3d/', './rio3d/index.html', './rio3d/app.js',
   './cabana3d/', './cabana3d/index.html', './cabana3d/app.js',
-  './cabana/app.js', './shared/three-AFY5OSH4.js',
+  './cabana/app.js', './shared/three-DZYUDTSS.js',
   './privacidad.html',
   './creditos.html',
   './datos.html',

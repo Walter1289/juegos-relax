@@ -6,7 +6,7 @@ import {S,P} from './state.js';
 import {mistAt,cx,hw} from './world.js';
 import {glowTex,scene,hemi,dir} from './core.js';
 import {env,water,sky} from './env.js';
-import {spawnRipple} from './ripples.js';
+import {spawnRipple,rippleMat} from './ripples.js';
 import {toast} from './hud.js';
 import {FU,DITHER} from '../fogfx.js';
 import {SU} from './skyfx.js';
@@ -46,7 +46,7 @@ export function weather(dt,s){
   const f=clamp(Math.max(mistAt(s)*.95,W.rain*.4,dawn*.4,.2));W.fog=f;
   scene.fog.near=lerp(22,5,f);scene.fog.far=lerp(250,85,f);
   _c.set(0xe6e4ee).multiplyScalar(1-env.night*.7);scene.fog.color.copy(env.fog).lerp(_c,f*.55);
-  const u=water.material.uniforms;u.fogN.value=scene.fog.near;u.fogF.value=scene.fog.far;u.fog.value.copy(scene.fog.color);
+  const u=water.material.uniforms;u.fogN.value=scene.fog.near;u.fogF.value=scene.fog.far;u.fog.value.copy(scene.fog.color);u.ruf.value=W.rain||0;rippleMat.uniforms.fogF.value=scene.fog.far;
   sky.material.uniforms.hor.value.lerp(scene.fog.color,f*.8);sky.material.uniforms.top.value.lerp(scene.fog.color,f*.35);
   SU.mist.value=f;SU.cover.value=clamp(.24+.16*Math.sin(P.t*.012)+W.rain*.55+f*.2);   // nubes: cielo más cubierto con llovizna y bruma
   hemi.intensity*=1-.22*W.rain;dir.intensity*=1-.45*W.rain;
@@ -70,5 +70,5 @@ export function weather(dt,s){
   rainL.visible=W.rain>.03;rainM.opacity=.3*W.rain;
   if(rainL.visible){for(let i=0;i<RN;i++){const v=rv[i];v[1]-=16*dt;if(v[1]<0){v[1]=13+Math.random()*2;v[0]=Math.random()*40-20;v[2]=Math.random()*40-24}
     const x=P.px+v[0],z=P.pz+v[2];rainP.set([x,v[1],z,x-.05,v[1]+.65,z],i*6)}rainG.attributes.position.needsUpdate=true;
-    if(Math.random()<dt*9*W.rain)spawnRipple(P.px+(Math.random()-.5)*28,P.pz-Math.random()*22+4)}
+    {let n=dt*26*W.rain;while(Math.random()<n){n-=1;spawnRipple(P.px+(Math.random()-.5)*26,P.pz-Math.random()*22+4,.26+Math.random()*.22,1.3+Math.random()*.6,1)}}}
 }

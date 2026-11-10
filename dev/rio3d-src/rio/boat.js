@@ -5,6 +5,8 @@ import {toonGrad,tex,gustAt,bake} from '../style.js';
 import * as THREE from 'three';
 import {clamp} from './util.js';
 import {P,S} from './state.js';
+import {spawnRipple} from './ripples.js';
+import {spawnWake,splash} from './shore.js';
 import {MT,scene,spr,R,cam} from './core.js';
 const MTc=MT;
 /* ---------- canoa en primera persona ---------- */
@@ -181,7 +183,8 @@ function warmUp(){warmed=true;try{const vs=[me,cPad,...cargoMs];vs.forEach(o=>o.
   vs.forEach(o=>o.traverse(m=>{if(m.isMesh){const mm=m.material;if(mm&&mm.map)R.initTexture(mm.map)}}));
   me.visible=cPad.visible=false;cargoMs.forEach(n=>n.visible=false)}catch(e){}}
 /* estado de la animación */
-const AN={padX:1,th:3.6,left:2,rest:1.5,T:new THREE.Vector3(.78,-.1,1.2),H:new THREE.Vector3(0,.95,.35),ry:0,rx:0,rz:0,gy:0,gyv:0,gp:0,gpv:0,gyT:0,gpT:0,gT:2,blink:3,hv:0,lag:0};
+const _pw=new THREE.Vector3();
+const AN={wet:false,padX:1,th:3.6,left:2,rest:1.5,T:new THREE.Vector3(.78,-.1,1.2),H:new THREE.Vector3(0,.95,.35),ry:0,rx:0,rz:0,gy:0,gyv:0,gp:0,gpv:0,gyT:0,gpT:0,gT:2,blink:3,hv:0,lag:0};
 const _a=new THREE.Vector3(),_b=new THREE.Vector3(),_c=new THREE.Vector3(),_d=new THREE.Vector3(),_e=new THREE.Vector3(),_n=new THREE.Vector3(),_t1=new THREE.Vector3(),_t2=new THREE.Vector3(),_q=new THREE.Quaternion();
 /* cinemática inversa de dos huesos: hombro fijo, mano en el objetivo y codo hacia abajo y afuera */
 function solveArm(i,T){const A=arms[i],S=SH[i],sd=i?1:-1;A.t.lerp(T,.35);
@@ -206,6 +209,9 @@ export function updateCharacter(dt){
   else{const w=Math.sin(AN.th)>0?3.3:2.3;AN.th+=dt*w*(.85+.15*Math.sin(t*.31));
     if(AN.th>6.2832+3.6){AN.th-=6.2832;if(--AN.left<=0)AN.rest=2.2+Math.random()*4}
     pull=Math.max(0,Math.sin(AN.th))}
+  /* la pala entra al agua: onda y remolino de espuma donde muerde; al salir, unas gotas */
+  {const wet=pull>.35;if(wet&&!AN.wet){_pw.copy(AN.T);boat.localToWorld(_pw);spawnRipple(_pw.x,_pw.z,.62,3,.85);spawnWake(_pw.x,_pw.z,0,0,.55,2.2,.3)}
+   else if(!wet&&AN.wet){_pw.copy(AN.T);boat.localToWorld(_pw);splash(_pw.x,.12,_pw.z,2)}AN.wet=wet}
   const th=AN.th,cs=Math.cos(th),sn=Math.sin(th);
   /* objetivo de la pala (centro) y de la mano de arriba, en coordenadas de la canoa */
   const cy=me.position.y+SC*.54;

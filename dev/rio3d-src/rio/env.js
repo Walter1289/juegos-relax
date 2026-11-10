@@ -100,15 +100,19 @@ export function applyEnv(px,pz){
 export const todName=t=>t<.1?'Madrugada':t<.2?'Amanecer':t<.5?'Día':t<.68?'Atardecer':t<.92?'Noche':'Madrugada';
 /* ---------- agua: refleja el cielo (degradado, nubes, sol y luna) y se funde con la niebla ---------- */
 export const water=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.ShaderMaterial({
-  uniforms:{...SU,t:{value:0},deep:{value:new THREE.Color('#5a8f9c')},shallow:{value:new THREE.Color('#a3c8c4')},fog:{value:new THREE.Color()},
+  uniforms:{...SU,t:{value:0},ruf:{value:0},deep:{value:new THREE.Color('#5a8f9c')},shallow:{value:new THREE.Color('#a3c8c4')},fog:{value:new THREE.Color()},
     lDir:{value:new THREE.Vector3(0,1,0)},lCol:{value:new THREE.Color()},fogN:{value:22},fogF:{value:250},fogSunDir:FU.sunDir,fogSunCol:FU.sunCol,fogMisc:FU.misc},
   vertexShader:'varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
-  fragmentShader:`varying vec3 vW;uniform float t,fogN,fogF;uniform vec3 deep,shallow,fog,lDir,lCol,fogSunDir,fogSunCol;uniform vec4 fogMisc;
+  fragmentShader:`varying vec3 vW;uniform float t,fogN,fogF,ruf;uniform vec3 deep,shallow,fog,lDir,lCol,fogSunDir,fogSunCol;uniform vec4 fogMisc;
   ${SKYGLSL}
   float hh(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}
   float wn(vec2 q){vec2 i=floor(q),f=fract(q);f=f*f*(3.-2.*f);return mix(mix(hh(i),hh(i+vec2(1,0)),f.x),mix(hh(i+vec2(0,1)),hh(i+vec2(1,1)),f.x),f.y);}
   void main(){
-    vec2 p=vW.xz;
+    /* deformación de dominio con el ruido de las nubes: rompe la regularidad de las ondas y hace serpentear las vetas de corriente */
+    vec3 wz=texture2D(cloudTex,vW.xz*.011+vec2(t*.0035,-t*.006)).rgb;
+    vec2 p=vW.xz+(wz.rg-.5)*5.;
+    /* rachas: parches que el viento riza y oscurece mientras cruzan el río (la lluvia riza todo) */
+    float gu=clamp(smoothstep(.5,.78,texture2D(cloudTex,vW.xz*.0045+vec2(t*.007,t*.011)).b)*.85+ruf*.7,0.,1.2);
     float dx=cos(p.x*.35+t*.8)*.05+cos(p.x*.9+p.y*.6-t*1.3)*.03+cos(p.y*.25+t*.5)*.03+cos(p.x*2.1+p.y*1.3+t*1.9)*.012;
     float dz=cos(p.y*.4+t*.7)*.05+cos(p.y*.8-p.x*.5+t*1.1)*.03+cos(p.x*.3-t*.6)*.03+cos(p.y*2.3-p.x*1.1+t*1.7)*.012;
     vec3 n=normalize(vec3(-dx*.6,1.,-dz*.6));
@@ -117,13 +121,14 @@ export const water=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.S
     vec3 base=mix(deep,shallow,.5+.5*sin(p.x*.05+p.y*.04+t*.1));
     base*=mix(1.,.45,night);
     float lod=1.-smoothstep(8.,70.,dist);   /* detalle fino de superficie: baja amplitud, media cero y desvanecido con la distancia (sin parpadeo) */
-    base*=1.+(sin(p.x*3.1+p.y*2.3+t*.9)*sin(p.y*2.7-p.x*1.9-t*.7)*.045+sin(p.x*7.3-p.y*5.1+t*.6)*sin(p.y*6.1+p.x*4.7-t*.5)*.02)*lod;
+    base*=1.-.06*gu;
+    base*=1.+(1.+1.6*gu)*(sin(p.x*3.1+p.y*2.3+t*.9)*sin(p.y*2.7-p.x*1.9-t*.7)*.045+sin(p.x*7.3-p.y*5.1+t*.6)*sin(p.y*6.1+p.x*4.7-t*.5)*.02)*lod;
     vec3 refl=skyRefl(reflect(-v,normalize(vec3(n.x*.3,1.,n.z*.3))))*.86;   /* espejo de lago calmo: el reflejo del cielo sigue solo una fracción de las ondas (evita parpadeo al avanzar) */
     float st=wn(vec2(p.x*.07+t*.02,p.y*1.5+t*.25)),st2=wn(vec2(p.x*.16-t*.03,p.y*3.1-t*.4));
     float streak=smoothstep(.62,.9,st)*.55+smoothstep(.66,.92,st2)*.4;
     float dk=smoothstep(.55,.2,wn(vec2(p.x*.05,p.y*.9+t*.15)));
     base=mix(base,base*.78,dk*.6);
-    vec3 c=mix(base,refl,clamp(fr*.9+.26,0.,1.));
+    vec3 c=mix(base,refl,clamp(fr*.9+.26-.09*gu,0.,1.));
     c=mix(c,mix(hor,vec3(1.),.55),streak*(1.-night*.7)*.38);
     float sp=smoothstep(.9,1.,wn(p*2.6+vec2(t*.5,-t*.3)));c+=lCol*sp*.38;   /* destellos del agua suaves a propósito (WCAG 2.3.1) */
     vec3 h=normalize(lDir+v);c+=lCol*pow(max(dot(n,h),0.),90.)*.6;

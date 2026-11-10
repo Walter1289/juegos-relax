@@ -6,3 +6,10 @@ Las rutas de los scripts asumen /home/claude; ajusta si se clona en otro lado.
 - `style.js` también reúne lo compartido de animación y rendimiento: `windify()`/`windTick()`/`gustAt()` (viento único para la vegetación de ambos juegos, en el sombreador de vértices) y `bake()` (funde mallas estáticas por material para bajar llamadas de dibujo).
 - El lanchero (`rio/boat.js`) usa brazos de dos huesos con cinemática inversa; la canoa, el farol y los faroles del porche se mueven con muelles/péndulos, no con senos fijos.
 - Pescadores (`rio/scenery.js`), patos y garzas (`rio/fauna.js`, `rio/lm-parts.js`) siguen la escala y el estilo del lanchero. En la cabaña, la estructura fija y cada objeto reparable se funden con `bake()` al construirse; las mallas marcadas con `S()` (oclusores) y las manchas quedan sueltas.
+
+### Agua, ondas y ranas (Río 3D)
+- `rio/ripples.js`: las ondas son trenes de anillos (cresta clara / valle oscuro) con contorno irregular, instanciadas en **una** llamada de dibujo. `spawnRipple(x,z,size,life,amp)`.
+- `rio/shore.js`: `laceTex` (encaje de espuma en mosaico) lo comparten la estela (instanciada, se deshace por erosión), la espuma de la orilla y la de las rocas. Las ondas de proa nacen a lo largo del rumbo.
+- `rio/env.js`: el agua deforma su dominio con `cloudTex` (vetas que serpentean) y tiene rachas de viento (`gu`) y rizado por lluvia (`ruf`).
+- `rio/frogs.js`: ranas en ~30 % de las rocas (`mkFrog`, `updateFrog`); saltan si la canoa pasa a menos de `r+4.6` m y vuelven cuando se aleja 55 m. Sonido `A.croak`.
+- Velocidad de la canoa: remada 2.34 y corriente .99 (10 % menos que antes).

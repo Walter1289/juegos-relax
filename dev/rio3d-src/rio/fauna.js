@@ -58,7 +58,7 @@ export function updateFish(dt,ps){
       f.position.x+=Math.sin(u.hd)*u.sp*dt;f.position.z-=Math.cos(u.hd)*u.sp*dt;f.position.y=-.02+Math.sin(u.t*2+u.ph)*.01;
       swimFish(f,u,dt,1);f.rotation.set(0,-u.hd,u.bank);
       if(Math.random()<dt*.03&&dz<-6&&dz>-45){f.userData.st=1;u.j=0;u.vx=Math.sin(u.hd)*2.6;u.vz=-Math.cos(u.hd)*2.6;splash(f.position.x,.1,f.position.z,5);A.plop((f.position.x-P.px)/25)}
-      else if(Math.random()<dt*.05&&Math.abs(dz)<30&&Math.abs(dz)>5)spawnWake(f.position.x,f.position.z,0,0,.7);
+      else if(Math.random()<dt*.05&&Math.abs(dz)<30&&Math.abs(dz)>5)spawnRipple(f.position.x,f.position.z,.6,3.2,.8);
     }else{ // salto
       u.j+=dt;const T=.95,k=u.j/T,h=Math.sin(Math.PI*k)*1.25;
       f.position.x+=u.vx*dt;f.position.z+=u.vz*dt;f.position.y=-.02+h;
@@ -123,11 +123,11 @@ export function updateFauna(dt,ps){
     if(!u.follow&&!(u.flee>0)&&(dz<-14||dz>110)){placeWB(b,ps);continue}
     if(u.follow&&dz<-70){u.follow=0;placeWB(b,ps);continue}
     u.nd-=dt;if(u.nd<=0&&u.dip<=0&&!u.follow&&!(u.flee>0)){u.dip=1.3;u.nd=5+Math.random()*7;u.rip=false}
-    if(u.dip>0){u.dip-=dt;const k=Math.sin(Math.PI*clamp(1-u.dip/1.3));u.neck.rotation.x=1.2*k;b.rotation.x=.9*k*.5;b.position.y=-.05*k;if(k>.9&&!u.rip){u.rip=true;spawnRipple(b.position.x,b.position.z-.4);A.plop((b.position.x-P.px)/25)}}
+    if(u.dip>0){u.dip-=dt;const k=Math.sin(Math.PI*clamp(1-u.dip/1.3));u.neck.rotation.x=1.2*k;b.rotation.x=.9*k*.5;b.position.y=-.05*k;if(k>.9&&!u.rip){u.rip=true;spawnRipple(b.position.x,b.position.z-.4,.7,3.2,.9);A.plop((b.position.x-P.px)/25)}}
     else{/* nado: cada patada empuja el cuerpo y la cabeza va y vuelve al compás; de vez en cuando sacude la cola */
       const sp=u.spd||.35,k=Math.min(1,sp*.9);u.pd+=dt*(3.2+sp*3.6);u.wg-=dt;if(u.wg<-.55)u.wg=4+Math.random()*8;
       u.neck.rotation.x=Math.sin(u.t*1.1)*.06+Math.sin(u.pd)*.13*k;u.neck.rotation.y=Math.sin(u.t*.37+u.pd*.03)*.25;
-      u.tail.rotation.y=u.wg<0?Math.sin(u.t*26)*.35:0;
+      u.tail.rotation.y=u.wg<0?Math.sin(u.t*26)*.35:0;u.rp=(u.rp||1)-dt*(.4+sp);if(u.rp<=0){u.rp=.9+Math.random()*.6;if(Math.abs(dz)<45)spawnRipple(b.position.x,b.position.z,.42*(b.scale.x>.6?1:.7),2.4,.55)}
       b.rotation.x=Math.sin(u.pd-.6)*.035*k;b.rotation.z=Math.sin(u.pd*.5)*.045*k+Math.sin(u.t*.9)*.015;b.position.y=Math.sin(u.t*1.3)*.012+Math.abs(Math.sin(u.pd))*.006*k;
       u.hd+=Math.sin(u.t*.4)*.3*dt;const e=b.position.x-cx(s);if(Math.abs(e)>hw(s)-5)u.hd+=(tanAng(s)+(e>0?-1:1)*.8-u.hd)*dt*1.2;
       b.position.x+=Math.sin(u.hd)*(u.spd||.35)*dt;b.position.z-=Math.cos(u.hd)*(u.spd||.35)*dt}

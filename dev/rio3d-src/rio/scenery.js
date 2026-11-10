@@ -9,6 +9,9 @@ import {hw,cx,tanAng,castleNear} from './world.js';
 import {scene,glowTex,MT} from './core.js';
 import {env} from './env.js';
 import {spawnRipple} from './ripples.js';
+import {laceTex} from './shore.js';
+import {mkFrog,updateFrog} from './frogs.js';
+import {SU} from './skyfx.js';
 import {_c2,_c} from './weather.js';
 /* ====== piedras del río ====== */
 const RCELL=38,rockCells=new Map();
@@ -17,12 +20,33 @@ const rockGeos=[0,1,2].map(v=>{const g=new THREE.IcosahedronGeometry(1,1).toNonI
   g.setAttribute('color',new THREE.BufferAttribute(c,3));const uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*2,uv.getY(i)*2);g.computeVertexNormals();return g});
 const rockMat=new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xb7b3c4,vertexColors:true,map:tex('rock')});
 const mossMat=new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0x86b88a,map:tex('leaf')});
-const foamRing=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.4,depthWrite:false,side:THREE.DoubleSide});
+/* espuma de las rocas: cojín de agua río arriba, cerco irregular y una cola de encaje que la corriente se lleva */
+const rockFoamU={t:{value:0}};
+const foamRing=new THREE.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{lace:{value:laceTex},t:rockFoamU.t,hor:SU.hor,night:SU.night},
+  vertexShader:`varying vec2 vL,vW2;void main(){vL=position.xz;vec4 w=modelMatrix*vec4(position,1.);vW2=w.xz;gl_Position=projectionMatrix*viewMatrix*w;}`,
+  fragmentShader:`varying vec2 vL,vW2;uniform sampler2D lace;uniform float t;uniform vec3 hor;uniform float night;
+  void main(){vec2 q=vL;float dn=max(0.,-q.y);q.y*=q.y<0.?.36:1.15;q.x*=1.+dn*.22;
+    float an=atan(vL.y,vL.x),d=length(q)*(1.+.06*sin(an*3.+vW2.x)+.04*sin(an*7.-vW2.y*2.));
+    float band=smoothstep(.98,1.12,d)*(1.-smoothstep(1.18,1.75,d));
+    float l=texture2D(lace,vW2*.33+vec2(0.,-t*.05)).r*.8+texture2D(lace,vW2*.15+vec2(.4,-t*.03)).r*.4;
+    float pulse=.5+.5*sin(t*1.1+vW2.x*.7+an*2.);
+    float a=smoothstep(.2,.85,l*band+band*(.2+.14*pulse))*.6+smoothstep(.985,1.03,d)*(1.-smoothstep(1.05,1.16,d))*(.3+.2*pulse);
+    a*=1.-smoothstep(2.6,3.,length(vL));if(a<.004)discard;
+    gl_FragColor=vec4(mix(hor,vec3(1.),.8)*(1.-night*.5),a);
+#include <colorspace_fragment>
+  }`});
+const rockFoamG=new THREE.PlaneGeometry(6.2,6.2).rotateX(-Math.PI/2);
+const _rc=new THREE.Raycaster(),_ro=new THREE.Vector3(),_dn=new THREE.Vector3(0,-1,0);
 function rockAt(c){const r=hash(c,41);if(c<2||r>.34)return null;const s=c*RCELL+hash(c,42)*RCELL,e=(hash(c,43)*2-1)*hw(s)*.4;return{s,x:cx(s)+e,z:-s,r:.9+hash(c,44)*1.1,v:Math.floor(hash(c,45)*3),a:hash(c,46)*6.28}}
 function mkRock(o){const g=new THREE.Group();const m=new THREE.Mesh(rockGeos[o.v],rockMat);m.scale.setScalar(o.r);m.rotation.y=o.a;m.position.y=o.r*.18;g.add(m);
   const mo=new THREE.Mesh(rockGeos[(o.v+1)%3],mossMat);mo.scale.set(o.r*.62,o.r*.3,o.r*.6);mo.position.set(o.r*.12,o.r*.62,0);mo.rotation.y=o.a+1;g.add(mo);
-  const fr=new THREE.Mesh(new THREE.RingGeometry(1.05,1.55,24).rotateX(-Math.PI/2),foamRing);fr.scale.setScalar(o.r);fr.position.y=.05;fr.userData.fr=1;g.add(fr);
-  g.position.set(o.x,0,o.z);g.userData=o;return g}
+  const fr=new THREE.Mesh(rockFoamG,foamRing);fr.scale.setScalar(o.r);fr.position.y=.05;fr.rotation.y=-tanAng(o.s);fr.userData.fr=1;fr.renderOrder=1;g.add(fr);
+  g.position.set(o.x,0,o.z);g.userData=o;
+  /* una rana en unas pocas rocas, posada sobre la superficie real de la piedra */
+  if(hash(Math.round(o.s),47)<.3){g.updateMatrixWorld(true);const fa=hash(Math.round(o.s),48)*6.28,fx=Math.cos(fa)*o.r*.22,fz=Math.sin(fa)*o.r*.22;
+    _rc.set(_ro.set(o.x+fx,6,o.z+fz),_dn);const h=_rc.intersectObjects([m,mo],false)[0];
+    if(h){const f=mkFrog();f.position.set(fx,h.point.y-.012,fz);f.rotation.y=f.userData.ry1=hash(Math.round(o.s),49)*6.28;f.userData.hx=fx;f.userData.hy=f.position.y;f.userData.hz=fz;g.add(f);o.frog=f}}
+  return g}
 export function updateRocks(dt,ps){
   const c0=Math.floor((ps-25)/RCELL),c1=Math.floor((ps+280)/RCELL);
   for(const [c,g] of rockCells)if((c<c0||c>c1)&&g)scene.remove(g);
@@ -30,7 +54,8 @@ export function updateRocks(dt,ps){
     if(!g)continue;if(!g.parent)scene.add(g);
     const dx=P.px-g.userData.x,dz=P.pz-g.userData.z,need=g.userData.r*1.2+1.5,d=Math.hypot(dx,dz);
     if(d<need&&d>.01){P.px+=dx/d*(need-d)*.6;P.pz+=dz/d*(need-d)*.6;P.v*=.9;if(P.t-P.bumpT>1.2){A.bump();P.bumpT=P.t;spawnRipple(g.userData.x+dx/d*-g.userData.r,g.userData.z+dz/d*-g.userData.r)}}
-    g.children[2].material.opacity=.3+.12*Math.sin(P.t*1.4+c)}
+    if(g.userData.frog)updateFrog(g.userData.frog,g.userData,dt)}
+  rockFoamU.t.value=P.t;
 }
 
 /* ====== macizos kársticos cercanos con niebla ====== */

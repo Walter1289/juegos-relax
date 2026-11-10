@@ -138,7 +138,7 @@
     ['Subtítulos: sí','Captions: on','字幕: オン'],['Subtítulos: no','Captions: off','字幕: オフ'],['Vibración: sí','Vibration: on','振動: オン'],['Vibración: no','Vibration: off','振動: オフ'],
     ['Una mano: no','One hand: off','片手: オフ'],['Una mano: derecha','One hand: right','片手: 右'],['Una mano: izquierda','One hand: left','片手: 左'],
     ['Flauta shakuhachi','Shakuhachi flute','尺八'],['Campanillas','Wind chimes','鈴の音'],['Koto','Koto','琴'],['Campana de templo','Temple bell','寺の鐘'],['Tambor lejano','Distant drum','遠くの太鼓'],
-    ['Cuac de pato','Duck quack','カモの鳴き声'],['Aleteo de garza','Heron wingbeats','サギの羽ばたき'],['Golpe suave de la canoa','Soft knock on the canoe','カヌーが軽くぶつかる音'],['Salpicadura','Splash','水しぶき'],['Fuegos artificiales','Fireworks','花火'],['Nota de linterna','Lantern note','ランタンの音'],['Cascada cercana','Waterfall nearby','近くの滝の音'],['Lluvia suave','Soft rain','やさしい雨音'],
+    ['Cuac de pato','Duck quack','カモの鳴き声'],['Croar de rana','Frog croak','カエルの鳴き声'],['Aleteo de garza','Heron wingbeats','サギの羽ばたき'],['Golpe suave de la canoa','Soft knock on the canoe','カヌーが軽くぶつかる音'],['Salpicadura','Splash','水しぶき'],['Fuegos artificiales','Fireworks','花火'],['Nota de linterna','Lantern note','ランタンの音'],['Cascada cercana','Waterfall nearby','近くの滝の音'],['Lluvia suave','Soft rain','やさしい雨音'],
     ['Viento','Wind','風'],['Grillos','Crickets','コオロギ'],['Fregado','Scrubbing','こする音'],['Madera que cruje','Creaking wood','きしむ木の音'],['Estrella fugaz','Shooting star','流れ星'],
   ]);
 
