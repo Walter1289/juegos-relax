@@ -5,3 +5,4 @@
 Las rutas de los scripts asumen /home/claude; ajusta si se clona en otro lado.
 - `style.js` también reúne lo compartido de animación y rendimiento: `windify()`/`windTick()`/`gustAt()` (viento único para la vegetación de ambos juegos, en el sombreador de vértices) y `bake()` (funde mallas estáticas por material para bajar llamadas de dibujo).
 - El lanchero (`rio/boat.js`) usa brazos de dos huesos con cinemática inversa; la canoa, el farol y los faroles del porche se mueven con muelles/péndulos, no con senos fijos.
+- Pescadores (`rio/scenery.js`), patos y garzas (`rio/fauna.js`, `rio/lm-parts.js`) siguen la escala y el estilo del lanchero. En la cabaña, la estructura fija y cada objeto reparable se funden con `bake()` al construirse; las mallas marcadas con `S()` (oclusores) y las manchas quedan sueltas.

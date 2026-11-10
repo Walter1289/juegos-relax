@@ -79,7 +79,7 @@ function buildLM0(k){
     signs(g,gy,hwv,'鷺',false,'#5f8aa8');
     const NR=900,rm=new THREE.InstancedMesh(bladeGeo,reedM.material,NR);rm.frustumCulled=false;let nr2=0;
     for(let i=0;i<NR;i++){const sd=i%2?1:-1,lx=sd*(hwv-5.5+hash(k,i)*13),lz=(hash(k,i+50)-.5)*84;if(Math.abs(lx)<hwv-5.8)continue;
-      const sc=1.1+hash(k,i+70)*1.5,y=Math.max(-.25,gy(lx,lz)-.15);V3.set(lx,y,lz);Q.setFromAxisAngle(UP,hash(k,i+90)*6.28);S3.set(sc,sc*(1+hash(k,i+30)*.9),sc);M4.compose(V3,Q,S3);rm.setMatrixAt(nr2,M4);rm.setColorAt(nr2,tmp.set(REED[(hash(k,i+4)*4)|0]));nr2++}
+      const sc=.7+hash(k,i+70)*.6,y=Math.max(-.25,gy(lx,lz)-.15);V3.set(lx,y,lz);Q.setFromAxisAngle(UP,hash(k,i+90)*6.28);S3.set(sc,sc*(1+hash(k,i+30)*.5),sc);/* cañas de 1,5 a 4 m: antes llegaban a 10 m y tapaban a las garzas */M4.compose(V3,Q,S3);rm.setMatrixAt(nr2,M4);rm.setColorAt(nr2,tmp.set(REED[(hash(k,i+4)*4)|0]));nr2++}
     rm.count=nr2;rm.userData.keep=true;g.add(rm);
     g.userData.hp=[];
     for(let i=0;i<20;i++){const sd=i%2?1:-1,wade=i%3!==0,lx=sd*(hwv-(wade?2.2+hash(k,i)*3.5:-1.5+hash(k,i)*2)),lz=(hash(k,i+10)-.5)*70,sc=.95+hash(k,i+5)*.5,ry=hash(k,i+3)*6.28,py=wade?-.12:gy(lx,lz)-.1;

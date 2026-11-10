@@ -1,7 +1,7 @@
 /* app.js — orquestador de la Cabaña 3D: construye la escena en orden, enlaza módulos y corre el bucle de animación */
 import {R,RT,IT,scene,cam,resize} from './core.js';
 import {A} from '../audio.js';
-import {addVignette} from '../style.js';
+import {addVignette,bake} from '../style.js';
 import './i18n.js';
 import {el,initTex} from './util.js';
 import {ITEMS} from './items.js';
@@ -37,6 +37,8 @@ buildStruct();
 buildSecret();
 buildItemsA();
 buildItemsB();
+/* piezas de cada objeto (versión dañada y reparada) fundidas por material; las manchas quedan aparte */
+{const deep=g=>{g.children.forEach(c=>{if(c.isGroup)deep(c)});bake(g)};Object.values(IT).forEach(it=>{deep(it.f);deep(it.b)})}
 W.traverse(o=>{if(o.isMesh&&!o.userData.item){o.castShadow=true;o.receiveShadow=true}});
 Object.values(IT).forEach(it=>it.blobs.forEach(m=>{m.castShadow=false}));
 addVignette();

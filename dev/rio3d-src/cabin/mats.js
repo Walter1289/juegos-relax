@@ -20,3 +20,8 @@ export function box(w,h,d,c,x,y,z,p,o){const mt=typeof c==='string'?mat(c,o):c;c
 
 /* material blanco (el color lo pone cada instancia) con viento y, si se pide, textura pintada: para el bosque y las matas */
 export const windMat=(w,kind)=>windify(toon('#ffffff',kind,{flatShading:true}),w);
+
+/* cilindro (pilares, troncos, macetas) con la textura a escala real, como box() */
+export function cyl(rt,rb,h,c,x,y,z,p,seg){const mt=typeof c==='string'?mat(c):c,g=new THREE.CylinderGeometry(rt,rb,h,seg||10),kd=mt.userData&&mt.userData.kind;
+  if(kd){const uv=g.attributes.uv,ku=Math.max(1,Math.round(6.283*Math.max(rt,rb)*DENS[kd])),n=(seg||10)+1;for(let i=0;i<n*2;i++)uv.setXY(i,uv.getX(i)*ku,uv.getY(i)*h*DENS[kd])}
+  const m=new THREE.Mesh(g,mt);m.position.set(x,y,z);if(p)p.add(m);return m}

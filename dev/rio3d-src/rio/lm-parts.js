@@ -1,11 +1,12 @@
 /* Piezas de los lugares: cajas/cilindros/brillos, objetos japoneses tradicionales, garza, materiales y fusión de mallas (optimizeLM/disposeLM). */
-import {toonGrad} from '../style.js';
+import {toonGrad,bake} from '../style.js';
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {MT,spr,glowTex} from './core.js';
 import {reedM} from './props.js';
 import {lmG,lmAnim} from './lm-data.js';
 import {hash} from './util.js';
+const _UPH=new THREE.Vector3(0,1,0);
 /* ---- primitivas ---- */
 export const bx=(g,w,h,d,c,x,y,z,o)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),MT(c,o));m.position.set(x,y,z);g.add(m);return m};
 export const cyl=(g,r1,r2,h,c,x,y,z,seg=7,o)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,seg),MT(c,o));m.position.set(x,y,z);g.add(m);return m};
@@ -34,14 +35,20 @@ export function pagoda(g,x,y,z){const h=new THREE.Group();h.position.set(x,y,z);
   cyl(h,.1,.18,4.6,0xd9a85a,0,yy+1.3,0,6);for(let i=0;i<6;i++)cyl(h,.55-i*.07,.55-i*.07,.12,0xd9a85a,0,yy+.2+i*.62,0,8);gl(h,0xffc77a,5,0,3,3.4,.7);return h}
 export function torii(g,x,y,z,sc,col){const h=new THREE.Group();h.position.set(x,y,z);h.scale.setScalar(sc);g.add(h);[-2.2,2.2].forEach(sx=>cyl(h,.3,.36,6,col,sx,3,0,8));bx(h,6.4,.4,.55,0x2c2a2e,0,6.4,0);[-1,1].forEach(sd=>{const e=bx(h,1.1,.36,.55,0x2c2a2e,sd*3.55,6.55,0);e.rotation.z=sd*.28});
   [-2.2,2.2].forEach(sx=>cyl(h,.42,.46,.5,0xb9b5ad,sx,.25,0,8));bx(h,5.6,.35,.4,col,0,5.4,0);bx(h,.5,.9,.4,col,0,5.85,0);return h}
-export function mkHeron(sc,ph){const h=new THREE.Group(),w=0xf6f3ee,w2=0xe9e4da;
-  const b=new THREE.Mesh(new THREE.SphereGeometry(.5,10,8),MT(w));b.scale.set(1,.8,1.5);b.position.y=1.35;h.add(b);
-  const tl=new THREE.Mesh(new THREE.ConeGeometry(.2,.7,5),MT(w2));tl.rotation.x=-Math.PI/2-.3;tl.position.set(0,1.35,-.85);h.add(tl);
-  cyl(h,.045,.045,1.1,0x3d3a36,-.12,.55,.05,4);cyl(h,.045,.045,1.1,0x3d3a36,.12,.55,.05,4);
-  const nk=new THREE.Group();nk.userData.noMerge=true;nk.position.set(0,1.6,.55);h.add(nk);
-  const n1=cyl(nk,.07,.09,1,w,0,.45,.05,5);n1.rotation.x=-.35;const n2=cyl(nk,.06,.07,.7,w,0,1.05,.3,5);n2.rotation.x=.45;
-  const hd=new THREE.Mesh(new THREE.SphereGeometry(.14,8,6),MT(w));hd.position.set(0,1.4,.55);nk.add(hd);
-  const bk=new THREE.Mesh(new THREE.ConeGeometry(.05,.5,4),MT(0xe3a24a));bk.rotation.x=Math.PI/2;bk.position.set(0,1.38,.9);nk.add(bk);
+/* garceta de ~1,05 m a escala 1 (antes medía 3 m): patas con rodilla, cuerpo inclinado con alas plegadas y plumas de cola,
+   cuello en S, cabeza con pico de daga, ojo y penacho. El cuello y la cabeza van en una sola malla animable (nk). */
+const HERM=new THREE.MeshToonMaterial({gradientMap:toonGrad,vertexColors:true});
+export function mkHeron(sc,ph){const h=new THREE.Group(),w=0xf6f3ee,w2=0xe2ddd2,dk=0x3d3a36;
+  const sp=(par,c,r,sx,sy,sz,x,y,z,rx)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,10,8),MT(c));m.scale.set(sx,sy,sz);m.position.set(x,y,z);if(rx)m.rotation.x=rx;par.add(m);return m};
+  const sg=(par,c,a,b,r0,r1,n)=>{const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,A.distanceTo(B),n||5,1),MT(c));m.position.copy(A).add(B).multiplyScalar(.5);m.quaternion.setFromUnitVectors(_UPH,B.sub(A).normalize());par.add(m);return m};
+  [-1,1].forEach(sd=>{sg(h,dk,[sd*.045,-.1,.03],[sd*.045,.22,-.03],.012,.014,4);sg(h,dk,[sd*.045,.22,-.03],[sd*.05,.46,.03],.014,.022,4)});
+  sp(h,w,.5,.3,.27,.5,0,.57,0,-.3);[-1,1].forEach(sd=>sp(h,w2,.5,.09,.2,.43,sd*.125,.58,-.05,-.3));
+  sg(h,w2,[0,.5,-.2],[0,.4,-.44],.065,.01,5);[-1,0,1].forEach(q=>sg(h,w,[q*.035,.64,-.1],[q*.07,.46,-.42],.012,.002,3));
+  const nk=new THREE.Group();nk.userData.noMerge=true;nk.position.set(0,.64,.2);h.add(nk);
+  nk.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[0,-.04,-.03],[0,.09,.09],[0,.21,.035],[0,.33,.03],[0,.41,.1]].map(q=>new THREE.Vector3(...q))),8,.03,5,false),MT(w)));
+  sp(nk,w,.05,1,.95,1.5,0,.42,.14);sg(nk,0xe3a24a,[0,.415,.19],[0,.4,.43],.02,.003,4);sg(nk,w,[0,.45,.1],[0,.475,-.07],.01,.002,3);
+  [-1,1].forEach(sd=>sp(nk,0x1c1a1a,.008,1,1,1,sd*.04,.43,.17));
+  bake(nk,{vc:true,mat:HERM});nk.children.forEach(m=>{m.userData.noMerge=true});
   h.scale.setScalar(sc);lmAnim.push({nk,ph});return h}
 export const fallMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:{t:{value:0},fogCol:{value:new THREE.Color(0xdde4ee)}},
   vertexShader:'varying vec2 vU;varying float vD;void main(){vU=uv;vec4 mv=modelViewMatrix*vec4(position,1.);vD=-mv.z;gl_Position=projectionMatrix*mv;}',

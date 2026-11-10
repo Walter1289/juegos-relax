@@ -70,16 +70,22 @@ export function updateFish(dt,ps){
 }
 /* ====== aves y libélulas ====== */
 export const birds=[],dfs=[];
-function mkBird(i){const g=new THREE.Group(),white=i%3!==2,c=white?0xf6f3ee:0x8d98a8,c2=white?0xe8e2d8:0x6f7a8c;
-  const body=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),MT(c));body.scale.set(.7,.7,1.8);g.add(body);
-  const nk=new THREE.Mesh(new THREE.CylinderGeometry(.045,.06,.5,6),MT(c));nk.rotation.x=1.15;nk.position.set(0,.1,-.5);g.add(nk);
-  const hd=new THREE.Mesh(new THREE.SphereGeometry(.09,8,6),MT(c));hd.position.set(0,.3,-.72);g.add(hd);
-  const bk=new THREE.Mesh(new THREE.ConeGeometry(.035,.3,5),MT(0xe8a24a));bk.rotation.x=-Math.PI/2;bk.position.set(0,.3,-.95);g.add(bk);
-  const wings=[-1,1].map(sd=>{const p=new THREE.Group();p.position.set(sd*.12,.08,-.05);g.add(p);
-    const w=new THREE.Mesh(new THREE.BoxGeometry(1.35,.03,.62),MT(c2));w.position.x=sd*.68;p.add(w);
-    const tip=new THREE.Mesh(new THREE.BoxGeometry(.5,.03,.4),MT(white?0x4b4b55:0x59606f));tip.position.set(sd*1.5,0,.05);p.add(tip);return p});
-  const tl=new THREE.Mesh(new THREE.ConeGeometry(.12,.45,4),MT(c));tl.rotation.x=Math.PI/2;tl.position.z=.65;g.add(tl);
-  g.scale.setScalar(1);g.userData={wings,ph:Math.random()*6,fl:0,sp:5+Math.random()*2.5,hd:0,h:7+Math.random()*7,off:(Math.random()-.5)*20};scene.add(g);return g}
+/* garza/garceta en vuelo: cuello recogido en S, patas estiradas hacia atrás y alas de dos tramos (la punta llega tarde al aleteo).
+   Envergadura ~2,4 m (antes 3,5–4,7 m), acorde con las garzas de la orilla. */
+const wingGeo=pts=>{const g=new THREE.BufferGeometry(),v=[];[[0,1,2],[0,2,3]].forEach(t=>t.forEach(i=>v.push(pts[i][0],0,pts[i][1])));g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.computeVertexNormals();return g};
+const WING_IN=wingGeo([[0,-.2],[0,.2],[.6,.15],[.6,-.15]]),WING_OUT=wingGeo([[0,-.15],[0,.15],[.4,.1],[.55,-.05]]);
+function mkBird(i){const g=new THREE.Group(),white=i%3!==2,c=white?0xf6f3ee:0x8d98a8,c2=white?0xe9e4da:0x6f7a8c,ct=white?0xd6d1c8:0x3f4654,bd=new THREE.Group();g.add(bd);
+  const sg=(col,a,b,r0,r1,n)=>{const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,A.distanceTo(B),n||5,1),MT(col));m.position.copy(A).add(B).multiplyScalar(.5);m.quaternion.setFromUnitVectors(UP,B.sub(A).normalize());bd.add(m)};
+  const body=new THREE.Mesh(new THREE.SphereGeometry(.22,10,8),MT(c));body.scale.set(.62,.6,1.7);bd.add(body);
+  sg(c,[0,.0,-.28],[0,.13,-.4],.06,.045);sg(c,[0,.13,-.4],[0,.1,-.56],.045,.04);
+  const hd=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),MT(c));hd.scale.set(.9,.9,1.35);hd.position.set(0,.1,-.6);bd.add(hd);
+  sg(0xe3a24a,[0,.095,-.66],[0,.07,-.93],.026,.003,4);
+  [-1,1].forEach(sd=>{sg(0x3d3a36,[sd*.04,-.05,.28],[sd*.03,-.07,.98],.014,.01,4);const e=new THREE.Mesh(new THREE.SphereGeometry(.012,5,4),MT(0x1c1a1a));e.position.set(sd*.05,.115,-.64);bd.add(e)});
+  const tl=new THREE.Mesh(new THREE.ConeGeometry(.1,.34,4),MT(c2));tl.scale.set(1,1,.3);tl.rotation.x=Math.PI/2;tl.position.z=.5;bd.add(tl);
+  bake(bd,{vc:true,mat:FISHM});
+  const tips=[],wings=[-1,1].map(sd=>{const p=new THREE.Group();p.position.set(sd*.07,.06,-.06);p.scale.x=sd;g.add(p);
+    p.add(new THREE.Mesh(WING_IN,MT(c2,{side:THREE.DoubleSide})));const t=new THREE.Group();t.position.x=.6;t.add(new THREE.Mesh(WING_OUT,MT(ct,{side:THREE.DoubleSide})));p.add(t);tips.push(t);return p});
+  g.userData={wings,tips,ph:Math.random()*6,fl:0,sp:5+Math.random()*2.5,hd:0,h:7+Math.random()*7,off:(Math.random()-.5)*20};scene.add(g);return g}
 function mkDf(i){const g=new THREE.Group(),cols=[0x3fc1c9,0xe0524a,0x4f8fd9,0x7bd66a],c=cols[i%4];
   const bd=new THREE.Mesh(new THREE.CylinderGeometry(.025,.018,.5,6),MT(c,{emissive:c,emissiveIntensity:.35}));bd.rotation.x=Math.PI/2;g.add(bd);
   const hd=new THREE.Mesh(new THREE.SphereGeometry(.055,8,6),MT(c));hd.position.z=-.27;g.add(hd);
@@ -89,13 +95,22 @@ function mkDf(i){const g=new THREE.Group(),cols=[0x3fc1c9,0xe0524a,0x4f8fd9,0x7b
 for(let i=0;i<8;i++)dfs.push(mkDf(i));
 /* aves pequeñas nadando: flotan, picotean la superficie buscando peces */
 export const wbirds=[];
-function mkWB(i){const g=new THREE.Group(),c=i%2?0x6f6a5c:0xe9e4d8,c2=i%2?0x4a4a40:0xc9ae82;
-  const body=new THREE.Mesh(new THREE.SphereGeometry(.3,10,8),MT(c));body.scale.set(.85,.6,1.35);body.position.y=.12;g.add(body);
-  const tail=new THREE.Mesh(new THREE.ConeGeometry(.12,.3,5),MT(c));tail.rotation.x=-Math.PI/2*1.1;tail.position.set(0,.2,.4);g.add(tail);
-  const neck=new THREE.Group();neck.position.set(0,.3,-.25);g.add(neck);
-  const nk=new THREE.Mesh(new THREE.CylinderGeometry(.06,.08,.34,6),MT(c));nk.position.y=.15;neck.add(nk);
-  const hd=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),MT(i%2?0x35342e:c));hd.position.set(0,.34,-.03);neck.add(hd);
-  const bk=new THREE.Mesh(new THREE.ConeGeometry(.04,.16,5),MT(0xe8a24a));bk.rotation.x=-Math.PI/2;bk.position.set(0,.33,-.15);neck.add(bk);
+/* oshidori (pato mandarín): macho con sus «velas» naranjas y ceja blanca, hembra gris de anillo ocular y patitos amarillos.
+   Cuerpo con pecho, alas plegadas y cola respingona; cabeza con pico plano y ojos. */
+const DUCK=[{b:0x8a6a4e,ch:0x6b3f4a,wg:0xd9a55a,hd:0x2f5a4a,bk:0xd8523c,sail:0xe58a3a,st:0xf6f1e6,ck:0xd9853a},
+  {b:0x8f877b,ch:0xa39887,wg:0x6f6a62,hd:0x7d776e,bk:0x5a5a5e,st:0xf6f1e6},
+  {b:0xdcc67e,ch:0xead99a,wg:0xb89a5a,hd:0xa98a4e,bk:0x6a5a4a}];
+function mkWB(i){const g=new THREE.Group(),k=DUCK[i>=2?2:i%2];
+  const sph=(par,c,r,sx,sy,sz,x,y,z)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,r>.2?16:10,r>.2?12:8),MT(c));m.scale.set(sx,sy,sz);m.position.set(x,y,z);par.add(m);return m};
+  sph(g,k.b,.3,.84,.58,1.3,0,.12,.02);sph(g,k.ch,.3,.72,.57,.72,0,.13,-.2);
+  [-1,1].forEach(sd=>{const w=sph(g,k.wg,.3,.2,.38,.95,sd*.2,.2,.08);w.rotation.set(.12,0,-sd*.4)});
+  if(k.sail)[-1,1].forEach(sd=>{const v=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),MT(k.sail));v.scale.set(.16,.95,1.15);v.position.set(sd*.075,.34,.2);v.rotation.set(-.55,0,-sd*.3);g.add(v)});
+  const tail=new THREE.Mesh(new THREE.ConeGeometry(.1,.24,7).translate(0,.12,0),MT(k.b));tail.scale.set(1,1,.4);tail.rotation.x=1.15;tail.position.set(0,.2,.34);g.add(tail);
+  const neck=new THREE.Group();neck.position.set(0,.3,-.22);g.add(neck);
+  const nk=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,.28,7),MT(k.ch));nk.position.set(0,.12,-.02);nk.rotation.x=-.15;neck.add(nk);
+  sph(neck,k.hd,.1,1,.95,1.15,0,.3,-.05);sph(neck,k.bk,.05,.75,.42,1.5,0,.285,-.165);
+  if(k.sail)sph(neck,k.hd,.07,.8,.8,1.6,0,.33,.06);
+  [-1,1].forEach(sd=>{sph(neck,0x1c1a1a,.014,1,1,1,sd*.078,.32,-.1);if(k.st)sph(neck,k.st,.022,.4,.8,2.4,sd*.09,.338,-.02);if(k.ck)sph(neck,k.ck,.06,.45,1,1.2,sd*.072,.26,.0)});
   tail.userData.dyn=true;bake(neck,{vc:true,mat:FISHM});bake(g,{vc:true,mat:FISHM});g.rotation.order='YXZ';g.scale.setScalar(.82);g.userData={neck,tail,pd:Math.random()*6,wg:3+Math.random()*6,t:Math.random()*6,dip:0,nd:3+Math.random()*5,hd:Math.random()*6.28,tx:0,tz:0};scene.add(g);return g}
 function _placeWB(b,ps){const s=ps+14+Math.random()*60,e=(Math.random()*2-1)*(hw(s)-6);b.position.set(cx(s)+e,0,-s);b.userData.hd=tanAng(s)+(Math.random()-.5)*2}
 for(let i=0;i<4;i++){const b=mkWB(i);if(i>=2)b.scale.setScalar(.5);wbirds.push(b)}wbirds.forEach(b=>placeWB(b,30));
@@ -135,12 +150,12 @@ const ALB_MAP={heron:'garza',koi:'koi',duck:'pato',dragonfly:'libelula',festival
 export function encounter(k,msg){try{ALB_MAP[k]&&albumSee(ALB_MAP[k])}catch(e){}if(ENC[k])return;ENC[k]=Date.now();try{localStorage.setItem('rio3d-enc',JSON.stringify(ENC))}catch(e){}toast(msg)}
 // garza en vuelo: geometría fusionada de una garza, usada para las garzas «vivas» de la reserva
 const heronGeo=(()=>{const h=mkHeron(1,0);lmAnim.pop();h.updateMatrixWorld(true);const gs=[];
-  h.traverse(o=>{if(!o.isMesh)return;const g=o.geometry.clone().applyMatrix4(o.matrixWorld);g.deleteAttribute('uv');const c=o.material.color,n=g.attributes.position.count,a=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=c.r;a[i*3+1]=c.g;a[i*3+2]=c.b}g.setAttribute('color',new THREE.BufferAttribute(a,3));gs.push(g.index?g.toNonIndexed():g)});
+  h.traverse(o=>{if(!o.isMesh)return;const g=o.geometry.clone().applyMatrix4(o.matrixWorld);g.deleteAttribute('uv');if(!g.attributes.color){const c=o.material.color,n=g.attributes.position.count,a=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=c.r;a[i*3+1]=c.g;a[i*3+2]=c.b}g.setAttribute('color',new THREE.BufferAttribute(a,3))}gs.push(g.index?g.toNonIndexed():g)});
   return mergeGeometries(gs)})();
 export const liveH=new THREE.InstancedMesh(heronGeo,new THREE.MeshToonMaterial({gradientMap:toonGrad,vertexColors:true}),24);liveH.frustumCulled=false;liveH.count=0;scene.add(liveH);
 export const fliers=[],flierPool=[];
 function launchHeron(x,y,z,hdAway){
-  const b=flierPool.pop()||mkBird(0);b.rotation.order='YXZ';b.scale.setScalar(1.35);b.visible=true;b.position.set(x,y+1.2,z);
+  const b=flierPool.pop()||mkBird(0);b.rotation.order='YXZ';b.scale.setScalar(1);b.visible=true;b.position.set(x,y+1.2,z);
   b.userData.fl2={t:0,hd:hdAway,vy:3.2,sp:2.2,ph:Math.random()*6,wp:0};scene.add(b);fliers.push(b);
   try{A.flap((x-P.px)/25)}catch(e){}
   encounter('heron','Las garzas alzan el vuelo a tu paso')}
@@ -199,6 +214,7 @@ export function updateCritters(dt,ps){
     /* aleteo: fase acumulada (sin saltos al cambiar de ritmo), bajada más rápida que la subida, y planeos entre tandas una vez en el aire */
     {const k1=clamp((f.t-3)/3),k2=clamp((f.t-6)/3),env=(.8*(1-k2)+k2*(.2+.5*clamp(.5+Math.sin(f.t*.7+f.ph)*1.2)));f.wp+=dt*(10-4.5*k1*k1*(3-2*k1));
       const w=f.wp+f.ph,a=Math.sin(w+.4*Math.sin(w))*env;b.userData.wings.forEach((p,j)=>{p.rotation.z=(j?1:-1)*a;p.rotation.x=Math.cos(w)*.16*env});
+      {const tz=Math.sin(w-1+.4*Math.sin(w-1))*env*.6-.12*(1-env);(b.userData.tips||[]).forEach(t=>{t.rotation.z=tz})}
       b.position.y-=Math.cos(w)*env*.012;b.rotation.z=Math.sin(f.t*.5+f.ph)*.08*k2}
     if(f.t>16||Math.hypot(b.position.x-P.px,b.position.z-P.pz)>230){scene.remove(b);flierPool.push(b);fliers.splice(i,1)}}
 }

@@ -1,7 +1,8 @@
 /* items-a.js — objetos reparables (parte 1): piso, barandal, escalera, techo, panel solar y ventana */
 import * as THREE from 'three';
+import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {Y0,rng,mkTex} from './util.js';
-import {mat,box} from './mats.js';
+import {mat,box,cyl} from './mats.js';
 import {scatter} from './blobs.js';
 import {mk,ASSET,CORAL,GREY,PITCH,slopeY} from './kit.js';
 import {buildInterior} from './interior.js';
@@ -22,6 +23,9 @@ export function buildItemsA(){
    box(.13,1.05,.13,'#ecc9ae',x,Y0+.52,3.9,it.f);
    if(![2,5,8].includes(i)){const m=box(.13,1.05,.13,GREY,x,Y0+.52,3.9,it.b);m.rotation.z=(r()-.5)*.34}}
  box(12,.12,.15,'#f1d3bb',2.2,Y0+1.06,3.9,it.f);box(12,.1,.12,'#f1d3bb',2.2,Y0+.55,3.9,it.f);
+ /* postes maestros con giboshi (remate de bronce en forma de cebolla), como en los puentes y galerías japonesas */
+ {const prof=[[.085,0],[.092,.03],[.06,.05],[.055,.09],[.11,.16],[.102,.22],[.035,.3],[.001,.335]].map(([r,y])=>new THREE.Vector2(r,y));
+  [0,5,10].forEach(i=>{const x=-3.8+i*1.2;box(.2,1.24,.2,'#f1d3bb',x,Y0+.62,3.9,it.f);const gb=new THREE.Mesh(new THREE.LatheGeometry(prof,10),mat('#8a6f3c'));gb.position.set(x,Y0+1.24,3.9);it.f.add(gb)})}
  [[-2.9,1.6],[2.6,2.4],[6.4,2.8]].forEach(([x,l])=>{const m=box(l,.12,.14,GREY,x,Y0+1.02+(r()-.5)*.06,3.9,it.b);m.rotation.z=(r()-.5)*.1});
  [[-1.3,2.1],[4.3,1.6]].forEach(([x,l])=>box(l,.1,.12,GREY,x,Y0+.5,3.9,it.b));
  scatter(it,6,41,r=>[-3.5+r()*11,Y0+1.1,3.9],.28,.5)}
@@ -40,6 +44,11 @@ export function buildItemsA(){
 {const it=mk('techo'),r=rng(33);
  const slab=(c,sag)=>{const g=new THREE.Group();[[.7,PITCH],[-2.7,-PITCH]].forEach(([z,rx])=>{const m=box(9.8,.24,4.1,c,1.5,8.3,z,g);m.rotation.x=rx+(sag&&z>0?.0:0);m.position.z=z});return g};
  const F=slab(CORAL),B=slab('#9b8b88');it.f.add(F);it.b.add(B);
+ /* tejado reparado: hileras de teja redonda (marugawara) que bajan por cada agua, rematadas en el alero con su disco */
+ [[.7,PITCH],[-2.7,-PITCH]].forEach(([z,rx])=>{const gs=[],sg=rx>0?1:-1;
+   for(let i=0;i<27;i++){const x=-4.81+i*.37;gs.push(new THREE.CylinderGeometry(.075,.075,4.12,6,1,true).rotateX(Math.PI/2).translate(x,.13,0));
+     const d=new THREE.CircleGeometry(.092,8);if(sg<0)d.rotateY(Math.PI);gs.push(d.translate(x,.13,sg*2.06))}
+   const m=new THREE.Mesh(mergeGeometries(gs),mat(CORAL));m.position.set(1.5,8.3,z);m.rotation.x=rx;F.add(m)});   // mismo color que el faldón: las hileras se leen por la luz, no por contraste
  for(let i=0;i<11;i++){const t=(i+.5)/11,z=2.3-t*3.3;const y=slopeY(z)+.13;
    const m=box(9.8,.04,.07,'#f6c3b4',1.5,y,z,it.f);m.rotation.x=PITCH;
    const n=box(9.8,.04,.07,'#7e706e',1.5,y,z,it.b);n.rotation.x=PITCH}
