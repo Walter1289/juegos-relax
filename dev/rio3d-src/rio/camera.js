@@ -33,7 +33,7 @@ export function updateCamera(dt,bob){
   if(S.camK>.003){const k=S.camK*S.camK*(3-2*S.camK);fpQ.copy(cam.quaternion);
     psiC+=(P.psi-psiC)*Math.min(1,dt*1.6);const psiL=psiC-LOOK.yaw,ca=psiL+.3;
     fwdV.set(Math.sin(ca),0,-Math.cos(ca));
-    tpP.set(P.px,6.2+bob,P.pz).addScaledVector(fwdV,-10.8);
+    tpP.set(P.px,4.7+bob,P.pz).addScaledVector(fwdV,-8.4);
     fwdV.set(Math.sin(psiL),0,-Math.cos(psiL));tpT.set(P.px,.3+LOOK.pitch*7,P.pz).addScaledVector(fwdV,6.5);tpT.x+=Math.cos(psiL)*1.9;tpT.z+=Math.sin(psiL)*1.9;
     tmpCam.position.copy(tpP);tmpCam.lookAt(tpT);tpQ.copy(tmpCam.quaternion);
     cam.position.lerp(tpP,k);cam.quaternion.copy(fpQ).slerp(tpQ,k)}

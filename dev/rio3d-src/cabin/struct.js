@@ -41,7 +41,7 @@ box(.2,.2,6.8,DARK,-3.3,7.15,-1,W);box(.2,.2,6.8,DARK,6.3,7.15,-1,W);
 // faroles del porche
 [-2.6,5.6].forEach(x=>{const g=new THREE.Group();g.position.set(x,6.5,2.1);W.add(g);
   box(.03,.5,.03,'#6a5058',0,.5,0,g);const body=new THREE.Mesh(new THREE.SphereGeometry(.26,12,10),mat('#f3e2c2',{emissive:'#ff9a4a',emissiveIntensity:.0}));body.scale.set(1,1.25,1);g.add(body);[.3,-.3].forEach(y=>box(.24,.06,.24,'#2f2a2a',0,y,0,g));[-.12,0,.12].forEach(y=>{const rb=new THREE.Mesh(new THREE.TorusGeometry(.255*Math.sqrt(1-Math.pow(y/.33,2)),.008,4,16),mat('#8e3d2e'));rb.rotation.x=Math.PI/2;rb.position.y=y;g.add(rb)});
-  const gl=spr(glowTex,0xffc27a,3.2,0,true);g.add(gl);const L=new THREE.PointLight(0xffc27a,0,11,1.5);g.add(L);LT.porchL.push({body,gl,L})});
+  const gl=spr(glowTex,0xffc27a,3.2,0,true);g.add(gl);const L=new THREE.PointLight(0xffc27a,0,11,1.5);g.add(L);LT.porchL.push({body,gl,L,g,b:g.position.clone(),a:0,av:0})});
 // macetas fijas de colores
 [[-3.2,'#e6a091','#f5c9d9'],[-2.4,'#7fc3bd','#f8e5a0'],[-1.6,'#d9a9cb','#ffffff'],[-.8,'#a6cf92','#f5c9d9']].forEach(([x,pc,fc])=>{
   box(.5,.4,.5,pc,x,Y0+.2,3.3,W);const s=new THREE.Mesh(new THREE.IcosahedronGeometry(.34,0),mat('#79b08a'));s.position.set(x,Y0+.55,3.3);W.add(s);

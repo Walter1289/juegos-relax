@@ -1,5 +1,5 @@
 /* Props del terreno: mallas instanciadas (árboles, nenúfares, juncos, parasoles, arbustos, bambú) y paleta del suelo. */
-import {toonGrad,tex} from '../style.js';
+import {toonGrad,tex,windify} from '../style.js';
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {hash,clamp} from './util.js';
@@ -26,36 +26,45 @@ pineGeo.computeVertexNormals();
 const crownGeo=mergeGeometries([[1.9,0,4.3,0],[1.4,1.3,4.9,.5],[1.35,-1.2,4.7,-.6],[1.2,.2,5.7,.3],[1.0,-.6,5.2,1.2],[1.05,.9,4.2,-1.1],[.8,1.7,4.1,.9]].map(([r,x,y,z])=>{const g=new THREE.IcosahedronGeometry(r,1);g.translate(x,y,z);g.deleteAttribute('normal');return shadeGeo(g,[3,3],.7,1.3)}));
 crownGeo.computeVertexNormals();
 const LEAFM=()=>new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,map:tex('leaf')});
-export const pineM=new THREE.InstancedMesh(pineGeo,new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,map:tex('needle')}),MAXT);
-export const crownM=new THREE.InstancedMesh(crownGeo,LEAFM(),MAXT);
-export const trunkM=new THREE.InstancedMesh(new THREE.CylinderGeometry(.19,.36,4.2,9,3).translate(0,2.1,0),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0x8a6a5c,map:tex('bark')}),MAXT);
-export const padM=new THREE.InstancedMesh(new THREE.CircleGeometry(.7,10).rotateX(-Math.PI/2),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff}),700);
-export const lotM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.28,0).translate(0,.2,0),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff}),224);
+export const pineM=new THREE.InstancedMesh(pineGeo,windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,map:tex('needle')}),{H:7.2,amp:.2,pow:2.2,fl:.018}),MAXT);
+/* copa y tronco comparten la misma curva de viento (H, amp, pow): se doblan juntos y la copa no se despega del tronco */
+export const crownM=new THREE.InstancedMesh(crownGeo,windify(LEAFM(),{H:6.5,amp:.3,pow:2,fl:.035}),MAXT);
+export const trunkM=new THREE.InstancedMesh(new THREE.CylinderGeometry(.19,.36,4.2,9,3).translate(0,2.1,0),windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0x8a6a5c,map:tex('bark')}),{H:6.5,amp:.3,pow:2}),MAXT);
+/* nenúfar: hoja redonda con su muesca y nervios, de 0,5 a 1,2 m (antes un disco liso de hasta 2,2 m); loto: flor de dos coronas de pétalos con centro dorado */
+const padGeo=(()=>{const g=new THREE.CircleGeometry(.38,15,.28,Math.PI*2-.56).rotateX(-Math.PI/2),n=g.attributes.position.count,c=new Float32Array(n*3);
+  for(let i=0;i<n;i++){const k=i===0?1.1:(i%2?.94:.8);c[i*3]=k;c[i*3+1]=k;c[i*3+2]=k*.97}g.setAttribute('color',new THREE.BufferAttribute(c,3));return g})();
+const lotGeo=(()=>{const gs=[],petal=(a,tilt,r,len,w)=>{const g=new THREE.ConeGeometry(w,len,4,1).toNonIndexed();g.scale(1,1,.38);g.translate(0,len/2,0);
+    const p=g.attributes.position,c=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){const k=.8+.34*p.getY(i)/len;c[i*3]=k;c[i*3+1]=k;c[i*3+2]=k}g.setAttribute('color',new THREE.BufferAttribute(c,3));
+    g.rotateX(tilt);g.translate(0,.03,r);g.rotateY(a);g.deleteAttribute('uv');return g};
+  for(let i=0;i<7;i++)gs.push(petal(i/7*6.283,1.02,.035,.2,.07));
+  for(let i=0;i<5;i++)gs.push(petal(i/5*6.283+.5,.5,.02,.17,.055));
+  const ce=new THREE.IcosahedronGeometry(.05,0);ce.translate(0,.07,0);const cc=new Float32Array(ce.attributes.position.count*3);for(let i=0;i<cc.length;i+=3){cc[i]=1.1;cc[i+1]=.86;cc[i+2]=.34}ce.setAttribute('color',new THREE.BufferAttribute(cc,3));ce.deleteAttribute('uv');gs.push(ce);
+  const g=mergeGeometries(gs);g.computeVertexNormals();return g})();
+export const padM=new THREE.InstancedMesh(padGeo,new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true}),700);
+export const lotM=new THREE.InstancedMesh(lotGeo,new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,side:THREE.DoubleSide}),224);
 [pineM,crownM,trunkM,padM,lotM].forEach(m=>{m.frustumCulled=false;scene.add(m)});
 /* ---- juncos dorados, árboles-parasol y macizos kársticos (estilo acuarela china) ---- */
 export const swayU={value:0};
-function swayMat(m){m.onBeforeCompile=sh=>{sh.uniforms.uSw=swayU;sh.vertexShader='uniform float uSw;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
- vec4 wp0=modelMatrix*instanceMatrix*vec4(position,1.);float hh=clamp(position.y/1.8,0.,1.);transformed.x+=sin(uSw*1.6+wp0.x*.7+wp0.z*.5)*.2*hh*hh;transformed.z+=cos(uSw*1.3+wp0.z*.6)*.1*hh*hh;`)};return m}
 export const bladeGeo=(()=>{const gs=[];for(let i=0;i<14;i++){const a=i/14*6.28+hash(i,1),h=.8+hash(i,2)*1.7,l=.05,x=Math.cos(a)*.25*hash(i,3),z=Math.sin(a)*.25*hash(i,3),lean=(hash(i,4)-.5)*.9;
     const g=new THREE.BufferGeometry(),p=new Float32Array([-l,0,0,l,0,0,lean*.5-l*.5,h*.6,0,lean*.5+l*.5,h*.6,0,lean,h,0]);g.setAttribute('position',new THREE.BufferAttribute(p,3));
     g.setIndex([0,1,2,1,3,2,2,3,4]);g.computeVertexNormals();const col=new Float32Array(15);const cs=[[.28,.2,.12],[.28,.2,.12],[.62,.5,.24],[.62,.5,.24],[.92,.78,.4]];cs.forEach((c,k)=>col.set(c,k*3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
     g.rotateY(a);g.translate(x,0,z);gs.push(g)}return mergeGeometries(gs)})();
-export const reedM=new THREE.InstancedMesh(bladeGeo,swayMat(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,side:THREE.DoubleSide})),1960);
+export const reedM=new THREE.InstancedMesh(bladeGeo,windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,side:THREE.DoubleSide}),{H:2.3,amp:.36,pow:1.7,fl:.012}),1960);
 const umbGeo=(()=>{const gs=[];const tk=new THREE.CylinderGeometry(.14,.3,4.2,6).translate(0,2.1,0);const tc=new Float32Array(tk.attributes.position.count*3).fill(.3);tk.setAttribute('color',new THREE.BufferAttribute(tc,3));gs.push(tk);
   [[0,4.3,0,2.8],[1.6,3.7,.6,1.9],[-1.5,3.3,-.8,1.7]].forEach(([x,y,z,r])=>{const g=new THREE.SphereGeometry(1,9,5).toNonIndexed();g.scale(r,r*.28,r);g.translate(x,y,z);
     const p=g.attributes.position,c=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){const k=.62+.4*clamp((p.getY(i)-y)/(r*.28)*.5+.5);c[i*3]=k*.9;c[i*3+1]=k;c[i*3+2]=k*.92}g.setAttribute('color',new THREE.BufferAttribute(c,3));
     g.deleteAttribute('uv');gs.push(g)});
   gs[0]=gs[0].toNonIndexed();gs[0].deleteAttribute('uv');return mergeGeometries(gs)})();
-export const umbM=new THREE.InstancedMesh(umbGeo,new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true}),560);
+export const umbM=new THREE.InstancedMesh(umbGeo,windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true}),{H:4.6,amp:.2,pow:2,fl:.02}),560);
 [reedM,umbM].forEach(o=>{o.frustumCulled=false;scene.add(o)});
 export const UMB=['#5d7a64','#4f6b5c','#6a8a6e','#566f5d'],REED=['#ffffff','#f0e0b0','#e6c98a','#d6b070'];
 export const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),V3=new THREE.Vector3(),S3=new THREE.Vector3(),UP=new THREE.Vector3(0,1,0);
 export const cSeasG=new THREE.Color(SE.gnd);
 export const PINE=SE.pine,BLOS=SE.blos,SBLOS=SAKURA.blos,SBBLOS=SAKURA.bblos;
-export const bushM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,2).scale(1,.72,1).translate(0,.45,0),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,map:tex('leaf')}),2380);bushM.frustumCulled=false;scene.add(bushM);
+export const bushM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,2).scale(1,.72,1).translate(0,.45,0),windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,map:tex('leaf')}),{H:1.2,amp:.07,pow:1,fl:.03}),2380);bushM.frustumCulled=false;scene.add(bushM);
 export const BUSH=['#6fa383','#7fb592','#5f957a','#8cc09a'],BBLOS=SE.bblos;
 const bambGeo=(()=>{const g=new THREE.CylinderGeometry(.11,.15,1,5,8,true).translate(0,.5,0).toNonIndexed();const p=g.attributes.position,c=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){const y=p.getY(i),k=(Math.round(y*8)%3===0)?.68:1;c[i*3]=k;c[i*3+1]=k;c[i*3+2]=k*.95}g.setAttribute('color',new THREE.BufferAttribute(c,3));g.deleteAttribute('uv');g.computeVertexNormals();return g})();
-export const bambM=new THREE.InstancedMesh(bambGeo,new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true}),2800);
-export const bleafM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0).scale(1,.5,1),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff}),2800);
+export const bambM=new THREE.InstancedMesh(bambGeo,windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true}),{H:1,amp:.5,pow:2}),2800);
+export const bleafM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0).scale(1,.5,1),windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff}),{H:1,amp:.5,pow:1,base:1,fl:.05}),2800);
 [bambM,bleafM].forEach(o=>{o.frustumCulled=false;scene.add(o)});
 export const BAMB=['#8fc58a','#9fd194','#7bb87f','#a9d89a'],BLEAF=['#b7e08f','#a4d68a','#c4e89b','#92cc86'],BRD=SE.brd;export const cBam=new THREE.Color('#9ccf8a');

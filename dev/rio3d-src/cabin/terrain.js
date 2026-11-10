@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import {scene} from './core.js';
 import {rng,spr,glowTex} from './util.js';
-import {mat} from './mats.js';
+import {mat,windMat} from './mats.js';
 export const RIV=z=>46+16*Math.sin(z*.021+.6)+8*Math.sin(z*.047),RY=-13.6;
 export const riverW=z=>8+Math.max(0,(34-z)/3)*.16;
 const sm=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
@@ -56,7 +56,7 @@ export function buildPath(){
   for(let x=PX0+3,i=0;x<PX1-2;x+=6,i++){const z=zc(x)+(i%2?2.4:-2.4);lamp(x,z)}
   /* matas de hierba, arbustos con flor y piedras con musgo en la ladera */
   {const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),Sc=new THREE.Vector3(),P=new THREE.Vector3(),cc=new THREE.Color(),n=420;
-   const gr=new THREE.InstancedMesh(new THREE.ConeGeometry(.3,1.2,4).translate(0,.6,0),mat('#ffffff'),n),bu=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1),mat('#ffffff'),70),rk=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0),mat('#ffffff'),40);
+   const gr=new THREE.InstancedMesh(new THREE.ConeGeometry(.3,1.2,4,1).translate(0,.6,0),windMat({H:1.2,amp:.2,pow:1.5}),n),bu=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1),windMat({H:1,amp:.06,pow:1,base:.3,fl:.03},'leaf'),70),rk=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0),mat('#ffffff'),40);
    const gc=['#9bb070','#b3b87a','#86a068','#a6c47a'],bc=['#5f8a60','#6e9a68','#7aa86a','#e58aa8','#f3a9c0'],rc=['#7e7a74','#8a8a7c','#6f7d68'];let a=0,b=0,k=0;
    for(let i=0;i<900&&(a<n||b<70||k<40);i++){const x=8+r()*38,c=zc(Math.max(15.7,x)),z=c+(r()-.5)*15;if(Math.abs(z-c)<1.5&&x>PX0)continue;const y=ground(x,z);if(y<-13)continue;
      const q=r();

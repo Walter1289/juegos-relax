@@ -1,7 +1,7 @@
 /* Fauna: carpas koi, patos, libélulas, garzas y sus encuentros con la canoa (curiosidad, huida, aterrizaje). */
 import {A} from '../audio-rio.js';
 import {albumSee} from '../album.js';
-import {toonGrad} from '../style.js';
+import {toonGrad,bake} from '../style.js';
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {clamp,angD} from './util.js';
@@ -19,12 +19,27 @@ import {mkHeron} from './lm-parts.js';
 import {splash,spawnWake,updateShoreFx} from './shore.js';
 export const FISH=5,fish=[];
 const fishCols=[[0xf0884a,0xfff1e0],[0xe8a24a,0xf6d9a0],[0xe2603f,0xffe9d2],[0xd9c9a0,0xf0884a]];
-function mkFish(i){const g=new THREE.Group(),cs=fishCols[i%fishCols.length];
-  const body=new THREE.Mesh(new THREE.SphereGeometry(.5,12,8),MT(cs[0]));body.scale.set(.32,.26,1);g.add(body);
-  const patch=new THREE.Mesh(new THREE.SphereGeometry(.5,10,6),MT(cs[1]));patch.scale.set(.33,.1,.55);patch.position.set(0,.12,-.05);g.add(patch);
-  const tail=new THREE.Group();tail.position.z=.45;g.add(tail);const tf=new THREE.Mesh(new THREE.ConeGeometry(.22,.5,4),MT(cs[0],{side:THREE.DoubleSide}));tf.rotation.x=-Math.PI/2;tf.scale.set(1.2,1,.18);tf.position.z=.22;tail.add(tf);
-  const fin=new THREE.Mesh(new THREE.ConeGeometry(.08,.3,3),MT(cs[0]));fin.position.set(0,.2,.05);fin.rotation.x=-.3;g.add(fin);
-  g.userData={tail,st:0,t:0,ph:Math.random()*6,sp:.7+Math.random()*.6,tx:0,tz:0,jt:0};scene.add(g);return g}
+const FISHM=new THREE.MeshToonMaterial({gradientMap:toonGrad,vertexColors:true,side:THREE.DoubleSide});
+/* koi de ~0,85 m (antes 1,4 m): cuerpo en tres tramos encadenados (cabeza, lomo, cola) para que la ondulación viaje de la cabeza a la cola */
+function mkFish(i){const g=new THREE.Group(),cs=fishCols[i%fishCols.length],m0=MT(cs[0]),m1=MT(cs[1]),mf=MT(cs[0],{side:THREE.DoubleSide});
+  const front=new THREE.Group();g.add(front);
+  const b1=new THREE.Mesh(new THREE.SphereGeometry(.5,12,8),m0);b1.scale.set(.3,.25,.62);b1.position.z=-.12;front.add(b1);
+  const p1=new THREE.Mesh(new THREE.SphereGeometry(.5,10,6),m1);p1.scale.set(.27,.1,.3);p1.position.set(.03,.115,-.2);front.add(p1);
+  const dor=new THREE.Mesh(new THREE.ConeGeometry(.07,.26,3),mf);dor.scale.set(.3,1,1);dor.position.set(0,.22,-.02);dor.rotation.x=-.9;front.add(dor);
+  const fins=[-1,1].map(sd=>{const f=new THREE.Mesh(new THREE.ConeGeometry(.09,.24,4).translate(0,-.12,0),mf);f.scale.set(1,1,.2);f.position.set(sd*.13,-.03,-.22);f.rotation.set(-.5,0,sd*1.1);front.add(f);return f});
+  const mid=new THREE.Group();mid.position.z=.12;g.add(mid);
+  const b2=new THREE.Mesh(new THREE.SphereGeometry(.5,10,8),m0);b2.scale.set(.25,.21,.56);b2.position.z=.14;mid.add(b2);
+  const p2=new THREE.Mesh(new THREE.SphereGeometry(.5,8,6),m1);p2.scale.set(.18,.09,.2);p2.position.set(-.03,.09,.24);mid.add(p2);
+  const tail=new THREE.Group();tail.position.z=.4;mid.add(tail);
+  [-1,1].forEach(sd=>{const tf=new THREE.Mesh(new THREE.ConeGeometry(.13,.4,4).translate(0,-.2,0),mf);tf.rotation.order='YXZ';tf.rotation.set(-Math.PI/2,sd*.38,0);tf.scale.set(1,1,.14);tail.add(tf)});
+  front.position.y=mid.position.y=.06;                     // el lomo asoma del agua y la silueta se lee desde arriba
+  [front,mid,tail].forEach(q=>bake(q,{vc:true,mat:FISHM}));
+  g.scale.setScalar(.62);
+  g.userData={tail,mid,front,fins,sw:Math.random()*6,hd0:0,bank:0,st:0,t:0,ph:Math.random()*6,sp:.7+Math.random()*.6,tx:0,tz:0,jt:0};scene.add(g);return g}
+/* nado: la frecuencia sube con la velocidad, la cabeza compensa la cola y el cuerpo se ladea al virar */
+function swimFish(f,u,dt,k){u.sw+=dt*(3.2+u.sp*3.4)*k;const a=(.2+Math.min(.22,u.sp*.07))*Math.min(1.6,k),w=u.sw;
+  u.front.rotation.y=-a*.4*Math.sin(w);u.mid.rotation.y=a*Math.sin(w-1.1);u.tail.rotation.y=a*1.35*Math.sin(w-2.2);
+  let dh=u.hd-u.hd0;u.hd0=u.hd;if(dt>0){dh=Math.max(-3,Math.min(3,dh/dt));u.bank+=(dh*.22-u.bank)*Math.min(1,dt*4)}}
 for(let i=0;i<FISH;i++)fish.push(mkFish(i));
 const GROW=new Set();
 function appear(o){if(o.userData.bs==null)o.userData.bs=o.scale.x;o.userData.born=P.t;o.scale.setScalar(o.userData.bs*.02);GROW.add(o)}
@@ -41,14 +56,14 @@ export function updateFish(dt,ps){
       u.hd+=Math.sin(u.t*.6+u.ph)*.5*dt;
       const e=f.position.x-cx(s),lim=hw(s)-3;if(Math.abs(e)>lim)u.hd+=(tanAng(s)+(e>0?-1:1)*.9-u.hd)*dt*1.5;
       f.position.x+=Math.sin(u.hd)*u.sp*dt;f.position.z-=Math.cos(u.hd)*u.sp*dt;f.position.y=-.02+Math.sin(u.t*2+u.ph)*.01;
-      f.rotation.set(0,-u.hd,0);u.tail.rotation.y=Math.sin(u.t*7)*.5;
+      swimFish(f,u,dt,1);f.rotation.set(0,-u.hd,u.bank);
       if(Math.random()<dt*.03&&dz<-6&&dz>-45){f.userData.st=1;u.j=0;u.vx=Math.sin(u.hd)*2.6;u.vz=-Math.cos(u.hd)*2.6;splash(f.position.x,.1,f.position.z,5);A.plop((f.position.x-P.px)/25)}
       else if(Math.random()<dt*.05&&Math.abs(dz)<30&&Math.abs(dz)>5)spawnWake(f.position.x,f.position.z,0,0,.7);
     }else{ // salto
       u.j+=dt;const T=.95,k=u.j/T,h=Math.sin(Math.PI*k)*1.25;
       f.position.x+=u.vx*dt;f.position.z+=u.vz*dt;f.position.y=-.02+h;
       const slope=Math.cos(Math.PI*k)*1.25*Math.PI/T;f.rotation.set(0,-u.hd,0);f.rotateX(Math.atan2(slope,2.6));
-      u.tail.rotation.y=Math.sin(u.t*26)*.6;
+      swimFish(f,u,dt,3.2);
       if(u.j>=T){f.userData.st=0;f.position.y=-.02;f.rotation.set(0,-u.hd,0);splash(f.position.x,.1,f.position.z,9);A.plop((f.position.x-P.px)/25)}}
   }
   updateShoreFx(dt)
@@ -64,13 +79,13 @@ function mkBird(i){const g=new THREE.Group(),white=i%3!==2,c=white?0xf6f3ee:0x8d
     const w=new THREE.Mesh(new THREE.BoxGeometry(1.35,.03,.62),MT(c2));w.position.x=sd*.68;p.add(w);
     const tip=new THREE.Mesh(new THREE.BoxGeometry(.5,.03,.4),MT(white?0x4b4b55:0x59606f));tip.position.set(sd*1.5,0,.05);p.add(tip);return p});
   const tl=new THREE.Mesh(new THREE.ConeGeometry(.12,.45,4),MT(c));tl.rotation.x=Math.PI/2;tl.position.z=.65;g.add(tl);
-  g.scale.setScalar(1.5);g.userData={wings,ph:Math.random()*6,fl:0,sp:5+Math.random()*2.5,hd:0,h:7+Math.random()*7,off:(Math.random()-.5)*20};scene.add(g);return g}
+  g.scale.setScalar(1);g.userData={wings,ph:Math.random()*6,fl:0,sp:5+Math.random()*2.5,hd:0,h:7+Math.random()*7,off:(Math.random()-.5)*20};scene.add(g);return g}
 function mkDf(i){const g=new THREE.Group(),cols=[0x3fc1c9,0xe0524a,0x4f8fd9,0x7bd66a],c=cols[i%4];
   const bd=new THREE.Mesh(new THREE.CylinderGeometry(.025,.018,.5,6),MT(c,{emissive:c,emissiveIntensity:.35}));bd.rotation.x=Math.PI/2;g.add(bd);
   const hd=new THREE.Mesh(new THREE.SphereGeometry(.055,8,6),MT(c));hd.position.z=-.27;g.add(hd);
   const wm=new THREE.MeshBasicMaterial({color:0xeaf6ff,transparent:true,opacity:.5,side:THREE.DoubleSide,depthWrite:false});
   const wings=[];[[-1,-.1],[-1,.06],[1,-.1],[1,.06]].forEach(([sd,z])=>{const p=new THREE.Group();p.position.set(0,.02,z);g.add(p);const w=new THREE.Mesh(new THREE.PlaneGeometry(.38,.1).rotateX(-Math.PI/2),wm);w.position.x=sd*.2;p.add(w);wings.push([p,sd])});
-  g.scale.setScalar(1.8);g.userData={wings,tx:0,ty:1,tz:0,t:0,ph:Math.random()*6,sp:4};scene.add(g);return g}
+  g.scale.setScalar(.8);g.userData={wings,tx:0,ty:1,tz:0,t:0,ph:Math.random()*6,sp:4};scene.add(g);return g}
 for(let i=0;i<8;i++)dfs.push(mkDf(i));
 /* aves pequeñas nadando: flotan, picotean la superficie buscando peces */
 export const wbirds=[];
@@ -81,9 +96,9 @@ function mkWB(i){const g=new THREE.Group(),c=i%2?0x6f6a5c:0xe9e4d8,c2=i%2?0x4a4a
   const nk=new THREE.Mesh(new THREE.CylinderGeometry(.06,.08,.34,6),MT(c));nk.position.y=.15;neck.add(nk);
   const hd=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),MT(i%2?0x35342e:c));hd.position.set(0,.34,-.03);neck.add(hd);
   const bk=new THREE.Mesh(new THREE.ConeGeometry(.04,.16,5),MT(0xe8a24a));bk.rotation.x=-Math.PI/2;bk.position.set(0,.33,-.15);neck.add(bk);
-  g.scale.setScalar(1.15);g.userData={neck,t:Math.random()*6,dip:0,nd:3+Math.random()*5,hd:Math.random()*6.28,tx:0,tz:0};scene.add(g);return g}
+  tail.userData.dyn=true;bake(neck,{vc:true,mat:FISHM});bake(g,{vc:true,mat:FISHM});g.rotation.order='YXZ';g.scale.setScalar(.82);g.userData={neck,tail,pd:Math.random()*6,wg:3+Math.random()*6,t:Math.random()*6,dip:0,nd:3+Math.random()*5,hd:Math.random()*6.28,tx:0,tz:0};scene.add(g);return g}
 function _placeWB(b,ps){const s=ps+14+Math.random()*60,e=(Math.random()*2-1)*(hw(s)-6);b.position.set(cx(s)+e,0,-s);b.userData.hd=tanAng(s)+(Math.random()-.5)*2}
-for(let i=0;i<4;i++){const b=mkWB(i);if(i>=2)b.scale.setScalar(.72);wbirds.push(b)}wbirds.forEach(b=>placeWB(b,30));
+for(let i=0;i<4;i++){const b=mkWB(i);if(i>=2)b.scale.setScalar(.5);wbirds.push(b)}wbirds.forEach(b=>placeWB(b,30));
 function _placeBird(b,ps){const s=ps+30+Math.random()*130;b.position.set(cx(s)+b.userData.off,b.userData.h,-s);b.userData.hd=tanAng(s)+(Math.random()-.5)*.5;b.userData.fl=Math.random()*3}
 function _placeDf(d,ps){const s=ps+8+Math.random()*60,e=(Math.random()*2-1)*(hw(s)+2);d.position.set(cx(s)+e,.6+Math.random()*1.1,-s);d.userData.tx=d.position.x;d.userData.ty=d.position.y;d.userData.tz=d.position.z}
 dfs.forEach(d=>placeDf(d,30));
@@ -94,7 +109,11 @@ export function updateFauna(dt,ps){
     if(u.follow&&dz<-70){u.follow=0;placeWB(b,ps);continue}
     u.nd-=dt;if(u.nd<=0&&u.dip<=0&&!u.follow&&!(u.flee>0)){u.dip=1.3;u.nd=5+Math.random()*7;u.rip=false}
     if(u.dip>0){u.dip-=dt;const k=Math.sin(Math.PI*clamp(1-u.dip/1.3));u.neck.rotation.x=1.2*k;b.rotation.x=.9*k*.5;b.position.y=-.05*k;if(k>.9&&!u.rip){u.rip=true;spawnRipple(b.position.x,b.position.z-.4);A.plop((b.position.x-P.px)/25)}}
-    else{u.neck.rotation.x=Math.sin(u.t*1.6)*.12;b.rotation.x=0;b.position.y=Math.sin(u.t*1.3)*.015;
+    else{/* nado: cada patada empuja el cuerpo y la cabeza va y vuelve al compás; de vez en cuando sacude la cola */
+      const sp=u.spd||.35,k=Math.min(1,sp*.9);u.pd+=dt*(3.2+sp*3.6);u.wg-=dt;if(u.wg<-.55)u.wg=4+Math.random()*8;
+      u.neck.rotation.x=Math.sin(u.t*1.1)*.06+Math.sin(u.pd)*.13*k;u.neck.rotation.y=Math.sin(u.t*.37+u.pd*.03)*.25;
+      u.tail.rotation.y=u.wg<0?Math.sin(u.t*26)*.35:0;
+      b.rotation.x=Math.sin(u.pd-.6)*.035*k;b.rotation.z=Math.sin(u.pd*.5)*.045*k+Math.sin(u.t*.9)*.015;b.position.y=Math.sin(u.t*1.3)*.012+Math.abs(Math.sin(u.pd))*.006*k;
       u.hd+=Math.sin(u.t*.4)*.3*dt;const e=b.position.x-cx(s);if(Math.abs(e)>hw(s)-5)u.hd+=(tanAng(s)+(e>0?-1:1)*.8-u.hd)*dt*1.2;
       b.position.x+=Math.sin(u.hd)*(u.spd||.35)*dt;b.position.z-=Math.cos(u.hd)*(u.spd||.35)*dt}
     b.rotation.y=-u.hd}
@@ -121,8 +140,8 @@ const heronGeo=(()=>{const h=mkHeron(1,0);lmAnim.pop();h.updateMatrixWorld(true)
 export const liveH=new THREE.InstancedMesh(heronGeo,new THREE.MeshToonMaterial({gradientMap:toonGrad,vertexColors:true}),24);liveH.frustumCulled=false;liveH.count=0;scene.add(liveH);
 export const fliers=[],flierPool=[];
 function launchHeron(x,y,z,hdAway){
-  const b=flierPool.pop()||mkBird(0);b.rotation.order='YXZ';b.scale.setScalar(2.1);b.visible=true;b.position.set(x,y+1.2,z);
-  b.userData.fl2={t:0,hd:hdAway,vy:3.2,sp:2.2,ph:Math.random()*6};scene.add(b);fliers.push(b);
+  const b=flierPool.pop()||mkBird(0);b.rotation.order='YXZ';b.scale.setScalar(1.35);b.visible=true;b.position.set(x,y+1.2,z);
+  b.userData.fl2={t:0,hd:hdAway,vy:3.2,sp:2.2,ph:Math.random()*6,wp:0};scene.add(b);fliers.push(b);
   try{A.flap((x-P.px)/25)}catch(e){}
   encounter('heron','Las garzas alzan el vuelo a tu paso')}
 const _hv=new THREE.Vector3(),_hq=new THREE.Quaternion(),_hs=new THREE.Vector3(),_hm=new THREE.Matrix4();
@@ -177,7 +196,10 @@ export function updateCritters(dt,ps){
     const s=-b.position.z;f.hd+=angD(tanAng(s)+(Math.sin(f.ph)*.3),f.hd)*dt*.6;
     b.position.x+=Math.sin(f.hd)*f.sp*dt;b.position.z-=Math.cos(f.hd)*f.sp*dt;b.position.y+=f.vy*dt;
     b.rotation.y=-f.hd;b.rotation.x=Math.min(.5,f.vy*.12);
-    const a=Math.sin(f.t*(f.t<4?10:6)+f.ph)*(f.t<8?.8:.3);b.userData.wings.forEach((p,j)=>{p.rotation.z=(j?1:-1)*a});
+    /* aleteo: fase acumulada (sin saltos al cambiar de ritmo), bajada más rápida que la subida, y planeos entre tandas una vez en el aire */
+    {const k1=clamp((f.t-3)/3),k2=clamp((f.t-6)/3),env=(.8*(1-k2)+k2*(.2+.5*clamp(.5+Math.sin(f.t*.7+f.ph)*1.2)));f.wp+=dt*(10-4.5*k1*k1*(3-2*k1));
+      const w=f.wp+f.ph,a=Math.sin(w+.4*Math.sin(w))*env;b.userData.wings.forEach((p,j)=>{p.rotation.z=(j?1:-1)*a;p.rotation.x=Math.cos(w)*.16*env});
+      b.position.y-=Math.cos(w)*env*.012;b.rotation.z=Math.sin(f.t*.5+f.ph)*.08*k2}
     if(f.t>16||Math.hypot(b.position.x-P.px,b.position.z-P.pz)>230){scene.remove(b);flierPool.push(b);fliers.splice(i,1)}}
 }
 const _bw=new THREE.Vector3();

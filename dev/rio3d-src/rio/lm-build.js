@@ -174,7 +174,7 @@ function buildLM0(k){
     for(let i=0;i<12;i++){const sd=i%2?1:-1,lx=sd*(hwv+4+hash(k,i)*12),lz=(hash(k,i+20)-.5)*110;const m2=new THREE.Mesh(new THREE.PlaneGeometry(3.6,22),new THREE.MeshBasicMaterial({map:glowTex,color:0xfff0b0,transparent:true,opacity:.14,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));m2.position.set(lx,gy(lx,lz)+10,lz);m2.rotation.set(0,hash(k,i+9)*3,sd*.25);g.add(m2)}}
   else if(type===10)g.userData.job=castleJob(g,k,{gy,hwv,side,s,a})
   else{for(let i=0;i<46;i++){const lx=(hash(k,i)-.5)*hwv*1.5,lz=(hash(k,i+40)-.5)*34;
-      const p=new THREE.Mesh(new THREE.CircleGeometry(.8+hash(k,i+7)*.5,10).rotateX(-Math.PI/2),MT(0x7fbf8a,{side:THREE.DoubleSide}));p.position.set(lx,.05,lz);g.add(p);
+      const p=new THREE.Mesh(new THREE.CircleGeometry(.45+hash(k,i+7)*.3,10).rotateX(-Math.PI/2),MT(0x7fbf8a,{side:THREE.DoubleSide}));p.position.set(lx,.05,lz);g.add(p);
       if(i%4===0){const f=new THREE.Mesh(new THREE.IcosahedronGeometry(.34,0),MT(0xf5a4bd,{emissive:0x8a3a50}));f.scale.y=1.2;f.position.set(lx,.3,lz);g.add(f);gl(g,0xff9fc0,1.8,lx,.5,lz,.35)}}}
   return g;
 }

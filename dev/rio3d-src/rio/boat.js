@@ -1,5 +1,7 @@
-/* Canoa y remero: casco, remos, personaje con sombrero de paja (3ª persona), y su animación por fotograma. */
-import {toonGrad,tex} from '../style.js';
+/* Canoa y lanchero: casco, remos, personaje (3ª persona) y su animación por fotograma.
+   Movimiento: la canoa se mece con muelles (no con senos fijos), el farol cuelga como un péndulo y el lanchero rema con brazos articulados,
+   respira, mira alrededor y descansa entre remadas. */
+import {toonGrad,tex,gustAt,bake} from '../style.js';
 import * as THREE from 'three';
 import {clamp} from './util.js';
 import {P,S} from './state.js';
@@ -36,7 +38,7 @@ const woodD=MTc(0x6e4a34,{map:tex('wood')}),trim=MTc(0xd9b98c,{map:tex('woodV')}
   [-1,1].forEach(sx=>{const cv=new THREE.CatmullRomCurve3(stIdx.map(i=>{const u=uOf(i);return new THREE.Vector3(sx*bw(u)*1.06,sheerH(u)+.012,zAt(u))}));
     boat.add(new THREE.Mesh(new THREE.TubeGeometry(cv,50,.034,6,false),trim))});
   // piso de tablones
-  {const rows=stIdx.map(i=>{const u=uOf(i),b=bw(u)*.7,y=keelY(u)+.22;return{z:zAt(u),pts:[[-b,y],[b,y]]}});const fg=gridGeo(rows,.8);boat.add(new THREE.Mesh(fg,plk))}
+  {const rows=stIdx.map(i=>{const u=uOf(i),b=bw(u)*.84-.03,y=keelY(u)+.34;/* el piso queda siempre por encima del agua: antes rozaba la superficie y el río «entraba» en la canoa al cabecear */return{z:zAt(u),pts:[[-b,y],[b,y]]}});const fg=gridGeo(rows,.8);boat.add(new THREE.Mesh(fg,plk))}
   // travesaños (bancos) a lo ancho
   [[-1.55,.3],[-2.25,.4],[.55,.34],[-.55,.3]].forEach(([z,y])=>{const u=(ZS-z)/(ZS-ZB),w=bw(u)*1.72;const t=new THREE.Mesh(new THREE.BoxGeometry(w,.045,.14),z===.55?plk:trim);t.position.set(0,y+.1,z);boat.add(t)});
   // cuerdas atadas a la proa y rollo de cuerda
@@ -47,7 +49,7 @@ const woodD=MTc(0x6e4a34,{map:tex('wood')}),trim=MTc(0xd9b98c,{map:tex('woodV')}
   const bw2=new THREE.Mesh(new THREE.SphereGeometry(.06,8,6),woodD);bw2.position.set(0,sheerH(1)+.03,ZB+.02);boat.add(bw2)}
 const cargoMs=[];
 {const nm=MTc(0x8a7b5e,{map:tex('cloth')}),pm=MTc(0xa88a5c,{map:tex('woodV')});
-  [[-.35,.4,-1.55,.34],[-.05,.38,-1.35,.28],[-.3,.36,-1.1,.26]].forEach(([x,y,z,r])=>{const n=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),nm);n.scale.set(1.1,.65,1);n.position.set(x,y,z);boat.add(n);cargoMs.push(n)});
+  [[-.35,.4,-1.55,.34],[-.05,.38,-1.35,.28],[-.3,.36,-1.1,.26]].forEach(([x,y,z,r])=>{const n=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),nm);n.scale.set(1.1,.65,1);n.position.set(x,y,z);n.userData.dyn=true;boat.add(n);cargoMs.push(n)});
   // pértiga de bambú con nudos
   const bg=new THREE.Group();bg.position.set(-.52,.46,-1.9);bg.rotation.set(Math.PI/2,0,0);boat.add(bg);
   const bp=new THREE.Mesh(new THREE.CylinderGeometry(.025,.035,4.6,8),pm);bg.add(bp);
@@ -57,7 +59,7 @@ const lanternG=new THREE.Group();lanternG.position.set(0,1.46,-3.28);boat.add(la
 const postM=MTc(0x5c3d2a,{map:tex('woodV')});
 {const post=new THREE.Mesh(new THREE.CylinderGeometry(.028,.04,.95,6),postM);post.position.set(0,sheerH(.9)+.45,-2.95);boat.add(post);
   const arm=new THREE.Mesh(new THREE.TorusGeometry(.2,.022,5,12,Math.PI*.55),postM);arm.rotation.set(0,Math.PI/2,0);arm.rotation.z=-.6;arm.position.set(0,sheerH(.9)+.9,-3.05);boat.add(arm)}
-export const bl=new THREE.Mesh(new THREE.SphereGeometry(.15,16,12),new THREE.MeshBasicMaterial({color:0xffe2a8}));bl.scale.set(1,1.3,1);bl.position.set(0,-.18,0);lanternG.add(bl);
+export const bl=new THREE.Mesh(new THREE.SphereGeometry(.15,16,12),new THREE.MeshBasicMaterial({color:0xffe2a8}));bl.scale.set(1,1.3,1);bl.position.set(0,-.18,0);bl.userData.dyn=true;lanternG.add(bl);
 {const rib=MTc(0x7a3a24);[-.17,-.09,0,.09,.17].forEach(y=>{const r=.15*Math.sqrt(Math.max(0,1-Math.pow(y/.195,2)))+.004;const t=new THREE.Mesh(new THREE.TorusGeometry(r,.0055,4,18),rib);t.rotation.x=Math.PI/2;t.position.y=-.18+y;lanternG.add(t)});
   [.215,-.215].forEach(y=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.035,10),rib);c.position.y=-.18+y;lanternG.add(c)});
   const cord=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.2,3),rib);cord.position.y=.02;lanternG.add(cord);
@@ -74,67 +76,102 @@ function mkPaddle(){
 const paddles=[mkPaddle(),mkPaddle()];
 const HD=[new THREE.Vector3(-.7,.5,-.3),new THREE.Vector3(.7,.5,-.3)];
 const REST=[new THREE.Vector3(-1.05,.55,-.9),new THREE.Vector3(1.05,.55,-.9)];
-const me=new THREE.Group();boat.add(me);me.position.set(0,.42,.55);me.scale.setScalar(1.3);
-const torso=new THREE.Group();torso.position.y=.3;me.add(torso);
-const head=new THREE.Group();head.position.y=1.0;torso.add(head);
-const hatG=new THREE.Group();hatG.position.y=.2;head.add(hatG);
-const armPivot=[];try{window.__arm=armPivot}catch(e){}
-{const indigo=MTc(0x2b4a82,{map:tex('cloth')}),indigoL=MTc(0x6f8fc4,{map:tex('cloth')}),pants=MTc(0x2a3148,{map:tex('cloth')}),skin=MTc(0xd9a982),
-  kasa=MTc(0xe4c27e,{map:tex('straw'),side:THREE.DoubleSide}),kasaD=MTc(0xb48a4a,{map:tex('straw'),side:THREE.DoubleSide}),hair=MTc(0x24212a),mino=MTc(0xb8944f,{map:tex('straw'),side:THREE.DoubleSide}),minoD=MTc(0x8f6f3a,{map:tex('straw'),side:THREE.DoubleSide}),cord=MTc(0xa83a2c),wrap=MTc(0xd8d0bc,{map:tex('cloth')});
-  // piernas cruzadas con pantalón recogido y tobillos envueltos
-  const lg=new THREE.Mesh(new THREE.SphereGeometry(.5,16,12),pants);lg.scale.set(1.2,.42,.85);lg.position.y=-.1;me.add(lg);
-  [-1,1].forEach(sd=>{const k=new THREE.Mesh(new THREE.SphereGeometry(.17,10,8),pants);k.position.set(sd*.5,-.02,-.3);me.add(k);
-    const sh=new THREE.Mesh(new THREE.CylinderGeometry(.1,.12,.5,8),pants);sh.rotation.x=Math.PI/2;sh.rotation.z=sd*.15;sh.position.set(sd*.4,-.05,-.1);me.add(sh);
-    const ft=new THREE.Mesh(new THREE.SphereGeometry(.11,8,6),wrap);ft.scale.set(.9,.6,1.4);ft.position.set(sd*.22,-.12,-.42);me.add(ft)});
-  // torso: chaqueta añil con solapa cruzada (happi) y faja de cuerda
-  const bd=new THREE.Mesh(new THREE.CylinderGeometry(.3,.4,.8,14),indigo);bd.position.y=.42;torso.add(bd);
-  const obi=new THREE.Mesh(new THREE.TorusGeometry(.37,.05,6,18),wrap);obi.rotation.x=Math.PI/2;obi.position.y=.1;torso.add(obi);
-  const knot=new THREE.Mesh(new THREE.SphereGeometry(.06,6,5),wrap);knot.position.set(.1,.1,-.37);torso.add(knot);
-  [-1,1].forEach(sd=>{const lp=new THREE.Mesh(new THREE.BoxGeometry(.1,.62,.04),indigoL);lp.position.set(sd*.08,.5,-.33);lp.rotation.z=sd*.45;torso.add(lp)});
-  const sd2=new THREE.Mesh(new THREE.SphereGeometry(.44,14,10),indigo);sd2.scale.set(1,.45,.7);sd2.position.y=.78;torso.add(sd2);
-  const nk=new THREE.Mesh(new THREE.CylinderGeometry(.09,.1,.16,8),skin);nk.position.y=.95;torso.add(nk);
-  // espalda: emblema blanco (mon) y dobladillo claro, como un hanten de pescador
-  const wm=MTc(0xf2efe6,{side:THREE.DoubleSide});
-  const mon=new THREE.Mesh(new THREE.RingGeometry(.07,.15,24),wm);mon.position.set(0,.55,.352);torso.add(mon);
-  const hem=new THREE.Mesh(new THREE.CylinderGeometry(.385,.405,.07,16,1,true),wm);hem.position.y=.07;torso.add(hem);
-  const tcol=new THREE.Mesh(new THREE.TorusGeometry(.15,.04,6,14),wm);tcol.rotation.x=Math.PI/2;tcol.position.y=.9;torso.add(tcol);
-  // cabeza: cara, moño y cinta
-  const hd=new THREE.Mesh(new THREE.SphereGeometry(.21,16,12),skin);hd.position.y=.2;head.add(hd);
-  const hr=new THREE.Mesh(new THREE.SphereGeometry(.22,16,10,0,Math.PI*2,0,Math.PI*.55),hair);hr.position.set(0,.2,.03);hr.rotation.x=.45;head.add(hr);
-  const hb=new THREE.Mesh(new THREE.TorusGeometry(.205,.03,6,18),wm);hb.rotation.x=Math.PI/2;hb.position.y=.3;head.add(hb);
-  const tk=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),hair);tk.position.set(0,.43,.0);head.add(tk);
-  [-1,1].forEach(sd=>{const ey=new THREE.Mesh(new THREE.SphereGeometry(.022,6,4),hair);ey.position.set(sd*.07,.2,-.195);head.add(ey)});
-  // kasa: sombrero cónico ancho, con anillos de bambú y cordón rojo bajo la barbilla
-  const ht=new THREE.Mesh(new THREE.ConeGeometry(.7,.4,32,1,true),kasa);ht.position.y=.12;hatG.add(ht);
-  [.2,.38,.56,.74].forEach(f=>{const r=new THREE.Mesh(new THREE.TorusGeometry(.7*f+.02,.009,4,32),kasaD);r.rotation.x=Math.PI/2;r.position.y=.12+.2-.4*f+.002;hatG.add(r)});
-  const tp=new THREE.Mesh(new THREE.ConeGeometry(.07,.07,8),kasaD);tp.position.y=.34;hatG.add(tp);
-  const rim=new THREE.Mesh(new THREE.TorusGeometry(.695,.02,6,32),kasaD);rim.rotation.x=Math.PI/2;rim.position.y=-.08;hatG.add(rim);
-  [-1,1].forEach(s2=>{const st=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,.34,4),cord);st.position.set(s2*.17,-.2,.05);st.rotation.z=s2*.12;hatG.add(st)});
-  const kn=new THREE.Mesh(new THREE.SphereGeometry(.03,6,5),cord);kn.position.set(0,-.34,-.16);hatG.add(kn);
-  [-1,1].forEach(side=>{const p=new THREE.Group();p.position.set(side*.42,.75,0);torso.add(p);
-    const a=new THREE.Mesh(new THREE.CylinderGeometry(.1,.075,.6,10),indigo);a.position.y=-.3;p.add(a);
-    const h=new THREE.Mesh(new THREE.SphereGeometry(.085,10,8),skin);h.position.y=-.63;p.add(h);
-    const cf=new THREE.Mesh(new THREE.TorusGeometry(.082,.022,5,10),wrap);cf.rotation.x=Math.PI/2;cf.position.y=-.53;p.add(cf);
-    armPivot.push(p)})}
-const cPad=new THREE.Group();boat.add(cPad);
-{const m1=MTc(0xb98a56,{map:tex('woodV')}),m2=MTc(0xcf8d74,{map:tex('plank')});const sh=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,2.1,6),m1);sh.rotation.x=Math.PI/2;sh.position.z=1.05;cPad.add(sh);
-  const bl=new THREE.Mesh(new THREE.BoxGeometry(.22,.04,.55),m2);bl.position.z=2.0;cPad.add(bl);
-  const gr=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.05),m1);gr.position.z=-.03;cPad.add(gr)}
-let padX=1,lagS=0,phi=0;
-const pv=new THREE.Vector3();
-/* coloca la canoa en el agua con su vaivén; devuelve el balanceo (bob) que usa la cámara */
+/* ---------- lanchero ----------
+   Proporciones reales (sentado mide ~0,9 m sobre el banco; el kasa mide menos que la manga de la canoa), hanten añil con mon blanco,
+   hachimaki, tekkō en las muñecas y brazos de dos huesos (hombro–codo–muñeca) que agarran de verdad el remo. */
+const SC=1.12,me=new THREE.Group();boat.add(me);me.position.set(0,.47,.55);me.scale.setScalar(SC);
+const torso=new THREE.Group();torso.position.y=.1;me.add(torso);
+const head=new THREE.Group();head.position.y=.615;torso.add(head);
+const hatG=new THREE.Group();hatG.position.y=.15;head.add(hatG);
+const tails=new THREE.Group();tails.position.set(0,.135,.1);head.add(tails);
+const _Y=new THREE.Vector3(0,1,0),_D=new THREE.Vector3(0,-1,0),_Z=new THREE.Vector3(0,0,1);
+const seg=(par,a,b,r0,r1,mat,rs)=>{const A=new THREE.Vector3(a[0],a[1],a[2]),B=new THREE.Vector3(b[0],b[1],b[2]),m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,A.distanceTo(B),rs||8,1),mat);
+  m.position.copy(A).add(B).multiplyScalar(.5);m.quaternion.setFromUnitVectors(_Y,B.sub(A).normalize());par.add(m);return m};
+const ball=(par,p,r,mat,sx,sy,sz,ws,hs)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,ws||10,hs||8),mat);m.position.set(p[0],p[1],p[2]);if(sx)m.scale.set(sx,sy,sz);par.add(m);return m};
+const L1=.26,L2=.27,SH=[new THREE.Vector3(-.2,.44,0),new THREE.Vector3(.2,.44,0)],arms=[],eyes=[];
+{const indigo=MTc(0x2b4a82,{map:tex('cloth')}),indigoD=MTc(0x223c6c,{map:tex('cloth')}),indigoL=MTc(0x7c9bcc,{map:tex('cloth')}),pants=MTc(0x2a3148,{map:tex('cloth')}),skin=MTc(0xdcae88),skinD=MTc(0xc99873),
+  kasa=MTc(0xe4c27e,{map:tex('straw'),side:THREE.DoubleSide}),kasaD=MTc(0xb48a4a,{map:tex('straw')}),hair=MTc(0x24212a),cord=MTc(0xa83a2c),wrap=MTc(0xe2dac6,{map:tex('cloth')}),wm=MTc(0xf2efe6,{side:THREE.DoubleSide});
+  // piernas cruzadas: muslo, rodilla, espinilla y pie con tabi
+  ball(me,[0,.09,.03],.17,pants,1.25,.6,1);
+  [-1,1].forEach(sd=>{const hip=[sd*.09,.09,.02],knee=[sd*.33,.085,-.27],ank=[-sd*.07,.06+(sd>0?.03:0),-.37];
+    seg(me,hip,knee,.088,.07,pants);ball(me,knee,.074,pants);seg(me,knee,ank,.066,.05,pants);ball(me,[ank[0]-sd*.05,ank[1],ank[2]-.01],.055,wrap,1.5,.62,.85)});
+  // torso torneado (cintura, pecho, hombros caídos) y aplanado de pecho a espalda, con faldón del hanten
+  const prof=[[.212,-.07],[.2,0],[.174,.1],[.17,.16],[.186,.26],[.2,.36],[.196,.42],[.158,.482],[.085,.52],[.05,.555]].map(([r,y])=>new THREE.Vector2(r,y));
+  const bd=new THREE.Mesh(new THREE.LatheGeometry(prof,18),indigo);bd.scale.z=.74;torso.add(bd);
+  const hem=new THREE.Mesh(new THREE.CylinderGeometry(.208,.214,.028,18,1,true),wm);hem.position.y=-.05;hem.scale.z=.74;torso.add(hem);
+  const obi=new THREE.Mesh(new THREE.TorusGeometry(.176,.021,6,20),wrap);obi.rotation.x=Math.PI/2;obi.position.y=.125;obi.scale.y=.76;torso.add(obi);
+  ball(torso,[.04,.125,-.14],.028,wrap);seg(torso,[.04,.12,-.142],[.07,.04,-.15],.012,.008,wrap,5);seg(torso,[.04,.12,-.142],[.015,.035,-.152],.012,.008,wrap,5);
+  // solapas cruzadas (izquierda sobre derecha) y cuello interior claro
+  [-1,1].forEach(sd=>{const cv=new THREE.CatmullRomCurve3([new THREE.Vector3(sd*.07,.515,-.02),new THREE.Vector3(sd*.085,.44,-.118),new THREE.Vector3(sd*.06,.31,-.143),new THREE.Vector3(-sd*.02,.15,-.132)]);
+    const t=new THREE.Mesh(new THREE.TubeGeometry(cv,10,sd>0?.02:.017,5,false),indigoL);torso.add(t)});
+  {const cv=new THREE.CatmullRomCurve3([new THREE.Vector3(-.05,.53,-.01),new THREE.Vector3(0,.455,-.085),new THREE.Vector3(.05,.53,-.01)]);torso.add(new THREE.Mesh(new THREE.TubeGeometry(cv,8,.013,5,false),wm))}
+  // espalda: mon blanco (anillo con punto) siguiendo la curva de la espalda
+  const mon=new THREE.Mesh(new THREE.RingGeometry(.04,.078,22),wm);mon.position.set(0,.31,.147);mon.rotation.x=-.04;torso.add(mon);
+  const mon2=new THREE.Mesh(new THREE.CircleGeometry(.018,12),wm);mon2.position.set(0,.31,.148);torso.add(mon2);
+  seg(torso,[0,.53,0],[0,.62,-.005],.05,.045,skin);
+  // cabeza: cráneo, mandíbula suave, orejas, cara sencilla, pelo recogido y hachimaki con las puntas sueltas
+  ball(head,[0,.1,0],.105,skin,.95,1.06,1,14,12);ball(head,[0,.05,-.02],.08,skin,.95,.9,1);
+  [-1,1].forEach(sd=>{ball(head,[sd*.098,.09,.012],.022,skinD,.6,1,.8,6,5);
+    const ey=ball(head,[sd*.038,.1,-.094],.013,hair,1.25,.85,.5,6,5);ey.userData.dyn=true;eyes.push(ey);
+    const br=new THREE.Mesh(new THREE.BoxGeometry(.034,.006,.008),hair);br.position.set(sd*.04,.128,-.096);br.rotation.z=-sd*.16;head.add(br)});
+  ball(head,[0,.082,-.103],.014,skinD,.9,1.1,1,6,5);
+  {const mo=new THREE.Mesh(new THREE.BoxGeometry(.03,.004,.006),skinD);mo.position.set(0,.05,-.096);head.add(mo)}
+  const hr=new THREE.Mesh(new THREE.SphereGeometry(.111,14,10,0,Math.PI*2,0,Math.PI*.56),hair);hr.position.set(0,.102,.012);hr.rotation.x=.5;head.add(hr);
+  seg(head,[0,.2,.035],[0,.235,-.02],.022,.018,hair,6);
+  const hb=new THREE.Mesh(new THREE.TorusGeometry(.103,.011,5,20),wm);hb.rotation.x=Math.PI/2+.1;hb.position.y=.137;head.add(hb);
+  [-1,1].forEach(sd=>{const t=new THREE.Mesh(new THREE.BoxGeometry(.022,.12,.004).translate(0,-.06,0),wm);t.position.x=sd*.014;t.rotation.z=sd*.14;tails.add(t)});
+  // kasa: cono ancho (0,8 m) con aros de bambú, remate y cordón rojo anudado bajo la barbilla
+  const ht=new THREE.Mesh(new THREE.ConeGeometry(.4,.2,30,1,true),kasa);ht.position.y=.1;hatG.add(ht);
+  [.25,.5,.75].forEach(f=>{const r=new THREE.Mesh(new THREE.TorusGeometry(.4*f+.006,.005,4,28),kasaD);r.rotation.x=Math.PI/2;r.position.y=.2-.2*f+.002;hatG.add(r)});
+  const tp=new THREE.Mesh(new THREE.ConeGeometry(.04,.045,8),kasaD);tp.position.y=.215;hatG.add(tp);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(.398,.011,5,30),kasaD);rim.rotation.x=Math.PI/2;hatG.add(rim);
+  [-1,1].forEach(sd=>seg(hatG,[sd*.1,.02,.0],[sd*.012,-.225,-.07],.005,.005,cord,4));ball(hatG,[0,-.228,-.072],.014,cord,1,1,1,6,5);
+  // brazos: manga ancha hasta el codo, antebrazo con tekkō y mano
+  [-1,1].forEach((sd,i)=>{const up=new THREE.Group(),fo=new THREE.Group();torso.add(up,fo);
+    ball(up,[0,0,0],.068,indigo);const sl=new THREE.Mesh(new THREE.CylinderGeometry(.064,.08,L1+.02,10,1).translate(0,-(L1+.02)/2,0),indigo);up.add(sl);
+    const cuff=new THREE.Mesh(new THREE.CylinderGeometry(.079,.086,.085,10,1,true).translate(0,-.03,0),indigoD);cuff.material.side=THREE.DoubleSide;fo.add(cuff);
+    const fa=new THREE.Mesh(new THREE.CylinderGeometry(.041,.032,.25,8,1).translate(0,-.125,0),skin);fo.add(fa);
+    const tk=new THREE.Mesh(new THREE.CylinderGeometry(.039,.035,.1,8,1).translate(0,-.185,0),wrap);fo.add(tk);
+    ball(fo,[0,-L2,0],.043,skin,1,1.15,.82);
+    arms.push({up,fo,t:new THREE.Vector3(sd*.2,.15,-.2)})})}
+/* remo de 3ª persona: 1,7 m (antes 2,3 m): pala de hoja, caña y empuñadura en T */
+const cPad=new THREE.Group();boat.add(cPad);const PADL=1.5;
+{const m1=MTc(0xb98a56,{map:tex('woodV')}),m2=MTc(0xcf8d74,{map:tex('plank')});const sh=new THREE.Mesh(new THREE.CylinderGeometry(.019,.021,1.3,6),m1);sh.rotation.x=Math.PI/2;sh.position.z=.65;cPad.add(sh);
+  const bl2=new THREE.Mesh(new THREE.CylinderGeometry(.085,.06,.46,8,1),m2);bl2.rotation.x=Math.PI/2;bl2.scale.set(1,1,.16);bl2.position.z=1.5;cPad.add(bl2);
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(.085,8,6),m2);tip.scale.set(1,.16,.5);tip.position.z=1.73;cPad.add(tip);
+  const gr=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.11,6),m1);gr.rotation.z=Math.PI/2;gr.position.z=-.01;cPad.add(gr)}
+/* piezas estáticas fusionadas por material: la canoa y el lanchero pasan de más de cien mallas a unas treinta */
+[boat,lanternG,me,torso,head,hatG,tails,cPad,...arms.flatMap(a=>[a.up,a.fo]),...boat.children.filter(o=>o.isGroup&&o!==me&&o!==lanternG&&o!==cPad&&!paddles.includes(o))].forEach(g=>bake(g));
+paddles.forEach(w=>bake(w.children[0]));
+/* ---------- dinámica de la canoa ---------- */
+const BD={roll:0,rollV:0,pitch:0,pitchV:0,lx:0,lxv:0,lz:0,lzv:0,v0:0,t0:0,sr:0,sp:0};
+const calmK=()=>{try{return window.UX&&UX.calm&&UX.calm()?.4:1}catch(e){return 1}};
+/* coloca la canoa en el agua; devuelve el balanceo (bob) que usa la cámara.
+   El alabeo y el cabeceo son muelles amortiguados: responden al giro y a la remada con un poco de inercia y se asientan solos. */
 export function placeBoat(){
-  const bob=Math.sin(P.t*.9)*.03+Math.sin(P.t*1.7)*.012;
-  boat.position.set(P.px,bob*.6,P.pz);boat.rotation.order='YXZ';{const yr=P.yawr||0;boat.rotation.set(-Math.abs(yr)*.045+Math.sin(P.t*.8)*.004,-P.psi,-P.steer*.05-yr*.11+Math.sin(P.t*.7)*.008)}boat.updateMatrixWorld(true);
+  const t=P.t,dt=Math.min(.05,Math.max(0,t-BD.t0));BD.t0=t;const ck=calmK();
+  const bob=Math.sin(t*.9)*.03+Math.sin(t*1.7)*.012+Math.sin(t*.53+1)*.01;
+  const yr=P.yawr||0,acc=dt>0?(P.v-BD.v0)/dt:0;BD.v0=P.v;
+  const tr=-P.steer*.05-yr*.11+BD.sr+(Math.sin(t*.7)*.008+Math.sin(t*1.13+2)*.006)*ck,tp=-Math.abs(yr)*.045+BD.sp+clamp(acc,-2,2)*.012+(Math.sin(t*.8)*.004+Math.sin(t*.47+.6)*.005)*ck;
+  BD.rollV+=((tr-BD.roll)*30-BD.rollV*6.6)*dt;BD.roll+=BD.rollV*dt;
+  BD.pitchV+=((tp-BD.pitch)*24-BD.pitchV*6)*dt;BD.pitch+=BD.pitchV*dt;
+  boat.position.set(P.px,bob*.6,P.pz);boat.rotation.order='YXZ';boat.rotation.set(BD.pitch,-P.psi,BD.roll);
+  /* farol: péndulo de 0,3 m que responde a los giros, a los cambios de velocidad y a las rachas */
+  {const w2=32,dp=1.5,gu=(gustAt(P.px,P.pz)-.4)*.05*ck;
+    BD.lzv+=(-w2*BD.lz-dp*BD.lzv+(yr*Math.max(.6,P.v)*1.4-BD.rollV*2.2+gu*8)*ck)*dt;BD.lz=clamp(BD.lz+BD.lzv*dt,-.5,.5);
+    BD.lxv+=(-w2*BD.lx-dp*BD.lxv+(clamp(acc,-3,3)*1.6+BD.pitchV*2.2+gu*5)*ck)*dt;BD.lx=clamp(BD.lx+BD.lxv*dt,-.4,.4);
+    lanternG.rotation.set(BD.lx,0,BD.lz)}
+  boat.updateMatrixWorld(true);
   return bob}
 /* remos en primera persona (el del lado hacia el que giras se hunde como timón) */
+const padK=[0,0],_pb=new THREE.Vector3(),_pt=new THREE.Vector3(),pv=new THREE.Vector3();
 export function updatePaddles(){
   paddles.forEach((w,i)=>{
-    const sx=i?1:-1,k=clamp(P.steer*sx,0,1);          // el remo del lado hacia el que giras se hunde como timón
-    const B=new THREE.Vector3().copy(REST[i]);
-    B.lerp(new THREE.Vector3(sx*1.25,-.1,-.9+Math.sin(P.t*1.3+i)*.08),k);
+    const sx=i?1:-1,kt=clamp(P.steer*sx,0,1);padK[i]+=(kt-padK[i])*.12;const k=padK[i]*padK[i]*(3-2*padK[i]);
+    const B=_pb.copy(REST[i]);B.y+=Math.sin(P.t*.83+i*2.1)*.008;
+    B.lerp(_pt.set(sx*1.25,-.1,-.9+Math.sin(P.t*1.3+i)*.08),k);
     const dv=pv.copy(B).sub(HD[i]).normalize();
-    w.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),dv);w.position.copy(B).addScaledVector(dv,-1.55);
+    w.quaternion.setFromUnitVectors(_Z,dv);w.position.copy(B).addScaledVector(dv,-1.55);
   });
 }
 /* personaje y remo en 3ª persona */
@@ -143,26 +180,62 @@ let warmed=false;
 function warmUp(){warmed=true;try{const vs=[me,cPad,...cargoMs];vs.forEach(o=>o.visible=true);R.compile(scene,cam);
   vs.forEach(o=>o.traverse(m=>{if(m.isMesh){const mm=m.material;if(mm&&mm.map)R.initTexture(mm.map)}}));
   me.visible=cPad.visible=false;cargoMs.forEach(n=>n.visible=false)}catch(e){}}
+/* estado de la animación */
+const AN={padX:1,th:3.6,left:2,rest:1.5,T:new THREE.Vector3(.78,-.1,1.2),H:new THREE.Vector3(0,.95,.35),ry:0,rx:0,rz:0,gy:0,gyv:0,gp:0,gpv:0,gyT:0,gpT:0,gT:2,blink:3,hv:0,lag:0};
+const _a=new THREE.Vector3(),_b=new THREE.Vector3(),_c=new THREE.Vector3(),_d=new THREE.Vector3(),_e=new THREE.Vector3(),_n=new THREE.Vector3(),_t1=new THREE.Vector3(),_t2=new THREE.Vector3(),_q=new THREE.Quaternion();
+/* cinemática inversa de dos huesos: hombro fijo, mano en el objetivo y codo hacia abajo y afuera */
+function solveArm(i,T){const A=arms[i],S=SH[i],sd=i?1:-1;A.t.lerp(T,.35);
+  _d.subVectors(A.t,S);let L=_d.length();const mx=(L1+L2)*.995;if(L>mx){_d.multiplyScalar(mx/L);L=mx}if(L<.2){_d.set(0,-.14,-.14);L=_d.length()}
+  const a=(L1*L1-L2*L2+L*L)/(2*L),h=Math.sqrt(Math.max(0,L1*L1-a*a));_n.copy(_d).divideScalar(L);
+  _e.set(sd*.5,-1,.35);_e.addScaledVector(_n,-_e.dot(_n)).normalize();
+  _c.copy(S).addScaledVector(_n,a).addScaledVector(_e,h);          // codo
+  A.up.position.copy(S);A.up.quaternion.setFromUnitVectors(_D,_b.subVectors(_c,S).normalize());
+  A.fo.position.copy(_c);A.fo.quaternion.setFromUnitVectors(_D,_b.copy(S).add(_d).sub(_c).normalize())}
+const toTorso=v=>v.sub(me.position).divideScalar(SC).sub(torso.position).applyQuaternion(_q);
 export function updateCharacter(dt){
   if(!warmed)warmUp();
-  {const tp=S.camK>.45||S.cineW>.15;me.visible=tp;cargoMs.forEach(n=>n.visible=tp);cPad.visible=tp;paddles.forEach(w=>w.visible=!tp);
-   if(tp){if(P.steer>.2)padX=Math.min(1,padX+dt*3);else if(P.steer<-.2)padX=Math.max(-1,padX-dt*3);
-    lagS+=(P.steer-lagS)*Math.min(1,dt*2.2);const br=Math.sin(P.t*1.4);
-    torso.rotation.z=-P.steer*.2+Math.sin(P.t*.6)*.02-padX*Math.sin(phi)*.07;torso.rotation.y=-P.steer*.28+padX*Math.cos(phi)*.16;torso.rotation.x=.05+br*.012+Math.abs(P.steer)*.06+.1*Math.cos(phi);
-    head.rotation.y=-P.steer*.38+Math.sin(P.t*.35)*.08;head.rotation.x=.04+Math.sin(P.t*.5)*.03;
-    hatG.rotation.z=(P.steer-lagS)*.45;hatG.rotation.x=-Math.abs(P.steer-lagS)*.12;
-    /* remada: entra delante, tira hacia atrás en el agua y se recupera en el aire; al girar se hunde como timón */
-    phi+=dt*(.9+Math.min(P.v,3)*.55);if(phi>6.2832)phi-=6.2832;
-    const dip=Math.abs(P.steer)>.2?1:0,sn=Math.sin(phi),cs=Math.cos(phi),pull=sn>0,u=pull?phi/Math.PI:(phi-Math.PI)/Math.PI,
-      tz=pull?.25+1.35*u:1.6-1.35*u,ty=pull?-.28:-.28+.5*Math.sin(u*Math.PI);
-    /* los hombros mandan: la mano de arriba trabaja junto al pecho (al alcance del brazo) y el remo sale de ella */
-    const s0=boat.worldToLocal(armPivot[0].getWorldPosition(new THREE.Vector3())),s1=boat.worldToLocal(armPivot[1].getWorldPosition(new THREE.Vector3()));
-    const cx0=(s0.x+s1.x)/2,cy0=(s0.y+s1.y)/2,cz0=(s0.z+s1.z)/2;
-    const hand=new THREE.Vector3(cx0-padX*.08,cy0-.36+.1*cs,cz0-.3-.24*cs),
-      tipT=new THREE.Vector3(padX*(.62+dip*.45),dip?-.25:ty,cz0+(dip?.9+Math.sin(P.t*1.2)*.12:tz));
-    const d2=tipT.clone().sub(hand).normalize();cPad.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),d2);cPad.position.copy(hand);
-    /* brazos hacia el remo (mano alta en el mango, mano baja en el eje) */
-    const grips=[hand.clone(),hand.clone().addScaledVector(d2,.62)];if(padX<0)grips.reverse();
-    armPivot.forEach((p,i)=>{const wt=p.parent.worldToLocal(boat.localToWorld(grips[i].clone()));const loc=wt.sub(p.position);
-      p.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0),loc.clone().normalize());p.scale.y=clamp(loc.length()/.66,.75,1.3)})}}
+  const tp=S.camK>.45||S.cineW>.15;me.visible=tp;cargoMs.forEach(n=>n.visible=tp);cPad.visible=tp;paddles.forEach(w=>w.visible=!tp);
+  if(!tp){BD.sr*=.9;BD.sp*=.9;return}
+  const t=P.t,z0=me.position.z,steering=Math.abs(P.steer)>.15,still=P.v<.45,ck=calmK(),e=k=>Math.min(1,dt*k);
+  if(P.steer>.2)AN.padX=Math.min(1,AN.padX+dt*1.6);else if(P.steer<-.2)AN.padX=Math.max(-1,AN.padX+-dt*1.6);else AN.padX+=((AN.padX<0?-1:1)-AN.padX)*e(3);
+  const px=AN.padX,sx=px<0?-1:1,cross=1-Math.abs(px);
+  /* ritmo: una a tres remadas tranquilas y luego deja la pala a la rastra un rato; la corriente hace el resto */
+  let pull=0;
+  if(still||steering){AN.th+=(3.6-AN.th)*e(2.5);AN.left=1}
+  else if(AN.rest>0){AN.rest-=dt;AN.th+=(3.6-AN.th)*e(2);if(AN.rest<=0){AN.th=3.6;AN.left=1+((Math.random()*3)|0)}}
+  else{const w=Math.sin(AN.th)>0?3.3:2.3;AN.th+=dt*w*(.85+.15*Math.sin(t*.31));
+    if(AN.th>6.2832+3.6){AN.th-=6.2832;if(--AN.left<=0)AN.rest=2.2+Math.random()*4}
+    pull=Math.max(0,Math.sin(AN.th))}
+  const th=AN.th,cs=Math.cos(th),sn=Math.sin(th);
+  /* objetivo de la pala (centro) y de la mano de arriba, en coordenadas de la canoa */
+  const cy=me.position.y+SC*.54;
+  if(still){_a.set(sx*.74,.56,z0-.3);_b.set(-sx*.34,.64,z0-.34)}                                   // parado: remo cruzado sobre las bordas
+  else if(steering){_a.set(sx*.74,-.2,z0+.78+Math.sin(t*1.2)*.05);_b.set(-sx*.03,cy-.18,z0-.32)}    // timón: pala hundida a popa
+  else if(AN.rest>0){_a.set(sx*.76,-.07+Math.sin(t*.9)*.02,z0+.72);_b.set(-sx*.03,cy-.2,z0-.32)}  // descanso: pala a la rastra
+  else{_a.set(sx*(.78+.05*Math.max(0,-sn)),-.04-(sn>0?.2:.15)*sn,z0+.08-.52*cs);_b.set(-sx*.03,cy-.2+.05*cs,z0-.36+.08*cs)}
+  _a.x=px*Math.abs(_a.x);_a.y+=cross*.8;_b.x*=Math.abs(px);_b.y+=cross*.1;
+  AN.T.lerp(_a,e(still?3:7));AN.H.lerp(_b,e(6));
+  /* el remo tiene longitud fija: sale de la mano de arriba hacia la pala */
+  _d.subVectors(AN.T,AN.H).normalize();_c.copy(AN.T).addScaledVector(_d,-PADL);
+  _e.subVectors(_c,AN.H);if(_e.length()>.09)_e.setLength(.09);_c.copy(AN.H).add(_e);
+  cPad.quaternion.setFromUnitVectors(_Z,_d);cPad.position.copy(_c);
+  /* torso: gira con la remada, se inclina hacia la pala y respira */
+  const br=Math.sin(t*1.25),sk=still||steering||AN.rest>0?0:1;
+  AN.ry+=((sx*.24*cs*sk-P.steer*.2)*Math.abs(px)-AN.ry)*e(6);AN.rx+=((-.05-.09*cs*sk-Math.abs(P.steer)*.04)-AN.rx)*e(6);AN.rz+=((-sx*.07*pull-P.steer*.1)-AN.rz)*e(6);
+  torso.rotation.set(AN.rx+br*.01,AN.ry,AN.rz+Math.sin(t*.6)*.012-BD.roll*.5);
+  torso.scale.set(1+br*.012,1+br*.006,1+br*.022);
+  BD.sr+=(-sx*.014*pull-BD.sr)*e(8);BD.sp+=(.006*cs*sk-BD.sp)*e(8);
+  /* manos sobre el remo: la de arriba en la empuñadura, la de abajo medio metro más abajo, del lado de la pala */
+  _q.copy(torso.quaternion).invert();
+  const top=toTorso(_t1.copy(_c)),low=toTorso(_t2.copy(_c).addScaledVector(_d,.46));
+  solveArm(sx>0?0:1,top);solveArm(sx>0?1:0,low);
+  /* mirada: la cabeza no sigue al torso; cada pocos segundos elige algo que mirar y llega con un pequeño rebote */
+  AN.gT-=dt;if(steering){AN.gyT=-P.steer*.5;AN.gpT=.03;AN.gT=1.2}
+  else if(AN.gT<=0){AN.gT=2.5+Math.random()*5;const r=Math.random();if(r<.55){AN.gyT=(Math.random()-.5)*.3;AN.gpT=Math.random()*.08-.02}else if(r<.9){AN.gyT=(Math.random()<.5?-1:1)*(.45+Math.random()*.5);AN.gpT=Math.random()*.1}else{AN.gyT=(Math.random()-.5)*.4;AN.gpT=-.22}}
+  AN.gyv+=((AN.gyT-AN.gy)*26-AN.gyv*8.2)*dt;AN.gy+=AN.gyv*dt;AN.gpv+=((AN.gpT-AN.gp)*26-AN.gpv*8.2)*dt;AN.gp+=AN.gpv*dt;
+  head.rotation.set(AN.gp-AN.rx*.8+Math.sin(t*.5)*.015,AN.gy-AN.ry*.75+Math.sin(t*.35)*.03,-AN.rz*.6);
+  /* movimiento secundario: el kasa llega tarde a los giros de la cabeza; las puntas del hachimaki ondean con el viento */
+  AN.lag+=(AN.gyv+(P.yawr||0)-AN.lag)*e(5);hatG.rotation.set(-.06-Math.abs(AN.lag)*.03,0,clamp(AN.lag*.07,-.14,.14));
+  {const g=gustAt(P.px,P.pz)*ck;tails.rotation.set(.25+g*.55+Math.sin(t*5.3)*.1*(.3+g),Math.sin(t*3.1)*.2*(.3+g),0)}
+  AN.blink-=dt;{const k=AN.blink<.12?.15:1;eyes[0].scale.y=eyes[1].scale.y=.85*k;if(AN.blink<=0)AN.blink=2.5+Math.random()*4.5}
 }

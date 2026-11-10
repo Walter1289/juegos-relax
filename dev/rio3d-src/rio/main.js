@@ -2,7 +2,7 @@
 /* OJO: el orden de estos imports es el orden de creación del escenario (afecta al orden de la escena y a la secuencia de Math.random/UUID); no reordenar. */
 import '../fogfx.js';
 import {A} from '../audio-rio.js';
-import {addVignette,addPaper} from '../style.js';
+import {addVignette,addPaper,windTick} from '../style.js';
 import {SEAS,seasonIdx} from '../season.js';
 import {initExtras} from '../extras.js';
 import '../pause.js';
@@ -24,7 +24,7 @@ import {calendarioTick} from './calendario.js';
 import {updateHud,toast,savePos} from './hud.js';
 import {proaDorada} from '../lightmsg.js';
 import {updateLanterns,collectLanterns,mkLantern,updateDayLamp} from './lanterns.js';
-import {weather} from './weather.js';
+import {weather,W} from './weather.js';
 import {stepPlayer} from './player.js';
 import {initPad,addPadTexts} from '../steerpad.js';
 import {skipCine} from './state.js';
@@ -61,7 +61,7 @@ function frame(now,manual){
   if(S.started&&!X.photo)S.tod=(S.tod+dt/900)%1;
   applyEnv(P.px,P.pz);weather(dt,s);
   ensureTerrain(P.px,P.pz,buildFoam);
-  swayU.value=P.t;water.position.set(P.px,0,P.pz);water.material.uniforms.t.value=P.t;
+  swayU.value=P.t;windTick(dt,((window.UX&&UX.calm&&UX.calm())?.35:1)*(1+.7*(W.rain||0)));water.position.set(P.px,0,P.pz);water.material.uniforms.t.value=P.t;
   const night=env.night;
   rewardTick(dt);calendarioTick();const pk=1+.7*Math.min(1,pulse.t/2);bowLight.intensity=S.glowK*3.2*pk;if(!window.__bd&&proaDorada()){window.__bd=1;bowLight.color.set(0xffd27a)}blGlow.material.opacity=Math.min(1,(.3+.35*S.glowK)*pk);
   bl.material.color.set(0xffe2a8);

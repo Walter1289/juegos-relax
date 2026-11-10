@@ -1,5 +1,6 @@
 // Estilo compartido "indie pintado a mano": texturas procedurales y sombreado por bandas (toon).
 import * as THREE from 'three';
+import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const cache={};
@@ -63,7 +64,25 @@ function paint(kind){
       g.strokeStyle=`rgba(${v},${v},${v-10},${.45+r()*.4})`;g.lineWidth=2+r()*2;g.lineCap='round';g.beginPath();g.moveTo(xx,y0);g.lineTo(xx+r()*8-4,y0+l);g.stroke()}
       g.strokeStyle='rgba(50,70,50,.3)';g.lineWidth=3;g.beginPath();g.moveTo(0,y0+S/8-2);g.lineTo(S,y0+S/8-2);g.stroke()}
   }
+  painterly(g,S,r,kind);
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t;
+}
+/* pase pictórico: manchas amplias de aguada, pinceladas sueltas y una leve deriva cálido/frío, todo repetible en los bordes.
+   Rompe la uniformidad «generada» de cada patrón sin cambiar su valor medio (los colores del juego siguen saliendo del material). */
+function painterly(g,S,r,kind){
+  const wrap=(x,y,rad,fn)=>{for(const ox of[-S,0,S])for(const oy of[-S,0,S]){if(x+ox<-rad||x+ox>S+rad||y+oy<-rad||y+oy>S+rad)continue;fn(x+ox,y+oy)}};
+  const dir=kind==='woodV'||kind==='bark'||kind==='needle'?1.57:kind==='straw'?.78:0,soft=kind==='cloth'||kind==='straw'?.6:1;
+  // aguadas: grandes manchas claras y oscuras de borde difuso
+  for(let i=0;i<16;i++){const x=r()*S,y=r()*S,rad=34+r()*58,dk=r()>.5,a=(.05+r()*.06)*soft;
+    wrap(x,y,rad,(px,py)=>{const gr=g.createRadialGradient(px,py,0,px,py,rad);gr.addColorStop(0,dk?`rgba(58,50,70,${a})`:`rgba(255,250,236,${a*1.25})`);gr.addColorStop(1,dk?'rgba(58,50,70,0)':'rgba(255,250,236,0)');g.fillStyle=gr;g.fillRect(px-rad,py-rad,rad*2,rad*2)})}
+  // deriva de temperatura: toques cálidos y fríos muy tenues
+  for(let i=0;i<7;i++){const x=r()*S,y=r()*S,rad=50+r()*60,w=r()>.5;
+    wrap(x,y,rad,(px,py)=>{const gr=g.createRadialGradient(px,py,0,px,py,rad);gr.addColorStop(0,w?'rgba(255,214,170,.07)':'rgba(170,196,255,.06)');gr.addColorStop(1,w?'rgba(255,214,170,0)':'rgba(170,196,255,0)');g.fillStyle=gr;g.fillRect(px-rad,py-rad,rad*2,rad*2)})}
+  // pinceladas: trazos cortos de pincel seco siguiendo la dirección del material
+  g.lineCap='round';
+  for(let i=0;i<90;i++){const x=r()*S,y=r()*S,l=10+r()*26,a=dir+(r()-.5)*.7,w=1.5+r()*3.5,dk=r()>.55,al=(.035+r()*.05)*soft,dx=Math.cos(a)*l,dy=Math.sin(a)*l,bx=(r()-.5)*6,by=(r()-.5)*6;
+    wrap(x,y,l+4,(px,py)=>{g.strokeStyle=dk?`rgba(50,44,62,${al})`:`rgba(255,252,240,${al*1.3})`;g.lineWidth=w;g.beginPath();g.moveTo(px,py);g.quadraticCurveTo(px+dx*.5+bx,py+dy*.5+by,px+dx,py+dy);g.stroke()})}
+  g.lineCap='butt';
 }
 export const tex=k=>cache[k]||(cache[k]=paint(k));
 
@@ -92,3 +111,54 @@ export function addPaper(){
   for(let i=0;i<60;i++){g.strokeStyle='rgba(120,110,100,.06)';g.lineWidth=1;g.beginPath();const x=Math.random()*256,y=Math.random()*256;g.moveTo(x,y);g.lineTo(x+Math.random()*60-30,y+Math.random()*60-30);g.stroke()}
   const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:3;mix-blend-mode:multiply;opacity:.38;background:url('+c.toDataURL()+');background-size:256px';document.body.appendChild(d);
 }
+
+/* ---------- viento compartido (Río y Cabaña) ----------
+   Un solo reloj y una sola fuerza para toda la vegetación: frentes de ráfaga anchos que viajan en la dirección del viento,
+   una oscilación propia de cada planta y un temblor fino de hoja. Se calcula en el sombreador de vértices (sin coste de CPU). */
+export const WIND={t:{value:0},s:{value:1}};
+export function windTick(dt,k){const t=(WIND.t.value+=dt);
+  // la fuerza «respira»: calmas y rachas que nunca se repiten igual (periodos inconmensurables)
+  const br=.62+.26*Math.sin(t*.071)+.18*Math.sin(t*.173+1.3)*Math.sin(t*.029);
+  WIND.s.value+=((k==null?1:k)*Math.max(.18,br)-WIND.s.value)*Math.min(1,dt*.8)}
+/* versión en JS de la misma ráfaga, para objetos sueltos (faroles, ramas, cintas): devuelve ~0..1 */
+export function gustAt(x,z){const t=WIND.t.value,a=x*.8+z*.6,g=.5+.5*Math.sin(a*.05-t*.6+Math.sin(x*.03-z*.021+t*.11)*1.9);return g*g*(3-2*g)*WIND.s.value}
+const WGLSL=`uniform float uWT,uWS;
+vec3 windOff(vec2 ip,float k,float amp){vec2 wd=vec2(.8,.6);
+  float g=.5+.5*sin(dot(ip,wd)*.05-uWT*.6+sin(ip.x*.03-ip.y*.021+uWT*.11)*1.9);g=g*g*(3.-2.*g);
+  float ph=ip.x*.37+ip.y*.43;
+  float sw=sin(uWT*1.7+ph)*.6+sin(uWT*2.9+ph*1.31)*.4;
+  vec2 d=wd*((.22+.78*g)+sw*.3*(.35+g))+vec2(-wd.y,wd.x)*sin(uWT*1.23+ph*.71)*.2*(.3+g);
+  d*=amp*k*uWS;return vec3(d.x,-length(d)*.3*k,d.y);}
+vec3 windFl(vec3 wp,float fl){float a=uWT*3.7+wp.x*2.9+wp.z*2.3+wp.y*1.7;return vec3(sin(a),cos(a*.83+1.),sin(a*1.21+2.))*fl*uWS;}
+`;
+const f3=v=>Number(v).toFixed(4);
+/* añade viento a un material. H: altura (en unidades locales) a la que la planta se dobla del todo · amp: metros de vaivén arriba ·
+   pow: curva de rigidez · fl: temblor de hoja · base: parte del movimiento que afecta a toda la pieza (copas separadas del tronco) */
+export function windify(m,o){o=Object.assign({H:1,amp:.2,pow:2,fl:0,base:0},o||{});
+  m.onBeforeCompile=sh=>{sh.uniforms.uWT=WIND.t;sh.uniforms.uWS=WIND.s;
+    sh.vertexShader=WGLSL+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+#ifdef USE_INSTANCING
+ mat4 wM=modelMatrix*instanceMatrix;
+#else
+ mat4 wM=modelMatrix;
+#endif
+ float wK=${f3(o.base)}+${f3(1-o.base)}*pow(clamp(position.y/${f3(o.H)},0.,1.),${f3(o.pow)});
+ vec3 wOff=windOff(wM[3].xz,wK,${f3(o.amp)})+windFl((wM*vec4(position,1.)).xyz,${f3(o.fl)})*wK;`).replace('#include <project_vertex>',`#include <project_vertex>
+ mvPosition.xyz+=(viewMatrix*vec4(wOff,0.)).xyz;gl_Position=projectionMatrix*mvPosition;`)};
+  m.customProgramCacheKey=()=>'wind:'+[o.H,o.amp,o.pow,o.fl,o.base].join(',');return m}
+
+/* ---------- fusión de piezas estáticas ----------
+   Junta las mallas hijas directas de un grupo que comparten material (mismo color, textura y caras) en una sola malla: mismo dibujo, muchas
+   menos llamadas a la GPU. Con vc:true lo junta todo en UNA malla y guarda el color de cada pieza por vértice (para animales pequeños sin textura).
+   Las mallas con userData.dyn se dejan sueltas (las que se animan o cambian de color). */
+export function bake(group,o){o=o||{};const by=new Map();
+  for(const m of [...group.children]){if(!m.isMesh||m.isInstancedMesh||m.userData.dyn||m.material.vertexColors||m.material.transparent)continue;
+    m.updateMatrix();let g=m.geometry.clone().applyMatrix4(m.matrix);if(g.index)g=g.toNonIndexed();const mm=m.material,n=g.attributes.position.count;
+    for(const k of Object.keys(g.attributes))if(k!=='position'&&k!=='normal'&&k!=='uv')g.deleteAttribute(k);
+    if(!g.attributes.normal)g.computeVertexNormals();
+    if(o.vc){g.deleteAttribute('uv');const c=new Float32Array(n*3);for(let i=0;i<n;i++){c[i*3]=mm.color.r;c[i*3+1]=mm.color.g;c[i*3+2]=mm.color.b}g.setAttribute('color',new THREE.BufferAttribute(c,3))}
+    else if(!g.attributes.uv)g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(n*2),2));
+    const key=o.vc?'vc':[mm.type,mm.color.getHex(),mm.map?mm.map.uuid:'',mm.side,mm.emissive?mm.emissive.getHex():'',mm.flatShading?1:0].join('|');
+    if(!by.has(key))by.set(key,{mm,gs:[],cs:m.castShadow,rs:m.receiveShadow});by.get(key).gs.push(g);group.remove(m)}
+  for(const {mm,gs,cs,rs} of by.values()){const mesh=new THREE.Mesh(gs.length>1?mergeGeometries(gs):gs[0],o.vc?o.mat:mm);mesh.castShadow=cs;mesh.receiveShadow=rs;group.add(mesh)}
+  return group}

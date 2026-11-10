@@ -1,6 +1,6 @@
 /* mats.js — materiales con caché (clasificados por tipo de textura) y helper box() */
 import * as THREE from 'three';
-import {toon,boxUV,DENS} from '../style.js';
+import {toon,boxUV,DENS,windify} from '../style.js';
 const mc=new Map();
 const KIND=new Map();
 const kindFor=(list,k)=>list.forEach(c=>KIND.set(c.toLowerCase(),k));
@@ -17,3 +17,6 @@ const JP={'#dcae92':'#cfa578','#c89479':'#b98b5f','#d4a98c':'#c79a6e','#c49a7d':
  '#e6a091':'#2f4a74','#7fc3bd':'#9a6a3c','#d9a9cb':'#6a7f58','#a6cf92':'#c9a14a','#a1918c':'#8d7f74'};
 export const mat=(c,o)=>{const k=c+(o?JSON.stringify(o):'');if(!mc.has(k))mc.set(k,toon(JP[String(c).toLowerCase()]||c,KIND.get(String(c).toLowerCase()),Object.assign({flatShading:true},o||{})));return mc.get(k)};
 export function box(w,h,d,c,x,y,z,p,o){const mt=typeof c==='string'?mat(c,o):c;const g=new THREE.BoxGeometry(w,h,d);const kd=mt.userData&&mt.userData.kind;if(kd)boxUV(g,w,h,d,DENS[kd]);const m=new THREE.Mesh(g,mt);m.position.set(x,y,z);if(p)p.add(m);return m}
+
+/* material blanco (el color lo pone cada instancia) con viento y, si se pide, textura pintada: para el bosque y las matas */
+export const windMat=(w,kind)=>windify(toon('#ffffff',kind,{flatShading:true}),w);

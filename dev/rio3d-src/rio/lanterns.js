@@ -1,6 +1,7 @@
 /* Linternas flotantes: colocación a lo largo del río, brillo, recogida y contador. */
 import {A} from '../audio-rio.js';
 import * as THREE from 'three';
+import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {hash,el} from './util.js';
 import {S,P} from './state.js';
 import {hw,cx} from './world.js';
@@ -17,9 +18,11 @@ const LSP=38;const lanterns=new Map(),pool=[];let collected=new Set();try{JSON.p
 export const lanternPos=k=>{const s=70+k*LSP+hash(k,1)*20,e=(hash(k,2)*2-1)*.5*hw(s);return[cx(s)+e,-s]};
 export function mkLantern(){
   const g=new THREE.Group();
-  const body=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.55,10),new THREE.MeshBasicMaterial({color:0xffd9a0}));body.position.y=.38;
-  const cap=new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.06,10),new THREE.MeshBasicMaterial({color:0xc97d68}));cap.position.y=.7;
-  const base=cap.clone();base.position.y=.08;
+  /* tōrō nagashi: farol cuadrado de papel (36 cm) con armazón de madera sobre una balsita; el armazón va fusionado en una sola malla */
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.34,.42,.34),new THREE.MeshBasicMaterial({color:0xffd9a0}));body.position.y=.31;
+  const fr=[new THREE.BoxGeometry(.52,.05,.52).translate(0,.065,0),new THREE.BoxGeometry(.4,.035,.4).translate(0,.54,0)];
+  [-1,1].forEach(a=>[-1,1].forEach(b=>fr.push(new THREE.BoxGeometry(.03,.46,.03).translate(a*.175,.31,b*.175))));
+  const cap=new THREE.Mesh(mergeGeometries(fr),new THREE.MeshBasicMaterial({color:0x8a5a48})),base=new THREE.Object3D();
   const glow=spr(0xffc77a,3.2);glow.position.y=.45;glow.material.depthTest=false;glow.renderOrder=5;
   const refl=new THREE.Mesh(new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({map:glowTex,color:0xffc77a,transparent:true,opacity:.4,blending:THREE.AdditiveBlending,depthWrite:false}));
   refl.scale.set(5,1,5);refl.position.y=.04;

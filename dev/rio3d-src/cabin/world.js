@@ -4,8 +4,8 @@ import {SPX,SPZ,SPR} from './secret.js';
 import * as THREE from 'three';
 import {scene} from './core.js';
 import {clamp,rng,spr,glowTex,puffTex} from './util.js';
-import {mat} from './mats.js';
-import {tex,toonGrad} from '../style.js';
+import {mat,windMat} from './mats.js';
+import {tex,toonGrad,windify,windTick,bake} from '../style.js';
 import {FU,DITHER} from '../fogfx.js';
 import {RT} from './core.js';
 const mists=[],clouds=[],banks=[];
@@ -34,12 +34,14 @@ function buildFarland(){
   const PINEC=['#6d8466','#7a936f','#5f7a5d','#86a077'];
   /* bosque diverso: cedros (sugi), pinos, matsu de copa en nubes, arces rojos (momiji), ginkgos dorados, bambú, arbustos de azalea y matas de hierba */
   {const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),P=new THREE.Vector3(),c=new THREE.Color(),r=rng(77);
-   const mk=(geo,n)=>{const m=new THREE.InstancedMesh(geo,mat('#ffffff'),n);m.count=0;scene.add(m);return m};
+   /* cada especie con su propio material: se mece con el viento según su altura y lleva textura pintada (aguja u hoja) */
+   const uvk=(g,u,v)=>{const a=g.attributes.uv;for(let i=0;i<a.count;i++)a.setXY(i,a.getX(i)*u,a.getY(i)*v);return g};
+   const mk=(geo,n,w,kind)=>{const m=new THREE.InstancedMesh(geo,w?windMat(w,kind):mat('#ffffff'),n);m.count=0;scene.add(m);return m};
    const add=(m,x,y,z,sx,sy,sz,col,ry=0)=>{const i=m.count++;Q.setFromEuler(new THREE.Euler(0,ry,0));P.set(x,y,z);S.set(sx,sy,sz);M.compose(P,Q,S);m.setMatrixAt(i,M);m.setColorAt(i,c.set(col))};
-   const sugi=mk(new THREE.ConeGeometry(1.15,10,7).translate(0,5,0),520),pine=mk(new THREE.ConeGeometry(1.9,7.5,6).translate(0,3.8,0),520),
-     tr=mk(new THREE.CylinderGeometry(.18,.3,3.2,5).translate(0,1.6,0),520),pad=mk(new THREE.IcosahedronGeometry(1,1),1500),
-     bam=mk(new THREE.CylinderGeometry(.07,.09,8,5).translate(0,4,0),220),bleaf=mk(new THREE.IcosahedronGeometry(.9,0),260),
-     bush=mk(new THREE.IcosahedronGeometry(1,1),240),grass=mk(new THREE.ConeGeometry(.35,1.3,4).translate(0,.65,0),420);
+   const sugi=mk(uvk(new THREE.ConeGeometry(1.15,10,7,2).translate(0,5,0),3,4),520,{H:10,amp:.34,pow:2,fl:.02},'needle'),pine=mk(uvk(new THREE.ConeGeometry(1.9,7.5,6,2).translate(0,3.8,0),4,3),520,{H:7.5,amp:.26,pow:2,fl:.02},'needle'),
+     tr=mk(new THREE.CylinderGeometry(.18,.3,3.2,5,1).translate(0,1.6,0),520,{H:6,amp:.26,pow:2}),pad=mk(uvk(new THREE.IcosahedronGeometry(1,1),2,2),1500,{H:1,amp:.26,pow:1,base:.5,fl:.04},'leaf'),
+     bam=mk(new THREE.CylinderGeometry(.07,.09,8,5,3).translate(0,4,0),220,{H:8,amp:.6,pow:2}),bleaf=mk(new THREE.IcosahedronGeometry(.9,0),260,{H:1,amp:.6,pow:1,base:1,fl:.05}),
+     bush=mk(uvk(new THREE.IcosahedronGeometry(1,1),2,2),240,{H:1,amp:.06,pow:1,base:.3,fl:.03},'leaf'),grass=mk(new THREE.ConeGeometry(.35,1.3,4,1).translate(0,.65,0),420,{H:1.3,amp:.2,pow:1.5});
    const G={sugi:['#4f6b52','#5c7a5a','#476048'],pine:['#6d8466','#7a936f','#5f7a5d','#86a077'],matsu:['#4f7254','#5b8160','#44654a'],maple:['#d9573a','#e8793a','#c9432f','#f0a042'],gink:['#f0c44a','#e8b53a','#f6d46a'],bam:['#8fb06a','#9cc17a','#7fa05f'],bl:['#a6c47a','#94b56a'],bush:['#5f8a60','#6e9a68','#e58aa8','#d9708f','#f3a9c0'],gr:['#9bb070','#b3b87a','#86a068']};
    const pk=a=>a[(r()*a.length)|0];
    for(let i=0;i<12000;i++){
@@ -104,6 +106,8 @@ function buildValley(){
     g.userData={u:.1+i*.22,sp:.0035+i*.0006};scene.add(g);boats.push(g)}
 }
 let riverTex=null;
+/* jardín con brisa: funde las piezas de un grupo por material (de ~90 mallas a una docena) y las mece según su altura sobre y0 */
+function breezy(g,y0,H){bake(g);g.children.forEach(m=>{if(!m.isMesh)return;m.geometry.translate(0,-y0,0);m.position.y+=y0;m.material=windify(m.material.clone(),{H,amp:.24,pow:1.6,fl:.03})})}
 function buildCliff(){
   const g=new THREE.BoxGeometry(10,26,12,12,16,12),p=g.attributes.position,r=rng(3);
   const col=new Float32Array(p.count*3),c=new THREE.Color(),c1=new THREE.Color('#d0aa8c'),c2=new THREE.Color('#6d5a62');
@@ -131,10 +135,11 @@ function buildCliff(){
    for(let q=0;q<26;q++){const gx=-13.6+rr()*9,gz=-5+rr()*9;const f=new THREE.Mesh(new THREE.ConeGeometry(.22,.9+rr()*.6,4),mat(['#9bb070','#b3b87a','#86a068'][q%3]));f.position.set(gx,4.2+.5,gz);f.rotation.z=(rr()-.5)*.5;sg.add(f)}
    for(let q=0;q<6;q++){const k=new THREE.Mesh(new THREE.IcosahedronGeometry(.45+rr()*.5,0),mat(['#7e7a74','#8a8a7c','#6f7d68'][q%3]));k.position.set(-13+rr()*8.5,4.3,-5+rr()*9);k.scale.y=.6;sg.add(k)}
    for(let q=0;q<7;q++){const az=new THREE.Mesh(new THREE.IcosahedronGeometry(.5+rr()*.3,1),mat(['#e58aa8','#d9708f','#f3a9c0','#6e9a68'][q%4]));az.position.set(-13.5+rr()*9,4.5,-4.5+rr()*9);az.scale.y=.7;sg.add(az)}
-   if(secreto())sg.children.filter(o=>Math.hypot(o.position.x-SPX,o.position.z-SPZ)<SPR).forEach(o=>sg.remove(o))}
+   if(secreto())sg.children.filter(o=>Math.hypot(o.position.x-SPX,o.position.z-SPZ)<SPR).forEach(o=>sg.remove(o));
+   breezy(sg,4.2,6)}
   // sakura sobre el acantilado
   if(!secreto()){const sg=new THREE.Group();sg.position.set(-12.2,4.2,1.8);scene.add(sg);const tm=new THREE.Mesh(new THREE.CylinderGeometry(.22,.38,3,6),mat('#5a3d33'));tm.position.y=1.5;tm.rotation.z=.08;sg.add(tm);
-   [[0,3.6,0,1.7],[1.2,3.2,.4,1.3],[-1.1,3.3,-.3,1.2],[.2,4.4,.2,1.1]].forEach(([x,y,z,r],i)=>{const c=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),mat(['#f3bccb','#eea9bd','#f8d0da','#e99fb4'][i]));c.position.set(x,y,z);sg.add(c)})}
+   [[0,3.6,0,1.7],[1.2,3.2,.4,1.3],[-1.1,3.3,-.3,1.2],[.2,4.4,.2,1.1]].forEach(([x,y,z,r],i)=>{const c=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),mat(['#f3bccb','#eea9bd','#f8d0da','#e99fb4'][i]));c.position.set(x,y,z);sg.add(c)});breezy(sg,0,5.4)}
   // rocas al pie
   {const r=rng(5);for(let i=0;i<8;i++){const s=1+r()*2;const m=new THREE.Mesh(new THREE.IcosahedronGeometry(s,0),mat('#7b6a70'));m.position.set(-14+r()*12,-13,6+r()*3);m.rotation.set(r()*3,r()*3,0);scene.add(m)}}
 }
@@ -142,6 +147,7 @@ export function buildWorld(){buildSky();buildFarland();buildTerrain();buildPath(
 // niebla y nubes a la deriva
 const MOON=SUN.clone().normalize();
 export function worldStep(dt){
+  windTick(dt,(window.UX&&UX.calm&&UX.calm())?.35:1);
   {const T=RT.T;FU.sunDir.value.copy(MOON);FU.sunCol.value.set(1,.72,.5);FU.misc.value.set(.55,.05,.5,T);
    banks.forEach(b=>{b.position.x+=dt*b.userData.v;if(b.position.x>160)b.position.x=-160;if(b.position.x<-160)b.position.x=160;b.material.opacity=b.userData.o*(.8+.2*Math.sin(T*.12+b.userData.ph))})}
   boats.forEach(b=>{const u=b.userData;u.u+=u.sp*dt;if(u.u>1)u.u-=1;const z=30-u.u*240,x=RIV(z)+Math.sin(RT.T*.3+u.u*20)*1.2;b.position.set(x,RY+.1+Math.sin(RT.T*.9+u.u*9)*.04,z);const z2=z-1,x2=RIV(z2);b.rotation.y=Math.atan2(-(x2-x),-(z2-z))+Math.PI;b.scale.setScalar(1+u.u*.0)});

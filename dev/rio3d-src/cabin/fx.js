@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {scene,RT} from './core.js';
 import {clamp,spr,glowTex,puffTex} from './util.js';
 import {lit} from './lights.js';
+import {gustAt} from '../style.js';
 const smoke=[],RN=260,rp=new Float32Array(RN*6),rv=[];
 const FFN=60,ffP=new Float32Array(FFN*3),ffB=[];
 let rainG,ffG,rain,ffM,ff;
@@ -23,7 +24,8 @@ export function initAmbient(){
 export function ambientStep(dt,prog,nichos){
   const T=RT.T;
   // humo
-  smoke.forEach((s,i)=>{const ph=(T*.07+s.userData.ph)%1;s.position.set(4.4+ph*3.2+Math.sin(T*.6+i)*.3,9.4+ph*5.5,-.2+Math.sin(T*.4+i*2)*.2);const sz=1+ph*4.2;s.scale.set(sz,sz,1);s.material.opacity=.38*(1-ph)*Math.min(1,ph*8)*lit.smoke});
+  {const gu=gustAt(4,0);smoke.forEach((s,i)=>{const ph=(T*.07+s.userData.ph)%1;/* el humo sube recto junto a la chimenea y el viento lo va tumbando y rizando con la altura */
+    s.position.set(4.4+ph*(1.6+gu*3.4)+Math.sin(T*.6+i+ph*5)*.3*(.4+ph),9.4+ph*(5.9-gu*1.2),-.2+ph*ph*gu*1.6+Math.sin(T*.4+i*2+ph*4)*.25*(.4+ph));const sz=1+ph*4.2;s.scale.set(sz,sz,1);s.material.opacity=.38*(1-ph)*Math.min(1,ph*8)*lit.smoke})}
   // lluvia
   rain.material.opacity=.28*lit.rain;rain.visible=lit.rain>.02;
   if(rain.visible){for(let i=0;i<RN;i++){const v=rv[i];v[1]-=15*dt;if(v[1]<-2){v[1]=17+Math.random()*3;v[0]=Math.random()*34-14;v[2]=Math.random()*20-9}

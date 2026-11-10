@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {scene,RT} from './core.js';
 import {spr,glowTex} from './util.js';
 import {state} from './state.js';
+import {gustAt} from '../style.js';
 // luces y brillos que crean otros módulos (faroles, bombillas, nichos, lámpara, ventana, farol de mano)
 export const LT={porchL:[],bulbs:[],nichoGlow:[],lampL:null,lampGlow:null,winL:null,handL:null};
 // nivel de encendido (0..1) de cada grupo de luz
@@ -26,6 +27,9 @@ export function lightStep(dt){
   const fl=.93+.05*Math.sin(T*9)+.03*Math.sin(T*23);
   LT.lampL.intensity=2.6*lit.lamp*fl;LT.lampGlow.material.opacity=.55*lit.lamp*fl;
   LT.porchL.forEach((p,i)=>{p.L.intensity=1.6*lit.lant*(fl+.02*i);p.gl.material.opacity=.7*lit.lant*fl;p.body.material.emissiveIntensity=lit.lant});
+  /* los faroles del porche cuelgan de su cordón: péndulos que el viento empuja y que se van parando solos */
+  LT.porchL.forEach((p,i)=>{if(!p.g)return;const gu=gustAt(p.b.x*3+i*40,p.b.z);p.av+=(-20*p.a-.9*p.av+(gu-.3)*2.2+Math.sin(T*.83+i*2.1)*.25)*dt;p.a=Math.max(-.35,Math.min(.35,p.a+p.av*dt));
+    p.g.rotation.z=p.a;p.g.rotation.x=p.a*.45*Math.sin(T*.41+i);p.g.position.x=p.b.x+Math.sin(p.a)*.75;p.g.position.y=p.b.y+(1-Math.cos(p.a))*.75});
   LT.bulbs.forEach((b,i)=>{b.material.opacity=lit.str*(.55+.15*Math.sin(T*2+i))});
   LT.nichoGlow.forEach((g,i)=>{g.material.opacity=.7*lit.nich*(.8+.2*Math.sin(T*1.6+i*2))});
   LT.winL.intensity=1.2*lit.moon;
