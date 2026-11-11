@@ -75,7 +75,7 @@ function buildLM0(k){
     {const pxc=side*(hwv+12.5),pzc=1,yt=Math.max(gy(pxc,pzc),gy(pxc-4,pzc),gy(pxc+4,pzc),gy(pxc,pzc+4),gy(pxc,pzc-4))+.3,pz=new THREE.Group();pz.position.set(pxc,yt,pzc);g.add(pz);
       cyl(pz,5,5.5,5,0x9d9c9a,0,-2.5,0,16,{map:tex('stone')});cyl(pz,3.4,3.4,.08,0xbcb8ae,0,.03,0,16);cyl(pz,5.05,5.05,.12,0x8a8884,0,-.02,0,16);
       for(let i=0;i<4;i++)bx(pz,.9,.3,3.2-i*.15,0xaaa69d,-side*(5.3+i*.8),-.25-i*.42,0);
-      const st=new THREE.Mesh(rockGeo(1.5,k+3,2,1.6),MT(0x8f918c,{map:tex('rock')}));st.scale.set(.85,1,.8);st.position.y=2.05;st.rotation.y=k;pz.add(st);
+      const st=new THREE.Mesh(rockGeo(1.5,k+3,2,1.6),MT(0x8f918c,{map:tex('rock')}));st.scale.set(.85,1,.8);st.position.y=2.05;st.rotation.y=k;st.userData.noMerge=true;pz.add(st);
       const mo=new THREE.Mesh(lumpy(new THREE.IcosahedronGeometry(.95,1),.22,1.6,k,.5),MT(0x7fb36a));mo.scale.set(1,.34,.9);mo.position.y=4.25;pz.add(mo);
       const rp=new THREE.Mesh(new THREE.TorusGeometry(1.36,.12,6,20),MT(0xe6d8a0));rp.rotation.x=Math.PI/2;rp.scale.y=.94;rp.position.y=1.75;pz.add(rp);
       for(let i=0;i<8;i++){const an=i/8*6.283+.3,sh=new THREE.Mesh(new THREE.PlaneGeometry(.26,.62),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,side:THREE.DoubleSide}));sh.position.set(Math.cos(an)*1.42,1.38,Math.sin(an)*1.34);sh.rotation.y=-an+Math.PI/2;pz.add(sh)}
@@ -87,7 +87,7 @@ function buildLM0(k){
         const cp=new THREE.Mesh(new THREE.ConeGeometry(.33,.2,8),MT(0xb5473a));cp.position.set(x,1.65,z);pz.add(cp);
         const s=spr(0xffc77a,2.6);s.material.opacity=0;s.position.set(x,1.3,z);pz.add(s);lamps.push({b,s,k:0,on:0,d:x*side})}
       lamps.sort((p,q)=>q.d-p.d);
-      g.userData.visit={kind:2,lamps,views:[{ref:pz,eye:[-side*4.7,1.2,1.3],look:[0,2.2,-.1]}]}}
+      g.userData.visit={kind:2,lamps,stone:st,views:[{ref:pz,eye:[-side*4.4,1.55,1.2],look:[0,2.1,-.1],walk:{r:4.45,holes:[[0,0,2.15],[-side*2.2,0,1]]}}]}}
     // arco de bienvenida con faroles sobre el río
     torii(g,0,-.5,-34,1.08,0xb5473a,{w:(hwv-.5)/1.08,water:true});gl(g,0xffc77a,4,-hwv*.5,5.2,-34,.9);gl(g,0xffc77a,4,hwv*.5,5.2,-34,.9);gl(g,0xffc77a,4,0,5.2,-34,.9)}
   else if(type===3){
@@ -192,8 +192,8 @@ function buildLM0(k){
     for(let i=0;i<6;i++)cyl(h,.5,.55,.14,0xaaa69d,-.6+Math.sin(i*1.1)*.6,.1,6.2+i*1.25,7);
     for(const sd2 of[-1,1]){const t=tourou(g,gy,lx+sd2*7.5,5,1);t.position.y=gy(lx+sd2*7.5,5)}
     /* interior: sala de tatami con mesa baja, té, tokonoma con rollo y farol de papel (se ve al entrar a meditar) */
-    const steam=[];{const R=new THREE.Mesh(new THREE.BoxGeometry(5,2.4,4),MT(0xe9dcc2,{side:THREE.BackSide,emissive:0x2a2018}));R.position.set(0,2.62,-.3);h.add(R);
-      bx(h,4.98,.04,3.98,0xcdc490,0,1.45,-.3,{map:tex('straw'),emissive:0x221c10});for(const x of[-1.25,1.25])bx(h,.06,.045,3.98,0x4f6a4a,x,1.452,-.3);bx(h,2.5,.045,.06,0x4f6a4a,0,1.452,-.3);
+    const steam=[];{const R=new THREE.Mesh(new THREE.BoxGeometry(5,2.4,4),MT(0xe9dcc2,{side:THREE.BackSide,emissive:0x5a452c}));R.position.set(0,2.62,-.3);h.add(R);
+      bx(h,4.98,.04,3.98,0xcdc490,0,1.45,-.3,{map:tex('straw'),emissive:0x4a3c20});for(const x of[-1.25,1.25])bx(h,.06,.045,3.98,0x4f6a4a,x,1.452,-.3);bx(h,2.5,.045,.06,0x4f6a4a,0,1.452,-.3);
       for(const x of[-2.48,2.48])for(const z of[-2.28,1.68])bx(h,.14,2.4,.14,pw,x,2.62,z);bx(h,4.98,.12,.1,pw,0,3.3,-2.27);bx(h,4.98,.12,.1,pw,0,3.3,1.67);
       /* tokonoma al fondo: tarima, rollo 和 y un arreglo de flores */
       bx(h,1.7,.16,.55,0x6a4a3a,-1.3,1.55,-2);const kk=new THREE.Mesh(new THREE.PlaneGeometry(.52,1.3),new THREE.MeshBasicMaterial({map:kanjiTex('和','#f3ead6','#2b2b2b',64,160)}));kk.position.set(-1.3,2.65,-2.27);h.add(kk);
@@ -202,8 +202,8 @@ function buildLM0(k){
       const wm=new THREE.MeshBasicMaterial({color:0xffe8b8});const rw=new THREE.Mesh(new THREE.CircleGeometry(.62,20),wm);rw.position.set(1.15,2.7,-2.28);h.add(rw);for(const q of[-.2,.2]){bx(h,1.24,.03,.02,pw,1.15,2.7+q,-2.27);bx(h,.03,1.24,.02,pw,1.15+q,2.7,-2.27)}
       for(const sd of[-1,1])for(const z of[-1.2,.6]){const sh=bx(h,.02,1.5,1.3,0xffe8b8,sd*2.48,2.5,z);sh.material=wm;for(const q of[-.35,0,.35])bx(h,.03,1.5,.03,pw,sd*2.46,2.5,z+q);bx(h,.03,.03,1.3,pw,sd*2.46,2.5,z)}
       /* mesa baja, té, cojines y farol andon */
-      cyl(h,.62,.62,.05,0x6a4634,0,1.8,-.5,14);cyl(h,.3,.36,.3,0x5a3a2c,0,1.62,-.5,8);teaSet(h,0,1.825,-.5,steam);
-      bx(h,.7,.09,.7,0x7a3b3b,.95,1.5,.5);bx(h,.7,.09,.7,0x3f4a6b,-.95,1.5,.3);
+      cyl(h,.62,.62,.05,0x6a4634,0,1.8,-.5,14,{emissive:0x2c1c12});cyl(h,.3,.36,.3,0x5a3a2c,0,1.62,-.5,8,{emissive:0x22160e});teaSet(h,0,1.825,-.5,steam);
+      bx(h,.7,.09,.7,0x7a3b3b,.95,1.5,.5,{emissive:0x2a1212});bx(h,.7,.09,.7,0x3f4a6b,-.95,1.5,.3,{emissive:0x141a2a});
       bx(h,.34,.6,.34,0xffe0a0,2.05,1.95,-1.9).material=new THREE.MeshBasicMaterial({color:0xffd9a0});for(const [a,b] of[[1,1],[-1,1],[1,-1],[-1,-1]])bx(h,.03,.72,.03,pw,2.05+a*.17,1.86,-1.9+b*.17);
       const as=spr(0xffc77a,2.4);as.material.opacity=.5;as.position.set(2.05,1.95,-1.9);h.add(as)}
     /* mirador hacia el valle: terraza elevada con banco y, a lo lejos, la cabaña del acantilado */
@@ -214,7 +214,7 @@ function buildLM0(k){
      const tl=tourou(mh,gy,2,2,.9);tl.position.set(side*1.8,1.3,1.6);
      /* mesita de té en el balcón */
      bx(mh,.8,.05,.5,0x6a4634,side*.9,1.72,.1);for(const a of[-1,1])bx(mh,.05,.42,.44,0x5a3a2c,side*.9+a*.33,1.5,.1);teaSet(mh,side*.9,1.745,.1,steam);bx(mh,.75,.09,.75,0x7a3b3b,-side*.5,1.35,.9);
-     g.userData.visit={kind:7,steam,views:[{ref:h,eye:[.95,2.32,.75],look:[-.6,1.95,-1.8],name:0},{ref:h,eye:[-side*3.02,2.28,.9],look:[-side*30,1.2,-24],name:1}]};
+     g.userData.visit={kind:7,steam,views:[{ref:h,eye:[.95,2.32,.75],look:[-.6,1.95,-1.8],name:0,indoor:1},{ref:h,eye:[-side*3.02,2.28,.9],look:[-side*30,1.2,-24],name:1}]};
      /* té en la galería que da al río */
      teaSet(h,-side*3.05,1.29,-.15,steam);bx(h,.7,.09,.7,0x3f4a6b,-side*3.02,1.33,.9);
      for(let i=0;i<3;i++)cyl(h,.5,.55,.14,0xaaa69d,side*(5+i*1.15),.1,-.4,7);

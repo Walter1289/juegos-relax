@@ -3,7 +3,7 @@ import {A} from '../audio-rio.js';
 import {seasonIdx,SAKURA} from '../season.js';
 import * as THREE from 'three';
 import {clamp} from './util.js';
-import {P} from './state.js';
+import {P,S} from './state.js';
 import {LMS,lmPos,SE,forestAt,gardenAt,lmType,cx,hw,tanAng,H} from './world.js';
 import {glowTex,scene,R,cam} from './core.js';
 import {env,water} from './env.js';
@@ -83,6 +83,7 @@ petG.setAttribute('color',new THREE.BufferAttribute(petC,3));
 const petals=new THREE.Points(petG,petM);petals.frustumCulled=false;scene.add(petals);
 /* pétalos por fotograma */
 export function updatePetals(dt){
+  if(S.indoor){petG.setDrawRange(0,0);return}
   for(let i=0;i<PN;i++){const b=petS[i];b[1]-=dt*SE.pet.fall*(.45+.3*Math.sin(b[3]+P.t));if(b[1]<.2){b[1]=10+Math.random()*3;b[0]=Math.random()*60-30;b[2]=-Math.random()*60}
     petP[i*3]=P.px+b[0]+Math.sin(P.t*.7+b[3])*1.5;petP[i*3+1]=b[1];petP[i*3+2]=P.pz+b[2]+10+Math.cos(P.t*.5+b[3])}
   /* en el jardín de sakura / castillo caen pétalos ROSAS en todas las estaciones; fuera, los de la estación */

@@ -6,7 +6,7 @@ import {cam} from './core.js';
 import {lmPos} from './world.js';
 import {lmMade} from './lm-data.js';
 import {STILL} from '../still.js';
-import {LOOK} from './input.js';
+import {LOOK,IN} from './input.js';
 import {A} from '../audio-rio.js';
 import {lang} from '../i18n.js';
 import {vueltas} from '../lightmsg.js';
@@ -18,7 +18,7 @@ const ACT={2:{es:'Encender un farol',en:'Light a lantern',ja:'灯籠をともす
 const BACK={es:'Volver a la canoa',en:'Back to the canoe',ja:'カヌーに戻る'};
 const VIEW=[{es:'Salir al balcón',en:'Go out to the balcony',ja:'縁側に出る'},{es:'Entrar a la sala',en:'Go into the room',ja:'座敷に入る'}];
 const INTRO={
- 2:{es:'La piedra guarda a la aldea. Cada farol que enciendes aleja una sombra de las que pesan sobre las personas.',en:'The stone watches over the village. Each lantern you light drives away one of the shadows that weigh on people.',ja:'この石は村を見守っています。灯籠をひとつともすたび、人にのしかかる影がひとつ遠ざかります。'},
+ 2:{es:'La piedra guarda a la aldea. Cada farol que enciendes aleja una sombra de las que pesan sobre las personas. Mantén presionado para caminar por la plaza.',en:'The stone watches over the village. Each lantern you light drives away one of the shadows that weigh on people. Press and hold to walk around the square.',ja:'この石は村を見守っています。灯籠をひとつともすたび、人にのしかかる影がひとつ遠ざかります。長押しで広場を歩けます。'},
  5:{es:'Siéntate junto a la campana. Aquí no hay nada que hacer.',en:'Sit beside the bell. There is nothing to do here.',ja:'鐘のそばに座りましょう。ここでは、何もしなくていいのです。'},
  7:{es:'El té está caliente. Sostén la taza con las dos manos.',en:'The tea is hot. Hold the cup with both hands.',ja:'お茶は温かい。両手で湯のみを包みましょう。'}};
 const SOMBRAS=[
@@ -66,10 +66,10 @@ function say(t,hold=11){cap.style.opacity=0;clearTimeout(say.h);say.h=setTimeout
 /* fundido a oscuro, cambia algo a mitad y vuelve */
 function through(fn){if(busy)return;busy=true;fade.style.opacity=1;setTimeout(()=>{try{fn()}finally{fade.style.opacity=0;setTimeout(()=>{busy=false},500)}},640)}
 function enter(g){if(!g||V||busy)return;const d=g.userData.visit;
-  through(()=>{V={g,d,vi:0,t:0,next:0,li:0,lit:0,bell:0};S.visit=true;wasStill=STILL.on;STILL.on=true;LOOK.yaw=LOOK.pitch=0;document.body.classList.add('visiting');box.classList.add('in');
+  through(()=>{V={g,d,vi:0,t:0,next:0,li:0,lit:0,bell:0,w:null,hd:0,vel:0,bob:0};S.visit=true;wasStill=STILL.on;STILL.on=true;LOOK.yaw=LOOK.pitch=0;document.body.classList.add('visiting');box.classList.add('in');
     if(d.lamps)for(const l of d.lamps){l.on=0;l.k=0}
     try{A.zen(d.kind===5?1:d.kind===2?2:3)}catch(e){}cap.textContent='';say(INTRO[d.kind],12)})}
-function leave(){if(!V||busy)return;through(()=>{V=null;S.visit=false;STILL.on=wasStill;LOOK.yaw=LOOK.pitch=0;document.body.classList.remove('visiting');box.classList.remove('in');cap.style.opacity=0;cap.textContent='';try{A.zen(0)}catch(e){}})}
+function leave(){if(!V||busy)return;through(()=>{V=null;S.visit=false;S.indoor=false;STILL.on=wasStill;LOOK.yaw=LOOK.pitch=0;document.body.classList.remove('visiting');box.classList.remove('in');cap.style.opacity=0;cap.textContent='';try{A.zen(0)}catch(e){}})}
 function swap(){if(!V||busy||V.d.views.length<2)return;through(()=>{V.vi=1-V.vi;LOOK.yaw=LOOK.pitch=0})}
 function act(){if(!V)return;const d=V.d;
   if(d.kind===2){if(V.lit>=d.lamps.length)return;d.lamps[V.lit].on=1;say(SOMBRAS[V.lit%SOMBRAS.length],9);V.lit++;try{A.bowl([293.66,329.63,392,440,523.25,587.33,659.25,783.99][V.lit-1],.07,0,-2);UX.hap(10)}catch(e){}
@@ -86,10 +86,11 @@ export function visitStep(dt){
   /* faroles, campana y vapor siguen animándose aunque ya no estés dentro (se apagan solos al salir) */
   for(const [,g] of lmMade){const d=g.userData.visit;if(!d)continue;const here=V&&V.d===d;
     if(d.lamps)for(const l of d.lamps){const tg=here?l.on:0;if(Math.abs(tg-l.k)>.002||l.k>0){l.k+=(tg-l.k)*Math.min(1,dt*1.6);l.b.material.color.copy(_c.copy(C0).lerp(C1,l.k));l.s.material.opacity=l.k*(.62+.08*Math.sin(P.t*5.3+l.d))}}
+    if(d.stone){let n=0;for(const l of d.lamps)n+=l.k;d.stone.material.emissive.setRGB(.085*n/8,.055*n/8,.025*n/8)}
     if(d.steam)for(const s of d.steam){const u=(P.t*.22+s.userData.ph)%1;s.position.y=s.userData.y0+u*.5;s.material.opacity=here?.3*Math.sin(u*Math.PI):0;s.scale.setScalar((d.kind===5?.3:.14)+u*(d.kind===5?.5:.2))}
     if(d.bell){const e=here?V.t-V.bell:99,a=e<12&&here&&V.bell>0?Math.exp(-e*.35)*Math.sin(e*2.6):0;d.bell.rotation.x=a*.07;d.log.position.z=2.6-(e<.5&&here&&V.bell>0?Math.sin(e*6.283)*.9:0)}}
   if(!V)return;
-  if(!V.g.parent){V=null;S.visit=false;STILL.on=wasStill;document.body.classList.remove('visiting');box.classList.remove('in');cap.style.opacity=0;return}
+  if(!V.g.parent){V=null;S.visit=false;S.indoor=false;STILL.on=wasStill;document.body.classList.remove('visiting');box.classList.remove('in');cap.style.opacity=0;return}
   V.t+=dt;STILL.t=0;bAct.textContent=T3(ACT[V.d.kind]);bBack.textContent=T3(BACK);if(V.d.views.length>1)bView.textContent=T3(VIEW[V.vi]);
   /* frases sin prisa: llegan solas cada cierto tiempo */
   if(V.t>V.next){const L=LINES[V.d.kind];say(L[V.li++%L.length],V.d.kind===2?14:13)}
@@ -97,8 +98,20 @@ export function visitStep(dt){
   const v=V.d.views[V.vi];v.ref.updateWorldMatrix(true,false);_a.fromArray(v.eye);_b.fromArray(v.look);v.ref.localToWorld(_a);v.ref.localToWorld(_b);
   const dx=_b.x-_a.x,dy=_b.y-_a.y,dz=_b.z-_a.z,yaw=Math.atan2(dx,-dz),pit=Math.atan2(dy,Math.hypot(dx,dz)),cm=(window.UX&&UX.calm&&UX.calm())?.3:1;
   const ly=Math.max(-1.9,Math.min(1.9,LOOK.yaw)),sipK=V.sip!=null?Math.max(0,1-Math.abs((V.t-V.sip)-.9)/.9):0;
+  S.indoor=!!v.indoor;
+  if(v.walk){
+    /* plaza caminable: mantén presionado para avanzar hacia donde miras; el joystick o deslizar gira. Te quedas dentro del círculo y rodeas la piedra */
+    const w=v.walk;if(!V.w)V.w=[_a.x,_a.z];
+    const hold=P.hold||P.key.up;V.vel+=((hold?1.5:0)-V.vel)*Math.min(1,dt*3);V.hd+=((hold?IN.steer:0)+(P.key.r?1:0)-(P.key.l?1:0))*1.1*dt;
+    const hy=yaw+V.hd-ly;V.w[0]+=Math.sin(hy)*V.vel*dt;V.w[1]-=Math.cos(hy)*V.vel*dt;
+    _b.set(0,0,0);v.ref.localToWorld(_b);{const ex=V.w[0]-_b.x,ez=V.w[1]-_b.z,r=Math.hypot(ex,ez);if(r>w.r){V.w[0]=_b.x+ex/r*w.r;V.w[1]=_b.z+ez/r*w.r}}
+    for(const [hx,hz,hr] of w.holes){_b.set(hx,0,hz);v.ref.localToWorld(_b);const ex=V.w[0]-_b.x,ez=V.w[1]-_b.z,r=Math.hypot(ex,ez)||1e-3;if(r<hr){V.w[0]=_b.x+ex/r*hr;V.w[1]=_b.z+ez/r*hr}}
+    V.bob+=V.vel*dt*2.4;
+    cam.position.set(V.w[0],_a.y+Math.sin(V.bob)*.045*Math.min(1,V.vel)*cm,V.w[1]);
+    cam.rotation.set(pit*.6+LOOK.pitch*.8,-(yaw+V.hd)+ly,0,'YXZ');
+  }else{
   cam.position.set(_a.x,_a.y+Math.sin(V.t*.8)*.012*cm,_a.z);
-  cam.rotation.set(pit+LOOK.pitch*.8-sipK*.12,-yaw+ly,0,'YXZ');
+  cam.rotation.set(pit+LOOK.pitch*.8-sipK*.12,-yaw+ly,0,'YXZ');}
   if(Math.abs(cam.fov-66)>.05&&innerWidth/innerHeight>=1){cam.fov=66;cam.updateProjectionMatrix()}
 }
 try{window.__visit={enter:()=>enter(near),leave,act,swap,get v(){return V},get near(){return near}}}catch(e){}
