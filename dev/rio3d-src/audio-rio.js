@@ -134,7 +134,7 @@ export const A={
     gn.connect(d);o.start(t);o2.start(t);o.stop(t+dur+.1);o2.stop(t+dur+.1);
   },
   drum(t,vol,p){
-    if(!this.ok()||(window.UX&&UX.quiet))return;const c=this.ctx;
+    if(!this.ok()||this.zenK||(window.UX&&UX.quiet))return;const c=this.ctx;
     const o=c.createOscillator(),gn=c.createGain();o.type='sine';
     vol*=.42;o.frequency.setValueAtTime(115*p,t);o.frequency.exponentialRampToValueAtTime(48*p,t+.28);
     const dl=c.createBiquadFilter();dl.type='lowpass';dl.frequency.value=700;
@@ -272,5 +272,17 @@ export const A={
     [[0,420,300],[.14,360,250]].forEach(([dl,f0,f1])=>{const o=c.createOscillator(),bp=c.createBiquadFilter(),g=c.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f0,t+dl);o.frequency.exponentialRampToValueAtTime(f1,t+dl+.1);bp.type='bandpass';bp.frequency.value=1000;bp.Q.value=2.5;g.gain.setValueAtTime(0,t+dl);g.gain.linearRampToValueAtTime(.03,t+dl+.015);g.gain.exponentialRampToValueAtTime(.0001,t+dl+.12);o.connect(bp);bp.connect(g);g.connect(d);o.start(t+dl);o.stop(t+dl+.14)})},
   flap(x){hap([6,40,6,40,6]);if(!this.ok())return;this.cap('Aleteo de garza');const c=this.ctx,t=c.currentTime,d=this.dest((x||0)*4,-3),s=c.createBufferSource();s.buffer=this.nbuf;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=700;bp.Q.value=.8;const g=c.createGain();g.gain.setValueAtTime(0,t);
     for(let i=0;i<5;i++){g.gain.linearRampToValueAtTime(.05,t+i*.16+.04);g.gain.linearRampToValueAtTime(.006,t+i*.16+.13)}g.gain.linearRampToValueAtTime(0,t+.95);s.connect(bp);bp.connect(g);g.connect(d);s.start(t,Math.random());s.stop(t+1)},
+  /* cuenco zen: parciales inarmónicos en parejas levemente desafinadas (batido lento) y cola larga */
+  bowl(f,vol,x,z){if(!this.ok())return;const c=this.ctx,t=c.currentTime+.03,d=this.dest(x,z);
+    [[1,1,11],[2.71,.34,7],[5.15,.12,4]].forEach(([k,a,D])=>{for(const dd of[-.35,.35]){const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f*k+dd*k;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol*a*.5,t+.04);g.gain.exponentialRampToValueAtTime(.0001,t+D);o.connect(g);g.connect(d);o.start(t);o.stop(t+D+.1)}})},
+  /* la gran campana del templo, tocada por el jugador */
+  gong(){hap([20,80,12]);if(!this.ok())return;this.cap('Campana de templo');const t=this.ctx.currentTime+.02;this.bell(110,t,.2,true,0,-2);this.bell(73.42,t,.16,true,0,-2);this.bowl(220,.05,0,-2)},
+  /* ambiente de meditación en tierra: 0 apagado · 1 templo (cuencos graves) · 2 plaza · 3 casa de té (con koto suelto) */
+  zen(kind){this.zenK=kind||0;if(this._zt||!kind)return;const F=[146.83,174.61,196,220,261.63,293.66];
+    const tick=()=>{this._zt=0;if(!this.zenK||!this.ctx)return;
+      if(this.ok()){this.cap('Cuencos y campanas zen');const k=this.zenK,f=F[(Math.random()*F.length)|0]*(k===1?1:2);this.bowl(f,k===1?.09:.06,rnd(-3,3),rnd(-4,-1));
+        if(Math.random()<.45)this.bell(f*(Math.random()<.5?3:4),this.ctx.currentTime+rnd(1.5,3.5),.03,false,rnd(-4,4),-3);
+        if(k===3&&Math.random()<.6){const t=this.ctx.currentTime+rnd(4,6),b=(Math.random()*4)|0;[0,2,4].forEach((i,j)=>this.pluck(SC[Math.min(SC.length-1,b+i)],.07,t+j*.55,rnd(-2,2),-2))}}
+      this._zt=setTimeout(tick,rnd(7000,12000))};this._zt=setTimeout(tick,1200)},
   setVol(v){this.vol=v;if(this.master&&!this.muted)this.master.gain.setTargetAtTime(.6*v,this.ctx.currentTime,.1);if(this.pad)this.padFilter()}
 };

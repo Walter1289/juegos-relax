@@ -9,6 +9,12 @@ import {MT,spr,glowTex} from './core.js';
 import {bladeGeo,reedM,V3,Q,UP,S3,M4,tmp,REED,padM,lotM} from './props.js';
 import {camino} from '../lightmsg.js';
 import {optimizeLM,bx,gl,cyl,roof,signs,farCabin,mkHeron,tourou,torii,pagoda,fallMat,kanjiTex,hipRoof,rock,rockGeo,fallGeo} from './lm-parts.js';
+/* bandeja con tetera de hierro, dos tazas y un hilo de vapor (para la casa de té) */
+function teaSet(h,x,y,z,st){bx(h,.62,.03,.4,0x5a3a2c,x,y+.015,z);
+  const tp=new THREE.Mesh(new THREE.SphereGeometry(.11,10,8),MT(0x3a3d44));tp.scale.y=.8;tp.position.set(x-.14,y+.12,z);h.add(tp);cyl(h,.04,.05,.03,0x2c2e34,x-.14,y+.215,z,8);
+  const sp=cyl(h,.018,.028,.13,0x3a3d44,x-.03,y+.14,z,5);sp.rotation.z=-1;const hd=new THREE.Mesh(new THREE.TorusGeometry(.09,.012,5,10,Math.PI),MT(0x2c2e34));hd.position.set(x-.14,y+.2,z);h.add(hd);
+  for(const dz of[-.09,.1]){cyl(h,.045,.035,.06,0xe9e2d2,x+.17,y+.06,z+dz,8);cyl(h,.038,.038,.01,0x9fb86a,x+.17,y+.085,z+dz,8)}
+  for(let i=0;i<2;i++){const s=spr(0xffffff,.22);s.material.blending=THREE.NormalBlending;s.material.opacity=.0;s.position.set(x+(i?.17:-.03),y+.25,z+(i?.1:0));s.userData.y0=y+.2;s.userData.ph=i*2.1;h.add(s);st.push(s)}}
 /* el castillo se construye por trozos (g.userData.job); landmarks.js lo termina y lo optimiza */
 export function buildLM(k){const g=buildLM0(k);return g.userData.job?g:optimizeLM(g)}
 function buildLM0(k){
@@ -54,7 +60,7 @@ function buildLM0(k){
       const ch=bx(h,.7,1.6,.7,0x8a7a72,w*.25,ht+1.1,-d*.2);const sm_=spr(0xffffff,3);sm_.material.blending=THREE.NormalBlending;sm_.material.opacity=.3;sm_.position.set(w*.25,ht+2.8,-d*.2);h.add(sm_);
       const lan=new THREE.Mesh(new THREE.SphereGeometry(.22,8,6),MT(0xd9604a,{emissive:0x7a2a1a}));lan.position.set(w/2-.2,ht*.78,d/2+.5);h.add(lan);gl(h,0xff9a6a,2.4,w/2-.2,ht*.78,d/2+.5,.8)};
     const roofs=[0xb3706a,0x8f6a5f,0xa8805a,0x7d6a72];let n=0;
-    for(const sd of[-1,1])for(let i=0;i<7;i++){const lz=-26+i*8.5+hash(k,i+sd*9)*3,off=hwv+7+hash(k,i+30+sd)*6+(i%2)*5,w=4+hash(k,i+50)*2.5,d=3.6+hash(k,i+60)*2,ht=2.6+hash(k,i+70)*1.6,thatch=hash(k,i+90+sd)>.45;
+    for(const sd of[-1,1])for(let i=0;i<7;i++){if(sd===side&&i===3)continue;const lz=-26+i*8.5+hash(k,i+sd*9)*3+(sd===side?(i===2?-1.5:i===4?1.5:0):0),off=hwv+7+hash(k,i+30+sd)*6+(i%2)*5,w=4+hash(k,i+50)*2.5,d=3.6+hash(k,i+60)*2,ht=2.6+hash(k,i+70)*1.6,thatch=hash(k,i+90+sd)>.45;
       house(new THREE.Group(),sd*off,lz,w,d,ht,thatch?[0xb59a6a,0xa48a5e][i%2]:roofs[(i+n)%4],(sd>0?-Math.PI/2:Math.PI/2)+(hash(k,i+80+sd)-.5)*.35,thatch);n++}
     // muelles con botes amarrados y postes con faroles
     for(const [sd,lz] of[[-1,-10],[1,6],[-1,18]]){const dk=new THREE.Group();dk.position.set(sd*(hwv-3.2),.35,lz);g.add(dk);
@@ -65,6 +71,23 @@ function buildLM0(k){
     for(let i=0;i<18;i++){const t=i/17,lz=-24+t*48,sdd=i%2?1:-1;const ln=new THREE.Mesh(new THREE.SphereGeometry(.25,8,6),new THREE.MeshBasicMaterial({color:i%3?0xffd59a:0xff9a7a}));
       ln.position.set(sdd*(hwv+4+Math.sin(i)*1.2),4.2+Math.sin(i*1.9)*.5,lz);g.add(ln);gl(g,i%3?0xffc77a:0xff9a6a,3.2,ln.position.x,ln.position.y,lz,.85)}
     gl(g,0xffb066,46,side*(hwv+11),6,0,.28);
+    /* plaza de la piedra ceremonial: terraza de piedra entre las casas, monolito con soga sagrada y ocho faroles que se encienden al meditar */
+    {const pxc=side*(hwv+12.5),pzc=1,yt=Math.max(gy(pxc,pzc),gy(pxc-4,pzc),gy(pxc+4,pzc),gy(pxc,pzc+4),gy(pxc,pzc-4))+.3,pz=new THREE.Group();pz.position.set(pxc,yt,pzc);g.add(pz);
+      cyl(pz,5,5.5,5,0x9d9c9a,0,-2.5,0,16,{map:tex('stone')});cyl(pz,3.4,3.4,.08,0xbcb8ae,0,.03,0,16);cyl(pz,5.05,5.05,.12,0x8a8884,0,-.02,0,16);
+      for(let i=0;i<4;i++)bx(pz,.9,.3,3.2-i*.15,0xaaa69d,-side*(5.3+i*.8),-.25-i*.42,0);
+      const st=new THREE.Mesh(rockGeo(1.5,k+3,2,1.6),MT(0x8f918c,{map:tex('rock')}));st.scale.set(.85,1,.8);st.position.y=2.05;st.rotation.y=k;pz.add(st);
+      const mo=new THREE.Mesh(lumpy(new THREE.IcosahedronGeometry(.95,1),.22,1.6,k,.5),MT(0x7fb36a));mo.scale.set(1,.34,.9);mo.position.y=4.25;pz.add(mo);
+      const rp=new THREE.Mesh(new THREE.TorusGeometry(1.36,.12,6,20),MT(0xe6d8a0));rp.rotation.x=Math.PI/2;rp.scale.y=.94;rp.position.y=1.75;pz.add(rp);
+      for(let i=0;i<8;i++){const an=i/8*6.283+.3,sh=new THREE.Mesh(new THREE.PlaneGeometry(.26,.62),new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,side:THREE.DoubleSide}));sh.position.set(Math.cos(an)*1.42,1.38,Math.sin(an)*1.34);sh.rotation.y=-an+Math.PI/2;pz.add(sh)}
+      /* piedra de ofrendas con cuenco de incienso, y dos bancos */
+      bx(pz,.7,.5,1.3,0xa8a6a2,-side*2.2,.25,0);cyl(pz,.17,.12,.14,0x5a5048,-side*2.2,.57,0,8);
+      for(const sz of[-1,1]){bx(pz,1.8,.12,.5,0xb0876c,-side*2.6,.5,sz*3.95,{map:tex('plank')}).rotation.y=-sz*side*.5;bx(pz,.3,.44,.3,0x7a5a4c,-side*2.6,.22,sz*3.95)}
+      const lamps=[];for(let i=0;i<8;i++){const an=(side>0?0:Math.PI)+(i%2?1:-1)*(.52+(i>>1)*.52),x=Math.cos(an)*3.7,z=Math.sin(an)*3.7;cyl(pz,.05,.07,1.05,0x4a3a32,x,.52,z,5);cyl(pz,.2,.26,.1,0x8a8884,x,.05,z,7);
+        const b=new THREE.Mesh(new THREE.CylinderGeometry(.24,.2,.5,8),new THREE.MeshBasicMaterial({color:0x6b645c}));b.userData.noMerge=true;b.position.set(x,1.3,z);pz.add(b);
+        const cp=new THREE.Mesh(new THREE.ConeGeometry(.33,.2,8),MT(0xb5473a));cp.position.set(x,1.65,z);pz.add(cp);
+        const s=spr(0xffc77a,2.6);s.material.opacity=0;s.position.set(x,1.3,z);pz.add(s);lamps.push({b,s,k:0,on:0,d:x*side})}
+      lamps.sort((p,q)=>q.d-p.d);
+      g.userData.visit={kind:2,lamps,views:[{ref:pz,eye:[-side*4.7,1.2,1.3],look:[0,2.2,-.1]}]}}
     // arco de bienvenida con faroles sobre el río
     torii(g,0,-.5,-34,1.08,0xb5473a,{w:(hwv-.5)/1.08,water:true});gl(g,0xffc77a,4,-hwv*.5,5.2,-34,.9);gl(g,0xffc77a,4,hwv*.5,5.2,-34,.9);gl(g,0xffc77a,4,0,5.2,-34,.9)}
   else if(type===3){
@@ -96,8 +119,12 @@ function buildLM0(k){
     bx(h,9.4,.5,.7,0xc23f33,0,7.3,3.4);bx(h,9.4,.5,.7,0xc23f33,0,7.3,-3.4);bx(h,.7,.5,7.2,0xc23f33,-4.2,7.3,0);bx(h,.7,.5,7.2,0xc23f33,4.2,7.3,0);bx(h,9,.35,.6,0xd9a85a,0,6.7,3.4);
     bx(h,9,.2,7,0x7a5a4c,0,2.15,0);roof(h,9.6,2.7,9.1,0x4c4a5a);bx(h,5.2,1.5,5.2,0xefe3cd,0,8.7,0);bx(h,5.5,.2,5.5,0xc23f33,0,7.9,0);roof(h,5.3,2,11.2,0x3f3d4d);
     cyl(h,.1,.1,1.6,0xd9a85a,0,13,0,6);const orb=new THREE.Mesh(new THREE.SphereGeometry(.34,8,6),MT(0xd9a85a,{emissive:0x5a3a10}));orb.position.y=12.3;h.add(orb);
-    bx(h,.5,.5,5,0x4a3a32,0,6.8,0);cyl(h,.05,.05,1.1,0x3a2a22,0,6.1,0,4);const bell=cyl(h,.75,1.15,2,0xb4893f,0,4.9,0,12,{emissive:0x4a3410});cyl(h,.8,.8,.12,0xd9a85a,0,5.6,0,12);gl(h,0xffc77a,5,0,4.6,0,.6);
-    const lg=cyl(h,.2,.2,4,0x6a4a3a,0,3.3,2.6,6);lg.rotation.x=Math.PI/2;lg.position.set(0,3.5,2.6);cyl(h,.025,.025,1.6,0xe6d8a0,0,4.6,2.2,4);
+    bx(h,.5,.5,5,0x4a3a32,0,6.8,0);cyl(h,.05,.05,1.1,0x3a2a22,0,6.1,0,4);const bell=cyl(h,.75,1.15,2,0xb4893f,0,4.9,0,12,{emissive:0x4a3410});bell.userData.noMerge=true;cyl(h,.8,.8,.12,0xd9a85a,0,5.6,0,12);gl(h,0xffc77a,5,0,4.6,0,.6);
+    const lg=cyl(h,.2,.2,4,0x6a4a3a,0,3.3,2.6,6);lg.rotation.x=Math.PI/2;lg.position.set(0,3.5,2.6);lg.userData.noMerge=true;
+    /* sitio de meditación junto a la campana: cojines e incienso */
+    {const st=[];bx(h,.95,.12,.95,0x7a3b3b,3.15,2.31,-2.55);bx(h,.95,.12,.95,0x3f4a6b,-2.6,2.31,-1.7);cyl(h,.18,.13,.16,0x5a5048,1.3,2.33,1.1,8);cyl(h,.012,.012,.3,0x7a4a3a,1.3,2.52,1.1,4);
+      const s=spr(0xffffff,.5);s.material.blending=THREE.NormalBlending;s.material.opacity=0;s.position.set(1.3,2.9,1.1);s.userData.y0=2.75;s.userData.ph=1;h.add(s);st.push(s);
+      g.userData.visit={kind:5,bell,log:lg,steam:st,views:[{ref:h,eye:[3.15,3.3,-2.55],look:[-1.7,4.05,5]}]}}cyl(h,.025,.025,1.6,0xe6d8a0,0,4.6,2.2,4);
     for(const x of[-4,4])for(const z of[3.4,-3.4]){const ln=new THREE.Mesh(new THREE.SphereGeometry(.34,8,6),MT(0xd9604a,{emissive:0x8a2a1a}));ln.scale.y=1.3;ln.position.set(x*1.12,6.2,z*1.05);h.add(ln);gl(h,0xff9a6a,3,x*1.12,6.2,z*1.05,.85)}
     for(const x of[-3.4,3.4])for(const z of[10.4,14.5])tourou(h,()=>0,x,z,1.15).position.y=-.1;
     for(let i=0;i<5;i++)bx(h,2.6,.12,1.6,stn,0,-.3,10+i*2.1);torii(h,0,-.4,17.5,1.1,0xc23f33);
@@ -164,12 +191,32 @@ function buildLM0(k){
     for(let i=0;i<7;i++){const t=new THREE.Mesh(lumpy(new THREE.IcosahedronGeometry(.7,1),.22,2.6,i,.7),MT(i%2?0x6fa86a:0x5f9a62));t.position.set(-3.2+i*1.1,.7,-3.9);t.scale.set(1.2,.8,1);h.add(t)}
     for(let i=0;i<6;i++)cyl(h,.5,.55,.14,0xaaa69d,-.6+Math.sin(i*1.1)*.6,.1,6.2+i*1.25,7);
     for(const sd2 of[-1,1]){const t=tourou(g,gy,lx+sd2*7.5,5,1);t.position.y=gy(lx+sd2*7.5,5)}
+    /* interior: sala de tatami con mesa baja, té, tokonoma con rollo y farol de papel (se ve al entrar a meditar) */
+    const steam=[];{const R=new THREE.Mesh(new THREE.BoxGeometry(5,2.4,4),MT(0xe9dcc2,{side:THREE.BackSide,emissive:0x2a2018}));R.position.set(0,2.62,-.3);h.add(R);
+      bx(h,4.98,.04,3.98,0xcdc490,0,1.45,-.3,{map:tex('straw'),emissive:0x221c10});for(const x of[-1.25,1.25])bx(h,.06,.045,3.98,0x4f6a4a,x,1.452,-.3);bx(h,2.5,.045,.06,0x4f6a4a,0,1.452,-.3);
+      for(const x of[-2.48,2.48])for(const z of[-2.28,1.68])bx(h,.14,2.4,.14,pw,x,2.62,z);bx(h,4.98,.12,.1,pw,0,3.3,-2.27);bx(h,4.98,.12,.1,pw,0,3.3,1.67);
+      /* tokonoma al fondo: tarima, rollo 和 y un arreglo de flores */
+      bx(h,1.7,.16,.55,0x6a4a3a,-1.3,1.55,-2);const kk=new THREE.Mesh(new THREE.PlaneGeometry(.52,1.3),new THREE.MeshBasicMaterial({map:kanjiTex('和','#f3ead6','#2b2b2b',64,160)}));kk.position.set(-1.3,2.65,-2.27);h.add(kk);
+      cyl(h,.07,.09,.2,0x3f5a6b,-.85,1.73,-2,7);const fl=new THREE.Mesh(tuftGeo(5,.5,.14,3),MT(0x6fa86a,{side:THREE.DoubleSide}));fl.position.set(-.85,1.8,-2);h.add(fl);const bl=new THREE.Mesh(new THREE.SphereGeometry(.07,6,5),MT(0xf5a4bd));bl.position.set(-.8,2.22,-1.97);h.add(bl);
+      /* ventana redonda y shoji iluminados */
+      const wm=new THREE.MeshBasicMaterial({color:0xffe8b8});const rw=new THREE.Mesh(new THREE.CircleGeometry(.62,20),wm);rw.position.set(1.15,2.7,-2.28);h.add(rw);for(const q of[-.2,.2]){bx(h,1.24,.03,.02,pw,1.15,2.7+q,-2.27);bx(h,.03,1.24,.02,pw,1.15+q,2.7,-2.27)}
+      for(const sd of[-1,1])for(const z of[-1.2,.6]){const sh=bx(h,.02,1.5,1.3,0xffe8b8,sd*2.48,2.5,z);sh.material=wm;for(const q of[-.35,0,.35])bx(h,.03,1.5,.03,pw,sd*2.46,2.5,z+q);bx(h,.03,.03,1.3,pw,sd*2.46,2.5,z)}
+      /* mesa baja, té, cojines y farol andon */
+      cyl(h,.62,.62,.05,0x6a4634,0,1.8,-.5,14);cyl(h,.3,.36,.3,0x5a3a2c,0,1.62,-.5,8);teaSet(h,0,1.825,-.5,steam);
+      bx(h,.7,.09,.7,0x7a3b3b,.95,1.5,.5);bx(h,.7,.09,.7,0x3f4a6b,-.95,1.5,.3);
+      bx(h,.34,.6,.34,0xffe0a0,2.05,1.95,-1.9).material=new THREE.MeshBasicMaterial({color:0xffd9a0});for(const [a,b] of[[1,1],[-1,1],[1,-1],[-1,-1]])bx(h,.03,.72,.03,pw,2.05+a*.17,1.86,-1.9+b*.17);
+      const as=spr(0xffc77a,2.4);as.material.opacity=.5;as.position.set(2.05,1.95,-1.9);h.add(as)}
     /* mirador hacia el valle: terraza elevada con banco y, a lo lejos, la cabaña del acantilado */
     {const mx=side*10.5,mh=new THREE.Group();mh.position.set(mx,0,-1);h.add(mh);
      bx(mh,5.4,.3,5.4,wood,0,1.15,0,pl);for(const x of[-2.4,2.4])for(const z of[-2.4,2.4])cyl(mh,.13,.16,1.3,pw,x,.5,z,5);
      bx(mh,5.4,.12,.12,0xb5473a,0,1.95,2.6);bx(mh,5.4,.12,.12,0xb5473a,0,1.95,-2.6);bx(mh,.12,.12,5.4,0xb5473a,-side*2.6,1.95,0);bx(mh,.12,.12,5.4,0xb5473a,side*2.6,1.95,0);
      bx(mh,2.2,.14,.7,wood,0,1.75,-1.6);bx(mh,2.2,.5,.1,wood,0,2.1,-1.95);cyl(mh,.08,.08,.5,pw,-.9,1.5,-1.6,4);cyl(mh,.08,.08,.5,pw,.9,1.5,-1.6,4);
      const tl=tourou(mh,gy,2,2,.9);tl.position.set(side*1.8,1.3,1.6);
+     /* mesita de té en el balcón */
+     bx(mh,.8,.05,.5,0x6a4634,side*.9,1.72,.1);for(const a of[-1,1])bx(mh,.05,.42,.44,0x5a3a2c,side*.9+a*.33,1.5,.1);teaSet(mh,side*.9,1.745,.1,steam);bx(mh,.75,.09,.75,0x7a3b3b,-side*.5,1.35,.9);
+     g.userData.visit={kind:7,steam,views:[{ref:h,eye:[.95,2.32,.75],look:[-.6,1.95,-1.8],name:0},{ref:h,eye:[-side*3.02,2.28,.9],look:[-side*30,1.2,-24],name:1}]};
+     /* té en la galería que da al río */
+     teaSet(h,-side*3.05,1.29,-.15,steam);bx(h,.7,.09,.7,0x3f4a6b,-side*3.02,1.33,.9);
      for(let i=0;i<3;i++)cyl(h,.5,.55,.14,0xaaa69d,side*(5+i*1.15),.1,-.4,7);
      /* cabaña lejana sobre un risco */
      const fx=side*66,fz=-27,c=new THREE.Group();c.position.set(fx,gy(fx,fz)-1,fz);h.add(c);c.scale.setScalar(2.9);

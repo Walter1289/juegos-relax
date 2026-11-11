@@ -23,3 +23,9 @@ Las rutas de los scripts asumen /home/claude; ajusta si se clona en otro lado.
 - `rio/lm-build.js`: puente (pilas con tajamar hasta las vigas), aldea (tejados de paja/teja, postes, engawa, celosías, arco-torii), sakura (troncos curvos, copas irregulares), camino a la cabaña (losas irregulares, matas, torii de entrada), cascada (rocas, repisas, helechos, ondas al pie vía `g.userData.fall`), casa de té, estanque de lotos (instancias de `padM`/`lotM`).
 - `rio/dragon.js`: cuerpo de 10 lados con vientre de placas, cresta de llamas, patas redondas con garras, cabeza con hocico, astas y bigotes; se mece con `dragonU` (shader). `world.js: clearAt` despeja árboles a su alrededor.
 - `sw.js`: VERSION v92. Acordarse de subirla en cada publicación.
+
+## Bajar a tierra a meditar (rio/visit.js)
+Desde la primera vuelta cerrada (`vueltas()` en lightmsg.js: cuenta vueltas con o sin linternas) aparece un botón al pasar por la aldea, el templo y la casa de té.
+Cada lugar deja en `g.userData.visit` su tipo, las vistas (`ref` + `eye`/`look` en coordenadas locales) y lo que se anima (faroles de la plaza, campana y mazo, vapor del té).
+visit.js detiene la canoa (STILL), mueve la cámara con un fundido, muestra frases sin prisa y activa `A.zen(kind)` (cuencos, campanillas y koto suelto; el tambor calla).
+Acciones: encender los ocho faroles de la piedra ceremonial, tocar la campana (`A.gong`), tomar té y cambiar entre sala y galería. Prueba: `/home/claude/shots/vis.js`.

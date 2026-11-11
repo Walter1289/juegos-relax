@@ -36,7 +36,7 @@ function pos(u){const d=u*len;let i=1;while(i<cum.length-1&&cum[i]<d)i++;const t
 const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 export function walkStep(dt){
   if(!btn&&typeof document!=='undefined')init();if(!btn)return;
-  const show=S.started&&camino()&&!S.walk&&!S.X.photo;
+  const show=S.started&&camino()&&!S.walk&&!S.visit&&!S.X.photo;
   tempG=show?templeNear(P.dist||-P.pz):null;
   btn.style.display=tempG?'block':'none';if(tempG)btn.textContent=T3({es:'Caminar hacia la colina',en:'Walk to the hill',ja:'丘へ歩く'});
   back.style.display=S.walk?'block':'none';if(S.walk)back.textContent=T3({es:'Volver a la canoa',en:'Back to the canoe',ja:'カヌーに戻る'});

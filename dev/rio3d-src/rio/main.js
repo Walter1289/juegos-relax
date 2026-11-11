@@ -40,6 +40,7 @@ import {updateRocks,updateFarBoats,updateMassifs,massMistMat} from './scenery.js
 import {updatePetals,updateFW,updateAur} from './moments.js';
 import {installDebug} from './debug.js';
 import {walkStep} from './walk.js';
+import {visitStep} from './visit.js';
 import {ceremonyStep} from './ceremony.js';
 let last=performance.now();
 addVignette();addPaper();
@@ -56,7 +57,7 @@ function frame(now,manual){
   updatePaddles();
   updateCharacter(dt);
   updateCamera(dt,bob);
-  cineStep(dt);walkStep(dt);ceremonyStep(dt);if(window.__fc)window.__fc();
+  cineStep(dt);walkStep(dt);visitStep(dt);ceremonyStep(dt);if(window.__fc)window.__fc();
   // mundo
   if(S.started&&!X.photo)S.tod=(S.tod+dt/900)%1;
   applyEnv(P.px,P.pz);weather(dt,s);

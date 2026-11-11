@@ -11,7 +11,7 @@ import {STILL,tickStill} from '../still.js';
 let rudT=0,sw=0,swv=0,pv=0,ph=0;
 export function stepPlayer(dt,s){
   if(S.started){
-    const hold=P.hold||P.key.up||Math.abs(IN.pad)>.12,steerIn=S.walk?0:clamp(IN.steer+IN.pad+(P.key.r?1:0)-(P.key.l?1:0),-1,1);
+    const hold=P.hold||P.key.up||Math.abs(IN.pad)>.12,steerIn=(S.walk||S.visit)?0:clamp(IN.steer+IN.pad+(P.key.r?1:0)-(P.key.l?1:0),-1,1);
     // velocidad: corriente suave + remada
     tickStill(dt,true,()=>spawnRipple(P.px,P.pz));const sk=1-STILL.k;
     const target=S.X.photo?0:2.34*(1-.85*S.cineW)*sk*(1-.3*Math.min(1,Math.abs(pv)/.45));P.v+=(target-P.v)*(STILL.menu?3:.5)*dt;

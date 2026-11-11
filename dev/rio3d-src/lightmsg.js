@@ -15,6 +15,9 @@ export const liberadas=()=>{try{return Math.max(0,+localStorage.getItem('rio3d-r
 export const disponibles=()=>luces();
 export const camino=()=>{try{return localStorage.getItem('rio3d-camino')==='1'}catch(e){return false}};
 export const GRAN=108;
+/* vueltas cerradas al río (con o sin linternas): desde la primera se puede bajar a tierra en la aldea, el templo y la casa de té */
+export const vueltas=()=>{try{return Math.max(+localStorage.getItem('rio3d-laps')||0,ceremonias())}catch(e){return 0}};
+export const sumaVuelta=()=>{try{localStorage.setItem('rio3d-laps',String(vueltas()+1))}catch(e){}};
 export const grandes=()=>{try{return Math.max(0,+localStorage.getItem('rio3d-gran')||0)}catch(e){return 0}};
 /* Recompensas por vuelta: 2 ceremonias = luz de proa dorada; 3 = las linternas te atraen desde más lejos; 108 o más en una vuelta = Gran ceremonia (campanas y cielo dorado) */
 export const proaDorada=()=>ceremonias()>=2;

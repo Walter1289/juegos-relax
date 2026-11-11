@@ -16,7 +16,7 @@ import {castleStep} from './castle.js';
 import {env} from './env.js';
 import {taskTick} from '../tasks.js';
 import {albumSee} from '../album.js';
-import {disponibles,camino,UMBRAL,GRAN,ceremonia,ceremonias,lapK,setLapK,parts,joiner} from '../lightmsg.js';
+import {vueltas,sumaVuelta,disponibles,camino,UMBRAL,GRAN,ceremonia,ceremonias,lapK,setLapK,parts,joiner} from '../lightmsg.js';
 import {lang} from '../i18n.js';
 import {startCeremony} from './ceremony.js';
 import {NL} from './world.js';
@@ -61,7 +61,7 @@ export function updateLandmarks(ps){
     const lk=lapK();
     if(lk<0){window.__cerK=k;setLapK(k);reward({audio:true,pulse:9,n:1,delay:6000,msg:{es:'La campana suena por primera vez para ti. Tu peregrinación ha empezado',en:'The bell rings for you for the first time. Your pilgrimage has begun',ja:'鐘があなたのために初めて鳴りました。巡礼のはじまりです'}});toast(T3({es:'Aquí empieza tu vuelta al río. Vuelve a este templo tras recorrerlo entero y tus linternas se liberarán en una ceremonia',en:'Your lap of the river begins here. Return to this temple after travelling it all and your lanterns will be released in a ceremony',ja:'ここから川の一周が始まります。一周して寺に戻ると、ランタンは儀式で放たれます'}));continue}
     if(k<lk+NL)continue;
-    window.__cerK=k;setLapK(k);const n=disponibles();
+    window.__cerK=k;setLapK(k);const n=disponibles();{const v0=vueltas();sumaVuelta();if(v0<1)setTimeout(()=>toast(T3({es:'Desde ahora puedes bajar a tierra: la plaza de la aldea, el templo y la casa de té te esperan para meditar',en:'From now on you can step ashore: the village square, the temple and the tea house await you for meditation',ja:'これからは岸に上がれます。村の広場、寺、茶屋が瞑想の場として待っています'})),n<1?6000:24000)}
     if(n<1){toast(T3({es:'Vuelta completa. Sin linternas que liberar: la próxima vuelta llevará más luz',en:'Lap complete. No lanterns to release: the next lap will carry more light',ja:'一周しました。放つランタンがありません。次の一周は、もっと灯を運びましょう'}));continue}
     const abre=n>=UMBRAL&&!camino();ceremonia(n,abre);S.count=0;try{el('n').textContent=0}catch(e){}
     const gran=n>=GRAN;startCeremony(n,gran);{const cn=ceremonias();if(cn<=4){setOfrendaPend(cn);setTimeout(()=>openOfrenda(cn),gran?14000:9000)}}
