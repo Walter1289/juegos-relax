@@ -13,3 +13,7 @@ Las rutas de los scripts asumen /home/claude; ajusta si se clona en otro lado.
 - `rio/env.js`: el agua deforma su dominio con `cloudTex` (vetas que serpentean) y tiene rachas de viento (`gu`) y rizado por lluvia (`ruf`).
 - `rio/frogs.js`: ranas en ~30 % de las rocas (`mkFrog`, `updateFrog`); saltan si la canoa pasa a menos de `r+4.6` m y vuelven cuando se aleja 55 m. Sonido `A.croak`.
 - Velocidad de la canoa: remada 2.34 y corriente .99 (10 % menos que antes).
+
+### Vegetación orgánica y pirotecnia de la aldea
+- `style.js`: `lumpy` (bultos de follaje irregulares), `tierGeo` (pisos de conífera con falda en zigzag), `trunkGeo` (tronco curvo con raíces y ramas), `sprayGeo` (penacho de hojas de bambú), `tuftGeo` (mata de hierba). Los usan `rio/props.js`, `cabin/world.js` y `cabin/terrain.js`.
+- `rio/moments.js`: los fuegos salen de tierra tras las casas de la aldea (`festVillage`), suben con estela (~1,2 s), estallan a 13–20 m y se apagan en 1,5 s (2 s el sauce dorado). Tipos: peonía, anillo, sauce. Respetan la profundidad (los tapan árboles y montes) y el agua refleja cada estallido (`fwP`/`fwC` en el shader del agua).

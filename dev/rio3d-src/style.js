@@ -162,3 +162,48 @@ export function bake(group,o){o=o||{};const by=new Map();
     if(!by.has(key))by.set(key,{mm,gs:[],cs:m.castShadow,rs:m.receiveShadow});by.get(key).gs.push(g);group.remove(m)}
   for(const {mm,gs,cs,rs} of by.values()){const mesh=new THREE.Mesh(gs.length>1?mergeGeometries(gs):gs[0],o.vc?o.mat:mm);mesh.castShadow=cs;mesh.receiveShadow=rs;group.add(mesh)}
   return group}
+
+/* ===== vegetación orgánica: formas irregulares sin subir el número de triángulos =====
+   Todo se deforma por posición (los vértices duplicados reciben lo mismo, sin grietas). */
+export const n3=(x,y,z,s=0)=>Math.sin(x*1.7+y*2.3+s)*Math.sin(y*1.9+z*2.1+s*1.3)*.6+Math.sin(z*3.3+x*2.9+s*.7)*Math.sin(x*1.3-y*1.1+s)*.4;
+/* bulto de follaje: esfera centrada en el origen con abolladuras y panza inferior más plana */
+export function lumpy(g,amp=.16,freq=1.5,seed=0,under=.8){const p=g.attributes.position;
+  for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),k=1+amp*n3(x*freq,y*freq,z*freq,seed);p.setXYZ(i,x*k,y*k*(y<0?under:1),z*k)}
+  g.computeVertexNormals();return g}
+/* piso de conífera: cono con la falda en zigzag (ramas que cuelgan), radio irregular y la punta algo ladeada; base en y=0 */
+export function tierGeo(r,h,seg,seed=0,o={}){const hs=o.hs||1,zig=o.zig==null?.16:o.zig,droop=o.droop==null?.13:o.droop;
+  let g=new THREE.ConeGeometry(r,h,seg,hs,!!o.open);const p=g.attributes.position,st=6.2832/seg,lx=Math.sin(seed*3.1)*r*.1,lz=Math.cos(seed*2.3)*r*.1;
+  for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);const rr=Math.hypot(x,z),t=(y+h/2)/h;
+    if(rr>1e-4){const a=Math.atan2(z,x),id=Math.round(a/st+seg)%seg,odd=(id+Math.round(seed))%2;
+      if(t<.01){const f=1+zig*(odd?1:-.7)+.1*Math.sin(a*3+seed*5);x*=f;z*=f;y-=droop*h*(odd?1:.15)*(1+.5*Math.sin(a*2+seed))}
+      else{const f=1+.1*Math.sin(a*2+seed*2+t*4);x*=f;z*=f}}
+    else if(t<.01)y+=h*.06;                                  /* centro de la tapa: hundido para que la falda no se vea plana */
+    x+=lx*t;z+=lz*t;p.setXYZ(i,x,y+h/2,z)}
+  g.computeVertexNormals();return g}
+/* tronco: curva suave en S, raíces abiertas en la base y ramas que suben hacia la copa. branches: [[y0,tx,ty,tz,r],...] */
+export function trunkGeo(rt,rb,h,seg,hs,o={}){const bend=o.bend==null?.14:o.bend,sd=o.seed||0;
+  const cxz=y=>{const t=y/h;return[bend*Math.sin(Math.PI*t)*(1-t*.3),bend*.55*Math.sin(6.2832*t+sd)*(1-t)]};
+  const g=new THREE.CylinderGeometry(rt,rb,h,seg,hs,true).translate(0,h/2,0),p=g.attributes.position;
+  for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);const t=y/h,a=Math.atan2(z,x);
+    if(t<.16){const f=1+(o.flare==null?.75:o.flare)*Math.pow(1-t/.16,2)*(1+.35*Math.sin(a*3+sd));x*=f;z*=f}
+    const c=cxz(y);p.setXYZ(i,x+c[0],y,z+c[1])}
+  const gs=[g],up=new THREE.Vector3(0,1,0),d=new THREE.Vector3(),q=new THREE.Quaternion();
+  for(const [y0,tx,ty,tz,r] of(o.branches||[])){const c=cxz(y0);d.set(tx-c[0],ty-y0,tz-c[1]);const len=d.length();d.normalize();q.setFromUnitVectors(up,d);
+    const b=new THREE.CylinderGeometry(r*.35,r,len,4,1,true).translate(0,len/2,0);b.applyQuaternion(q);b.translate(c[0],y0,c[1]);gs.push(b)}
+  const m=gs.length>1?mergeGeometries(gs):g;m.computeVertexNormals();return m}
+const kite=(out,col,bx,by,bz,dx,dy,dz,len,w,droop,k0,k1)=>{/* hoja en cometa: base, dos puntos medios y punta caída (2 triángulos) */
+  const sx=-dz,sz=dx,sl=Math.hypot(sx,sz)||1,mx=bx+dx*len*.5,my=by+dy*len*.5+len*.06,mz=bz+dz*len*.5,tx=bx+dx*len,ty=by+dy*len-droop*len,tz=bz+dz*len,
+    ax=sx/sl*w,az=sz/sl*w;out.push(bx,by,bz,mx-ax,my,mz-az,mx+ax,my,mz+az, mx-ax,my,mz-az,tx,ty,tz,mx+ax,my,mz+az);
+  const km=(k0+k1)/2;col.push(k0,k0,k0,km,km,km,km,km,km, km,km,km,k1,k1,k1,km,km,km)};
+const finish=(pos,col)=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(pos.length/3*2),2));g.computeVertexNormals();return g};
+/* penacho de hojas (bambú, puntas de rama): hojas largas que salen de un punto y cuelgan; radio ~1 */
+export function sprayGeo(n=10,seed=1){const pos=[],col=[];
+  for(let i=0;i<n;i++){const a=i/n*6.2832+Math.sin(i*7.3+seed)*.5,up=i%3===0?.75:(i%3===1?.15:-.2),l=.85+.35*Math.sin(i*3.7+seed*2),c=Math.cos(up);
+    kite(pos,col,0,0,0,Math.cos(a)*c,Math.sin(up),Math.sin(a)*c,l,.2+.05*Math.sin(i*5.1),.3+.2*Math.abs(Math.sin(i*2.3+seed)),.72,1.12)}
+  return finish(pos,col)}
+/* mata de hierba: briznas anchas que se abren y se curvan; altura h, radio r */
+export function tuftGeo(n=5,h=1,r=.3,seed=1){const pos=[],col=[];
+  for(let i=0;i<n;i++){const a=i/n*6.2832+Math.sin(i*4.1+seed)*.6,lean=.25+.3*Math.abs(Math.sin(i*2.9+seed)),hh=h*(.7+.3*Math.abs(Math.sin(i*5.3+seed*3))),c=Math.cos(a),s=Math.sin(a),L=Math.hypot(lean,1);
+    kite(pos,col,c*r*.25,0,s*r*.25,c*lean/L,1/L,s*lean/L,hh*L,r*.3,.12+.1*Math.sin(i*3.3+seed),.62,1.1)}
+  return finish(pos,col)}

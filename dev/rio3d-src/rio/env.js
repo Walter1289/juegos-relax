@@ -100,10 +100,10 @@ export function applyEnv(px,pz){
 export const todName=t=>t<.1?'Madrugada':t<.2?'Amanecer':t<.5?'Día':t<.68?'Atardecer':t<.92?'Noche':'Madrugada';
 /* ---------- agua: refleja el cielo (degradado, nubes, sol y luna) y se funde con la niebla ---------- */
 export const water=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.ShaderMaterial({
-  uniforms:{...SU,t:{value:0},ruf:{value:0},deep:{value:new THREE.Color('#5a8f9c')},shallow:{value:new THREE.Color('#a3c8c4')},fog:{value:new THREE.Color()},
+  uniforms:{...SU,t:{value:0},ruf:{value:0},fwP:{value:[new THREE.Vector3(),new THREE.Vector3()]},fwC:{value:[new THREE.Color(0,0,0),new THREE.Color(0,0,0)]},deep:{value:new THREE.Color('#5a8f9c')},shallow:{value:new THREE.Color('#a3c8c4')},fog:{value:new THREE.Color()},
     lDir:{value:new THREE.Vector3(0,1,0)},lCol:{value:new THREE.Color()},fogN:{value:22},fogF:{value:250},fogSunDir:FU.sunDir,fogSunCol:FU.sunCol,fogMisc:FU.misc},
   vertexShader:'varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
-  fragmentShader:`varying vec3 vW;uniform float t,fogN,fogF,ruf;uniform vec3 deep,shallow,fog,lDir,lCol,fogSunDir,fogSunCol;uniform vec4 fogMisc;
+  fragmentShader:`varying vec3 vW;uniform float t,fogN,fogF,ruf;uniform vec3 fwP[2],fwC[2];uniform vec3 deep,shallow,fog,lDir,lCol,fogSunDir,fogSunCol;uniform vec4 fogMisc;
   ${SKYGLSL}
   float hh(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}
   float wn(vec2 q){vec2 i=floor(q),f=fract(q);f=f*f*(3.-2.*f);return mix(mix(hh(i),hh(i+vec2(1,0)),f.x),mix(hh(i+vec2(0,1)),hh(i+vec2(1,1)),f.x),f.y);}
@@ -131,6 +131,8 @@ export const water=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.S
     vec3 c=mix(base,refl,clamp(fr*.9+.26-.09*gu,0.,1.));
     c=mix(c,mix(hor,vec3(1.),.55),streak*(1.-night*.7)*.38);
     float sp=smoothstep(.9,1.,wn(p*2.6+vec2(t*.5,-t*.3)));c+=lCol*sp*.38;   /* destellos del agua suaves a propósito (WCAG 2.3.1) */
+    /* fuegos artificiales: cada estallido deja un reguero de su color sobre el agua, roto por las ondas */
+    {vec3 rf=reflect(-v,normalize(vec3(n.x*2.2,1.,n.z*.9)));for(int i=0;i<2;i++){vec3 fd=normalize(fwP[i]-vW);c+=fwC[i]*(pow(max(dot(rf,fd),0.),220.)*.9+pow(max(dot(rf,fd),0.),30.)*.12);}}
     vec3 h=normalize(lDir+v);c+=lCol*pow(max(dot(n,h),0.),90.)*.6;
     float tF=clamp((dist-fogN)/(fogF-fogN),0.,1.);float cF=tF*tF*(3.-2.*tF);float ffF=mix(cF,1.,smoothstep(.82,1.,tF));
     {vec2 fwp=vW.xz;float ftt=fogMisc.w*.06;float fpn=.5+.3*sin(fwp.x*.021+sin(fwp.y*.017+ftt)*1.7+ftt*.7)+.2*sin(fwp.y*.037-fwp.x*.011-ftt*1.3);

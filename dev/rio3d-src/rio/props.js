@@ -1,5 +1,5 @@
 /* Props del terreno: mallas instanciadas (árboles, nenúfares, juncos, parasoles, arbustos, bambú) y paleta del suelo. */
-import {toonGrad,tex,windify} from '../style.js';
+import {toonGrad,tex,windify,lumpy,tierGeo,trunkGeo,sprayGeo} from '../style.js';
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {hash,clamp} from './util.js';
@@ -21,15 +21,16 @@ function shadeGeo(g,uvs,lo,hi){g=g.index?g.toNonIndexed():g;const uv=g.attribute
   g.computeBoundingBox();const y0=g.boundingBox.min.y,y1=g.boundingBox.max.y,p=g.attributes.position,c=new Float32Array(p.count*3);
   for(let i=0;i<p.count;i++){const k=lo+(hi-lo)*((p.getY(i)-y0)/(y1-y0||1));c[i*3]=c[i*3+1]=c[i*3+2]=k}
   g.setAttribute('color',new THREE.BufferAttribute(c,3));return g}
-const pineGeo=mergeGeometries([[2.1,2.4,.7],[1.8,2.3,1.9],[1.45,2.2,3.1],[1.1,2.0,4.3],[.7,1.8,5.4]].map(([r,h,y])=>shadeGeo(new THREE.ConeGeometry(r,h,11,2).translate(0,y+h/2,0),[4,2],.64,1.26)).map(g=>{g.deleteAttribute('normal');return g}));
+/* pino: pisos con falda en zigzag y punta ladeada, cada uno un poco descentrado; ya no son conos apilados perfectos */
+const pineGeo=mergeGeometries([[2.1,2.4,.7],[1.8,2.3,1.9],[1.45,2.2,3.1],[1.1,2.0,4.3],[.7,1.8,5.4]].map(([r,h,y],i)=>{const g=tierGeo(r,h,11,i*1.7+.4,{hs:2,zig:.15,droop:.12}).toNonIndexed();g.rotateY(i*1.3);g.translate(Math.sin(i*2.1)*.13,y,Math.cos(i*1.7)*.13);return shadeGeo(g,[4,2],.64,1.26)}).map(g=>{g.deleteAttribute('normal');return g}));
 pineGeo.computeVertexNormals();
-const crownGeo=mergeGeometries([[1.9,0,4.3,0],[1.4,1.3,4.9,.5],[1.35,-1.2,4.7,-.6],[1.2,.2,5.7,.3],[1.0,-.6,5.2,1.2],[1.05,.9,4.2,-1.1],[.8,1.7,4.1,.9]].map(([r,x,y,z])=>{const g=new THREE.IcosahedronGeometry(r,1);g.translate(x,y,z);g.deleteAttribute('normal');return shadeGeo(g,[3,3],.7,1.3)}));
+const crownGeo=mergeGeometries([[1.9,0,4.3,0],[1.4,1.3,4.9,.5],[1.35,-1.2,4.7,-.6],[1.2,.2,5.7,.3],[1.0,-.6,5.2,1.2],[1.05,.9,4.2,-1.1],[.8,1.7,4.1,.9]].map(([r,x,y,z])=>{const g=lumpy(new THREE.IcosahedronGeometry(r,1),.2,1.9/r,x*3+z,.72);g.translate(x,y,z);g.deleteAttribute('normal');return shadeGeo(g,[3,3],.7,1.3)}));
 crownGeo.computeVertexNormals();
 const LEAFM=()=>new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,map:tex('leaf')});
 export const pineM=new THREE.InstancedMesh(pineGeo,windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,map:tex('needle')}),{H:7.2,amp:.2,pow:2.2,fl:.018}),MAXT);
 /* copa y tronco comparten la misma curva de viento (H, amp, pow): se doblan juntos y la copa no se despega del tronco */
 export const crownM=new THREE.InstancedMesh(crownGeo,windify(LEAFM(),{H:6.5,amp:.3,pow:2,fl:.035}),MAXT);
-export const trunkM=new THREE.InstancedMesh(new THREE.CylinderGeometry(.19,.36,4.2,9,3).translate(0,2.1,0),windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0x8a6a5c,map:tex('bark')}),{H:6.5,amp:.3,pow:2}),MAXT);
+export const trunkM=new THREE.InstancedMesh(trunkGeo(.17,.3,4.4,6,4,{bend:.16,seed:1,branches:[[2.5,1.15,4.7,.45,.085],[3,-1.05,4.5,-.55,.075]]}),windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0x8a6a5c,map:tex('bark')}),{H:6.5,amp:.3,pow:2}),MAXT);
 /* nenúfar: hoja redonda con su muesca y nervios, de 0,5 a 1,2 m (antes un disco liso de hasta 2,2 m); loto: flor de dos coronas de pétalos con centro dorado */
 const padGeo=(()=>{const g=new THREE.CircleGeometry(.38,15,.28,Math.PI*2-.56).rotateX(-Math.PI/2),n=g.attributes.position.count,c=new Float32Array(n*3);
   for(let i=0;i<n;i++){const k=i===0?1.1:(i%2?.94:.8);c[i*3]=k;c[i*3+1]=k;c[i*3+2]=k*.97}g.setAttribute('color',new THREE.BufferAttribute(c,3));return g})();
@@ -48,23 +49,28 @@ export const swayU={value:0};
 export const bladeGeo=(()=>{const gs=[];for(let i=0;i<14;i++){const a=i/14*6.28+hash(i,1),h=.8+hash(i,2)*1.7,l=.05,x=Math.cos(a)*.25*hash(i,3),z=Math.sin(a)*.25*hash(i,3),lean=(hash(i,4)-.5)*.9;
     const g=new THREE.BufferGeometry(),p=new Float32Array([-l,0,0,l,0,0,lean*.5-l*.5,h*.6,0,lean*.5+l*.5,h*.6,0,lean,h,0]);g.setAttribute('position',new THREE.BufferAttribute(p,3));
     g.setIndex([0,1,2,1,3,2,2,3,4]);g.computeVertexNormals();const col=new Float32Array(15);const cs=[[.28,.2,.12],[.28,.2,.12],[.62,.5,.24],[.62,.5,.24],[.92,.78,.4]];cs.forEach((c,k)=>col.set(c,k*3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
-    g.rotateY(a);g.translate(x,0,z);gs.push(g)}return mergeGeometries(gs)})();
+    g.rotateY(a);g.translate(x,0,z);gs.push(g);
+    if(i%4===0){/* espiga plumosa (susuki) en las briznas más altas */const e=new THREE.BufferGeometry(),w=.07,ph=.42;e.setAttribute('position',new THREE.BufferAttribute(new Float32Array([lean,h-.02,0,lean*1.12-w,h+ph*.45,0,lean*1.12+w,h+ph*.45,0,lean*1.12-w,h+ph*.45,0,lean*1.3+.06,h+ph,0,lean*1.12+w,h+ph*.45,0]),3));
+      e.setIndex([0,1,2,3,4,5]);e.computeVertexNormals();const ec=new Float32Array(18);for(let q=0;q<6;q++)ec.set([1.12,1.02,.86],q*3);e.setAttribute('color',new THREE.BufferAttribute(ec,3));e.rotateY(a);e.translate(x,0,z);gs.push(e)}}return mergeGeometries(gs)})();
 export const reedM=new THREE.InstancedMesh(bladeGeo,windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,side:THREE.DoubleSide}),{H:2.3,amp:.36,pow:1.7,fl:.012}),1960);
-const umbGeo=(()=>{const gs=[];const tk=new THREE.CylinderGeometry(.14,.3,4.2,6).translate(0,2.1,0);const tc=new Float32Array(tk.attributes.position.count*3).fill(.3);tk.setAttribute('color',new THREE.BufferAttribute(tc,3));gs.push(tk);
-  [[0,4.3,0,2.8],[1.6,3.7,.6,1.9],[-1.5,3.3,-.8,1.7]].forEach(([x,y,z,r])=>{const g=new THREE.SphereGeometry(1,9,5).toNonIndexed();g.scale(r,r*.28,r);g.translate(x,y,z);
+const umbGeo=(()=>{const gs=[];const tk=trunkGeo(.13,.26,4.3,5,4,{bend:.2,seed:2,branches:[[2.3,1.5,3.6,.55,.09],[1.9,-1.4,3.2,-.75,.085]]});const tc=new Float32Array(tk.attributes.position.count*3).fill(.3);tk.setAttribute('color',new THREE.BufferAttribute(tc,3));gs.push(tk);
+  [[0,4.3,0,2.8],[1.6,3.7,.6,1.9],[-1.5,3.3,-.8,1.7]].forEach(([x,y,z,r])=>{const g=lumpy(new THREE.SphereGeometry(1,9,5),.16,2.1,x+y,.6).toNonIndexed();g.scale(r,r*.3,r);g.translate(x,y,z);
     const p=g.attributes.position,c=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){const k=.62+.4*clamp((p.getY(i)-y)/(r*.28)*.5+.5);c[i*3]=k*.9;c[i*3+1]=k;c[i*3+2]=k*.92}g.setAttribute('color',new THREE.BufferAttribute(c,3));
     g.deleteAttribute('uv');gs.push(g)});
-  gs[0]=gs[0].toNonIndexed();gs[0].deleteAttribute('uv');return mergeGeometries(gs)})();
+  gs[0]=gs[0].toNonIndexed();gs[0].deleteAttribute('uv');gs.forEach(g=>g.deleteAttribute('normal'));const mg=mergeGeometries(gs);mg.computeVertexNormals();return mg})();
 export const umbM=new THREE.InstancedMesh(umbGeo,windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true}),{H:4.6,amp:.2,pow:2,fl:.02}),560);
 [reedM,umbM].forEach(o=>{o.frustumCulled=false;scene.add(o)});
 export const UMB=['#5d7a64','#4f6b5c','#6a8a6e','#566f5d'],REED=['#ffffff','#f0e0b0','#e6c98a','#d6b070'];
 export const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),V3=new THREE.Vector3(),S3=new THREE.Vector3(),UP=new THREE.Vector3(0,1,0);
 export const cSeasG=new THREE.Color(SE.gnd);
 export const PINE=SE.pine,BLOS=SE.blos,SBLOS=SAKURA.blos,SBBLOS=SAKURA.bblos;
-export const bushM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,2).scale(1,.72,1).translate(0,.45,0),windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,map:tex('leaf')}),{H:1.2,amp:.07,pow:1,fl:.03}),2380);bushM.frustumCulled=false;scene.add(bushM);
+/* arbusto: tres bultos irregulares (menos triángulos que la cúpula lisa de antes), más oscuros por abajo */
+const bushGeo=(()=>{const g=mergeGeometries([[.86,0,.4,0,1],[.6,.56,.26,.22,2],[.52,-.48,.24,-.4,3]].map(([r,x,y,z,sd])=>lumpy(new THREE.IcosahedronGeometry(r,1),.2,1.8/r,sd*2.7,.7).scale(1,.84,1).translate(x,y,z))).toNonIndexed();
+  const p=g.attributes.position,c=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){const k=.7+.36*clamp((p.getY(i)+.2)/1.2);c[i*3]=c[i*3+1]=c[i*3+2]=k}g.setAttribute('color',new THREE.BufferAttribute(c,3));g.computeVertexNormals();return g})();
+export const bushM=new THREE.InstancedMesh(bushGeo,windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,map:tex('leaf')}),{H:1.2,amp:.07,pow:1,fl:.03}),2380);bushM.frustumCulled=false;scene.add(bushM);
 export const BUSH=['#6fa383','#7fb592','#5f957a','#8cc09a'],BBLOS=SE.bblos;
 const bambGeo=(()=>{const g=new THREE.CylinderGeometry(.11,.15,1,5,8,true).translate(0,.5,0).toNonIndexed();const p=g.attributes.position,c=new Float32Array(p.count*3);for(let i=0;i<p.count;i++){const y=p.getY(i),k=(Math.round(y*8)%3===0)?.68:1;c[i*3]=k;c[i*3+1]=k;c[i*3+2]=k*.95}g.setAttribute('color',new THREE.BufferAttribute(c,3));g.deleteAttribute('uv');g.computeVertexNormals();return g})();
 export const bambM=new THREE.InstancedMesh(bambGeo,windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true}),{H:1,amp:.5,pow:2}),2800);
-export const bleafM=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0).scale(1,.5,1),windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff}),{H:1,amp:.5,pow:1,base:1,fl:.05}),2800);
+export const bleafM=new THREE.InstancedMesh(sprayGeo(10,1).scale(1.15,1,1.15),windify(new THREE.MeshToonMaterial({gradientMap:toonGrad,color:0xffffff,vertexColors:true,side:THREE.DoubleSide}),{H:1,amp:.5,pow:1,base:1,fl:.05}),2800);
 [bambM,bleafM].forEach(o=>{o.frustumCulled=false;scene.add(o)});
 export const BAMB=['#8fc58a','#9fd194','#7bb87f','#a9d89a'],BLEAF=['#b7e08f','#a4d68a','#c4e89b','#92cc86'],BRD=SE.brd;export const cBam=new THREE.Color('#9ccf8a');
