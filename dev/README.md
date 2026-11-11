@@ -17,3 +17,9 @@ Las rutas de los scripts asumen /home/claude; ajusta si se clona en otro lado.
 ### Vegetación orgánica y pirotecnia de la aldea
 - `style.js`: `lumpy` (bultos de follaje irregulares), `tierGeo` (pisos de conífera con falda en zigzag), `trunkGeo` (tronco curvo con raíces y ramas), `sprayGeo` (penacho de hojas de bambú), `tuftGeo` (mata de hierba). Los usan `rio/props.js`, `cabin/world.js` y `cabin/terrain.js`.
 - `rio/moments.js`: los fuegos salen de tierra tras las casas de la aldea (`festVillage`), suben con estela (~1,2 s), estallan a 13–20 m y se apagan en 1,5 s (2 s el sauce dorado). Tipos: peonía, anillo, sauce. Respetan la profundidad (los tapan árboles y montes) y el agua refleja cada estallido (`fwP`/`fwC` en el shader del agua).
+
+### Estructuras y sitios orgánicos (Río 3D)
+- `rio/lm-parts.js`: `roofGeo`/`hipRoof` (tejado japonés cóncavo con esquinas levantadas; `roof()` lo usa, así que templo y pagoda lo heredan), `torii` myōjin (vigas curvas `beamGeo`, cuñas, placa, opción `water`/`rope`), `rockGeo`/`rock` (roca con estratos), `fallGeo` + `fallMat` (cortina de cascada abombada, velos que aceleran, espuma), risco de `farCabin` con estratos.
+- `rio/lm-build.js`: puente (pilas con tajamar hasta las vigas), aldea (tejados de paja/teja, postes, engawa, celosías, arco-torii), sakura (troncos curvos, copas irregulares), camino a la cabaña (losas irregulares, matas, torii de entrada), cascada (rocas, repisas, helechos, ondas al pie vía `g.userData.fall`), casa de té, estanque de lotos (instancias de `padM`/`lotM`).
+- `rio/dragon.js`: cuerpo de 10 lados con vientre de placas, cresta de llamas, patas redondas con garras, cabeza con hocico, astas y bigotes; se mece con `dragonU` (shader). `world.js: clearAt` despeja árboles a su alrededor.
+- `sw.js`: VERSION v92. Acordarse de subirla en cada publicación.

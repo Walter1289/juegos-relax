@@ -1,10 +1,12 @@
+import * as THREE from 'three';
 /* Lugares: crea/descarta lugares según la distancia, detecta el descubrimiento y anima brillos, cascada y garzas. */
 import {A} from '../audio-rio.js';
 import {S,P} from './state.js';
 import {LMS,lmPos,lmType,dragonS,setCaminoOn} from './world.js';
-import {buildDragon} from './dragon.js';
+import {buildDragon,dragonU} from './dragon.js';
 import {scene} from './core.js';
 import {toast,updateDiary} from './hud.js';
+import {spawnRipple} from './ripples.js';
 import {lmMade,lmFound,retaken,lmSeen,LM,saveFound,lmG,lmAnim} from './lm-data.js';
 import {disposeLM,glowMat,fallMat} from './lm-parts.js';
 import {buildLM} from './lm-build.js';
@@ -25,6 +27,7 @@ import {setOfrendaPend,ofrendaPend} from '../lightmsg.js';
 import {LETTER_FIRST} from '../story.js';
 import {el} from './util.js';
 const T3=a=>a[lang()]||a.es;
+let fallNext=0;const _fv=new THREE.Vector3();
 const dragons=new Map();try{window.__dragons=dragons}catch(e){}
 function updateDragons(ps,k0,k1){
   for(const [k,g] of dragons){const s=g.userData.dragon.s;if(s<ps-140||s>ps+380){scene.remove(g);disposeLM(g);dragons.delete(k)}}
@@ -76,6 +79,8 @@ export function updateLandmarks(ps){
   {let nt=null;for(let k=k0;k<=k1;k++){if(Math.abs(lmPos(k)-ps)<60){nt=lmType(k);break}}taskTick(nt,()=>{try{A.chime(0,2)}catch(e){}})}
   for(const [,g] of lmMade){if(g.userData.job){const t0=performance.now();let r;do{r=g.userData.job.next()}while(!r.done&&performance.now()-t0<5);if(r.done){g.userData.job=null;optimizeLM(g)}}else if(g.userData.cas)castleStep(g,env.night,.016)}
   for(const s of lmG){s.material.opacity=s.userData.base*(.3+.7*S.glowK)}glowMat.uniforms.k.value=S.glowK;
-  fallMat.uniforms.t.value=P.t;fallMat.uniforms.fogCol.value.copy(scene.fog.color);
+  dragonU.value=P.t;fallMat.uniforms.t.value=P.t;fallMat.uniforms.fogCol.value.copy(scene.fog.color);
+  /* la cascada bate el agua: ondas que nacen al pie de la caída */
+  if(P.t>fallNext){fallNext=P.t+.4+Math.random()*.4;for(const [,g] of lmMade){const f=g.userData.fall;if(f&&Math.abs(g.position.z-P.pz)<150){_fv.set(f[0]+(Math.random()-.5)*2.5,0,f[1]+(Math.random()-.5)*6);g.localToWorld(_fv);spawnRipple(_fv.x,_fv.z,1.2+Math.random()*.5,3.6,.75)}}}
   for(const q of lmAnim){if(q.nk)q.nk.rotation.x=Math.sin(P.t*.5+q.ph)*.08+Math.pow(Math.max(0,Math.sin(P.t*.23+q.ph*3)),6)*.9;else q.b.rotation.y=Math.sin(P.t*1.1+q.ph)*.12}
 }

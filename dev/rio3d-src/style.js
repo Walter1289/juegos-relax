@@ -203,7 +203,7 @@ export function sprayGeo(n=10,seed=1){const pos=[],col=[];
     kite(pos,col,0,0,0,Math.cos(a)*c,Math.sin(up),Math.sin(a)*c,l,.2+.05*Math.sin(i*5.1),.3+.2*Math.abs(Math.sin(i*2.3+seed)),.72,1.12)}
   return finish(pos,col)}
 /* mata de hierba: briznas anchas que se abren y se curvan; altura h, radio r */
-export function tuftGeo(n=5,h=1,r=.3,seed=1){const pos=[],col=[];
-  for(let i=0;i<n;i++){const a=i/n*6.2832+Math.sin(i*4.1+seed)*.6,lean=.25+.3*Math.abs(Math.sin(i*2.9+seed)),hh=h*(.7+.3*Math.abs(Math.sin(i*5.3+seed*3))),c=Math.cos(a),s=Math.sin(a),L=Math.hypot(lean,1);
-    kite(pos,col,c*r*.25,0,s*r*.25,c*lean/L,1/L,s*lean/L,hh*L,r*.3,.12+.1*Math.sin(i*3.3+seed),.62,1.1)}
+export function tuftGeo(n=5,h=1,r=.3,seed=1){const pos=[],col=[];n+=3;
+  for(let i=0;i<n;i++){const a=i/n*6.2832+Math.sin(i*4.1+seed)*.6,lean=.2+.45*Math.abs(Math.sin(i*2.9+seed)),hh=h*(.55+.45*Math.abs(Math.sin(i*5.3+seed*3))),c=Math.cos(a),s=Math.sin(a),L=Math.hypot(lean,1);
+    kite(pos,col,c*r*.3,0,s*r*.3,c*lean/L,1/L,s*lean/L,hh*L,r*.17,.14+.12*Math.sin(i*3.3+seed),.62,1.1)}
   return finish(pos,col)}
