@@ -284,5 +284,7 @@ export const A={
         if(Math.random()<.45)this.bell(f*(Math.random()<.5?3:4),this.ctx.currentTime+rnd(1.5,3.5),.03,false,rnd(-4,4),-3);
         if(k===3&&Math.random()<.6){const t=this.ctx.currentTime+rnd(4,6),b=(Math.random()*4)|0;[0,2,4].forEach((i,j)=>this.pluck(SC[Math.min(SC.length-1,b+i)],.07,t+j*.55,rnd(-2,2),-2))}}
       this._zt=setTimeout(tick,rnd(7000,12000))};this._zt=setTimeout(tick,1200)},
+  /* golpe seco de caña contra piedra (shishi-odoshi) */
+  tock(){if(!this.ok())return;this.cap('Caña de agua');const c=this.ctx,t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(620,t);o.frequency.exponentialRampToValueAtTime(240,t+.07);g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.0001,t+.16);o.connect(g);g.connect(this.dest(1,-2));o.start(t);o.stop(t+.2)},
   setVol(v){this.vol=v;if(this.master&&!this.muted)this.master.gain.setTargetAtTime(.6*v,this.ctx.currentTime,.1);if(this.pad)this.padFilter()}
 };

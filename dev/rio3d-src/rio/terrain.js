@@ -1,7 +1,7 @@
 /* Terreno en streaming: reconstruye la malla y las instancias por ventana (generador por filas) alrededor del jugador. */
 import * as THREE from 'three';
 import {vn,hash,sm} from './util.js';
-import {COLS,ROWS,BACK,DX,DZ,bambooAt,gardenAt,forestAt,H,cx,hw,SE,clearAt,castleClear,castleMask,BLOCK} from './world.js';
+import {COLS,ROWS,BACK,DX,DZ,bambooAt,bambooClear,gardenAt,forestAt,H,cx,hw,SE,clearAt,castleClear,castleMask,BLOCK} from './world.js';
 import {tmp,cBed,cG1,cG2,cSand,cHi,cTop,cBam,cSeasG,cGold,cGold2,cPetal,cGravel,MAXT,V3,Q,UP,S3,M4,crownM,trunkM,BLOS,SBLOS,SBBLOS,BRD,umbM,UMB,pineM,PINE,bushM,BBLOS,BUSH,bambM,BAMB,bleafM,BLEAF,reedM,REED,padM,lotM,tPos,tCol,tGeo} from './props.js';
 let anchor={a:1e9,b:1e9};
 const tPosS=new Float32Array(COLS*ROWS*3),tColS=new Float32Array(COLS*ROWS*3),STG=new Map();
@@ -31,7 +31,7 @@ function* rebuild(ax,as){
       }
       tColS[o]=tmp.r+j2;tColS[o+1]=tmp.g+j2;tColS[o+2]=tmp.b+j2;
       // árboles
-      if(d>5&&y<17&&np<MAXT&&!clearAt(s,d)&&!castleClear(x,s)){
+      if(d>5&&y<17&&np<MAXT&&!clearAt(s,d)&&!castleClear(x,s)&&!(bam>0&&bambooClear(x,s))){
         const r=hash(x*3.1,s*1.7);
         const dens=.05*(.5+vn(x*.03+9,s*.03))*(d<34?.75:1)+(d<36?(.05+.09*fo)*(1-d/44):0)*(.6+.8*vn(x*.07,s*.07))+(d<60?ga*.11*(1-d/70):0);
         if(r<dens*(1-bam*.92)){
@@ -57,14 +57,14 @@ function* rebuild(ax,as){
     }
   }
   for(let j=0;j<ROWS;j++){if(j%5===0)yield;const s=s0+j*DZ,ga=gardenAt(s),bam=bambooAt(s);
-    for(let i=0;i<COLS;i+=1){const x=x0+i*DX,d=Math.abs(x-cx(s))-hw(s);if(d<2.2||d>55||nb>=2380||clearAt(s,d)||castleClear(x,s))continue;const y=H(x,s);if(y>15)continue;
+    for(let i=0;i<COLS;i+=1){const x=x0+i*DX,d=Math.abs(x-cx(s))-hw(s);if(d<2.2||d>55||nb>=2380||clearAt(s,d)||castleClear(x,s)||(bam>0&&bambooClear(x,s)))continue;const y=H(x,s);if(y>15)continue;
       const r=hash(x*2.3+1,s*1.3);if(r>(.05+ga*.2)*(1-bam*.8))continue;
       const ox=(hash(x,s+9)-.5)*DX,oz=(hash(s,x+9)-.5)*DZ,sc=.7+hash(x+8,s)*.9+ga*.3;V3.set(x+ox,H(x+ox,s+oz)-.1,-(s+oz));Q.setFromAxisAngle(UP,hash(s,x)*6.28);S3.set(sc*1.2,sc,sc*1.1);M4.compose(V3,Q,S3);
       stM(bushM,nb,M4);stC(bushM,nb,tmp.set(ga>.25&&hash(x,s+5)<.55?SBBLOS[(hash(x,s)*4)|0]:BUSH[(hash(s,x+2)*4)|0]));nb++}}
   for(let j=0;j<ROWS;j++){if(j%5===0)yield;const s=s0+j*DZ,bam=bambooAt(s);if(bam<.02)continue;
     for(let i=0;i<COLS;i++){const x=x0+i*DX,c0=cx(s),d=Math.abs(x-c0)-hw(s);if(d<.3||d>26||nk>=2790)continue;
       for(let q=0;q<2;q++){if(hash(x*3.7+q*5,s*2.9+q)>bam*(1.05-d*.012))continue;
-        const ox=(hash(x+q,s+3)-.5)*DX,oz=(hash(s+q,x+3)-.5)*DZ,xx=x+ox,zz=s+oz,hh=11+hash(xx,zz)*12,sc=.8+hash(zz,xx)*.6,tl=.05+hash(xx*2,zz)*.14,sg=xx>c0?1:-1,y0=H(xx,zz)-.3;
+        const ox=(hash(x+q,s+3)-.5)*DX,oz=(hash(s+q,x+3)-.5)*DZ,xx=x+ox,zz=s+oz,hh=11+hash(xx,zz)*12,sc=.8+hash(zz,xx)*.6,tl=.05+hash(xx*2,zz)*.14,sg=xx>c0?1:-1,y0=H(xx,zz)-.3;if(bambooClear(xx,zz))continue;
         V3.set(xx,y0,-zz);Q.setFromAxisAngle(new THREE.Vector3(0,0,1),sg*tl);S3.set(sc,hh,sc);M4.compose(V3,Q,S3);stM(bambM,nk,M4);stC(bambM,nk,tmp.set(BAMB[(hash(xx,zz+1)*4)|0]));
         const tx=xx-sg*Math.sin(tl)*hh,ty=y0+Math.cos(tl)*hh;V3.set(tx,ty,-zz);Q.identity();const ls=1.5+hash(zz,xx+4)*1.6;S3.set(ls,ls,ls);M4.compose(V3,Q,S3);stM(bleafM,nk,M4);stC(bleafM,nk,tmp.set(BLEAF[(hash(xx+2,zz)*4)|0]));nk++}}}
   cm.push([bambM,nk],[bleafM,nk]);

@@ -220,6 +220,10 @@ export function* castleJob(g,k,ctx){
     {w:18.2,d:14.2,h:4.0,nx:4,nz:3,ro:{o:2.0,rise:2.6,k:[0,2],kw:7,kh:3,kd:4.5}},
     {w:15.6,d:11.8,h:3.8,nx:3,nz:2},
     {w:13.2,d:9.8,h:3.6,nx:3,nz:2,ro:{o:2.7,rise:3.0,gh:4.4,irimoya:true,shachi:1}}]);
+  /* mirador: galería con barandilla alrededor del último piso, para subir a contemplar el río */
+  const VY=kt.top-6.35,VW=13.2/2+1.55,VD=9.8/2+1.55;S.box(VW*2,.24,VD*2,C.woodM,KX,VY-.1,KZ,false);
+  for(const sg of[-1,1]){S.box(VW*2,.12,.12,C.red||0xb5473a,KX,VY+1.0,KZ+sg*VD,false);S.box(.12,.12,VD*2,C.red||0xb5473a,KX+sg*VW,VY+1.0,KZ,false);S.box(VW*2,.08,.08,C.woodD,KX,VY+.5,KZ+sg*VD,false);S.box(.08,.08,VD*2,C.woodD,KX+sg*VW,VY+.5,KZ,false);
+    for(let i=-3;i<=3;i++){S.box(.12,1,.12,C.woodD,KX+i*VW/3,VY+.5,KZ+sg*VD,false);S.box(.12,1,.12,C.woodD,KX+sg*VW,VY+.5,KZ+i*VD/3,false)}}
   mark('keep');yield;
   /* torres menores y corredores: anillo cerrado alrededor del patio */
   const k1=tower(X,-22,-27,Y0,[{w:12,d:10,h:4.6,nx:3,nz:2,ro:{o:1.9,rise:2.2,k:[0],kw:5,kh:2.4,kd:3.4}},{w:9.2,d:7.4,h:3.8,nx:2,nz:2,ro:{o:2.0,rise:2.2,gh:3,irimoya:true,shachi:.6}}]);
@@ -252,6 +256,7 @@ export function* castleJob(g,k,ctx){
   for(const [wx,wy,wz,sz] of[[KX-13.5,Y0+4,KZ+11.5,26],[KX+13.5,Y0+5,KZ+11.5,24],[KX,Y0+13,KZ+11,26],[KX,Y0+21,KZ+8,22],[KX,Y0+28,KZ+6,18],[KX,Y0+34,KZ+5,14],[-22,Y0+4,-21,14],[24,Y0+5,8,14],[-24,Y0+5,9,14],[-10,PH+5,CAS.ZF+3,18]])gl(h,0xffd592,sz,wx,wy,wz,.2);
   mark('focos');g.updateMatrixWorld(true);const v=new THREE.Vector3(KX,Y0+14,KZ);h.localToWorld(v);
   g.userData.cas={parts,ms:0,tris:Pl.count()+S.count()+G.count()+E.count()+CL.count(),mats:M,keep:{x:KX,z:KZ,top:kt.top,ridge:kt.ridge},drums:X.drums,h,fr:X.fr,cw:v};
+  g.userData.visit={kind:10,range:95,views:[{ref:h,eye:[KX,VY+1.62,KZ+9.8/2+.85],look:[KX-6,VY-9,KZ+130],walk:{rect:[KX-VW+.5,KX+VW-.5,KZ-VD+.5,KZ+VD-.5],boxes:[[KX-7.15,KX+7.15,KZ-5.45,KZ+5.45]]}}]};
   g.userData.cas.ms=performance.now()-t0;return g}
 /* puente arqueado rojo sobre el foso, embarcadero con linternas y losas de piedra */
 function bridge(X){

@@ -2,7 +2,7 @@
 import {tex,toonGrad,lumpy,trunkGeo,tuftGeo} from '../style.js';
 import * as THREE from 'three';
 import {hash} from './util.js';
-import {lmPos,tanAng,hw,cx,H,lmType} from './world.js';
+import {lmPos,tanAng,hw,cx,H,lmType,bambooPath} from './world.js';
 import {SAKURA} from '../season.js';
 import {castleJob} from './castle.js';
 import {MT,spr,glowTex} from './core.js';
@@ -224,7 +224,18 @@ function buildLM0(k){
     }
   else if(type===8){signs(g,gy,hwv,'竹林',false,'#4f8a5a');
     for(const sd of[-1,1])for(let i=0;i<6;i++)tourou(g,gy,sd*(hwv+3+hash(k,i)*2.5),-45+i*18+hash(k,i+3)*4);
-    for(let i=0;i<12;i++){const sd=i%2?1:-1,lx=sd*(hwv+4+hash(k,i)*12),lz=(hash(k,i+20)-.5)*110;const m2=new THREE.Mesh(new THREE.PlaneGeometry(3.6,22),new THREE.MeshBasicMaterial({map:glowTex,color:0xfff0b0,transparent:true,opacity:.14,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));m2.position.set(lx,gy(lx,lz)+10,lz);m2.rotation.set(0,hash(k,i+9)*3,sd*.25);g.add(m2)}}
+    for(let i=0;i<12;i++){const sd=i%2?1:-1,lx=sd*(hwv+4+hash(k,i)*12),lz=(hash(k,i+20)-.5)*110;const m2=new THREE.Mesh(new THREE.PlaneGeometry(3.6,22),new THREE.MeshBasicMaterial({map:glowTex,color:0xfff0b0,transparent:true,opacity:.14,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));m2.position.set(lx,gy(lx,lz)+10,lz);m2.rotation.set(0,hash(k,i+9)*3,sd*.25);g.add(m2)}
+    /* sendero de losas hasta un claro con shishi-odoshi (la caña que se llena de agua y golpea la piedra), roca para sentarse y farolillos */
+    {const B=bambooPath(k),pts=B.pts,[ex,ez]=B.end,ey=gy(ex,ez),sd=Math.sign(ex);
+      for(let i=1;i<=pts.length;i++){const p=pts[i-1],q=i<pts.length?pts[i]:[ex,ez],L=Math.hypot(q[0]-p[0],q[1]-p[1]),n=Math.round(L/1.25);for(let j=0;j<n;j++){const t=j/n,x=p[0]+(q[0]-p[0])*t+(hash(k,i*9+j)-.5)*.5,z=p[1]+(q[1]-p[1])*t+(hash(k,i*9+j+40)-.5)*.5;rock(g,.5+hash(k,i*7+j)*.18,j%2?0xaaa69d:0x9c9a94,x,gy(x,z)+.03,z,i*5+j,.18)}}
+      tourou(g,gy,pts[0][0]+sd*.3,pts[0][1]+1.8,.8);tourou(g,gy,ex-sd*3.2,ez+3.4,.8);tourou(g,gy,ex+sd*2.6,ez-3.3,.8);
+      const c=new THREE.Group();c.position.set(ex+sd*1.9,ey,ez+.6);g.add(c);
+      const bs=new THREE.Mesh(rockGeo(.75,k,1,.6),MT(0x8f918c,{map:tex('rock')}));bs.position.y=.2;c.add(bs);const wt=new THREE.Mesh(new THREE.CircleGeometry(.42,12).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xbfe6ea}));wt.position.y=.5;c.add(wt);
+      for(const z of[-.16,.16])cyl(c,.04,.05,1.1,0x7a9a5a,.75,.55,z,6);cyl(c,.035,.035,.9,0x8fb06a,1.25,1.25,0,6).rotation.z=1.1;
+      const arm=new THREE.Group();arm.position.set(.75,.95,0);arm.userData.noMerge=true;c.add(arm);const tb=cyl(arm,.075,.085,1.5,0x8fb06a,-.25,0,0,7);tb.rotation.z=Math.PI/2;cyl(arm,.09,.09,.06,0x6f8a4a,.2,0,0,7).rotation.z=Math.PI/2;
+      rock(g,1.0,0x9a9c96,ex-sd*1.6,ey+.12,ez-1.2,k+2,.42);
+      for(let i=0;i<10;i++){const an=i*.63,tf=new THREE.Mesh(tuftGeo(5,.4+hash(k,i+70)*.3,.3,i),MT(i%2?0x8fb878:0x7aa868,{side:THREE.DoubleSide})),x=ex+Math.cos(an)*(3.6+hash(k,i+80)),z=ez+Math.sin(an)*(3.6+hash(k,i+90));tf.position.set(x,gy(x,z),z);g.add(tf)}
+      g.userData.visit={kind:8,arm,views:[{ref:g,eye:[pts[0][0],1.6,pts[0][1]],look:[pts[1][0],1.3,pts[1][1]],walk:{ground:1.6,path:[...pts,[ex,ez]],pw:1.0,end:[ex,ez,3.3],holes:[[ex+sd*1.9,ez+.6,1.25],[ex+sd*2.9,ez+.6,.8],[ex-sd*1.6,ez-1.2,1.15],[ex-sd*3.2,ez+3.4,.6],[ex+sd*2.6,ez-3.3,.6]]}}]}}}
   else if(type===10)g.userData.job=castleJob(g,k,{gy,hwv,side,s,a})
   else{/* estanque de lotos: las mismas hojas con muesca y flores de pétalos del resto del río, en dos mallas instanciadas */
     const NP=54,pm=new THREE.InstancedMesh(padM.geometry,padM.material,NP),fm=new THREE.InstancedMesh(lotM.geometry,lotM.material,16);pm.frustumCulled=fm.frustumCulled=false;pm.userData.keep=fm.userData.keep=true;let nf=0;

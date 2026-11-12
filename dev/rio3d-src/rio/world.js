@@ -55,6 +55,13 @@ export const gardenAt=s=>{let b=0;const kc=Math.round((s-240)/260);for(let k=kc-
 export const bambooAt=s=>{let b=0;const kc=Math.round((s-240)/260);for(let k=kc-2;k<=kc+2;k++)if(lmType(k)===8)b=Math.max(b,1-sm(70,190,Math.abs(lmPos(k)-s)));return b};
 let CAMV=false;try{CAMV=localStorage.getItem('rio3d-camino')==='1'}catch(e){}
 export const setCaminoOn=v=>{CAMV=v};
+/* sendero del bosque de bambú: del agua a un claro tierra adentro (coordenadas locales del lugar, x ya con el lado) */
+const bpC=new Map();
+export function bambooPath(k){let I=bpC.get(k);if(!I){const s0=lmPos(k),a=tanAng(s0),sd=hash(k,9)>.5?1:-1,w=hw(s0);
+  I={s0,x0:cx(s0),ca:Math.cos(a),sa:Math.sin(a),pts:[[2.2,7],[5.5,4.5],[8.5,.5],[11.5,-1.5]].map(([x,z])=>[sd*(w+x),z]),end:[sd*(w+15.5),0,3.9]};bpC.set(k,I)}return I}
+export function bambooClear(x,s){const kc=Math.round((s-240)/260);for(let k=kc-1;k<=kc+1;k++){if(lmType(k)!==8)continue;const I=bambooPath(k);if(Math.abs(s-I.s0)>40)continue;
+  const u=x-I.x0,v=I.s0-s,lx=u*I.ca+v*I.sa,lz=-u*I.sa+v*I.ca;if(Math.hypot(lx-I.end[0],lz-I.end[1])<I.end[2]+1.2)return true;
+  for(let i=1;i<I.pts.length+1;i++){const a=I.pts[i-1],b=i<I.pts.length?I.pts[i]:I.end,dx=b[0]-a[0],dz=b[1]-a[1],t=Math.max(0,Math.min(1,((lx-a[0])*dx+(lz-a[1])*dz)/(dx*dx+dz*dz)));if(Math.hypot(lx-a[0]-dx*t,lz-a[1]-dz*t)<1.9)return true}}return false}
 export const clearAt=(s,d)=>{const kc=Math.round((s-240)/260);/* claro alrededor del dragón, para que ningún árbol lo atraviese */for(let k=kc-1;k<=kc+2;k++)if(lmType(k)===10&&d<19&&Math.abs(dragonS(k)-s)<20)return true;for(let k=kc-1;k<=kc+1;k++){const t=lmType(k);/* claro de la plaza de la aldea */if(t===2&&d<27&&Math.abs(lmPos(k)-1-s)<15)return true;if((t===5||t===7)&&Math.abs(lmPos(k)-s)<(t===5?(CAMV?30:26):12)&&d<(t===5?(CAMV?112:48):20))return true}return false};
 export const forestAt=s=>sm(.4,.55,vn(s*.0022+31,5)*.6+vn(s*.0053+8,2)*.4);
 export const mistAt=s=>{let m=0;const i0=Math.floor(s/650);for(let i=i0-1;i<=i0+1;i++){const c=i*650+250+hash(i,7)*220,w=120+hash(i,8)*70,u=(s-c)/w;m=Math.max(m,Math.exp(-u*u))}return m};
