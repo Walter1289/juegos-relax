@@ -8,6 +8,7 @@ import {castleJob} from './castle.js';
 import {MT,spr,glowTex} from './core.js';
 import {bladeGeo,reedM,V3,Q,UP,S3,M4,tmp,REED,padM,lotM} from './props.js';
 import {camino} from '../lightmsg.js';
+import {paintTex,pic,byobu,ranma,yoroi,irori,ikebana,niwaki,tsukubai,takegaki,chochin,furin,zabuton,moss,shokudai,katanaKake} from './lm-deco.js';
 import {optimizeLM,bx,gl,cyl,roof,signs,farCabin,mkHeron,tourou,torii,pagoda,fallMat,kanjiTex,hipRoof,rock,rockGeo,fallGeo} from './lm-parts.js';
 /* bandeja con tetera de hierro, dos tazas y un hilo de vapor (para la casa de té) */
 function teaSet(h,x,y,z,st){bx(h,.62,.03,.4,0x5a3a2c,x,y+.015,z);
@@ -37,6 +38,8 @@ function buildLM0(k){
     const py=deckY(0);for(const [x,z] of[[-2.6,-1.8],[2.6,-1.8],[-2.6,1.8],[2.6,1.8]])cyl(g,.22,.26,4.2,red2,x,py+2.1,z,8);
     hipRoof(g,8,6.2,2.1,py+4.45,0x5b4a4f,{lift:.7});cyl(g,.05,.14,.9,0xd9a85a,0,py+7,0,6);
     bx(g,6.4,.3,.3,0xd9a85a,0,py+4.35,-1.8);bx(g,6.4,.3,.3,0xd9a85a,0,py+4.35,1.8);
+    /* campanillas de viento bajo el alero, a los dos lados */
+    g.userData.visit.furin=[[-1.5,-1.8,0x9fd8e6],[0,-1.8,0xf5b8c8],[1.5,-1.8,0xbfe6b0],[-.8,1.8,0xf3e0a0],[.8,1.8,0x9fd8e6]].map(([x,z,c],i)=>{const f=furin(g,x,py+4.2,z,c);f.userData.ph=i*1.3;return f});g.userData.visit.act2='furin';
     const lb=new THREE.Mesh(new THREE.SphereGeometry(.4,10,8),new THREE.MeshBasicMaterial({color:0xffcf8a}));lb.position.set(0,py+3.6,0);g.add(lb);gl(g,0xffc77a,6,0,py+3.6,0,.9);
     // banderines de colores
     const fc=[0xe8a09a,0xf2d08a,0x9cc7b0,0x9fb3dc];for(let i=0;i<12;i++){const t=(i+.5)/12*2-1,x=t*(W2/2-2),y=deckY(t)+2.7+Math.sin(i*1.7)*.06;const fl=new THREE.Mesh(new THREE.PlaneGeometry(.5,.7),MT(fc[i%4],{side:THREE.DoubleSide}));fl.position.set(x,y,0);fl.rotation.set(0,0,Math.PI);g.add(fl)}
@@ -104,25 +107,30 @@ function buildLM0(k){
       bx(h,9.6,.9,7.6,0x9d9c9a,0,.1,0,{map:tex('stone')});bx(h,9,.2,7,0x6d4a3a,0,.6,0);bx(h,9.2,.16,1.5,0xb0876c,0,.6,4.1,{map:tex('plank')});for(let i=0;i<2;i++)bx(h,2.4-i*.3,.26,.7,0xaaa69d,0,.38-i*.26,5.1+i*.6);
       bx(h,8.4,.04,6.4,0xcdc490,0,.72,0,{map:tex('straw'),emissive:0x4a3c20});for(const x of[-2.1,0,2.1])bx(h,.06,.045,6.4,0x4f6a4a,x,.722,0);bx(h,8.4,.045,.06,0x4f6a4a,0,.722,0);
       bx(h,8.6,2.7,.15,0xe9dcc2,0,2.05,-3.27,em);for(const sx of[-1,1]){bx(h,.15,2.7,6.6,0xe9dcc2,sx*4.27,2.05,0,em);const sh=bx(h,2.4,2.3,.08,0xffe8b8,sx*3,1.85,3.2);sh.material=new THREE.MeshBasicMaterial({color:0xffe8b8});for(const q of[-.8,0,.8])bx(h,.04,2.3,.1,pw,sx*3+q,1.85,3.2);for(const q of[-.6,.2])bx(h,2.4,.04,.1,pw,sx*3,1.85+q,3.2)}
-      bx(h,8.7,.4,.18,pw,0,3.2,3.2);bx(h,8.9,.14,6.9,0x4a3428,0,3.45,0);for(const x of[-4.27,-1.8,1.8,4.27])bx(h,.2,2.7,.2,pw,x,2.05,3.2);for(const x of[-4.27,4.27])bx(h,.2,2.7,.2,pw,x,2.05,-3.27);for(const x of[-4.3,0,4.3])cyl(h,.1,.1,2.7,pw,x,2.05,4.75,6);
+      bx(h,8.7,.4,.18,pw,0,3.2,3.2);bx(h,8.9,.14,6.9,0x4a3428,0,3.45,0);for(const x of[-4.27,-1.8,1.8,4.27])bx(h,.2,2.7,.2,pw,x,2.05,3.2);for(const x of[-4.27,4.27])bx(h,.2,2.7,.2,pw,x,2.05,-3.27);for(const x of[-4.3,-1.8,1.8,4.3])cyl(h,.1,.1,2.7,pw,x,2.05,4.75,6);
       hipRoof(h,12.4,11,2.5,3.5,0x4c4a5a,{lift:.65,z:.6});
       /* tokonoma: tarima, rollo 誠 (sinceridad) y la armadura sobre su arcón */
       bx(h,2.8,.2,1,0x6a4a3a,-1.9,.84,-2.65);const kk=new THREE.Mesh(new THREE.PlaneGeometry(.6,1.5),new THREE.MeshBasicMaterial({map:kanjiTex('誠','#f3ead6','#2b2b2b',64,160)}));kk.position.set(-2.75,2.2,-3.18);h.add(kk);
-      {const x=-1.6,y=.94,z=-2.65,rd=0x8d2a23,gd=0xd9a85a,bk=0x2a2c33;bx(h,.62,.5,.46,0x3a2a24,x,y+.25,z);bx(h,.66,.05,.5,gd,x,y+.5,z);
-        for(const sx of[-1,0,1])bx(h,.24,.36,.08,rd,x+sx*.25,y+.72,z+.2).rotation.x=-.18;for(const sx of[-1,1])bx(h,.08,.36,.3,rd,x+sx*.36,y+.72,z).rotation.z=sx*.18;
-        bx(h,.56,.56,.34,0x7a1f1c,x,y+1.2,z);for(const q of[.98,1.16,1.34])bx(h,.58,.03,.36,gd,x,y+q,z);for(const sx of[-1,1]){bx(h,.24,.4,.34,rd,x+sx*.42,y+1.28,z).rotation.z=sx*.3;bx(h,.25,.03,.35,gd,x+sx*.45,y+1.14,z).rotation.z=sx*.3}
-        bx(h,.24,.2,.2,bk,x,y+1.6,z+.04);cyl(h,.3,.37,.14,rd,x,y+1.68,z-.03,10);const kb=new THREE.Mesh(new THREE.SphereGeometry(.23,10,8,0,6.283,0,1.7),MT(bk));kb.position.set(x,y+1.72,z);h.add(kb);bx(h,.34,.03,.14,bk,x,y+1.74,z+.22);
-        const cr=new THREE.Mesh(new THREE.TorusGeometry(.2,.022,4,12,Math.PI),MT(gd,{emissive:0x5a3a10}));cr.position.set(x,y+1.86,z+.2);h.add(cr);gl(h,0xffc77a,2.2,x,y+1.3,z+.6,.25)}
+      yoroi(h,-1.6,.94,-2.65);gl(h,0xffc77a,2.2,-1.6,2.24,-2.05,.25);shokudai(h,-.75,.94,-2.5);shokudai(h,-2.45,.94,-2.5);ikebana(h,-3.0,.94,-2.75,k+1);
       /* katana-kake con katana y wakizashi, arco en la pared, escritorio bajo y farol andon */
-      {const x=1.7,y=.74,z=-2.6;bx(h,1.2,.06,.3,pw,x,y+.03,z);for(const sx of[-1,1])bx(h,.07,.6,.22,pw,x+sx*.48,y+.33,z);
-        for(const [yy,L] of[[.52,1.05],[.3,.7]]){const sa=cyl(h,.024,.02,L,0x1e2028,x+.08,y+yy,z,6);sa.rotation.z=Math.PI/2;const ts=cyl(h,.026,.026,.28,0x3a3d6b,x-L/2-.06,y+yy,z,6);ts.rotation.z=Math.PI/2;const tb=cyl(h,.06,.06,.02,0xd9a85a,x-L/2+.085,y+yy,z,8);tb.rotation.z=Math.PI/2}}
+      katanaKake(h,1.7,.74,-2.6);
       {const bw=new THREE.Mesh(new THREE.TorusGeometry(1.5,.025,4,18,1.5),MT(0x5a3a2c));bw.position.set(3.1+1.38,2,-3.15);bw.rotation.z=Math.PI-.75;h.add(bw);bx(h,.012,2.05,.012,0xe6d8a0,3.39,2,-3.15)}
       bx(h,1.1,.06,.55,0x6a4634,2.9,1.06,1,{emissive:0x2c1c12});for(const sx of[-1,1])bx(h,.06,.32,.5,0x5a3a2c,2.9+sx*.48,.88,1);bx(h,.34,.01,.44,0xf3ead6,2.8,1.095,1);bx(h,.14,.04,.2,0x2a2c33,3.25,1.11,.9);cyl(h,.012,.012,.24,0x6a4634,3.2,1.1,1.15,4).rotation.x=Math.PI/2;
       bx(h,.34,.6,.34,0xffe0a0,-3.6,1.22,1.6).material=new THREE.MeshBasicMaterial({color:0xffd9a0});const as=spr(0xffc77a,2.4);as.material.opacity=.5;as.position.set(-3.6,1.22,1.6);h.add(as);
-      bx(h,.75,.09,.75,0x3f4a6b,0,.78,.9,{emissive:0x141a2a});bx(h,.75,.09,.75,0x7a3b3b,0,.74,4.1);
+      zabuton(h,0,.74,.9,0x3f4a6b,0x141a2a);zabuton(h,0,.68,4.1,0x7a3b3b);zabuton(h,-2.2,.74,.6,0x7a3b3b,0x2a1212);
+      /* más vida japonesa: pinturas en pan de oro, montante calado, hogar con tetera, biombo, vigas, farolillos y campanilla */
+      pic(h,3.3,2.1,paintTex('pine'),2.3,1.95,-3.17);pic(h,3.6,1.9,paintTex('crane'),-4.17,1.85,-.6,Math.PI/2);pic(h,3.6,1.9,paintTex('sakura'),4.17,1.85,-.9,-Math.PI/2);
+      ranma(h,3.5,0,2.9,3.19);for(const z of[-2.2,-.7,.8,2.3])bx(h,8.5,.14,.16,0x3a2a24,0,3.34,z);
+      const fire=irori(h,1.0,.72,-.4,3.38);byobu(h,-3.2,.74,2.2,1.1,4,'sakura',1.5,.6);
+      for(const x of[-2.9,2.9])chochin(h,x,2.75,4.6,0xfbf1e0,.8);const fr=furin(h,1.4,3.3,4.7);
+      /* jardín delantero: pino podado en nubes, pila tsukubai, musgo, cerca de bambú y estandarte */
+      {const y0=.02,gf=()=>y0;niwaki(h,-6.2,y0,6.2,k,1.05);niwaki(h,6.6,y0,3.2,k+4,.8);tsukubai(h,4.6,y0,6.4,k);
+        for(let i=0;i<6;i++)moss(h,(hash(k,i+500)-.5)*14,y0+.05,5.6+hash(k,i+510)*3,.5+hash(k,i+520)*.5,k+i,i%2?0x7fb36a:0x6aa35e);
+        takegaki(h,-9,8.6,-2.2,8.6,gf);takegaki(h,2.2,8.6,9,8.6,gf);takegaki(h,-9,8.6,-9,2,gf);takegaki(h,9,8.6,9,2,gf);
+        cyl(h,.05,.06,4.6,0x3a2a24,7.6,2.3,7.4,5);pic(h,.7,2.6,kanjiTex('武','#2f3f6b','#fbf6ea',64,240),7.2,3.2,7.4);bx(h,.8,.04,.04,0x3a2a24,7.25,4.52,7.4)}
       for(let i=0;i<5;i++)rock(g,.6+hash(k,i+400)*.2,0xaaa69d,lx-side*(6.5+i*1.5),gy(lx-side*(6.5+i*1.5),(i%2?.4:-.4))+.03,(i%2?.4:-.4),i,.2);
       for(const sz of[-1,1])tourou(g,gy,lx-side*6.4,sz*2.6,.9);
-      g.userData.visit={kind:3,range:55,views:[{ref:h,eye:[0,1.6,.9],look:[-1.5,1.75,-2.65],indoor:1,walk:{rect:[-3.65,3.65,-2.65,2.6],up:.7,boxes:[[-3.6,-.2,-9,-1.75]],holes:[[1.7,-2.6,.95],[2.9,1,.85],[-3.6,1.6,.5]]}},{ref:h,eye:[0,1.62,4.1],look:[0,1.3,40],walk:{rect:[-4,4,3.85,4.4],up:.65}}]}}
+      g.userData.visit={kind:3,range:55,furin:[fr],views:[{ref:h,eye:[0,1.6,.9],look:[-1.5,1.75,-2.65],indoor:1,walk:{rect:[-3.65,3.65,-2.65,2.6],up:.7,boxes:[[-3.6,-.2,-9,-1.75]],holes:[[1.7,-2.6,.95],[2.9,1,.85],[-3.6,1.6,.5],[1.0,-.4,.95],[-3.2,2.2,.9],[-2.2,.6,.4]]}},{ref:h,eye:[0,1.62,4.1],look:[0,1.3,40],walk:{rect:[-4,4,3.85,4.4],up:.65}}]}}
     for(const sd2 of[-1,1]){const t=tourou(g,gy,side*(hwv+3.4),sd2*10+2,1.1);t.position.y=gy(side*(hwv+3.4),sd2*10+2)}
     const bn=bx(g,3.2,.28,.9,0xb5473a,side*(hwv+7.5),gy(side*(hwv+7.5),-3)+.55,-3);bx(g,3.2,.7,.12,0xb5473a,side*(hwv+7.5),gy(side*(hwv+7.5),-3)+1,-3.5);void bn}
   else if(type===4){
@@ -228,7 +236,12 @@ function buildLM0(k){
       for(const sd of[-1,1])for(const z of[-1.2,.6]){const sh=bx(h,.02,1.5,1.3,0xffe8b8,sd*2.48,2.5,z);sh.material=wm;for(const q of[-.35,0,.35])bx(h,.03,1.5,.03,pw,sd*2.46,2.5,z+q);bx(h,.03,.03,1.3,pw,sd*2.46,2.5,z)}
       /* mesa baja, té, cojines y farol andon */
       cyl(h,.62,.62,.05,0x6a4634,0,1.8,-.5,14,{emissive:0x2c1c12});cyl(h,.3,.36,.3,0x5a3a2c,0,1.62,-.5,8,{emissive:0x22160e});teaSet(h,0,1.825,-.5,steam);
-      bx(h,.7,.09,.7,0x7a3b3b,.95,1.5,.5,{emissive:0x2a1212});bx(h,.7,.09,.7,0x3f4a6b,-.95,1.5,.3,{emissive:0x141a2a});
+      zabuton(h,.95,1.47,.5,0x7a3b3b,0x2a1212);zabuton(h,-.95,1.47,.75,0x3f4a6b,0x141a2a);
+      /* más vida japonesa: hogar con tetera colgada, poste natural del tokonoma, montante calado, biombo, vigas de bambú y farol de papel */
+      irori(h,-1.25,1.47,-.55,3.78);const tk=new THREE.Mesh(trunkGeo(.07,.09,2.35,6,6,{bend:.12,seed:k}),MT(0x7a5a44,{map:tex('bark'),emissive:0x1a120c}));tk.position.set(-.3,1.47,-2.05);h.add(tk);
+      ranma(h,4.7,0,3.5,-2.27);byobu(h,1.75,1.49,1.15,-2.3,2,'crane',1.3,.62);ikebana(h,-1.9,1.63,-2,k+2,0xf7c6d4);
+      for(const z of[-1.9,-1.1,-.3,.5,1.3])cyl(h,.045,.045,4.9,0xa9a35e,0,3.74,z,6,{emissive:0x2a2810}).rotation.z=Math.PI/2;
+      chochin(h,.2,3.25,.3,0xfbf1e0,.7,false);pic(h,1.5,1.1,paintTex('wave'),.05,2.3,-2.27);
       bx(h,.34,.6,.34,0xffe0a0,2.05,1.95,-1.9).material=new THREE.MeshBasicMaterial({color:0xffd9a0});for(const [a,b] of[[1,1],[-1,1],[1,-1],[-1,-1]])bx(h,.03,.72,.03,pw,2.05+a*.17,1.86,-1.9+b*.17);
       const as=spr(0xffc77a,2.4);as.material.opacity=.5;as.position.set(2.05,1.95,-1.9);h.add(as)}
     /* mirador hacia el valle: terraza elevada con banco y, a lo lejos, la cabaña del acantilado */
@@ -239,7 +252,13 @@ function buildLM0(k){
      const tl=tourou(mh,gy,2,2,.9);tl.position.set(side*1.8,1.3,1.6);
      /* mesita de té en el balcón */
      bx(mh,.8,.05,.5,0x6a4634,side*.9,1.72,.1);for(const a of[-1,1])bx(mh,.05,.42,.44,0x5a3a2c,side*.9+a*.33,1.5,.1);teaSet(mh,side*.9,1.745,.1,steam);bx(mh,.75,.09,.75,0x7a3b3b,-side*.5,1.35,.9);
-     g.userData.visit={kind:7,steam,views:[{ref:h,eye:[.95,2.32,.75],look:[-.6,1.95,-1.8],name:0,indoor:1,walk:{rect:[-1.95,1.95,-1.75,1.15],up:.6,holes:[[0,-.5,.9],[-1.3,-2.05,.75],[2.05,-1.9,.45],[-.95,.3,.3]]}},{ref:h,eye:[-side*3.02,2.28,.9],look:[-side*30,1.2,-24],name:1,walk:{rect:[-3.2,3.2,-2.3,2.8],up:.5,boxes:[[-2.95,2.95,-9,2.45]],holes:[[-side*3.05,-.15,.3]]}}]};
+     /* fuera: faroles rojos y campanilla en el alero, y un pequeño jardín roji entre la casa y el mirador */
+     for(const x of[-2.3,2.3])chochin(h,x,3.15,2.35,0xd9453a,.85);const fr=furin(h,-side*3.3,3.45,2.2,0xf5b8c8);
+     {const gx=h.position.x,gf=(x,z)=>gy(x,z);tsukubai(g,gx+side*5.8,gy(gx+side*5.8,3.6),3.6,k);niwaki(g,gx+side*7.2,gy(gx+side*7.2,-4.6),-4.6,k+2,.8);
+       for(let i=0;i<5;i++){const x=gx+side*(4.6+hash(k,i+600)*3.5),z=-3+hash(k,i+610)*8;moss(g,x,gy(x,z)+.05,z,.45+hash(k,i+620)*.4,k+i)}
+       for(let i=0;i<4;i++){const x=gx+side*(4.4+i*1.25),z=.6+(i%2?.35:-.3);rock(g,.48,0xaaa69d,x,gy(x,z)+.03,z,i+k,.2)}
+       takegaki(g,gx+side*4.2,6.2,gx+side*9.6,6.2,gf,.9)}
+     g.userData.visit={kind:7,steam,furin:[fr],views:[{ref:h,eye:[.95,2.32,.75],look:[-.6,1.95,-1.8],name:0,indoor:1,walk:{rect:[-1.95,1.95,-1.75,1.15],up:.6,holes:[[0,-.5,.9],[-1.3,-2.05,.75],[2.05,-1.9,.45],[-1.25,-.55,.8],[1.75,1.15,.6]]}},{ref:h,eye:[-side*3.02,2.28,.9],look:[-side*30,1.2,-24],name:1,walk:{rect:[-3.2,3.2,-2.3,2.8],up:.5,boxes:[[-2.95,2.95,-9,2.45]],holes:[[-side*3.05,-.15,.3]]}}]};
      /* té en la galería que da al río */
      teaSet(h,-side*3.05,1.29,-.15,steam);bx(h,.7,.09,.7,0x3f4a6b,-side*3.02,1.33,.9);
      for(let i=0;i<3;i++)cyl(h,.5,.55,.14,0xaaa69d,side*(5+i*1.15),.1,-.4,7);

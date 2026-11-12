@@ -7,6 +7,7 @@ import {lmPos,H} from './world.js';
 import {mkLantern} from './lanterns.js';
 import {scene} from './core.js';
 import {spawnRipple} from './ripples.js';
+import {paintTex} from './lm-deco.js';
 import {lmMade} from './lm-data.js';
 import {STILL} from '../still.js';
 import {LOOK,IN} from './input.js';
@@ -41,6 +42,16 @@ const BUSHIDO=[
  {es:'誠 Makoto, sinceridad: decir y hacer son una sola cosa.',en:'誠 Makoto, sincerity: saying and doing are one and the same.',ja:'誠：言うことと行うことは、ひとつ。'},
  {es:'名誉 Meiyo, honor: tú eres el testigo de tus propios actos.',en:'名誉 Meiyo, honour: you are the witness of your own actions.',ja:'名誉：自分の行いの証人は、自分自身。'},
  {es:'忠義 Chūgi, lealtad: cuidar aquello a lo que diste tu palabra.',en:'忠義 Chūgi, loyalty: looking after what you gave your word to.',ja:'忠義：約束したものを、守りつづける。'}];
+const FURIN={es:'Tocar las campanillas',en:'Ring the wind chimes',ja:'風鈴を鳴らす'},FURIN_L={es:'El viento no pide permiso para sonar. Tú tampoco para descansar.',en:'The wind does not ask permission to ring. Neither do you to rest.',ja:'風は鳴るのに許しを求めません。あなたも、休むのに許しはいりません。'};
+const VACT={rake:{es:'Rastrillar la arena',en:'Rake the sand',ja:'砂に筋を引く'},lord:{es:'Inclinarte ante el señor ausente',en:'Bow to the absent lord',ja:'不在の殿に一礼する'}};
+const RAKE=[{es:'Los surcos nuevos borran los de antes. Nadie echa de menos los viejos.',en:'The new furrows erase the old ones. No one misses the old.',ja:'新しい筋が前の筋を消します。古い筋を惜しむ人はいません。'},
+ {es:'Tres piedras y arena: no hace falta más para un mar.',en:'Three stones and sand: nothing more is needed for a sea.',ja:'石が三つと砂。海をつくるのに、それ以上はいりません。'},
+ {es:'Rastrillar no termina nunca, y por eso no hay prisa.',en:'Raking is never finished, and so there is no hurry.',ja:'砂を掻く仕事に終わりはなく、だから急ぐこともありません。'},
+ {es:'El orden de fuera va ordenando lo de dentro.',en:'The order outside slowly orders what is inside.',ja:'外を整えるうちに、内も整っていきます。'}];
+const LORD=[{es:'El señor ya no está, y el salón sigue en calma. El poder también se suelta.',en:'The lord is gone, and the hall is still calm. Power, too, is let go.',ja:'殿はもうおらず、広間は静かなまま。権力もまた、手放されるものです。'},
+ {es:'Quien se sentaba aquí también dudaba. Nadie manda sobre su propia inquietud a la fuerza.',en:'The one who sat here also had doubts. No one rules over their own unrest by force.',ja:'ここに座った人にも迷いはありました。心のざわめきは、力では治められません。'},
+ {es:'No necesitas ganar hoy. Basta con haber llegado.',en:'You do not need to win today. Having arrived is enough.',ja:'今日は勝たなくていい。ここに来ただけで十分です。'},
+ {es:'El oro de las paredes no pesa. Lo que pesa es querer más.',en:'The gold on the walls weighs nothing. What weighs is wanting more.',ja:'壁の金は重くありません。重いのは、もっと欲しいと思う心です。'}];
 const SOMBRAS=[
  {es:'Este farol aleja el miedo.',en:'This lantern drives away fear.',ja:'この灯は、恐れを遠ざけます。'},
  {es:'Este farol aleja el enojo.',en:'This lantern drives away anger.',ja:'この灯は、怒りを遠ざけます。'},
@@ -89,16 +100,16 @@ LINES[3]=[{es:'La espada mejor cuidada es la que se queda en su funda.',en:'The 
 const sky=[],boats=[];
 const BELL={es:'La campana se lleva lejos lo que ya no necesitas cargar.',en:'The bell carries far away what you no longer need to carry.',ja:'鐘の音が、もう背負わなくていいものを遠くへ運びます。'};
 /* ---------- interfaz ---------- */
-let box=null,bEnter,bAct,bView,bBack,cap,fade,near=null,V=null,wasStill=false,busy=false;
+let box=null,bEnter,bAct,bAct2,bView,bBack,cap,fade,near=null,V=null,wasStill=false,busy=false;
 const _a=new THREE.Vector3(),_b=new THREE.Vector3(),_c=new THREE.Color();
 const C0=new THREE.Color(0x6b645c),C1=new THREE.Color(0xffd9a0);
 function init(){
-  try{UX.add([['Cuencos y campanas zen','Zen bowls and bells','おりんと鐘の音'],['Caña de agua','Water cane knock','鹿おどしの音']])}catch(e){}
+  try{UX.add([['Cuencos y campanas zen','Zen bowls and bells','おりんと鐘の音'],['Caña de agua','Water cane knock','鹿おどしの音'],['Campanillas de viento','Wind chimes','風鈴の音']])}catch(e){}
   const st=document.createElement('style');st.textContent='#visitBox{position:fixed;z-index:58;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;bottom:max(204px,calc(env(safe-area-inset-bottom) + 196px))}#visitBox.in{bottom:max(26px,calc(env(safe-area-inset-bottom) + 18px))}#visitBox button{min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #8a6a40;background:rgba(60,38,26,.86);color:#fbf1e0;font:600 .88rem system-ui,sans-serif;display:none;cursor:pointer;white-space:nowrap}#visitBox button.soft{background:rgba(32,34,70,.82);border-color:#5a609a}#visitCap{position:fixed;z-index:57;left:50%;transform:translateX(-50%);top:max(74px,calc(env(safe-area-inset-top) + 64px));width:min(86vw,560px);text-align:center;color:#fbf1e0;font:500 1.06rem/1.5 Georgia,"Hiragino Mincho ProN",serif;text-shadow:0 1px 6px rgba(10,12,30,.9);background:rgba(20,22,44,.42);border-radius:16px;padding:10px 16px;opacity:0;transition:opacity 1.4s;pointer-events:none}#visitFade{position:fixed;inset:0;z-index:56;background:#0e1024;opacity:0;transition:opacity .6s;pointer-events:none}body.visiting #abox,body.visiting #joy,body.visiting #stillBtn,body.visiting #lantB,body.visiting #places-row,body.visiting #hint,body.visiting #next,body.visiting #taskBox{display:none!important}';
   document.head.appendChild(st);
   box=document.createElement('div');box.id='visitBox';
   const mk=(f,soft)=>{const b=document.createElement('button');b.type='button';if(soft)b.className='soft';b.onclick=f;box.appendChild(b);return b};
-  bEnter=mk(()=>enter(near));bAct=mk(act);bView=mk(swap,true);bBack=mk(leave,true);
+  bEnter=mk(()=>enter(near));bAct=mk(act);bAct2=mk(act2);bView=mk(swap,true);bBack=mk(leave,true);
   cap=document.createElement('div');cap.id='visitCap';cap.setAttribute('aria-live','polite');
   fade=document.createElement('div');fade.id='visitFade';
   document.body.append(fade,cap,box);
@@ -111,8 +122,12 @@ function enter(g){if(!g||V||busy)return;const d=g.userData.visit;
     if(d.lamps)for(const l of d.lamps){l.on=0;l.k=0}
     try{A.zen(d.kind===5||d.kind===10?1:d.kind===7||d.kind===3?3:2)}catch(e){}cap.textContent='';say(INTRO[d.kind],12)})}
 function leave(){if(!V||busy)return;through(()=>{V=null;S.visit=false;S.indoor=false;STILL.on=wasStill;LOOK.yaw=LOOK.pitch=0;document.body.classList.remove('visiting');box.classList.remove('in');cap.style.opacity=0;cap.textContent='';try{A.zen(0)}catch(e){}})}
-function swap(){if(!V||busy||V.d.views.length<2)return;through(()=>{V.vi=1-V.vi;V.w=null;V.hd=0;V.vel=0;LOOK.yaw=LOOK.pitch=0})}
-function act(){if(!V)return;const d=V.d;
+function swap(){if(!V||busy||V.d.views.length<2)return;through(()=>{V.vi=(V.vi+1)%V.d.views.length;V.w=null;V.hd=0;V.vel=0;LOOK.yaw=LOOK.pitch=0})}
+function act2(){if(!V||!V.d.furin||(V.f2&&V.t-V.f2<2))return;V.f2=V.t;for(const f of V.d.furin)f.userData.hit=P.t+Math.random()*.5;
+  try{A.cap('Campanillas de viento');const t=A.ctx.currentTime;[1568,1760,2093,2349,1976].forEach((f,i)=>{A.bell(f,t+.05+i*.16+Math.random()*.1,.035,false,(i-2)*1.2,-2);if(i%2)A.bell(f*1.5,t+.9+i*.2,.02,false,(i-2)*1.2,-2)});UX.hap(8)}catch(e){}say(FURIN_L,11)}
+function act(){if(!V)return;const d=V.d,va=d.views[V.vi].act;
+  if(va==='rake'){if(V.bell&&V.t-V.bell<2.5)return;V.bell=V.t;const G=d.garden;G.n=G.n%6+1;through(()=>{G.sand.material.map=paintTex('sand',G.n);G.sand.material.needsUpdate=true});try{A.bowl(174.61,.05,0,-2)}catch(e){}say(RAKE[(V.ri=(V.ri||0)+1)%RAKE.length],13);return}
+  if(va==='lord'){if(V.bell&&V.t-V.bell<3)return;V.bell=V.t;V.sip=V.t;try{A.bowl(146.83,.08,0,-2)}catch(e){}say(LORD[(V.lo=(V.lo||0)+1)%LORD.length],13);return}
   if(d.kind===2){if(V.lit>=d.lamps.length)return;d.lamps[V.lit].on=1;say(SOMBRAS[V.lit%SOMBRAS.length],9);V.lit++;try{A.bowl([293.66,329.63,392,440,523.25,587.33,659.25,783.99][V.lit-1],.07,0,-2);UX.hap(10)}catch(e){}
     if(V.lit>=d.lamps.length)setTimeout(()=>{if(V&&V.d===d)say(FIN2,16)},9500)}
   else if(d.kind===5){if(V.bell&&V.t-V.bell<3.2)return;V.bell=V.t;try{A.gong()}catch(e){}say(BELL,10)}
@@ -131,7 +146,7 @@ export function visitStep(dt){
   const ps=P.dist||-P.pz;near=null;
   if(S.started&&!V&&!S.walk&&!S.cine&&!S.X.photo&&vueltas()>=1)for(const [k,g] of lmMade){if(g.userData.visit&&!g.userData.job&&Math.abs(lmPos(k)-ps)<(g.userData.visit.range||46)){near=g;break}}
   bEnter.style.display=near&&!busy?'block':'none';if(near)bEnter.textContent=T3(ENTER[near.userData.visit.kind]);
-  const on=!!V;bBack.style.display=on?'block':'none';bAct.style.display=on&&!(V.d.kind===2&&V.lit>=V.d.lamps.length)?'block':'none';bView.style.display=on&&V.d.views.length>1?'block':'none';
+  const on=!!V;bBack.style.display=on?'block':'none';bAct.style.display=on&&!(V.d.kind===2&&V.lit>=V.d.lamps.length)?'block':'none';bView.style.display=on&&V.d.views.length>1?'block':'none';bAct2.style.display=on&&V.d.furin&&(V.d.act2||V.d.kind===3||V.d.kind===7)&&!V.d.views[V.vi].indoor?'block':'none';
   /* faroles, campana y vapor siguen animándose aunque ya no estés dentro (se apagan solos al salir) */
   for(const [,g] of lmMade){const d=g.userData.visit;if(!d)continue;const here=V&&V.d===d;
     if(d.lamps)for(const l of d.lamps){const tg=here?l.on:0;if(Math.abs(tg-l.k)>.002||l.k>0){l.k+=(tg-l.k)*Math.min(1,dt*1.6);l.b.material.color.copy(_c.copy(C0).lerp(C1,l.k));l.s.material.opacity=l.k*(.62+.08*Math.sin(P.t*5.3+l.d))}}
@@ -139,6 +154,7 @@ export function visitStep(dt){
     if(d.steam)for(const s of d.steam){const u=(P.t*.22+s.userData.ph)%1;s.position.y=s.userData.y0+u*.5;s.material.opacity=here?.3*Math.sin(u*Math.PI):0;s.scale.setScalar((d.kind===5?.3:.14)+u*(d.kind===5?.5:.2))}
     if(d.arm){/* shishi-odoshi: se llena despacio, cae, golpea y vuelve */const u=(P.t%9)/9,a=u<.86?-.3+u/.86*.55:u<.9?.25-(u-.86)/.04*.8:-.55+(u-.9)/.1*.25;d.arm.rotation.z=a;
       if(here&&u>=.9&&!d.tk){d.tk=1;try{A.tock()}catch(e){}}else if(u<.5)d.tk=0}
+    if(d.furin)for(const f of d.furin){const e=P.t-(f.userData.hit||-99),a=(e>0&&e<9?Math.exp(-e*.5)*.5:0)+.05;f.rotation.z=Math.sin(P.t*3.1+f.userData.ph)*a;f.rotation.x=Math.sin(P.t*2.3+(f.userData.ph||0)*2)*a*.7}
     if(d.bell){const e=here?V.t-V.bell:99,a=e<12&&here&&V.bell>0?Math.exp(-e*.35)*Math.sin(e*2.6):0;d.bell.rotation.x=a*.07;d.log.position.z=2.6-(e<.5&&here&&V.bell>0?Math.sin(e*6.283)*.9:0)}}
   /* luces soltadas desde la torre: suben despacio, se alejan y se apagan */
   for(let i=sky.length-1;i>=0;i--){const q=sky[i];q.t+=dt;const t=q.t;q.g.position.set(q.x+q.dx*t*.9+Math.sin(t*.45+q.ph)*.8,q.y+t*(.7+t*.06),q.z+q.dz*t*.9+Math.cos(t*.37+q.ph)*.6);
@@ -150,9 +166,9 @@ export function visitStep(dt){
     if(t>44)q.g.scale.setScalar(Math.max(.01,(50-t)/6));if(t>=50){scene.remove(q.g);q.g.traverse(o=>{if(o.geometry)o.geometry.dispose()});q.g.children[0].material.dispose();boats.splice(i,1)}}
   if(!V)return;
   if(!V.g.parent){V=null;S.visit=false;S.indoor=false;STILL.on=wasStill;document.body.classList.remove('visiting');box.classList.remove('in');cap.style.opacity=0;return}
-  V.t+=dt;STILL.t=0;bAct.textContent=T3(ACT[V.d.kind]);bBack.textContent=T3(BACK);if(V.d.views.length>1)bView.textContent=T3(VIEW[V.vi]);
+  V.t+=dt;STILL.t=0;{const cv=V.d.views[V.vi];bAct.textContent=T3(cv.act?VACT[cv.act]:ACT[V.d.kind]);bAct2.textContent=T3(FURIN);bBack.textContent=T3(BACK);if(V.d.views.length>1)bView.textContent=T3(cv.label||VIEW[V.vi])}
   /* frases sin prisa: llegan solas cada cierto tiempo */
-  if(V.t>V.next){const L=LINES[V.d.kind];say(L[V.li++%L.length],V.d.kind===2?14:13)}
+  if(V.t>V.next){const va=V.d.views[V.vi].act,L=va==='rake'?RAKE:va==='lord'?LORD:LINES[V.d.kind];say(L[V.li++%L.length],V.d.kind===2?14:13)}
   /* cámara sentada: respira apenas, y se puede mirar alrededor */
   const v=V.d.views[V.vi];v.ref.updateWorldMatrix(true,false);_a.fromArray(v.eye);_b.fromArray(v.look);v.ref.localToWorld(_a);v.ref.localToWorld(_b);
   const dx=_b.x-_a.x,dy=_b.y-_a.y,dz=_b.z-_a.z,yaw=Math.atan2(dx,-dz),pit=Math.atan2(dy,Math.hypot(dx,dz)),cm=(window.UX&&UX.calm&&UX.calm())?.3:1;

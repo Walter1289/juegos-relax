@@ -29,3 +29,9 @@ Desde la primera vuelta cerrada (`vueltas()` en lightmsg.js: cuenta vueltas con 
 Cada lugar deja en `g.userData.visit` su tipo, las vistas (`ref` + `eye`/`look` en coordenadas locales) y lo que se anima (faroles de la plaza, campana y mazo, vapor del té).
 visit.js detiene la canoa (STILL), mueve la cámara con un fundido, muestra frases sin prisa y activa `A.zen(kind)` (cuencos, campanillas y koto suelto; el tambor calla).
 Acciones: encender los ocho faroles de la piedra ceremonial, tocar la campana (`A.gong`), tomar té y cambiar entre sala y galería. Prueba: `/home/claude/shots/vis.js`.
+
+## Ornamentos y más paradas (rio/lm-deco.js)
+lm-deco.js reúne piezas japonesas reutilizables (pinturas en lienzo `paintTex`, biombo, montante, armadura, hogar irori, ikebana, pino niwaki, tsukubai, cerca de bambú, chōchin, fūrin, cojín, musgo, velas, soporte de espadas).
+Las vistas de una parada pueden ser más de dos (`views[i].label` es el texto del botón para pasar a la siguiente) y llevar acción propia (`act`: 'rake' | 'lord').
+Castillo: torre, jardín seco del patio alto (la arena cambia de trazo al rastrillar) y salón del señor en el 2.º piso de la torre (entre los zócalos macizos del lote; no bajar al 1.º: sus cajas de madera tapan el suelo).
+`visit.furin` = campanillas que se mecen; `act2:'furin'` añade el botón para tocarlas (puente, y galerías del samurái y la casa de té).

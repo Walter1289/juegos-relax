@@ -6,7 +6,10 @@ import {toonGrad} from '../style.js';
 import {hash,sm} from './util.js';
 import {CAS,H,cx,hw} from './world.js';
 import {Batch,rgb,tint} from './batch.js';
-import {gl} from './lm-parts.js';
+import {gl,bx,cyl,optimizeLM,rockGeo} from './lm-parts.js';
+import {paintTex,pic,byobu,ranma,yoroi,ikebana,niwaki,zabuton,moss,shokudai,katanaKake} from './lm-deco.js';
+import {tex} from '../style.js';
+import {MT} from './core.js';
 import {SAKURA} from '../season.js';
 import {buildFestival} from './festival.js';
 import {scene} from './core.js';
@@ -194,6 +197,7 @@ export function seg(bt,a,b,t,col,t2){const dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2
   bt.save().T((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2,Math.atan2(dx,dz),-Math.atan2(dy,Math.hypot(dx,dz)),0).box(t,t2||t,L,col).restore()}
 /* ======================= CONSTRUCCIÓN ======================= */
 /* construcción incremental (generador): se reparte en varios fotogramas para no producir tirones */
+let _mon=null;function kanjiMon(){if(_mon)return _mon;const c=document.createElement('canvas');c.width=64;c.height=240;const x=c.getContext('2d');x.fillStyle='#2f3f7a';x.fillRect(0,0,64,240);x.fillStyle='#fbf6ea';x.beginPath();x.arc(32,60,20,0,6.3);x.fill();x.fillStyle='#2f3f7a';x.beginPath();x.moveTo(18,66);x.quadraticCurveTo(30,44,46,54);x.quadraticCurveTo(34,58,30,72);x.fill();x.fillStyle='#fbf6ea';x.font='bold 40px serif';x.textAlign='center';x.fillText('鷺',32,150);_mon=new THREE.CanvasTexture(c);_mon.colorSpace=THREE.SRGBColorSpace;return _mon}
 export function* castleJob(g,k,ctx){
   const t0=performance.now(),{side,hwv}=ctx,rnd=mulb(k*7919+11),h=new THREE.Group();h.position.set(side*(hwv+CAS.PO),0,0);h.rotation.y=-side*Math.PI/2;g.add(h);
   const X={P:new Batch(),S:new Batch(),G:new Batch(),E:new Batch(),CL:new Batch(),h,rnd,fr:frameOf(ctx),ctx,drums:[]};
@@ -247,7 +251,7 @@ export function* castleJob(g,k,ctx){
   for(let i=0;i<13;i++){cs.push([-62+rnd()*50,-46+rnd()*84],[40+rnd()*22,-46+rnd()*84])}
   for(let i=0;i<6;i++)cs.push([-40+rnd()*80,-49+rnd()*7]);
   for(const [tx,tz] of cs){if(tz>12&&tz<38&&Math.abs(tx-SX)<7&&Math.abs(tx-SX)>1)continue;if(Math.abs(tx)<39&&tz>-42&&tz<19&&!(tz>12&&Math.abs(tx-SX)>7))continue;if(tz>37&&Math.abs(tx-SX)<10)continue;cherry(X,tx,PH+.05,tz,.8+rnd()*.5,rnd);if((++nt)%9===0)yield}
-  for(const [tx,tz] of[[-15,-10],[-11,-16],[-16,-4],[-7,-8],[-3,-14]])cherry(X,tx,Y0+.05,tz,.75+rnd()*.3,rnd);
+  for(const [tx,tz] of[[-17.5,-15],[-11,-18],[-17,-2.5],[-3.5,-16],[-4.5,-2.5]])cherry(X,tx,Y0+.05,tz,.75+rnd()*.3,rnd);
   for(let i=0;i<12;i++){const tx=-61+i*10.4+rnd()*2;if(Math.abs(tx-SX)<10)continue;tourouB(X,tx,PH+.05,36,.9)}
   mark('arboles');yield;yield* buildFestival(X);mark('festival');yield;
   /* mallas finales */
@@ -256,7 +260,32 @@ export function* castleJob(g,k,ctx){
   for(const [wx,wy,wz,sz] of[[KX-13.5,Y0+4,KZ+11.5,26],[KX+13.5,Y0+5,KZ+11.5,24],[KX,Y0+13,KZ+11,26],[KX,Y0+21,KZ+8,22],[KX,Y0+28,KZ+6,18],[KX,Y0+34,KZ+5,14],[-22,Y0+4,-21,14],[24,Y0+5,8,14],[-24,Y0+5,9,14],[-10,PH+5,CAS.ZF+3,18]])gl(h,0xffd592,sz,wx,wy,wz,.2);
   mark('focos');g.updateMatrixWorld(true);const v=new THREE.Vector3(KX,Y0+14,KZ);h.localToWorld(v);
   g.userData.cas={parts,ms:0,tris:Pl.count()+S.count()+G.count()+E.count()+CL.count(),mats:M,keep:{x:KX,z:KZ,top:kt.top,ridge:kt.ridge},drums:X.drums,h,fr:X.fr,cw:v};
-  g.userData.visit={kind:10,range:95,views:[{ref:h,eye:[KX,VY+1.62,KZ+9.8/2+.85],look:[KX-6,VY-9,KZ+130],walk:{rect:[KX-VW+.5,KX+VW-.5,KZ-VD+.5,KZ+VD-.5],boxes:[[KX-7.15,KX+7.15,KZ-5.45,KZ+5.45]]}}]};
+  /* ---- jardín seco (karesansui) en el patio alto: arena rastrillada, tres piedras con musgo, pino podado y tarima para sentarse ---- */
+  const gg=new THREE.Group();gg.position.set(-10.5,Y0+.06,-10);h.add(gg);
+  const sand=new THREE.Mesh(new THREE.PlaneGeometry(9,7).rotateX(-Math.PI/2),new THREE.MeshToonMaterial({gradientMap:toonGrad,map:paintTex('sand',1)}));sand.position.y=.03;sand.userData.noMerge=true;gg.add(sand);
+  for(const [w,d,x,z] of[[9.5,.3,0,3.62],[9.5,.3,0,-3.62],[.3,7,4.62,0],[.3,7,-4.62,0]])bx(gg,w,.22,d,0x8f8d88,x,.08,z,{map:tex('stone')});
+  for(const [x,z,r,sy,sd] of[[-2.16,-.7,.8,1.25,3],[1.08,-1.4,.5,.8,5],[1.8,1.26,.9,.7,8]]){const rk=new THREE.Mesh(rockGeo(r,sd,1,sy),MT(0x8a8c88,{map:tex('rock')}));rk.position.set(x,r*sy*.45,z);rk.rotation.y=sd;gg.add(rk);moss(gg,x+.15,.05,z+.1,r*.95,sd,0x5f9a58)}
+  niwaki(gg,5.5,0,-3.7,3,1.1);bx(gg,9.4,.3,1.7,0x6d4a3a,0,.15,4.75,{map:tex('plank')});for(const x of[-4.4,0,4.4])bx(gg,.3,.3,1.5,0x9d9c9a,x,-.05,4.75);zabuton(gg,0,.3,4.6,0x3f4a6b);zabuton(gg,-1.3,.3,4.7,0x7a3b3b);
+  mark('jardin');yield;
+  /* ---- salón del señor, dentro del segundo piso de la torre (entre sus zócalos de madera): tatami, estrado con biombo de oro, la armadura y sus espadas ---- */
+  const hg=new THREE.Group();hg.position.set(KX,Y0+9.2,KZ);h.add(hg);
+  {const em={emissive:0x5a452c},R=new THREE.Mesh(new THREE.BoxGeometry(15,3.45,11),MT(0xe3cf9a,{side:THREE.BackSide,emissive:0x5a4a26}));R.position.y=1.72;hg.add(R);
+    bx(hg,14.96,.04,10.96,0xcdc490,0,.02,0,{map:tex('straw'),emissive:0x4a3c20});for(const x of[-5,-2.5,0,2.5,5])bx(hg,.06,.045,10.9,0x4f6a4a,x,.024,0);for(const z of[-1.8,1.8])bx(hg,14.9,.045,.06,0x4f6a4a,0,.024,z);
+    bx(hg,14.96,.28,3,0x6a4a3a,0,.14,-4,{emissive:0x22160e});bx(hg,14.96,.04,2.96,0xcdc490,0,.3,-4,{map:tex('straw'),emissive:0x4a3c20});bx(hg,14.96,.3,.08,0x1e2028,0,.15,-2.48);
+    pic(hg,9.5,2.7,paintTex('pine'),0,1.75,-5.47);pic(hg,2.4,2.7,paintTex('crane'),-6.2,1.75,-5.46);pic(hg,2.4,2.7,paintTex('crane',2),6.2,1.75,-5.46);
+    pic(hg,6.5,2.3,paintTex('sakura'),-7.47,1.5,1.2,Math.PI/2);pic(hg,6.5,2.3,paintTex('sakura',2),7.47,1.5,1.2,-Math.PI/2);ranma(hg,14.8,0,3.05,-2.5);
+    yoroi(hg,0,.32,-4.3,0x2f3f7a);katanaKake(hg,2.2,.32,-4.2);ikebana(hg,-2.4,.32,-4.3,7,0xfbf6ea);byobu(hg,-5.2,.32,-3.6,.5,4,'crane',1.6,.62);byobu(hg,5.2,.32,-3.6,-.5,4,'pine',1.6,.62);
+    for(const x of[-1.1,1.1])shokudai(hg,x,.32,-3.3);for(const x of[-6.4,6.4])for(const z of[0,3.6])shokudai(hg,x,.04,z);
+    for(const x of[-3.6,3.6])for(const z of[-.6,2.6]){cyl(hg,.2,.2,3.4,0x8d2a23,x,1.7,z,10,{emissive:0x220a08});cyl(hg,.26,.26,.2,0xd9a85a,x,.1,z,10);cyl(hg,.26,.26,.2,0xd9a85a,x,3.25,z,10)}
+    for(const x of[-5.4,5.4])for(const z of[-.8,.9,2.6])zabuton(hg,x,.04,z,x<0?0x7a3b3b:0x3f4a6b,0x1a1414);zabuton(hg,0,.04,2.6,0x5a3a6b,0x1a1420);
+    bx(hg,14.9,.1,10.9,0x3a2a24,0,3.4,0);for(let i=-3;i<=3;i++)bx(hg,.14,.14,10.9,0x241a16,i*2.1,3.3,0);for(let i=-2;i<=2;i++)bx(hg,14.9,.14,.14,0x241a16,0,3.3,i*2.2);
+    /* estandartes con el mon de la garza */
+    for(const x of[-3,3])pic(hg,.55,2.0,kanjiMon(),x,2.2,-5.2)}
+  mark('salon');yield;
+  const garden={sand,n:1};
+  g.userData.visit={kind:10,range:95,garden,views:[{label:{es:'Bajar al jardín de piedras',en:'Go down to the rock garden',ja:'石庭に下りる'},ref:h,eye:[KX,VY+1.62,KZ+9.8/2+.85],look:[KX-6,VY-9,KZ+130],walk:{rect:[KX-VW+.5,KX+VW-.5,KZ-VD+.5,KZ+VD-.5],boxes:[[KX-7.15,KX+7.15,KZ-5.45,KZ+5.45]]}},
+    {label:{es:'Entrar al salón del señor',en:'Enter the lord’s hall',ja:'殿の広間に入る'},act:'rake',ref:gg,eye:[0,1.25,4.7],look:[-.3,.2,-1],walk:{rect:[-4.3,4.3,4.2,5.3],up:.6}},
+    {label:{es:'Subir a la torre',en:'Climb the tower',ja:'天守に登る'},act:'lord',ref:hg,eye:[0,.92,2.6],look:[0,1.5,-4.5],indoor:1,walk:{rect:[-6.7,6.7,-1.9,4.7],up:.68,holes:[[-3.6,-.6,.75],[3.6,-.6,.75],[-3.6,2.6,.75],[3.6,2.6,.75],[-6.4,0,.5],[6.4,0,.5],[-6.4,3.6,.5],[6.4,3.6,.5]]}}]};
   g.userData.cas.ms=performance.now()-t0;return g}
 /* puente arqueado rojo sobre el foso, embarcadero con linternas y losas de piedra */
 function bridge(X){
