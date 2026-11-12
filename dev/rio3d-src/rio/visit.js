@@ -19,8 +19,8 @@ const BACK={es:'Volver a la canoa',en:'Back to the canoe',ja:'カヌーに戻る
 const VIEW=[{es:'Salir al balcón',en:'Go out to the balcony',ja:'縁側に出る'},{es:'Entrar a la sala',en:'Go into the room',ja:'座敷に入る'}];
 const INTRO={
  2:{es:'La piedra guarda a la aldea. Cada farol que enciendes aleja una sombra de las que pesan sobre las personas. Mantén presionado para caminar por la plaza.',en:'The stone watches over the village. Each lantern you light drives away one of the shadows that weigh on people. Press and hold to walk around the square.',ja:'この石は村を見守っています。灯籠をひとつともすたび、人にのしかかる影がひとつ遠ざかります。長押しで広場を歩けます。'},
- 5:{es:'Siéntate junto a la campana. Aquí no hay nada que hacer.',en:'Sit beside the bell. There is nothing to do here.',ja:'鐘のそばに座りましょう。ここでは、何もしなくていいのです。'},
- 7:{es:'El té está caliente. Sostén la taza con las dos manos.',en:'The tea is hot. Hold the cup with both hands.',ja:'お茶は温かい。両手で湯のみを包みましょう。'}};
+ 5:{es:'Siéntate junto a la campana. Aquí no hay nada que hacer. Si quieres recorrer el templo, mantén presionado.',en:'Sit beside the bell. There is nothing to do here. To walk around the temple, press and hold.',ja:'鐘のそばに座りましょう。ここでは、何もしなくていいのです。長押しで寺の中を歩けます。'},
+ 7:{es:'El té está caliente. Sostén la taza con las dos manos. Si quieres moverte por la casa, mantén presionado.',en:'The tea is hot. Hold the cup with both hands. To move around the house, press and hold.',ja:'お茶は温かい。両手で湯のみを包みましょう。長押しで茶屋の中を歩けます。'}};
 const SOMBRAS=[
  {es:'Este farol aleja el miedo.',en:'This lantern drives away fear.',ja:'この灯は、恐れを遠ざけます。'},
  {es:'Este farol aleja el enojo.',en:'This lantern drives away anger.',ja:'この灯は、怒りを遠ざけます。'},
@@ -70,7 +70,7 @@ function enter(g){if(!g||V||busy)return;const d=g.userData.visit;
     if(d.lamps)for(const l of d.lamps){l.on=0;l.k=0}
     try{A.zen(d.kind===5?1:d.kind===2?2:3)}catch(e){}cap.textContent='';say(INTRO[d.kind],12)})}
 function leave(){if(!V||busy)return;through(()=>{V=null;S.visit=false;S.indoor=false;STILL.on=wasStill;LOOK.yaw=LOOK.pitch=0;document.body.classList.remove('visiting');box.classList.remove('in');cap.style.opacity=0;cap.textContent='';try{A.zen(0)}catch(e){}})}
-function swap(){if(!V||busy||V.d.views.length<2)return;through(()=>{V.vi=1-V.vi;LOOK.yaw=LOOK.pitch=0})}
+function swap(){if(!V||busy||V.d.views.length<2)return;through(()=>{V.vi=1-V.vi;V.w=null;V.hd=0;V.vel=0;LOOK.yaw=LOOK.pitch=0})}
 function act(){if(!V)return;const d=V.d;
   if(d.kind===2){if(V.lit>=d.lamps.length)return;d.lamps[V.lit].on=1;say(SOMBRAS[V.lit%SOMBRAS.length],9);V.lit++;try{A.bowl([293.66,329.63,392,440,523.25,587.33,659.25,783.99][V.lit-1],.07,0,-2);UX.hap(10)}catch(e){}
     if(V.lit>=d.lamps.length)setTimeout(()=>{if(V&&V.d===d)say(FIN2,16)},9500)}
@@ -100,15 +100,21 @@ export function visitStep(dt){
   const ly=Math.max(-1.9,Math.min(1.9,LOOK.yaw)),sipK=V.sip!=null?Math.max(0,1-Math.abs((V.t-V.sip)-.9)/.9):0;
   S.indoor=!!v.indoor;
   if(v.walk){
-    /* plaza caminable: mantén presionado para avanzar hacia donde miras; el joystick o deslizar gira. Te quedas dentro del círculo y rodeas la piedra */
-    const w=v.walk;if(!V.w)V.w=[_a.x,_a.z];
-    const hold=P.hold||P.key.up;V.vel+=((hold?1.5:0)-V.vel)*Math.min(1,dt*3);V.hd+=((hold?IN.steer:0)+(P.key.r?1:0)-(P.key.l?1:0))*1.1*dt;
-    const hy=yaw+V.hd-ly;V.w[0]+=Math.sin(hy)*V.vel*dt;V.w[1]-=Math.cos(hy)*V.vel*dt;
-    _b.set(0,0,0);v.ref.localToWorld(_b);{const ex=V.w[0]-_b.x,ez=V.w[1]-_b.z,r=Math.hypot(ex,ez);if(r>w.r){V.w[0]=_b.x+ex/r*w.r;V.w[1]=_b.z+ez/r*w.r}}
-    for(const [hx,hz,hr] of w.holes){_b.set(hx,0,hz);v.ref.localToWorld(_b);const ex=V.w[0]-_b.x,ez=V.w[1]-_b.z,r=Math.hypot(ex,ez)||1e-3;if(r<hr){V.w[0]=_b.x+ex/r*hr;V.w[1]=_b.z+ez/r*hr}}
-    V.bob+=V.vel*dt*2.4;
-    cam.position.set(V.w[0],_a.y+Math.sin(V.bob)*.045*Math.min(1,V.vel)*cm,V.w[1]);
-    cam.rotation.set(pit*.6+LOOK.pitch*.8,-(yaw+V.hd)+ly,0,'YXZ');
+    /* se puede caminar: mantén presionado para avanzar hacia donde miras; el joystick o deslizar gira. Al quedarte quieto vuelves a sentarte.
+       Todo en coordenadas locales del lugar: límite (círculo r o rectángulo), y obstáculos redondos (holes) y rectangulares (boxes) */
+    const w=v.walk;if(!V.w){V.w=[v.eye[0],v.eye[2]];V.up=w.up?0:1;V.idle=9}
+    const hold=P.hold||P.key.up;V.vel+=((hold?(w.up?1.15:1.5):0)-V.vel)*Math.min(1,dt*3);V.hd+=((hold?IN.steer:0)+(P.key.r?1:0)-(P.key.l?1:0))*1.1*dt;
+    const hy=yaw+V.hd-ly;_b.set(V.w[0],0,V.w[1]);v.ref.localToWorld(_b);_b.x+=Math.sin(hy)*V.vel*dt;_b.z-=Math.cos(hy)*V.vel*dt;v.ref.worldToLocal(_b);let x=_b.x,z=_b.z;
+    for(let it=0;it<2;it++){
+      if(w.r){const r=Math.hypot(x,z);if(r>w.r){x*=w.r/r;z*=w.r/r}}
+      if(w.rect){x=Math.max(w.rect[0],Math.min(w.rect[1],x));z=Math.max(w.rect[2],Math.min(w.rect[3],z))}
+      if(w.boxes)for(const [x0,x1,z0,z1] of w.boxes)if(x>x0&&x<x1&&z>z0&&z<z1){const d=[x-x0,x1-x,z-z0,z1-z],m=Math.min(...d);if(m===d[0])x=x0;else if(m===d[1])x=x1;else if(m===d[2])z=z0;else z=z1}
+      for(const [hx,hz,hr] of w.holes||[]){const ex=x-hx,ez=z-hz,r=Math.hypot(ex,ez)||1e-3;if(r<hr){x=hx+ex/r*hr;z=hz+ez/r*hr}}}
+    V.w[0]=x;V.w[1]=z;V.idle=V.vel>.12?0:V.idle+dt;
+    if(w.up)V.up+=((V.idle<2.5?1:0)-V.up)*Math.min(1,dt*1.8);
+    V.bob+=V.vel*dt*2.4;_b.set(x,v.eye[1]+(w.up||0)*V.up,z);v.ref.localToWorld(_b);
+    cam.position.set(_b.x,_b.y+(Math.sin(V.bob)*.045*Math.min(1,V.vel)+Math.sin(V.t*.8)*.01)*cm,_b.z);
+    cam.rotation.set(pit*(w.up?1-.6*V.up:.6)+LOOK.pitch*.8-sipK*.12*(1-V.up),-(yaw+V.hd)+ly,0,'YXZ');
   }else{
   cam.position.set(_a.x,_a.y+Math.sin(V.t*.8)*.012*cm,_a.z);
   cam.rotation.set(pit+LOOK.pitch*.8-sipK*.12,-yaw+ly,0,'YXZ');}

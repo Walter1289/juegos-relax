@@ -87,7 +87,7 @@ function buildLM0(k){
         const cp=new THREE.Mesh(new THREE.ConeGeometry(.33,.2,8),MT(0xb5473a));cp.position.set(x,1.65,z);pz.add(cp);
         const s=spr(0xffc77a,2.6);s.material.opacity=0;s.position.set(x,1.3,z);pz.add(s);lamps.push({b,s,k:0,on:0,d:x*side})}
       lamps.sort((p,q)=>q.d-p.d);
-      g.userData.visit={kind:2,lamps,stone:st,views:[{ref:pz,eye:[-side*4.4,1.55,1.2],look:[0,2.1,-.1],walk:{r:4.45,holes:[[0,0,2.15],[-side*2.2,0,1]]}}]}}
+      g.userData.visit={kind:2,lamps,stone:st,views:[{ref:pz,eye:[-side*4.4,1.55,1.2],look:[0,2.1,-.1],walk:{r:4.45,holes:[[0,0,2.15],[-side*2.2,0,1],[-side*2.6,3.95,.85],[-side*2.6,-3.95,.85],...lamps.map(l=>[l.b.position.x,l.b.position.z,.38])]}}]}}
     // arco de bienvenida con faroles sobre el río
     torii(g,0,-.5,-34,1.08,0xb5473a,{w:(hwv-.5)/1.08,water:true});gl(g,0xffc77a,4,-hwv*.5,5.2,-34,.9);gl(g,0xffc77a,4,hwv*.5,5.2,-34,.9);gl(g,0xffc77a,4,0,5.2,-34,.9)}
   else if(type===3){
@@ -124,7 +124,7 @@ function buildLM0(k){
     /* sitio de meditación junto a la campana: cojines e incienso */
     {const st=[];bx(h,.95,.12,.95,0x7a3b3b,3.15,2.31,-2.55);bx(h,.95,.12,.95,0x3f4a6b,-2.6,2.31,-1.7);cyl(h,.18,.13,.16,0x5a5048,1.3,2.33,1.1,8);cyl(h,.012,.012,.3,0x7a4a3a,1.3,2.52,1.1,4);
       const s=spr(0xffffff,.5);s.material.blending=THREE.NormalBlending;s.material.opacity=0;s.position.set(1.3,2.9,1.1);s.userData.y0=2.75;s.userData.ph=1;h.add(s);st.push(s);
-      g.userData.visit={kind:5,bell,log:lg,steam:st,views:[{ref:h,eye:[3.15,3.3,-2.55],look:[-1.7,4.05,5]}]}}cyl(h,.025,.025,1.6,0xe6d8a0,0,4.6,2.2,4);
+      g.userData.visit={kind:5,bell,log:lg,steam:st,views:[{ref:h,eye:[3.15,3.3,-2.55],look:[-1.7,4.05,5],walk:{rect:[-3.55,3.55,-2.85,2.85],up:.55,holes:[[0,0,1.5],[0,1.5,.6],[0,2.4,.6],[0,3.2,.6],[1.3,1.1,.4],[-2.6,-1.7,.5],[4,-3.2,.8],[-4,-3.2,.8],[4,0,.8],[-4,0,.8],[4,3.2,.8],[-4,3.2,.8]]}}]}}cyl(h,.025,.025,1.6,0xe6d8a0,0,4.6,2.2,4);
     for(const x of[-4,4])for(const z of[3.4,-3.4]){const ln=new THREE.Mesh(new THREE.SphereGeometry(.34,8,6),MT(0xd9604a,{emissive:0x8a2a1a}));ln.scale.y=1.3;ln.position.set(x*1.12,6.2,z*1.05);h.add(ln);gl(h,0xff9a6a,3,x*1.12,6.2,z*1.05,.85)}
     for(const x of[-3.4,3.4])for(const z of[10.4,14.5])tourou(h,()=>0,x,z,1.15).position.y=-.1;
     for(let i=0;i<5;i++)bx(h,2.6,.12,1.6,stn,0,-.3,10+i*2.1);torii(h,0,-.4,17.5,1.1,0xc23f33);
@@ -214,7 +214,7 @@ function buildLM0(k){
      const tl=tourou(mh,gy,2,2,.9);tl.position.set(side*1.8,1.3,1.6);
      /* mesita de té en el balcón */
      bx(mh,.8,.05,.5,0x6a4634,side*.9,1.72,.1);for(const a of[-1,1])bx(mh,.05,.42,.44,0x5a3a2c,side*.9+a*.33,1.5,.1);teaSet(mh,side*.9,1.745,.1,steam);bx(mh,.75,.09,.75,0x7a3b3b,-side*.5,1.35,.9);
-     g.userData.visit={kind:7,steam,views:[{ref:h,eye:[.95,2.32,.75],look:[-.6,1.95,-1.8],name:0,indoor:1},{ref:h,eye:[-side*3.02,2.28,.9],look:[-side*30,1.2,-24],name:1}]};
+     g.userData.visit={kind:7,steam,views:[{ref:h,eye:[.95,2.32,.75],look:[-.6,1.95,-1.8],name:0,indoor:1,walk:{rect:[-1.95,1.95,-1.75,1.15],up:.6,holes:[[0,-.5,.9],[-1.3,-2.05,.75],[2.05,-1.9,.45],[-.95,.3,.3]]}},{ref:h,eye:[-side*3.02,2.28,.9],look:[-side*30,1.2,-24],name:1,walk:{rect:[-3.2,3.2,-2.3,2.8],up:.5,boxes:[[-2.95,2.95,-9,2.45]],holes:[[-side*3.05,-.15,.3]]}}]};
      /* té en la galería que da al río */
      teaSet(h,-side*3.05,1.29,-.15,steam);bx(h,.7,.09,.7,0x3f4a6b,-side*3.02,1.33,.9);
      for(let i=0;i<3;i++)cyl(h,.5,.55,.14,0xaaa69d,side*(5+i*1.15),.1,-.4,7);
