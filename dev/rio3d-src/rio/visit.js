@@ -6,6 +6,7 @@ import {cam} from './core.js';
 import {lmPos,H} from './world.js';
 import {mkLantern} from './lanterns.js';
 import {scene} from './core.js';
+import {spawnRipple} from './ripples.js';
 import {lmMade} from './lm-data.js';
 import {STILL} from '../still.js';
 import {LOOK,IN} from './input.js';
@@ -27,6 +28,19 @@ INTRO[8]={es:'Un sendero entra en el bambú hasta un claro. Mantén presionado p
 INTRO[10]={es:'Desde lo alto del castillo se ve el río que has recorrido. Mantén presionado para rodear el mirador.',en:'From the top of the castle you can see the river you have travelled. Press and hold to walk around the gallery.',ja:'天守の上から、たどってきた川が見えます。長押しで回廊を歩けます。'};
 const FLAUTA={es:'El bambú está hueco, y por eso canta. Deja también un hueco en ti.',en:'Bamboo is hollow, and that is why it sings. Leave a hollow in yourself too.',ja:'竹は空ろだからこそ歌います。あなたの中にも、空きを残しましょう。'};
 const LUZ={es:'Una luz sube desde la torre y se lleva lo que querías demostrar.',en:'A light rises from the tower and takes with it what you wanted to prove.',ja:'灯が天守から昇り、証明したかったものを連れていきます。'};
+ENTER[0]={es:'Subir al puente',en:'Go up onto the bridge',ja:'橋に上がる'};ENTER[3]={es:'Visitar la casa del samurái',en:'Visit the samurai house',ja:'武家屋敷を訪ねる'};
+ACT[0]={es:'Soltar un barquito de papel',en:'Set a paper boat adrift',ja:'紙の舟を流す'};ACT[3]={es:'Inclinarte ante la armadura',en:'Bow before the armour',ja:'鎧に一礼する'};
+INTRO[0]={es:'Desde el puente el río pasa por debajo sin detenerse. Mantén presionado para cruzarlo de orilla a orilla.',en:'From the bridge the river passes beneath without stopping. Press and hold to cross from bank to bank.',ja:'橋の上から見ると、川は止まらず下を流れていきます。長押しで岸から岸へ渡れます。'};
+INTRO[3]={es:'La casa de un guerrero, abierta al jardín de cerezos. Su armadura descansa; él ya no la necesita. Mantén presionado para recorrer la sala.',en:'A warrior’s house, open to the cherry garden. His armour rests; he no longer needs it. Press and hold to walk around the room.',ja:'桜の庭にひらいた、武士の家。鎧は休んでいます。もう必要がないのです。長押しで座敷を歩けます。'};
+const BARCO={es:'El barquito se va con la corriente. No hace falta seguirlo.',en:'The little boat leaves with the current. There is no need to follow it.',ja:'小さな舟は流れとともに去ります。追いかけなくていいのです。'};
+const BUSHIDO=[
+ {es:'義 Gi, rectitud: hacer lo correcto aunque nadie mire.',en:'義 Gi, rectitude: doing what is right even when no one is watching.',ja:'義：誰も見ていなくても、正しいことをする。'},
+ {es:'勇 Yū, valor: el miedo sigue ahí, y aun así das el paso.',en:'勇 Yū, courage: the fear is still there, and you take the step anyway.',ja:'勇：恐れはあっても、一歩を踏み出す。'},
+ {es:'仁 Jin, compasión: la fuerza sirve para cuidar.',en:'仁 Jin, compassion: strength is for taking care of others.',ja:'仁：力は、いたわるためにある。'},
+ {es:'礼 Rei, respeto: la cortesía también se ofrece a quien no la devuelve.',en:'礼 Rei, respect: courtesy is offered even to those who do not return it.',ja:'礼：返ってこなくても、礼を尽くす。'},
+ {es:'誠 Makoto, sinceridad: decir y hacer son una sola cosa.',en:'誠 Makoto, sincerity: saying and doing are one and the same.',ja:'誠：言うことと行うことは、ひとつ。'},
+ {es:'名誉 Meiyo, honor: tú eres el testigo de tus propios actos.',en:'名誉 Meiyo, honour: you are the witness of your own actions.',ja:'名誉：自分の行いの証人は、自分自身。'},
+ {es:'忠義 Chūgi, lealtad: cuidar aquello a lo que diste tu palabra.',en:'忠義 Chūgi, loyalty: looking after what you gave your word to.',ja:'忠義：約束したものを、守りつづける。'}];
 const SOMBRAS=[
  {es:'Este farol aleja el miedo.',en:'This lantern drives away fear.',ja:'この灯は、恐れを遠ざけます。'},
  {es:'Este farol aleja el enojo.',en:'This lantern drives away anger.',ja:'この灯は、怒りを遠ざけます。'},
@@ -62,7 +76,17 @@ LINES[10]=[{es:'Desde arriba, lo que parecía grande cabe en una mirada.',en:'Fr
  {es:'El orgullo pesa como una armadura. Puedes dejarla en este piso.',en:'Pride weighs like armour. You can leave it on this floor.',ja:'誇りは鎧のように重いもの。この階に置いていけます。'},
  {es:'Cada curva del río fue un momento tuyo. Ya pasaron, y están bien donde están.',en:'Every bend of the river was a moment of yours. They have passed, and they are fine where they are.',ja:'川の曲がりひとつひとつが、あなたの時間でした。もう過ぎて、あるべきところにあります。'},
  {es:'Respira con el viento de la altura.',en:'Breathe with the wind of the heights.',ja:'高みの風といっしょに息をしましょう。'}];
-const sky=[];
+LINES[0]=[{es:'El agua que ves ya no es la que viste hace un momento.',en:'The water you see is no longer the water you saw a moment ago.',ja:'いま見ている水は、さっきの水ではありません。'},
+ {es:'Un puente no retiene nada: solo une dos orillas.',en:'A bridge holds on to nothing: it only joins two banks.',ja:'橋は何も引きとめません。ふたつの岸をつなぐだけです。'},
+ {es:'Lo que sueltas río abajo no se pierde; sigue su camino.',en:'What you let go downstream is not lost; it goes its own way.',ja:'下流へ手放したものは失われません。自分の道を行くのです。'},
+ {es:'Apóyate en la baranda. La madera está tibia.',en:'Lean on the railing. The wood is warm.',ja:'欄干にもたれましょう。木は温かい。'},
+ {es:'De un lado lo que ya pasó, del otro lo que viene. Tú estás en medio, y aquí se está bien.',en:'On one side what has passed, on the other what is coming. You are in the middle, and it is good here.',ja:'片方には過ぎたもの、もう片方にはこれから来るもの。あなたはその真ん中。ここは心地よい。'}];
+LINES[3]=[{es:'La espada mejor cuidada es la que se queda en su funda.',en:'The best-kept sword is the one that stays in its sheath.',ja:'いちばん手入れの行き届いた刀は、鞘に収まったままの刀です。'},
+ {es:'El guerrero barría su jardín cada mañana. También eso era disciplina.',en:'The warrior swept his garden every morning. That, too, was discipline.',ja:'武士は毎朝、庭を掃きました。それもまた修行でした。'},
+ {es:'Los pétalos caen sin resistirse. Por eso el samurái amaba el cerezo.',en:'The petals fall without resisting. That is why the samurai loved the cherry tree.',ja:'花びらは抗わずに散ります。だから侍は桜を愛しました。'},
+ {es:'La calma no es falta de fuerza: es fuerza que no necesita mostrarse.',en:'Calm is not a lack of strength: it is strength that has no need to show itself.',ja:'静けさは力の不足ではなく、見せる必要のない力です。'},
+ {es:'Siéntate derecho, sin rigidez. Así se sentaba él a escribir.',en:'Sit upright, without stiffness. That is how he sat to write.',ja:'背すじを伸ばし、力まずに座りましょう。彼もそうして筆をとりました。'}];
+const sky=[],boats=[];
 const BELL={es:'La campana se lleva lejos lo que ya no necesitas cargar.',en:'The bell carries far away what you no longer need to carry.',ja:'鐘の音が、もう背負わなくていいものを遠くへ運びます。'};
 /* ---------- interfaz ---------- */
 let box=null,bEnter,bAct,bView,bBack,cap,fade,near=null,V=null,wasStill=false,busy=false;
@@ -85,13 +109,17 @@ function through(fn){if(busy)return;busy=true;fade.style.opacity=1;setTimeout(()
 function enter(g){if(!g||V||busy)return;const d=g.userData.visit;
   through(()=>{V={g,d,vi:0,t:0,next:0,li:0,lit:0,bell:0,w:null,hd:0,vel:0,bob:0};S.visit=true;wasStill=STILL.on;STILL.on=true;LOOK.yaw=LOOK.pitch=0;document.body.classList.add('visiting');box.classList.add('in');
     if(d.lamps)for(const l of d.lamps){l.on=0;l.k=0}
-    try{A.zen(d.kind===5||d.kind===10?1:d.kind===7?3:2)}catch(e){}cap.textContent='';say(INTRO[d.kind],12)})}
+    try{A.zen(d.kind===5||d.kind===10?1:d.kind===7||d.kind===3?3:2)}catch(e){}cap.textContent='';say(INTRO[d.kind],12)})}
 function leave(){if(!V||busy)return;through(()=>{V=null;S.visit=false;S.indoor=false;STILL.on=wasStill;LOOK.yaw=LOOK.pitch=0;document.body.classList.remove('visiting');box.classList.remove('in');cap.style.opacity=0;cap.textContent='';try{A.zen(0)}catch(e){}})}
 function swap(){if(!V||busy||V.d.views.length<2)return;through(()=>{V.vi=1-V.vi;V.w=null;V.hd=0;V.vel=0;LOOK.yaw=LOOK.pitch=0})}
 function act(){if(!V)return;const d=V.d;
   if(d.kind===2){if(V.lit>=d.lamps.length)return;d.lamps[V.lit].on=1;say(SOMBRAS[V.lit%SOMBRAS.length],9);V.lit++;try{A.bowl([293.66,329.63,392,440,523.25,587.33,659.25,783.99][V.lit-1],.07,0,-2);UX.hap(10)}catch(e){}
     if(V.lit>=d.lamps.length)setTimeout(()=>{if(V&&V.d===d)say(FIN2,16)},9500)}
   else if(d.kind===5){if(V.bell&&V.t-V.bell<3.2)return;V.bell=V.t;try{A.gong()}catch(e){}say(BELL,10)}
+  else if(d.kind===0){if((V.bell&&V.t-V.bell<2.5)||boats.length>5)return;V.bell=V.t;const ref=d.views[0].ref,lx=V.w?Math.max(-12,Math.min(12,V.w[0])):0,p0=new THREE.Vector3(lx,.06,-6.5),p1=new THREE.Vector3(lx,.06,-7.5);ref.localToWorld(p0);ref.localToWorld(p1);
+    const b=new THREE.Group(),m=new THREE.MeshBasicMaterial({color:0xfbf6ea}),hl=new THREE.Mesh(new THREE.ConeGeometry(.2,.6,4),m),sl=new THREE.Mesh(new THREE.ConeGeometry(.1,.22,3),m);hl.rotation.x=Math.PI/2;hl.scale.set(1,1,.45);sl.position.y=.14;b.add(hl,sl);b.position.copy(p0);b.rotation.y=Math.atan2(p1.x-p0.x,p1.z-p0.z);scene.add(b);
+    boats.push({g:b,t:0,x:p0.x,z:p0.z,dx:p1.x-p0.x,dz:p1.z-p0.z,r:0});try{spawnRipple(p0.x,p0.z,.7,3,.7);A.plop(0);UX.hap(8)}catch(e){}say(BARCO,11)}
+  else if(d.kind===3){if(V.bell&&V.t-V.bell<3)return;V.bell=V.t;V.sip=V.t;try{A.bowl(196,.07,0,-2)}catch(e){}V.bi=V.bi||0;say(BUSHIDO[V.bi++%BUSHIDO.length],13)}
   else if(d.kind===8){if(V.bell&&V.t-V.bell<5)return;V.bell=V.t;try{const t=A.ctx.currentTime+.05,b=[293.66,349.23,440,466.16][(Math.random()*4)|0];A.cap('Flauta shakuhachi');A.flute(b,t,2.2,.05,0,-2);A.flute(b*1.335,t+2.3,1.6,.045,0,-2);A.flute(b*1.189,t+4,3,.05,0,-2)}catch(e){}say(FLAUTA,12)}
   else if(d.kind===10){if((V.bell&&V.t-V.bell<2.5)||sky.length>7)return;V.bell=V.t;const g=mkLantern();if(g.userData.refl)g.userData.refl.visible=false;g.scale.setScalar(1.5);
     const yw=-cam.rotation.y;g.position.set(cam.position.x+Math.sin(yw)*3.2,cam.position.y-.9,cam.position.z-Math.cos(yw)*3.2);scene.add(g);sky.push({g,t:0,x:g.position.x,y:g.position.y,z:g.position.z,ph:Math.random()*6,dx:Math.sin(yw),dz:-Math.cos(yw)});
@@ -116,6 +144,10 @@ export function visitStep(dt){
   for(let i=sky.length-1;i>=0;i--){const q=sky[i];q.t+=dt;const t=q.t;q.g.position.set(q.x+q.dx*t*.9+Math.sin(t*.45+q.ph)*.8,q.y+t*(.7+t*.06),q.z+q.dz*t*.9+Math.cos(t*.37+q.ph)*.6);
     const o=Math.min(1,t/.9)*Math.min(1,(24-t)/5);if(q.g.userData.glow)q.g.userData.glow.material.opacity=.75*Math.max(0,o);
     if(t>=24){scene.remove(q.g);q.g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()});sky.splice(i,1)}}
+  /* barquitos de papel: se van río abajo dejando ondas */
+  for(let i=boats.length-1;i>=0;i--){const q=boats[i];q.t+=dt;const t=q.t;q.g.position.set(q.x+q.dx*t*.75+Math.sin(t*.5)*.3,.06+Math.sin(t*2.1)*.015,q.z+q.dz*t*.75);q.g.rotation.z=Math.sin(t*1.7)*.06;
+    if(t>q.r){q.r=t+1.6;try{spawnRipple(q.g.position.x,q.g.position.z,.45,2.6,.5)}catch(e){}}
+    if(t>44)q.g.scale.setScalar(Math.max(.01,(50-t)/6));if(t>=50){scene.remove(q.g);q.g.traverse(o=>{if(o.geometry)o.geometry.dispose()});q.g.children[0].material.dispose();boats.splice(i,1)}}
   if(!V)return;
   if(!V.g.parent){V=null;S.visit=false;S.indoor=false;STILL.on=wasStill;document.body.classList.remove('visiting');box.classList.remove('in');cap.style.opacity=0;return}
   V.t+=dt;STILL.t=0;bAct.textContent=T3(ACT[V.d.kind]);bBack.textContent=T3(BACK);if(V.d.views.length>1)bView.textContent=T3(VIEW[V.vi]);
@@ -141,9 +173,9 @@ export function visitStep(dt){
       for(const [hx,hz,hr] of w.holes||[]){const ex=x-hx,ez=z-hz,r=Math.hypot(ex,ez)||1e-3;if(r<hr){x=hx+ex/r*hr;z=hz+ez/r*hr}}}
     V.w[0]=x;V.w[1]=z;V.idle=V.vel>.12?0:V.idle+dt;
     if(w.up)V.up+=((V.idle<2.5?1:0)-V.up)*Math.min(1,dt*1.8);
-    V.bob+=V.vel*dt*2.4;_b.set(x,v.eye[1]+(w.up||0)*V.up,z);v.ref.localToWorld(_b);if(w.ground)_b.y=H(_b.x,-_b.z)+w.ground;
+    V.bob+=V.vel*dt*2.4;_b.set(x,(w.yf?w.yf(x):v.eye[1])+(w.up||0)*V.up,z);v.ref.localToWorld(_b);if(w.ground)_b.y=H(_b.x,-_b.z)+w.ground;
     cam.position.set(_b.x,_b.y+(Math.sin(V.bob)*.045*Math.min(1,V.vel)+Math.sin(V.t*.8)*.01)*cm,_b.z);
-    cam.rotation.set(pit*(w.up?1-.6*V.up:.6)+LOOK.pitch*.8-sipK*.12*(1-V.up),-(yaw+V.hd)+ly,0,'YXZ');
+    cam.rotation.set(pit*(w.up?1-.6*V.up:.6)+LOOK.pitch*.8-sipK*.14*(1-V.up*.3),-(yaw+V.hd)+ly,0,'YXZ');
   }else{
   cam.position.set(_a.x,_a.y+Math.sin(V.t*.8)*.012*cm,_a.z);
   cam.rotation.set(pit+LOOK.pitch*.8-sipK*.12,-yaw+ly,0,'YXZ');}

@@ -32,6 +32,7 @@ function buildLM0(k){
     for(const z of[-2,2]){for(let i=0;i<=n;i++){const t=i/n*2-1,x=t*W2/2,y=deckY(t);bx(g,.18,1.5,.18,red2,x,y+.95,z);const cap=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),MT(0xd9a85a));cap.position.set(x,y+1.8,z);g.add(cap);
         if(i%3===0){const ln=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.45,8),new THREE.MeshBasicMaterial({color:0xffd9a0}));ln.position.set(x,y+2.35,z);g.add(ln);const cp=new THREE.Mesh(new THREE.ConeGeometry(.3,.2,8),MT(red2));cp.position.set(x,y+2.68,z);g.add(cp);gl(g,0xffc77a,3,x,y+2.35,z,.8)}}
       for(let i=0;i<n;i++){const t=(i+.5)/n*2-1,x=t*W2/2,y=deckY(t);const r1=bx(g,W2/n+.2,.14,.14,red2,x,y+1.5,z);r1.rotation.z=-t*.4;const r2=bx(g,W2/n+.2,.1,.1,red2,x,y+.7,z);r2.rotation.z=-t*.4}}
+    g.userData.visit={kind:0,views:[{ref:g,eye:[0,deckY(0)+1.77,0],look:[0,deckY(0)-3,-70],walk:{rect:[-W2/2+2.5,W2/2-2.5,-1.45,1.45],yf:x=>deckY(x/(W2/2))+1.77}}]};
     // pabellón central con techo
     const py=deckY(0);for(const [x,z] of[[-2.6,-1.8],[2.6,-1.8],[-2.6,1.8],[2.6,1.8]])cyl(g,.22,.26,4.2,red2,x,py+2.1,z,8);
     hipRoof(g,8,6.2,2.1,py+4.45,0x5b4a4f,{lift:.7});cyl(g,.05,.14,.9,0xd9a85a,0,py+7,0,6);
@@ -98,6 +99,30 @@ function buildLM0(k){
       for(const [px,py,pz,r,c] of[[0,4.5,0,2.7,pink],[1.7,4.0,.6,1.9,SAKURA.c2],[-1.5,4.2,-.8,2.1,pink],[.4,5.5,-.4,1.6,0xf8c9d6]]){const rr=r*sc*(.92+hash(k,i+px*7)*.2),cr=new THREE.Mesh(lumpy(new THREE.IcosahedronGeometry(rr,1),.2,1.9/rr,i+px,.7),MT(c));cr.scale.y=.78;cr.position.set(px*sc,py*sc,pz*sc);h.add(cr)}
       const pc=new THREE.Mesh(new THREE.CircleGeometry(2.6*sc,9).rotateX(-Math.PI/2),MT(0xf6c9d8,{side:THREE.DoubleSide}));pc.position.set(hash(k,i+9)*1.5-.7,.07,hash(k,i+19)*1.5-.7);pc.scale.set(1+hash(k,i+41)*.4,1,.6+hash(k,i+42)*.3);h.add(pc);
       if(i%3===0)gl(h,0xffb6cb,7,0,4.6*sc,0,.22)}
+    /* casa del samurái (buke-yashiki) tras los cerezos: sala de tatami abierta al jardín, con la armadura, las espadas y el arco */
+    {const lx=side*(hwv+30),h=new THREE.Group(),pw=0x3a2a24,em={emissive:0x4a3a26};h.position.set(lx,Math.max(gy(lx,0),gy(lx-side*4,0),gy(lx,4),gy(lx,-4))-.1,0);h.rotation.y=-side*Math.PI/2;g.add(h);
+      bx(h,9.6,.9,7.6,0x9d9c9a,0,.1,0,{map:tex('stone')});bx(h,9,.2,7,0x6d4a3a,0,.6,0);bx(h,9.2,.16,1.5,0xb0876c,0,.6,4.1,{map:tex('plank')});for(let i=0;i<2;i++)bx(h,2.4-i*.3,.26,.7,0xaaa69d,0,.38-i*.26,5.1+i*.6);
+      bx(h,8.4,.04,6.4,0xcdc490,0,.72,0,{map:tex('straw'),emissive:0x4a3c20});for(const x of[-2.1,0,2.1])bx(h,.06,.045,6.4,0x4f6a4a,x,.722,0);bx(h,8.4,.045,.06,0x4f6a4a,0,.722,0);
+      bx(h,8.6,2.7,.15,0xe9dcc2,0,2.05,-3.27,em);for(const sx of[-1,1]){bx(h,.15,2.7,6.6,0xe9dcc2,sx*4.27,2.05,0,em);const sh=bx(h,2.4,2.3,.08,0xffe8b8,sx*3,1.85,3.2);sh.material=new THREE.MeshBasicMaterial({color:0xffe8b8});for(const q of[-.8,0,.8])bx(h,.04,2.3,.1,pw,sx*3+q,1.85,3.2);for(const q of[-.6,.2])bx(h,2.4,.04,.1,pw,sx*3,1.85+q,3.2)}
+      bx(h,8.7,.4,.18,pw,0,3.2,3.2);bx(h,8.9,.14,6.9,0x4a3428,0,3.45,0);for(const x of[-4.27,-1.8,1.8,4.27])bx(h,.2,2.7,.2,pw,x,2.05,3.2);for(const x of[-4.27,4.27])bx(h,.2,2.7,.2,pw,x,2.05,-3.27);for(const x of[-4.3,0,4.3])cyl(h,.1,.1,2.7,pw,x,2.05,4.75,6);
+      hipRoof(h,12.4,11,2.5,3.5,0x4c4a5a,{lift:.65,z:.6});
+      /* tokonoma: tarima, rollo 誠 (sinceridad) y la armadura sobre su arcón */
+      bx(h,2.8,.2,1,0x6a4a3a,-1.9,.84,-2.65);const kk=new THREE.Mesh(new THREE.PlaneGeometry(.6,1.5),new THREE.MeshBasicMaterial({map:kanjiTex('誠','#f3ead6','#2b2b2b',64,160)}));kk.position.set(-2.75,2.2,-3.18);h.add(kk);
+      {const x=-1.6,y=.94,z=-2.65,rd=0x8d2a23,gd=0xd9a85a,bk=0x2a2c33;bx(h,.62,.5,.46,0x3a2a24,x,y+.25,z);bx(h,.66,.05,.5,gd,x,y+.5,z);
+        for(const sx of[-1,0,1])bx(h,.24,.36,.08,rd,x+sx*.25,y+.72,z+.2).rotation.x=-.18;for(const sx of[-1,1])bx(h,.08,.36,.3,rd,x+sx*.36,y+.72,z).rotation.z=sx*.18;
+        bx(h,.56,.56,.34,0x7a1f1c,x,y+1.2,z);for(const q of[.98,1.16,1.34])bx(h,.58,.03,.36,gd,x,y+q,z);for(const sx of[-1,1]){bx(h,.24,.4,.34,rd,x+sx*.42,y+1.28,z).rotation.z=sx*.3;bx(h,.25,.03,.35,gd,x+sx*.45,y+1.14,z).rotation.z=sx*.3}
+        bx(h,.24,.2,.2,bk,x,y+1.6,z+.04);cyl(h,.3,.37,.14,rd,x,y+1.68,z-.03,10);const kb=new THREE.Mesh(new THREE.SphereGeometry(.23,10,8,0,6.283,0,1.7),MT(bk));kb.position.set(x,y+1.72,z);h.add(kb);bx(h,.34,.03,.14,bk,x,y+1.74,z+.22);
+        const cr=new THREE.Mesh(new THREE.TorusGeometry(.2,.022,4,12,Math.PI),MT(gd,{emissive:0x5a3a10}));cr.position.set(x,y+1.86,z+.2);h.add(cr);gl(h,0xffc77a,2.2,x,y+1.3,z+.6,.25)}
+      /* katana-kake con katana y wakizashi, arco en la pared, escritorio bajo y farol andon */
+      {const x=1.7,y=.74,z=-2.6;bx(h,1.2,.06,.3,pw,x,y+.03,z);for(const sx of[-1,1])bx(h,.07,.6,.22,pw,x+sx*.48,y+.33,z);
+        for(const [yy,L] of[[.52,1.05],[.3,.7]]){const sa=cyl(h,.024,.02,L,0x1e2028,x+.08,y+yy,z,6);sa.rotation.z=Math.PI/2;const ts=cyl(h,.026,.026,.28,0x3a3d6b,x-L/2-.06,y+yy,z,6);ts.rotation.z=Math.PI/2;const tb=cyl(h,.06,.06,.02,0xd9a85a,x-L/2+.085,y+yy,z,8);tb.rotation.z=Math.PI/2}}
+      {const bw=new THREE.Mesh(new THREE.TorusGeometry(1.5,.025,4,18,1.5),MT(0x5a3a2c));bw.position.set(3.1+1.38,2,-3.15);bw.rotation.z=Math.PI-.75;h.add(bw);bx(h,.012,2.05,.012,0xe6d8a0,3.39,2,-3.15)}
+      bx(h,1.1,.06,.55,0x6a4634,2.9,1.06,1,{emissive:0x2c1c12});for(const sx of[-1,1])bx(h,.06,.32,.5,0x5a3a2c,2.9+sx*.48,.88,1);bx(h,.34,.01,.44,0xf3ead6,2.8,1.095,1);bx(h,.14,.04,.2,0x2a2c33,3.25,1.11,.9);cyl(h,.012,.012,.24,0x6a4634,3.2,1.1,1.15,4).rotation.x=Math.PI/2;
+      bx(h,.34,.6,.34,0xffe0a0,-3.6,1.22,1.6).material=new THREE.MeshBasicMaterial({color:0xffd9a0});const as=spr(0xffc77a,2.4);as.material.opacity=.5;as.position.set(-3.6,1.22,1.6);h.add(as);
+      bx(h,.75,.09,.75,0x3f4a6b,0,.78,.9,{emissive:0x141a2a});bx(h,.75,.09,.75,0x7a3b3b,0,.74,4.1);
+      for(let i=0;i<5;i++)rock(g,.6+hash(k,i+400)*.2,0xaaa69d,lx-side*(6.5+i*1.5),gy(lx-side*(6.5+i*1.5),(i%2?.4:-.4))+.03,(i%2?.4:-.4),i,.2);
+      for(const sz of[-1,1])tourou(g,gy,lx-side*6.4,sz*2.6,.9);
+      g.userData.visit={kind:3,range:55,views:[{ref:h,eye:[0,1.6,.9],look:[-1.5,1.75,-2.65],indoor:1,walk:{rect:[-3.65,3.65,-2.65,2.6],up:.7,boxes:[[-3.6,-.2,-9,-1.75]],holes:[[1.7,-2.6,.95],[2.9,1,.85],[-3.6,1.6,.5]]}},{ref:h,eye:[0,1.62,4.1],look:[0,1.3,40],walk:{rect:[-4,4,3.85,4.4],up:.65}}]}}
     for(const sd2 of[-1,1]){const t=tourou(g,gy,side*(hwv+3.4),sd2*10+2,1.1);t.position.y=gy(side*(hwv+3.4),sd2*10+2)}
     const bn=bx(g,3.2,.28,.9,0xb5473a,side*(hwv+7.5),gy(side*(hwv+7.5),-3)+.55,-3);bx(g,3.2,.7,.12,0xb5473a,side*(hwv+7.5),gy(side*(hwv+7.5),-3)+1,-3.5);void bn}
   else if(type===4){
