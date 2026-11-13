@@ -26,8 +26,8 @@ export function initPad(c){
   const down=new Set();
   const mk=(name,sym,label,extra)=>{
     const b=document.createElement('button');b.type='button';b.textContent=sym;b.setAttribute('aria-label',T(label));b.title=T(label);
-    b.style.cssText='width:64px;height:64px;border-radius:50%;border:1px solid #5a609a;background:rgba(43,45,82,.72);color:#fbf1e0;font:600 26px system-ui,sans-serif;padding:0;touch-action:none;-webkit-tap-highlight-color:transparent;cursor:pointer';
-    const on=v=>{[name].concat(extra||[]).forEach(n=>cfg.set(n,v));b.style.background=v?'rgba(255,199,122,.45)':'rgba(43,45,82,.72)';if(v)down.add(b);else down.delete(b)};
+    b.style.cssText='width:64px;height:64px;border-radius:50%;border:1px solid #b9a47c;background:rgba(243,235,217,.72);color:#2a231c;font:600 26px system-ui,sans-serif;padding:0;touch-action:none;-webkit-tap-highlight-color:transparent;cursor:pointer';
+    const on=v=>{[name].concat(extra||[]).forEach(n=>cfg.set(n,v));b.style.background=v?'rgba(197,70,59,.45)':'rgba(243,235,217,.72)';if(v)down.add(b);else down.delete(b)};
     b.addEventListener('pointerdown',e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(x){}if(cfg.onPress)cfg.onPress();on(true)});
     ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>on(false)));
     b.addEventListener('contextmenu',e=>e.preventDefault());

@@ -14,7 +14,7 @@ const T3=(a)=>a[lang()]||a.es;
 let btn=null,back=null,enter=null,W=null,wasStill=false,pt=[],cum=[],len=0,tempG=null,vel=0,yawOff=0,arrived=false,bobT=0,arrP=0;
 const V=new THREE.Vector3();
 S.walk=false;
-const mkBtn=(id,css)=>{const b=document.createElement('button');b.type='button';b.id=id;b.style.cssText='position:fixed;z-index:58;min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #8a6a40;background:rgba(60,38,26,.86);color:#fbf1e0;font:600 .88rem system-u'+'i,sans-serif;display:none;'+css;document.body.appendChild(b);return b};
+const mkBtn=(id,css)=>{const b=document.createElement('button');b.type='button';b.id=id;b.style.cssText='position:fixed;z-index:58;min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #b9a47c;background:rgba(243,235,217,.92);color:#2a231c;font:600 .88rem system-u'+'i,sans-serif;display:none;'+css;document.body.appendChild(b);return b};
 function init(){
   btn=mkBtn('walkBtn','left:50%;transform:translateX(-50%);bottom:max(150px,calc(env(safe-area-inset-bottom) + 142px));');
   back=mkBtn('walkBack','left:50%;transform:translateX(-50%);bottom:max(96px,calc(env(safe-area-inset-bottom) + 88px));');

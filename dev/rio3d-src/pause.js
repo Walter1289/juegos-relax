@@ -4,7 +4,7 @@
   if(window.PZ)return;
   const PZ=window.PZ={on:false,ctx:()=>null,started:()=>true};
   const st=document.createElement('style');
-  st.textContent='#pz{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(24,26,56,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:#fbf1e0;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px}#pz[hidden]{display:none}#pz .c{display:flex;flex-direction:column;gap:12px;align-items:center}#pz h2{margin:0;font:600 1.7rem system-ui}#pz p{margin:0;color:#cbc8e8;line-height:1.5}#pz button{background:#ffc77a;color:#3b2a1a;border:0;border-radius:99px;padding:13px 32px;font:700 1rem system-ui;cursor:pointer}';
+  st.textContent='#pz{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(236,226,204,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:#2a231c;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px}#pz[hidden]{display:none}#pz .c{display:flex;flex-direction:column;gap:12px;align-items:center}#pz h2{margin:0;font:600 1.7rem system-ui}#pz p{margin:0;color:#6b5e4f;line-height:1.5}#pz button{background:#c5463b;color:#f6efe1;border:0;border-radius:99px;padding:13px 32px;font:700 1rem system-ui;cursor:pointer}';
   document.head.appendChild(st);
   const d=document.createElement('div');d.id='pz';d.hidden=true;
   d.innerHTML='<div class="c"><h2>En pausa</h2><p>Respira con calma.<br>Todo seguirá aquí cuando vuelvas.</p><button type="button" id="pzGo">Continuar</button></div>';
@@ -21,7 +21,7 @@
   PZ.more=function(host,btns,label){
     btns=btns.filter(Boolean);if(!host||!btns.length)return;
     const s2=document.createElement('style');
-    s2.textContent='#pzMore{position:fixed;z-index:25;display:flex;flex-direction:column;gap:6px;padding:8px;min-width:150px;background:rgba(43,45,82,.97);border:1px solid rgba(255,255,255,.22);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}#pzMore[hidden]{display:none}#pzMore button{display:block;width:100%;text-align:left;background:rgba(255,255,255,.08);color:#fbf1e0;border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:9px 12px;font:600 .88rem system-ui,sans-serif;cursor:pointer}';
+    s2.textContent='#pzMore{position:fixed;z-index:25;display:flex;flex-direction:column;gap:6px;padding:8px;min-width:150px;background:rgba(243,235,217,.97);border:1px solid rgba(42,35,28,.22);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}#pzMore[hidden]{display:none}#pzMore button{display:block;width:100%;text-align:left;background:rgba(42,35,28,.08);color:#2a231c;border:1px solid rgba(42,35,28,.18);border-radius:10px;padding:9px 12px;font:600 .88rem system-ui,sans-serif;cursor:pointer}';
     document.head.appendChild(s2);
     const b=document.createElement('button');b.type='button';b.textContent=label||'Más';b.className=btns[0].className||'';b.id='pzMoreB';
     const p=document.createElement('div');p.id='pzMore';p.hidden=true;btns.forEach(x=>{x.removeAttribute('style');p.appendChild(x)});

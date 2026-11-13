@@ -22,7 +22,7 @@ let btn=null,paid=false;
 export function initStill(){
   if(btn||typeof document==='undefined')return;try{addStillTexts(window.UX)}catch(e){}
   btn=document.createElement('button');btn.type='button';btn.id='stillBtn';
-  btn.style.cssText='position:fixed;left:12px;bottom:max(96px,calc(env(safe-area-inset-bottom) + 88px));z-index:58;min-height:44px;padding:8px 16px;border-radius:99px;border:1px solid #5a609a;background:rgba(32,34,70,.82);color:#fbf1e0;font:600 .85rem system-ui;cursor:pointer;display:none';
+  btn.style.cssText='position:fixed;left:12px;bottom:max(96px,calc(env(safe-area-inset-bottom) + 88px));z-index:58;min-height:44px;padding:8px 16px;border-radius:99px;border:1px solid #b9a47c;background:rgba(243,235,217,.82);color:#2a231c;font:600 .85rem system-ui;cursor:pointer;display:none';
   const tr=s=>{try{return UX.tr(s)}catch(e){return s}};
   const lab=()=>{btn.textContent=tr(STILL.on?'Seguir el río':'Quedarme quieto')};lab();
   btn.onclick=()=>{STILL.on=!STILL.on;STILL.t=0;STILL.ev=0;paid=false;lab();try{UX.hap(8)}catch(e){}};

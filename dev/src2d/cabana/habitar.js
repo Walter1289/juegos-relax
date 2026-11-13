@@ -174,8 +174,8 @@ function place(s,d){
   state.decor[s.id]=d.id;burst(s.x,s.y-30);try{A.chime((s.x/W-.5)*8)}catch(e){}uHap([10,40,10]);toast(d.name+' colocado');refreshPanel();scheduleSave();
 }
 function showDiary(){
-  const m=document.createElement('div');m.style.cssText='position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(20,22,48,.6)';
-  const b=document.createElement('div');b.style.cssText='background:#363a66;color:#fbf1e0;border:1px solid #5a609a;border-radius:16px;padding:18px 20px;max-width:min(88vw,420px);max-height:70vh;overflow:auto;font:15px/1.45 var(--f-body,system-ui)';
+  const m=document.createElement('div');m.style.cssText='position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(243,235,217,.6)';
+  const b=document.createElement('div');b.style.cssText='background:#f3ebd9;color:#2a231c;border:1px solid #b9a47c;border-radius:16px;padding:18px 20px;max-width:min(88vw,420px);max-height:70vh;overflow:auto;font:15px/1.45 var(--f-body,system-ui)';
   const h=document.createElement('h2');h.style.cssText='margin:0 0 10px;font:600 1.1rem var(--f-display,system-ui)';h.textContent=T('Diario de la cabaña');b.appendChild(h);
   if(!state.notes.length){const p=document.createElement('p');p.textContent=T('Aún vacío. Los visitantes dejan notas sobre quien vivió aquí.');b.appendChild(p)}
   state.notes.forEach(n=>{const p=document.createElement('p');p.style.margin='0 0 10px';p.textContent='· '+T(n);b.appendChild(p)});
