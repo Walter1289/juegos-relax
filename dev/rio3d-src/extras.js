@@ -265,7 +265,7 @@ export function initExtras(C){
     <div class="row"><span>Botones de dirección<br><small style="color:var(--muted)">Alternativa a arrastrar</small></span><select id="xpad"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Acerca de<br><small style="color:var(--muted)">Privacidad, datos y créditos</small></span><button id="xabout" type="button">Abrir</button></div>
     <div class="row"><span>Cuaderno del río<br><small style="color:var(--muted)">Lo que has visto en el camino</small></span><button id="xalb" type="button">Abrir</button></div>
-    <div class="row"><span>Libro de sellos<br><small style="color:var(--muted)">Lo que te llevas de cada lugar</small></span><button id="xsel" type="button">Abrir</button></div>
+    <div class="row"><span>Pergamino de sellos<br><small style="color:var(--muted)">Lo que te llevas de cada lugar</small></span><button id="xsel" type="button">Abrir</button></div>
     <div class="row"><span>Tono suave<br><small style="color:var(--muted)">Suaviza los sonidos agudos</small></span><select id="xsoft"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Dormir<br><small style="color:var(--muted)">Baja el sonido y la luz poco a poco</small></span><select id="xsl"><option value="0">No</option><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option></select></div>`);
     const q=m.querySelector('#xq'),s=m.querySelector('#xs'),ql=m.querySelector('#xql');

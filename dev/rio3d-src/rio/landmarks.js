@@ -39,7 +39,7 @@ export function updateLandmarks(ps){
   if(S.started&&!window.__goalT&&P.t>30){window.__goalT=1;let g0=1;try{g0=localStorage.getItem('rio3d-goal')}catch(e){}if(!g0){try{localStorage.setItem('rio3d-goal','1')}catch(e){}
     toast(T3({es:'Tu camino: reúne linternas hasta el Templo de la campana. Allí empieza tu vuelta; al volver, una ceremonia las libera y la cabaña de la colina te espera',en:'Your path: gather lanterns up to the Bell Temple. Your lap starts there; when you return, a ceremony releases them and the hill cabin awaits',ja:'旅の道すじ：鐘の寺までランタンを集めます。そこから一周が始まり、戻ると儀式で灯が放たれ、丘の小屋があなたを待ちます'}))}}
   /* sellos antes de empezar la vuelta: se anotan en la vuelta 1 al pasar por cada lugar */
-  if(lapK()<0)for(let k=k0;k<=k1;k++){const t=lmType(k);if(lmPos(k)-ps>30||ps-lmPos(k)>25)continue;if(sellar(1,t))setTimeout(()=>toast(T3({es:'Sello nuevo: '+LM[t]+' · lo ves en Start › Sellos',en:'New stamp: '+UX.tr(LM[t])+' · see it in Start › Stamps',ja:'新しい印：'+UX.tr(LM[t])+' · スタート › 印帳で見られます'})),4200)}
+  if(lapK()<0)for(let k=k0;k<=k1;k++){const t=lmType(k);if(lmPos(k)-ps>30||ps-lmPos(k)>25)continue;if(sellar(1,t))setTimeout(()=>toast(T3({es:'Estampa nueva: '+LM[t]+' · la ves en Start › Sellos',en:'New stamp: '+UX.tr(LM[t])+' · see it in Start › Stamps',ja:'新しい印：'+UX.tr(LM[t])+' · スタート › 印帳で見られます'})),4200)}
   /* la vuelta se cierra en el templo: aviso unos metros antes */
   {const lk=lapK();if(lk>=0){const kc=lk+NL;if(window.__clsK!==kc&&lmPos(kc)-ps<260&&lmPos(kc)-ps>60){window.__clsK=kc;toast(T3({es:'Se acerca el Templo de la campana: aquí cierras tu vuelta y tus linternas suben al cielo',en:'The Bell Temple is near: here you close your lap and your lanterns rise to the sky',ja:'鐘の寺が近づきます。ここで一周を締めくくり、ランタンが空へのぼります'}))}}}
   updateDragons(ps,k0,k1);
@@ -52,7 +52,7 @@ export function updateLandmarks(ps){
     if(lmPos(k)-ps>30||ps-lmPos(k)>25)continue;
     window.__rwK=k;try{localStorage.setItem('rio3d-rwk',String(k))}catch(e){}
     const i=k-lk;
-    if(sellar(Math.min(3,ceremonias()+1),lmType(k)))setTimeout(()=>toast(T3({es:'Sello nuevo en tu libro: '+LM[lmType(k)],en:'New stamp in your book: '+UX.tr(LM[lmType(k)]),ja:'御朱印帳に新しい印：'+UX.tr(LM[lmType(k)])})),4200);
+    if(sellar(Math.min(3,ceremonias()+1),lmType(k)))setTimeout(()=>toast(T3({es:'Estampa nueva en tu pergamino: '+LM[lmType(k)],en:'New print in your scroll: '+UX.tr(LM[lmType(k)]),ja:'御朱印帳に新しい印：'+UX.tr(LM[lmType(k)])})),4200);
     if(i===3||i===6||i===9)reward({audio:true,n:i/3,pulse:6,msg:{es:'Un mojón del camino: ya llevas '+i+' lugares de esta vuelta',en:'A waymarker on the road: '+i+' places of this lap behind you',ja:'道標です。この一周で'+i+'か所を過ぎました'},delay:1500});
     else if(i===5)reward({fx:hintStill,msg:{es:'Mitad del camino: un buen sitio para quedarse quieto un rato',en:'Halfway along: a good place to stay still for a while',ja:'道のなかば。しばらくじっとするのによい場所です'},delay:1500});
   }}

@@ -35,3 +35,5 @@ lm-deco.js reúne piezas japonesas reutilizables (pinturas en lienzo `paintTex`,
 Las vistas de una parada pueden ser más de dos (`views[i].label` es el texto del botón para pasar a la siguiente) y llevar acción propia (`act`: 'rake' | 'lord').
 Castillo: torre, jardín seco del patio alto (la arena cambia de trazo al rastrillar) y salón del señor en el 2.º piso de la torre (entre los zócalos macizos del lote; no bajar al 1.º: sus cajas de madera tapan el suelo).
 `visit.furin` = campanillas que se mecen; `act2:'furin'` añade el botón para tocarlas (puente, y galerías del samurái y la casa de té).
+
+- **Pergamino de sellos** (`sellos.js` + `sello-art.js`): las 11 estampas se pintan con Canvas 2D (pincel de ancho variable `st`, árbol recursivo, aguadas `blob`, grano de papel). `pintaSello(canvas,t,nivel)`: nivel = vueltas selladas (1 tinta y sol, 2 acentos rojos y pájaros, 3 aguadas y sello de firma). El pergamino es un rollo horizontal con desplazamiento; se pinta una estampa por fotograma al abrir. Ojo: el CSS global pone `canvas{position:fixed}`, por eso los lienzos del rollo fuerzan `position:static`.
