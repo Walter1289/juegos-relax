@@ -1,0 +1,11 @@
+<!doctype html><meta charset=utf-8><title>logo</title>
+<!-- Genera los iconos de la app con el pincel de las estampas. Abrir con un servidor en la raíz del repo:
+     /dev/tools/logo.html?s=512&m=0  (s = tamaño en px; m=1 = enmascarable, con margen y sin sello). dev/tools/logo.js los exporta a icons/. -->
+<body style="margin:0;background:#888"><canvas id=c></canvas>
+<script type=module>
+import {pintaLogo,papel} from '../rio3d-src/sello-art.js';
+const q=new URLSearchParams(location.search),s=+(q.get('s')||512),m=q.get('m')==='1',c=document.getElementById('c');c.width=c.height=s;
+const x=c.getContext('2d'),im=new Image();im.onload=()=>{x.fillStyle=x.createPattern(im,'repeat');x.save();x.scale(s/420,s/420);x.fillRect(0,0,420,420);x.restore();
+  const v=x.createRadialGradient(s/2,s/2,s*.3,s/2,s/2,s*.75);v.addColorStop(0,'rgba(120,90,50,0)');v.addColorStop(1,'rgba(120,90,50,.16)');x.fillStyle=v;x.fillRect(0,0,s,s);
+  const t=document.createElement('canvas');t.width=t.height=s*(m?.74:.94);pintaLogo(t,!m);x.drawImage(t,(s-t.width)/2,(s-t.height)/2+(m?s*.01:0));document.title='ok'};im.src=papel();
+</script>

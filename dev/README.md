@@ -37,3 +37,5 @@ Castillo: torre, jardín seco del patio alto (la arena cambia de trazo al rastri
 `visit.furin` = campanillas que se mecen; `act2:'furin'` añade el botón para tocarlas (puente, y galerías del samurái y la casa de té).
 
 - **Pergamino de sellos** (`sellos.js` + `sello-art.js`): las 11 estampas se pintan con Canvas 2D (pincel de ancho variable `st`, árbol recursivo, aguadas `blob`, grano de papel). `pintaSello(canvas,t,nivel)`: nivel = vueltas selladas (1 tinta y sol, 2 acentos rojos y pájaros, 3 aguadas y sello de firma). El pergamino es un rollo horizontal con desplazamiento; se pinta una estampa por fotograma al abrir. Ojo: el CSS global pone `canvas{position:fixed}`, por eso los lienzos del rollo fuerzan `position:static`.
+
+- **Logotipo / iconos**: `pintaLogo` (en `sello-art.js`) dibuja la canoa con farol, el río, el sol y la rama. `dev/tools/logo.html` lo compone sobre papel y `node dev/tools/logo.js` exporta `icons/*.png` (necesita Playwright y un servidor en la raíz); después conviene reducirlos a paleta para que pesen poco.

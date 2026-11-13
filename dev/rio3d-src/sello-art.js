@@ -172,3 +172,22 @@ export function papel(){const s=160,cv=document.createElement('canvas');cv.width
   for(let i=0;i<2600;i++){x.fillStyle=g()<.5?'rgba(255,252,240,.5)':'rgba(120,96,60,.07)';x.fillRect(g()*s,g()*s,1+g()*1.6,1+g()*1.6)}
   x.strokeStyle='rgba(130,104,66,.1)';x.lineWidth=.6;for(let i=0;i<46;i++){const a=g()*s,b=g()*s,t=g()*6.28,l=5+g()*14;x.beginPath();x.moveTo(a,b);x.quadraticCurveTo(a+Math.cos(t)*l*.5+2,b+Math.sin(t)*l*.5,a+Math.cos(t)*l,b+Math.sin(t)*l);x.stroke()}
   return cv.toDataURL('image/png')}
+
+/** Logotipo (lienzo lógico 300×300): la canoa con su farol sobre el río, sol rojo y una rama en flor. sello=false lo omite (icono enmascarable). */
+export function pintaLogo(cv,sello){
+  c=cv.getContext('2d');r=rnd(4242);const k=cv.width/300;c.setTransform(k,0,0,k,0,0);c.clearRect(0,0,300,300);c.lineCap='round';c.lineJoin='round';
+  sun(190,98,37);const tp=[];
+  st([[14,128],[44,112],[70,104],[104,84]],7.5,4);tree(104,84,-.5,40,3.8,3,tp,.7);tree(70,104,-1.25,34,3.2,3,tp,.75);tree(44,112,.25,26,2.4,2,tp,.7);flowers(tp,.95,2.3);flowers(tp,.5,1.7);
+  bird(246,62,11);bird(264,82,7.5);bird(228,44,7);
+  /* canoa: casco de media luna, remero con sombrero y farol colgado en la proa */
+  blob([[70,190],[92,205],[150,212],[206,205],[236,184],[228,186],[204,198],[150,201],[98,198],[78,188]],INK);
+  blob([[117,199],[119,180],[126,172],[134,180],[138,199]],INK);poly([[112,174],[126,159],[141,174]],INK);st([[111,174],[126,173],[142,174]],2.6,2.2);
+  st([[134,182],[146,190],[160,216],[166,228]],2.4,1.6);blob([[162,222],[170,224],[172,238],[164,238]],INK,.9);
+  st([[206,203],[205,170],[208,150],[220,146]],2.8,1.8);ln(220,146,220,153,1,.9);
+  c.fillStyle=RED;c.beginPath();c.ellipse(220,165,7.5,10,0,0,7);c.fill();ln(215,155,225,155,2.4,2.2);ln(215,175,225,175,2.4,2.2);ln(220,176,220,188,1.6,.4,RED);
+  /* río */
+  st([[40,226],[86,222],[118,226],[150,223]],3,.8);st([[176,226],[214,222],[262,226]],3,.8);
+  st([[62,243],[110,240],[160,244],[200,241]],2.6,.7);st([[98,259],[140,256],[190,260],[236,257]],2.2,.6);st([[130,274],[166,272],[200,275]],1.8,.5);
+  for(let i=0;i<3;i++)ln(206+i*5,234+i*8,246-i*5,234+i*8,2,.6,RED,.9);
+  if(sello!==false){c.save();c.translate(52,262);c.rotate(-.05);c.fillStyle=RED;c.beginPath();c.rect(-13,-13,26,26);c.fill();c.fillStyle='#f6efe1';c.font='700 19px "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP","Noto Serif JP",serif';c.textAlign='center';c.textBaseline='middle';c.fillText('灯',0,1);c.restore()}
+  c.globalCompositeOperation='destination-out';const g=rnd(77);for(let i=0;i<9000;i++){c.globalAlpha=.1+g()*.28;c.fillRect(g()*300,g()*300,.7+g()*.9,.7+g()*.9)}c.globalCompositeOperation='source-over';c.globalAlpha=1}
