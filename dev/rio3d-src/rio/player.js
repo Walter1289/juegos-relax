@@ -8,6 +8,7 @@ import {boat} from './boat.js';
 import {spawnRipple} from './ripples.js';
 import {IN} from './input.js';
 import {STILL,tickStill} from '../still.js';
+import {collideLM} from './collide.js';
 let rudT=0,sw=0,swv=0,pv=0,ph=0;
 export function stepPlayer(dt,s){
   if(S.started){
@@ -30,6 +31,7 @@ export function stepPlayer(dt,s){
     P.pz+=-Math.cos(P.psi)*P.v*dt-Math.cos(ta)*.99*sk*dt+Math.sin(P.psi)*sw*dt;
     const s2=-P.pz,c=cx(s2),lim=hw(s2)-1.7,e=P.px-c;
     if(Math.abs(e)>lim){P.px=c+Math.sign(e)*lim;if(P.v>1.2&&P.t-P.bumpT>1.2){A.bump();P.bumpT=P.t}P.v*=.6;P.psi+=(tanAng(s2)-P.psi)*.4}
+    collideLM(dt);
     P.dist=Math.max(P.dist,s2);
     // remos: brazada alternada mientras se mantiene presionado
     rudT-=dt;if(Math.abs(steerIn)>.25&&rudT<=0){rudT=.7;const sd=steerIn>0?1:-1;const w=new THREE.Vector3(sd*1.2,0,.3);boat.localToWorld(w);spawnRipple(w.x,w.z,.7,3,.8)}

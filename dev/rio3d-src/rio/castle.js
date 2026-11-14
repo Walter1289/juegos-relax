@@ -200,6 +200,7 @@ export function seg(bt,a,b,t,col,t2){const dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2
 let _mon=null;function kanjiMon(){if(_mon)return _mon;const c=document.createElement('canvas');c.width=64;c.height=240;const x=c.getContext('2d');x.fillStyle='#2f3f7a';x.fillRect(0,0,64,240);x.fillStyle='#fbf6ea';x.beginPath();x.arc(32,60,20,0,6.3);x.fill();x.fillStyle='#2f3f7a';x.beginPath();x.moveTo(18,66);x.quadraticCurveTo(30,44,46,54);x.quadraticCurveTo(34,58,30,72);x.fill();x.fillStyle='#fbf6ea';x.font='bold 40px serif';x.textAlign='center';x.fillText('鷺',32,150);_mon=new THREE.CanvasTexture(c);_mon.colorSpace=THREE.SRGBColorSpace;return _mon}
 export function* castleJob(g,k,ctx){
   const t0=performance.now(),{side,hwv}=ctx,rnd=mulb(k*7919+11),h=new THREE.Group();h.position.set(side*(hwv+CAS.PO),0,0);h.rotation.y=-side*Math.PI/2;g.add(h);
+  /* embarcadero: entra 5 m en el río (coordenadas del grupo del lugar) */g.userData.obs=[side>0?[hwv-5.5,hwv+2,-12,-8]:[-hwv-2,-(hwv-5.5),8,12]];
   const X={P:new Batch(),S:new Batch(),G:new Batch(),E:new Batch(),CL:new Batch(),h,rnd,fr:frameOf(ctx),ctx,drums:[]};
   const{P:Pl,S,G,E,CL}=X,Y0=PH+12,SX=-10,parts={};let last=0,lt=performance.now();const mark=n=>{const c=Pl.count()+S.count()+G.count()+E.count()+CL.count(),t=performance.now();parts[n]=[c-last,Math.round(t-lt)];last=c;lt=t};
   /* terrazas de piedra: meseta (muro bajo) y base de la torre (tenshu-dai) */

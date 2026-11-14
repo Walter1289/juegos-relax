@@ -51,7 +51,7 @@ function buildLM0(k){
     // pilas en el agua
     /* pilas con tajamar: prisma de seis lados más ancho abajo, que llega hasta las vigas, con losa de coronación */
     [-.28,.28].forEach(t=>{const y1=deckY(t)-.62,pr=cyl(g,1.0,1.3,y1+1.6,stone,t*W2,(y1-1.6)/2,0,6,{map:tex('stone')});pr.scale.z=2.1;const cp=cyl(g,1.15,1.1,.3,0x7d7b7a,t*W2,y1-.1,0,6);cp.scale.z=2.1})}
-  else if(type===1){torii(g,0,-.7,0,1.45,red,{w:2.5,water:true,rope:true});gl(g,0xffc77a,3,0,6,0,.6)}
+  else if(type===1){torii(g,0,-.7,0,1.45,red,{w:2.5,water:true,rope:true});g.userData.obs=[[-3.63,0,.65],[3.63,0,.65]];gl(g,0xffc77a,3,0,6,0,.6)}
   else if(type===2){
     const house=(h,lx,lz,w,d,ht,roof,rot,thatch)=>{const y=gy(lx,lz);h.position.set(lx,y-.2,lz);h.rotation.y=rot;g.add(h);
       bx(h,w,ht,d,0xe8d3b6,0,ht/2,0,{map:tex('plank')});bx(h,w+.3,.35,d+.3,0x6f4a3a,0,.1,0);
@@ -67,7 +67,8 @@ function buildLM0(k){
     for(const sd of[-1,1])for(let i=0;i<7;i++){if(sd===side&&i===3)continue;const lz=-26+i*8.5+hash(k,i+sd*9)*3+(sd===side?(i===2?-1.5:i===4?1.5:0):0),off=hwv+7+hash(k,i+30+sd)*6+(i%2)*5,w=4+hash(k,i+50)*2.5,d=3.6+hash(k,i+60)*2,ht=2.6+hash(k,i+70)*1.6,thatch=hash(k,i+90+sd)>.45;
       house(new THREE.Group(),sd*off,lz,w,d,ht,thatch?[0xb59a6a,0xa48a5e][i%2]:roofs[(i+n)%4],(sd>0?-Math.PI/2:Math.PI/2)+(hash(k,i+80+sd)-.5)*.35,thatch);n++}
     // muelles con botes amarrados y postes con faroles
-    for(const [sd,lz] of[[-1,-10],[1,6],[-1,18]]){const dk=new THREE.Group();dk.position.set(sd*(hwv-3.2),.35,lz);g.add(dk);
+    g.userData.obs=[[-(hwv-.5),-34,.5],[hwv-.5,-34,.5]];
+    for(const [sd,lz] of[[-1,-10],[1,6],[-1,18]]){const dk=new THREE.Group();dk.position.set(sd*(hwv-3.2),.35,lz);g.add(dk);g.userData.obs.push(sd>0?[hwv-3.4,hwv+2,lz-1.2,lz+1.2]:[-hwv-2,-(hwv-3.4),lz-1.2,lz+1.2],[sd*(hwv-6.4),lz+1.3,.75],[sd*(hwv-6.4),lz+3.1,.75]);
       bx(dk,8,.25,2.2,0xb0876c,sd*-0+0,0,0,{map:tex('plank')}).position.x=sd*4;for(const px of[0,3,6.4])for(const pz of[-1,1])cyl(dk,.1,.12,1.8,0x6f4a3a,sd*px+0,.2,pz,5);
       const ln=new THREE.Mesh(new THREE.SphereGeometry(.26,8,6),new THREE.MeshBasicMaterial({color:0xffd59a}));ln.position.set(sd*6.4,1.5,1);dk.add(ln);gl(dk,0xffc77a,3.6,sd*6.4,1.5,1,.9);
       const bt=new THREE.Mesh(new THREE.SphereGeometry(1,10,6),MT(0x6a4a3a));bt.scale.set(.6,.3,1.9);bt.position.set(sd*-3.2,-.15,2.2);dk.add(bt)}
@@ -141,7 +142,7 @@ function buildLM0(k){
     rm.count=nr2;rm.userData.keep=true;g.add(rm);
     g.userData.hp=[];
     for(let i=0;i<20;i++){const sd=i%2?1:-1,wade=i%3!==0,lx=sd*(hwv-(wade?2.2+hash(k,i)*3.5:-1.5+hash(k,i)*2)),lz=(hash(k,i+10)-.5)*70,sc=.95+hash(k,i+5)*.5,ry=hash(k,i+3)*6.28,py=wade?-.12:gy(lx,lz)-.1;
-      if(i>=12){g.userData.hp.push([lx,py,lz,ry,sc,{gone:0}]);continue}
+      if(i>=12){g.userData.hp.push([lx,py,lz,ry,sc,{gone:0}]);continue}if(wade)(g.userData.obs=g.userData.obs||[]).push([lx,lz,.4]);
       const he=mkHeron(sc,hash(k,i)*6.28);he.position.set(lx,py,lz);he.rotation.y=ry;g.add(he)}
     const mist=spr(0xffffff,10);mist.material.blending=THREE.NormalBlending;mist.material.opacity=.25;mist.position.set(0,1.2,0);g.add(mist)}
   else if(type===5){signs(g,gy,hwv,'鐘',true,'#9a3a30');
@@ -200,7 +201,7 @@ function buildLM0(k){
     for(let i=0;i<6;i++){const f=spr(0xffffff,5+hash(k,i)*3);f.material.blending=THREE.NormalBlending;f.material.opacity=.5;f.position.set(-side*(1+hash(k,i+3)*4),.5+hash(k,i)*.8,(hash(k,i+9)-.5)*7);h.add(f)}
     const mist=spr(0xffffff,26);mist.material.blending=THREE.NormalBlending;mist.material.opacity=.5;mist.position.set(-side*3,4,0);h.add(mist)}
   else if(type===7){signs(g,gy,hwv,'茶',true,'#a9453a');
-    const lx=side*(hwv-3),h=new THREE.Group();h.position.set(lx,0,0);g.add(h);g.userData.lx=lx;
+    const lx=side*(hwv-3),h=new THREE.Group();h.position.set(lx,0,0);g.add(h);g.userData.lx=lx;g.userData.obs=[side>0?[hwv-6.9,hwv+2,-3.4,3.4]:[-hwv-2,-(hwv-6.9),-3.4,3.4],[lx-1.5,lx+1.5,3.4,5.7]];
     const pl={map:tex('plank')},pw=0x4b342a;
     /* cimiento de piedra, pilotes y engawa (terraza) con barandilla y escalones */
     bx(h,7.4,.6,6.4,0x9d9c9a,0,.1,0);for(const x of[-3.2,0,3.2])for(const z of[-2.7,2.7])cyl(h,.14,.16,1.2,pw,x,.4,z,6);

@@ -15,14 +15,14 @@ try{UX.add([['Soltar','Release','流す'],['Quieto','Still','静止'],['Seguir',
 
 const st=document.createElement('style');
 st.textContent=`
-#joy{position:fixed;z-index:27;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;border:2px solid rgba(42,35,28,.35);background:rgba(243,235,217,.28);pointer-events:none;display:none}
+#joy{position:fixed;z-index:27;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;border:2px solid rgba(42,35,28,.35);background:rgba(230,218,191,.28);pointer-events:none;display:none}
 #joy i{position:absolute;left:30px;top:30px;width:44px;height:44px;border-radius:50%;background:rgba(255,226,168,.62);border:1px solid rgba(42,35,28,.6)}
 #abox{position:fixed;z-index:28;right:max(14px,env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:190px;height:190px;display:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-#abox button{position:absolute;width:60px;height:60px;border-radius:50%;border:1px solid #b9a47c;background:rgba(243,235,217,.74);color:#2a231c;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font:600 24px/1 system-ui,sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
+#abox button{position:absolute;width:60px;height:60px;border-radius:50%;border:1px solid #a8926a;background:rgba(230,218,191,.74);color:#2a231c;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font:600 24px/1 system-ui,sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
 #abox button small{font:600 9.5px/1.1 system-ui,sans-serif;margin-top:2px;opacity:.85;letter-spacing:.02em}
-#abox button.press{background:rgba(197,70,59,.5)}
+#abox button.press{background:rgba(168,56,47,.5)}
 #abox button.off{opacity:.42}
-#abox button.hint{box-shadow:0 0 0 3px rgba(197,70,59,.6)}
+#abox button.hint{box-shadow:0 0 0 3px rgba(168,56,47,.6)}
 #abx{left:65px;top:130px}#abo{left:130px;top:65px}#abs{left:0;top:65px}#abt{left:65px;top:0}
 body.ctl-std #look,body.ctl-std #cam,body.ctl-std #lantB,body.ctl-std #stillBtn{display:none!important}
 body.photo #abox,body.photo #joy{display:none!important}

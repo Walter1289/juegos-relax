@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ece2cc">
+<meta name="theme-color" content="#dccfb1">
 <meta name="description" content="Créditos y licencias de Tomoshibi.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
 <title>Créditos · Tomoshibi</title>
 <style>
-:root{--bg:#ece2cc;--panel:#f3ebd9;--ink:#2a231c;--muted:#6b5e4f;--lamp:#c5463b;--line:#b9a47c}
+:root{--bg:#dccfb1;--panel:#e6dabf;--ink:#2a231c;--muted:#5a4e40;--lamp:#a8382f;--line:#a8926a}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(120% 90% at 50% 0%,#f6efe1,var(--bg) 60%);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;line-height:1.6;padding:24px 16px 60px;min-height:100vh}
+body{margin:0;background:radial-gradient(120% 90% at 50% 0%,#e7dcc2,var(--bg) 60%);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;line-height:1.6;padding:24px 16px 60px;min-height:100vh}
 main{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 h1{font:600 clamp(1.6rem,5vw,2.2rem)/1.15 'Fredoka',system-ui,sans-serif;margin:0}
 h2{font:600 1.15rem 'Fredoka',system-ui,sans-serif;margin:10px 0 0;color:var(--lamp)}
@@ -26,6 +26,11 @@ button.warn{border-color:#d98b7a}
 #msg{min-height:1.4em;color:var(--lamp)}
 [lang=en]{display:none}
 body.en [lang=es]{display:none}body.en [lang=en]{display:revert}
+
+/* papel con grano y fibra (misma textura en portada, paneles y menús) */
+:root{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .33 0 0 0 0 .25 0 0 0 0 .14 0 0 0 .2 0'/%3E%3C/filter%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .16 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E")}
+body,#start,#menu,.xm,.modal,.panel,.card,[role=dialog],[role=dialog]>div:not(.pg),#more-menu,.menu,.sheet{background-image:var(--grain)!important;background-size:240px 240px!important}
+body{background-color:var(--bg)}
 </style>
 </head>
 <body>

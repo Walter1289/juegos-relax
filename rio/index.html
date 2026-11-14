@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#ece2cc">
+<meta name="theme-color" content="#dccfb1">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <meta charset="utf-8">
@@ -23,7 +23,7 @@
 
 <style>
 /* Concepto: pantalla completa, el río ocupa todo el escenario. HUD discreto arriba, diario de lugares abajo. Paleta de crepúsculo fija por elección (atardecer a noche). */
-:root{--bg:#ece2cc;--panel:#f3ebd9;--panel-2:#e6dbc2;--ink:#2a231c;--muted:#6b5e4f;--lantern:#c5463b;--sakura:#f4b6c8;--moss:#8db474;--line:#b9a47c;--f-display:'Shippori Mincho','Hiragino Mincho ProN','Times New Roman',serif;--f-body:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Segoe UI',system-ui,sans-serif;color-scheme:dark}
+:root{--bg:#dccfb1;--panel:#e6dabf;--panel-2:#d3c5a4;--ink:#2a231c;--muted:#5a4e40;--lantern:#a8382f;--sakura:#f4b6c8;--moss:#8db474;--line:#a8926a;--f-display:'Shippori Mincho','Hiragino Mincho ProN','Times New Roman',serif;--f-body:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Segoe UI',system-ui,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;display:flex;flex-direction:column;gap:8px;padding-inline:16px;padding-block:10px;overflow:hidden}
@@ -38,10 +38,10 @@ button{font:inherit;color:inherit}
 #stage{flex:1;min-height:0;position:relative;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.45);background:#223a4a}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
 canvas:active{cursor:grabbing}
-#toast{position:absolute;left:50%;top:12px;transform:translate(-50%,-8px);background:rgba(243,235,217,.92);border:1px solid var(--line);color:var(--ink);padding:8px 16px;border-radius:99px;opacity:0;transition:.3s;pointer-events:none;max-width:92%;text-align:center;font-family:var(--f-display);font-weight:700}
+#toast{position:absolute;left:50%;top:12px;transform:translate(-50%,-8px);background:rgba(230,218,191,.92);border:1px solid var(--line);color:var(--ink);padding:8px 16px;border-radius:99px;opacity:0;transition:.3s;pointer-events:none;max-width:92%;text-align:center;font-family:var(--f-display);font-weight:700}
 #toast.show{opacity:1;transform:translate(-50%,0)}
-#hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);color:rgba(42,35,28,.92);background:rgba(243,235,217,.7);border-radius:99px;padding:6px 14px;font-size:.82rem;text-align:center;pointer-events:none;transition:opacity 1.2s;max-width:92%}
-#start{position:absolute;inset:0;display:grid;place-items:center;background:rgba(226,215,192,.78);backdrop-filter:blur(3px);z-index:2;padding:16px}
+#hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);color:rgba(42,35,28,.92);background:rgba(230,218,191,.7);border-radius:99px;padding:6px 14px;font-size:.82rem;text-align:center;pointer-events:none;transition:opacity 1.2s;max-width:92%}
+#start{position:absolute;inset:0;display:grid;place-items:center;background:rgba(205,192,162,.78);backdrop-filter:blur(3px);z-index:2;padding:16px}
 [hidden]{display:none!important}
 body{-webkit-user-select:none;user-select:none}
 .card{max-width:430px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px}
@@ -59,6 +59,11 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 #breath{position:fixed;left:50%;top:84px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:3}
 #breath .orb{width:128px;height:128px;border-radius:50%;background:radial-gradient(circle at 38% 32%,rgba(255,255,255,.6),rgba(196,176,255,.3) 58%,rgba(196,176,255,.1));box-shadow:0 0 44px rgba(206,186,255,.38);transform:scale(.5)}
 #breath span{font-weight:700;font-size:.95rem;color:var(--ink);text-shadow:0 1px 8px rgba(0,0,0,.55)}
+
+/* papel con grano y fibra (misma textura en portada, paneles y menús) */
+:root{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .33 0 0 0 0 .25 0 0 0 0 .14 0 0 0 .2 0'/%3E%3C/filter%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .16 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E")}
+body,#start,#menu,.xm,.modal,.panel,.card,[role=dialog],[role=dialog]>div:not(.pg),#more-menu,.menu,.sheet{background-image:var(--grain)!important;background-size:240px 240px!important}
+body{background-color:var(--bg)}
 </style>
 
 </head>
@@ -105,7 +110,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     if (window.PZ) return;
     const PZ3 = window.PZ = { on: false, ctx: () => null, started: () => true };
     const st2 = document.createElement("style");
-    st2.textContent = "#pz{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(24,26,56,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:#2a231c;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px}#pz[hidden]{display:none}#pz .c{display:flex;flex-direction:column;gap:12px;align-items:center}#pz h2{margin:0;font:600 1.7rem system-ui}#pz p{margin:0;color:#6b5e4f;line-height:1.5}#pz button{background:#c5463b;color:#f6efe1;border:0;border-radius:99px;padding:13px 32px;font:700 1rem system-ui;cursor:pointer}";
+    st2.textContent = "#pz{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(24,26,56,.64);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);color:#2a231c;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:20px}#pz[hidden]{display:none}#pz .c{display:flex;flex-direction:column;gap:12px;align-items:center}#pz h2{margin:0;font:600 1.7rem system-ui}#pz p{margin:0;color:#5a4e40;line-height:1.5}#pz button{background:#a8382f;color:#f6efe1;border:0;border-radius:99px;padding:13px 32px;font:700 1rem system-ui;cursor:pointer}";
     document.head.appendChild(st2);
     const d = document.createElement("div");
     d.id = "pz";
@@ -135,7 +140,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       btns = btns.filter(Boolean);
       if (!host || !btns.length) return;
       const s2 = document.createElement("style");
-      s2.textContent = "#pzMore{position:fixed;z-index:25;display:flex;flex-direction:column;gap:6px;padding:8px;min-width:150px;background:rgba(243,235,217,.97);border:1px solid rgba(255,255,255,.22);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}#pzMore[hidden]{display:none}#pzMore button{display:block;width:100%;text-align:left;background:rgba(255,255,255,.08);color:#2a231c;border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:9px 12px;font:600 .88rem system-ui,sans-serif;cursor:pointer}";
+      s2.textContent = "#pzMore{position:fixed;z-index:25;display:flex;flex-direction:column;gap:6px;padding:8px;min-width:150px;background:rgba(230,218,191,.97);border:1px solid rgba(255,255,255,.22);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}#pzMore[hidden]{display:none}#pzMore button{display:block;width:100%;text-align:left;background:rgba(255,255,255,.08);color:#2a231c;border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:9px 12px;font:600 .88rem system-ui,sans-serif;cursor:pointer}";
       document.head.appendChild(s2);
       const b = document.createElement("button");
       b.type = "button";
@@ -294,9 +299,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     tr = tr || (window.UX ? UX.tr : ((s2) => s2));
     const seen = get();
     const ov = document.createElement("div");
-    ov.style.cssText = "position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(226,215,192,.88);padding:12px";
+    ov.style.cssText = "position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(205,192,162,.88);padding:12px";
     const b = document.createElement("div");
-    b.style.cssText = "background:#f3ebd9;color:#2a231c;border:1px solid #b9a47c;border-radius:16px;padding:18px 20px;max-width:min(92vw,460px);max-height:82vh;overflow:auto;font:15px/1.45 system-ui";
+    b.style.cssText = "background:#e6dabf;color:#2a231c;border:1px solid #a8926a;border-radius:16px;padding:18px 20px;max-width:min(92vw,460px);max-height:82vh;overflow:auto;font:15px/1.45 system-ui";
     const h = document.createElement("h2");
     h.style.cssText = "margin:0 0 4px;font:600 1.15rem system-ui";
     h.textContent = tr("Cuaderno del r\xEDo");
@@ -306,7 +311,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     b.append(h, s);
     ALB.forEach((a) => {
       const k = !!seen[a[0]], p = document.createElement("div");
-      p.style.cssText = "margin:0 0 12px;padding:10px 12px;border-radius:12px;background:" + (k ? "rgba(197,70,59,.10)" : "rgba(255,255,255,.04)") + ";" + (k ? "" : "opacity:.55");
+      p.style.cssText = "margin:0 0 12px;padding:10px 12px;border-radius:12px;background:" + (k ? "rgba(168,56,47,.10)" : "rgba(255,255,255,.04)") + ";" + (k ? "" : "opacity:.55");
       const n = document.createElement("div");
       n.style.cssText = "font-weight:600";
       n.textContent = (k ? "\u2726 " : "\xB7 ") + (k ? tr(a[1]) : "?");
@@ -330,7 +335,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       }
       lg.forEach((x) => {
         const p = document.createElement("div");
-        p.style.cssText = "margin:0 0 8px;padding:8px 12px;border-radius:12px;background:rgba(197,70,59,.08);font-size:.88em";
+        p.style.cssText = "margin:0 0 8px;padding:8px 12px;border-radius:12px;background:rgba(168,56,47,.08);font-size:.88em";
         p.textContent = "\u{1F3EE} " + tr(DAYS[x[1]][0]);
         b.appendChild(p);
       });
@@ -338,7 +343,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     const c = document.createElement("button");
     c.type = "button";
     c.textContent = tr("Cerrar");
-    c.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #b9a47c;background:#ece2cc;color:#2a231c;font:inherit;cursor:pointer";
+    c.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #a8926a;background:#dccfb1;color:#2a231c;font:inherit;cursor:pointer";
     c.onclick = () => ov.remove();
     b.appendChild(c);
     ov.appendChild(b);
@@ -437,10 +442,10 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       b.textContent = sym;
       b.setAttribute("aria-label", T(label));
       b.title = T(label);
-      b.style.cssText = "width:64px;height:64px;border-radius:50%;border:1px solid #b9a47c;background:rgba(243,235,217,.72);color:#2a231c;font:600 26px system-ui,sans-serif;padding:0;touch-action:none;-webkit-tap-highlight-color:transparent;cursor:pointer";
+      b.style.cssText = "width:64px;height:64px;border-radius:50%;border:1px solid #a8926a;background:rgba(230,218,191,.72);color:#2a231c;font:600 26px system-ui,sans-serif;padding:0;touch-action:none;-webkit-tap-highlight-color:transparent;cursor:pointer";
       const on = (v) => {
         [name].concat(extra || []).forEach((n) => cfg.set(n, v));
-        b.style.background = v ? "rgba(255,199,122,.45)" : "rgba(243,235,217,.72)";
+        b.style.background = v ? "rgba(255,199,122,.45)" : "rgba(230,218,191,.72)";
         if (v) down.add(b);
         else down.delete(b);
       };
@@ -3718,7 +3723,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     btn = document.createElement("button");
     btn.type = "button";
     btn.id = "stillBtn";
-    btn.style.cssText = "position:fixed;left:12px;bottom:max(96px,calc(env(safe-area-inset-bottom) + 88px));z-index:58;min-height:44px;padding:8px 16px;border-radius:99px;border:1px solid #b9a47c;background:rgba(243,235,217,.82);color:#2a231c;font:600 .85rem system-ui;cursor:pointer;display:none";
+    btn.style.cssText = "position:fixed;left:12px;bottom:max(96px,calc(env(safe-area-inset-bottom) + 88px));z-index:58;min-height:44px;padding:8px 16px;border-radius:99px;border:1px solid #a8926a;background:rgba(230,218,191,.82);color:#2a231c;font:600 .85rem system-ui;cursor:pointer;display:none";
     const tr = (s) => {
       try {
         return UX.tr(s);
@@ -3920,7 +3925,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   function mk2() {
     box2 = document.createElement("button");
     box2.type = "button";
-    box2.style.cssText = "position:fixed;left:50%;bottom:max(150px,calc(env(safe-area-inset-bottom) + 144px));transform:translateX(-50%);z-index:60;display:none;min-height:50px;max-width:min(90vw,420px);padding:10px 20px;border-radius:99px;border:1px solid #c5463b;background:rgba(243,235,217,.88);color:#2a231c;font:600 .9rem/1.25 system-ui;cursor:pointer;overflow:hidden;touch-action:none";
+    box2.style.cssText = "position:fixed;left:50%;bottom:max(150px,calc(env(safe-area-inset-bottom) + 144px));transform:translateX(-50%);z-index:60;display:none;min-height:50px;max-width:min(90vw,420px);padding:10px 20px;border-radius:99px;border:1px solid #a8382f;background:rgba(230,218,191,.88);color:#2a231c;font:600 .9rem/1.25 system-ui;cursor:pointer;overflow:hidden;touch-action:none";
     bar = document.createElement("span");
     bar.style.cssText = "position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,199,122,.35);pointer-events:none";
     txt = document.createElement("span");
@@ -5007,7 +5012,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
           e = document.createElement("div");
           e.id = "uxcap";
           e.setAttribute("aria-live", "polite");
-          e.style.cssText = "position:fixed;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 50px));transform:translateX(-50%);background:rgba(243,235,217,.84);color:#2a231c;padding:6px 14px;border-radius:8px;font:600 .86rem system-ui,sans-serif;opacity:0;transition:opacity .4s;z-index:20;pointer-events:none;max-width:86%;text-align:center";
+          e.style.cssText = "position:fixed;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 50px));transform:translateX(-50%);background:rgba(230,218,191,.84);color:#2a231c;padding:6px 14px;border-radius:8px;font:600 .86rem system-ui,sans-serif;opacity:0;transition:opacity .4s;z-index:20;pointer-events:none;max-width:86%;text-align:center";
           document.body.appendChild(e);
         }
         e.textContent = "[" + UX4.tr(k) + "]";
@@ -5121,9 +5126,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       /* confirmación dentro del juego (en lugar de confirm() nativo) */
       ask(msg, ok) {
         const d = document.createElement("div");
-        d.style.cssText = "position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(243,235,217,.6);font:15px/1.4 system-ui,sans-serif";
+        d.style.cssText = "position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(230,218,191,.6);font:15px/1.4 system-ui,sans-serif";
         const b = document.createElement("div");
-        b.style.cssText = "background:#ece2cc;color:#2a231c;border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:20px 22px;max-width:min(86vw,360px);text-align:center";
+        b.style.cssText = "background:#dccfb1;color:#2a231c;border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:20px 22px;max-width:min(86vw,360px);text-align:center";
         const p = document.createElement("p");
         p.style.margin = "0 0 14px";
         p.textContent = UX4.tr(msg);
@@ -5281,7 +5286,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
             e = document.createElement("div");
             e.id = "uxrest";
             e.setAttribute("aria-live", "polite");
-            e.style.cssText = "position:fixed;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 60px));transform:translateX(-50%);max-width:min(88vw,420px);text-align:center;background:rgba(243,235,217,.88);color:#2a231c;padding:10px 16px;border-radius:14px;font:14px/1.4 system-ui,sans-serif;z-index:28;pointer-events:none;transition:opacity .8s;opacity:0";
+            e.style.cssText = "position:fixed;left:50%;bottom:max(70px,calc(env(safe-area-inset-bottom) + 60px));transform:translateX(-50%);max-width:min(88vw,420px);text-align:center;background:rgba(230,218,191,.88);color:#2a231c;padding:10px 16px;border-radius:14px;font:14px/1.4 system-ui,sans-serif;z-index:28;pointer-events:none;transition:opacity .8s;opacity:0";
             document.body.appendChild(e);
           }
           e.textContent = T3("Buen momento para soltar los hombros y tomar un poco de agua.", "A good moment to relax your shoulders and have some water.", "\u80A9\u306E\u529B\u3092\u629C\u3044\u3066\u3001\u6C34\u3092\u4E00\u53E3\u98F2\u3080\u306E\u306B\u3088\u3044\u9803\u5408\u3044\u3067\u3059\u3002");
@@ -5346,16 +5351,16 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
     ]);
     function breathe(done) {
       const o = document.createElement("div");
-      o.style.cssText = "position:fixed;inset:0;z-index:70;display:grid;place-items:center;align-content:center;gap:18px;background:rgba(243,235,217,.92);color:#2a231c;font:600 1.1rem system-ui;text-align:center";
+      o.style.cssText = "position:fixed;inset:0;z-index:70;display:grid;place-items:center;align-content:center;gap:18px;background:rgba(230,218,191,.92);color:#2a231c;font:600 1.1rem system-ui;text-align:center";
       const orb = document.createElement("div");
-      orb.style.cssText = "width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#a8382f,#ffb86b 70%);box-shadow:0 0 50px rgba(255,200,120,.45);transform:scale(.55);transition:transform 4s ease-in-out";
+      orb.style.cssText = "width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,#8f2f27,#ffb86b 70%);box-shadow:0 0 50px rgba(255,200,120,.45);transform:scale(.55);transition:transform 4s ease-in-out";
       const lb = document.createElement("div"), t = document.createElement("div");
       t.textContent = T3("Un minuto para respirar", "One minute to breathe", "1\u5206\u3060\u3051\u6DF1\u547C\u5438");
       t.style.cssText = "font-weight:400;opacity:.75;font-size:.9rem";
       const sk = document.createElement("button");
       sk.type = "button";
       sk.textContent = T3("Saltar", "Skip", "\u30B9\u30AD\u30C3\u30D7");
-      sk.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #b9a47c;background:#f3ebd9;color:#2a231c;font:inherit;font-size:.9rem;cursor:pointer";
+      sk.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #a8926a;background:#e6dabf;color:#2a231c;font:inherit;font-size:.9rem;cursor:pointer";
       o.append(t, orb, lb, sk);
       document.body.appendChild(o);
       let n = 0, alive = true, tm;
@@ -5408,9 +5413,9 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
       o.id = "uxAboutOv";
       o.setAttribute("role", "dialog");
       o.setAttribute("aria-modal", "true");
-      o.style.cssText = "position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(226,215,192,.88);padding:12px";
+      o.style.cssText = "position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(205,192,162,.88);padding:12px";
       const b = document.createElement("div");
-      b.style.cssText = "background:#f3ebd9;color:#2a231c;border:1px solid #b9a47c;border-radius:16px;padding:18px 20px;max-width:min(92vw,440px);max-height:84vh;overflow:auto;font:15px/1.5 system-ui,sans-serif";
+      b.style.cssText = "background:#e6dabf;color:#2a231c;border:1px solid #a8926a;border-radius:16px;padding:18px 20px;max-width:min(92vw,440px);max-height:84vh;overflow:auto;font:15px/1.5 system-ui,sans-serif";
       const h = document.createElement("h2");
       h.style.cssText = "margin:0 0 6px;font:600 1.2rem system-ui";
       h.textContent = "Tomoshibi";
@@ -5429,13 +5434,13 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         const a = document.createElement("a");
         a.href = "../" + x[0];
         a.textContent = x[1];
-        a.style.cssText = "color:#c5463b;min-height:44px;display:inline-flex;align-items:center;padding:0 6px";
+        a.style.cssText = "color:#a8382f;min-height:44px;display:inline-flex;align-items:center;padding:0 6px";
         nav.appendChild(a);
       });
       const c = document.createElement("button");
       c.type = "button";
       c.textContent = T3("Cerrar", "Close", "\u9589\u3058\u308B");
-      c.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #b9a47c;background:#ece2cc;color:#2a231c;font:inherit;cursor:pointer";
+      c.style.cssText = "min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #a8926a;background:#dccfb1;color:#2a231c;font:inherit;cursor:pointer";
       c.onclick = () => o.remove();
       b.append(h, tg, p1, p2, nav, c);
       o.appendChild(b);
@@ -5455,7 +5460,7 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         e.id = "uxsay";
         e.setAttribute("role", "status");
         e.setAttribute("aria-live", "polite");
-        e.style.cssText = "position:fixed;left:50%;bottom:max(90px,calc(env(safe-area-inset-bottom) + 80px));transform:translateX(-50%);max-width:min(88vw,420px);background:rgba(243,235,217,.9);color:#2a231c;padding:10px 16px;border-radius:14px;font:500 .85rem/1.35 system-ui;text-align:center;z-index:65;pointer-events:none;transition:opacity .5s;opacity:0";
+        e.style.cssText = "position:fixed;left:50%;bottom:max(90px,calc(env(safe-area-inset-bottom) + 80px));transform:translateX(-50%);max-width:min(88vw,420px);background:rgba(230,218,191,.9);color:#2a231c;padding:10px 16px;border-radius:14px;font:500 .85rem/1.35 system-ui;text-align:center;z-index:65;pointer-events:none;transition:opacity .5s;opacity:0";
         document.body.appendChild(e);
       }
       e.textContent = m;
@@ -5485,12 +5490,12 @@ footer{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = T3(es, en, ja);
-        b.style.cssText = "min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid #b9a47c;background:rgba(243,235,217,.7);color:#2a231c;font:500 .85rem system-ui;cursor:pointer";
+        b.style.cssText = "min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid #a8926a;background:rgba(230,218,191,.7);color:#2a231c;font:500 .85rem system-ui;cursor:pointer";
         b.onclick = () => {
           pick = pick === k ? null : k;
           for (const j in bs) {
-            bs[j].style.borderColor = j === pick ? "#c5463b" : "#b9a47c";
-            bs[j].style.background = j === pick ? "rgba(255,199,122,.22)" : "rgba(243,235,217,.7)";
+            bs[j].style.borderColor = j === pick ? "#a8382f" : "#a8926a";
+            bs[j].style.background = j === pick ? "rgba(255,199,122,.22)" : "rgba(230,218,191,.7)";
           }
           UX4.hap(6);
         };

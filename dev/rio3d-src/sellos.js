@@ -11,12 +11,12 @@ export const sellado=(lap,t)=>!!get()[lap+'-'+t];
 export function sellar(lap,t){
   if(lap<1||lap>3)return false;const a=get(),k=lap+'-'+t;if(a[k])return false;a[k]=Date.now();cache=a;try{localStorage.setItem(SK,JSON.stringify(a))}catch(e){}return true}
 try{UX.add([['Pergamino de sellos','Stamp scroll','御朱印の巻物'],['Libro de sellos','Stamp scroll','御朱印の巻物'],['Cada lugar deja una estampa. Cada vuelta le añade detalle.','Each place leaves an ink print. Each lap adds detail to it.','各地で墨の印がもらえます。一周ごとに絵が深まります。'],['Aún en blanco','Still blank','まだ白紙'],['Desliza para desenrollar','Swipe to unroll','横にすべらせて広げる'],['Peregrinación del río','River pilgrimage','川の巡礼'],['Vuelta','Lap','周'],['Sello','Stamp','印'],['Abrir','Open','開く'],['Lo que te llevas de cada lugar','What you take from each place','それぞれの場所からの持ち物']])}catch(e){}
-const CSS=`#pgOv{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(226,215,192,.95);padding:10px;color:#2a231c;font:15px/1.4 system-ui,sans-serif}
+const CSS=`#pgOv{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(205,192,162,.95);padding:10px;color:#2a231c;font:15px/1.4 system-ui,sans-serif}
 #pgOv h2{margin:0;font:600 1.1rem system-ui;text-align:center}#pgOv .sub{opacity:.7;font-size:.8rem;text-align:center;margin-top:2px}
 #pgOv .pg{display:flex;align-items:stretch;max-width:96vw;filter:drop-shadow(0 10px 22px rgba(0,0,0,.45))}
 #pgOv .jk{flex:0 0 18px;margin:-10px 0;border-radius:5px;background:linear-gradient(90deg,#3a2416,#8a5a36 38%,#a9764a 52%,#5a3822 86%,#2c1a10);position:relative;z-index:2}
 #pgOv .jk:before,#pgOv .jk:after{content:"";position:absolute;left:1px;right:1px;height:12px;border-radius:4px;background:linear-gradient(90deg,#1c1410,#4a3a30 45%,#1c1410)}#pgOv .jk:before{top:-7px}#pgOv .jk:after{bottom:-7px}
-#pgOv .pv{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background-color:#efe6d2;border-top:9px solid #39406e;border-bottom:9px solid #39406e;box-shadow:inset 0 2px 0 #c9a45a,inset 0 -2px 0 #c9a45a,inset 14px 0 14px -10px rgba(60,40,20,.35),inset -14px 0 14px -10px rgba(60,40,20,.35);max-width:100%;scrollbar-width:thin;scrollbar-color:#b9a47c transparent;transition:max-width .9s cubic-bezier(.3,.7,.2,1)}
+#pgOv .pv{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background-color:#e7dcc4;border-top:9px solid #39406e;border-bottom:9px solid #39406e;box-shadow:inset 0 2px 0 #c9a45a,inset 0 -2px 0 #c9a45a,inset 14px 0 14px -10px rgba(60,40,20,.35),inset -14px 0 14px -10px rgba(60,40,20,.35);max-width:100%;scrollbar-width:thin;scrollbar-color:#b9a47c transparent;transition:max-width .9s cubic-bezier(.3,.7,.2,1)}
 #pgOv .pv.roll{max-width:0}
 #pgOv .sp{display:flex;align-items:stretch;padding:0 10px}
 #pgOv .pp{flex:0 0 auto;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 14px 10px;color:#2a231c;position:relative}
@@ -29,7 +29,7 @@ const CSS=`#pgOv{position:fixed;inset:0;z-index:80;display:flex;flex-direction:c
 #pgOv .hk i.on{background:#c5463b;border:1px solid #c5463b;color:#f6efe1;box-shadow:inset 0 0 0 1.5px rgba(246,239,225,.55)}
 #pgOv .tt{writing-mode:vertical-rl;font:600 1.5rem/1.5 "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",Georgia,serif;letter-spacing:.3em;color:#2a231c}
 #pgOv .tt small{font-size:.72rem;letter-spacing:.1em;opacity:.6;font-weight:400}
-#pgOv .cl{min-height:44px;padding:8px 22px;border-radius:99px;border:1px solid #b9a47c;background:#f3ebd9;color:#2a231c;font:inherit;cursor:pointer}`;
+#pgOv .cl{min-height:44px;padding:8px 22px;border-radius:99px;border:1px solid #a8926a;background:#e6dabf;color:#2a231c;font:inherit;cursor:pointer}`;
 export function openSellos(tr){
   tr=tr||(window.UX?UX.tr:(s=>s));const a=get();if(document.getElementById('pgOv'))return;
   if(!document.getElementById('pgCss')){const st=document.createElement('style');st.id='pgCss';st.textContent=CSS;document.head.appendChild(st)}

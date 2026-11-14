@@ -26,14 +26,14 @@ export function openOfrenda(cer){
     q=w?{es:'Dejaste «'+W(w)+'» en la primera vuelta. ¿Sigue siendo cierto?',en:'You left “'+PALABRAS[w].en+'” on the first lap. Is it still true?',ja:'最初の一周で「'+PALABRAS[w].ja+'」を置いていきました。今もそうですか。'}
       :{es:'Esto es lo que dejaste atrás al empezar. ¿Sigue siendo cierto?',en:'This is what you left behind when you set out. Is it still true?',ja:'歩き出すときに置いてきたものです。今もそうですか。'}}
   const ov=document.createElement('div');ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');
-  ov.style.cssText='position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(236,226,204,.62);font-family:system-ui,-apple-system,sans-serif;color:#2a231c';
-  const card=document.createElement('div');card.style.cssText='max-width:440px;width:100%;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;padding:22px 20px;border-radius:18px;background:rgba(243,235,217,.93);border:1px solid #b9a47c;box-shadow:0 10px 40px rgba(0,0,0,.35)';
-  const h=document.createElement('div');h.style.cssText='font:600 .8rem system-ui;letter-spacing:.08em;color:#c5463b';h.textContent=a.k+' · '+L(a)+' · '+cer+' / 4';
+  ov.style.cssText='position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(220,207,177,.62);font-family:system-ui,-apple-system,sans-serif;color:#2a231c';
+  const card=document.createElement('div');card.style.cssText='max-width:440px;width:100%;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;padding:22px 20px;border-radius:18px;background:rgba(230,218,191,.93);border:1px solid #a8926a;box-shadow:0 10px 40px rgba(0,0,0,.35)';
+  const h=document.createElement('div');h.style.cssText='font:600 .8rem system-ui;letter-spacing:.08em;color:#a8382f';h.textContent=a.k+' · '+L(a)+' · '+cer+' / 4';
   const t=document.createElement('div');t.style.cssText='font:600 1.12rem/1.4 system-ui';t.textContent=L(q);
   const row=document.createElement('div');row.style.cssText='display:flex;gap:10px;flex-wrap:wrap;justify-content:center';
   const fin=w=>{if(w)addOfrenda(cer,w);setOfrendaPend(0);ov.remove();open=false;
     const c=primeraFrase(cartaUmbral(cer));if(c)setTimeout(()=>toast(L({es:'Mara: «'+c+'»',en:'Mara: “'+c+'”',ja:'マラ：「'+c+'」'})),900)};
-  const btn=(txt,f,soft)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.style.cssText='min-height:46px;padding:10px 18px;border-radius:99px;border:1px solid '+(soft?'#b9a47c':'#c5463b')+';background:'+(soft?'transparent':'rgba(197,70,59,.16)')+';color:#2a231c;font:600 .95rem system-ui;cursor:pointer';b.onclick=f;return b};
+  const btn=(txt,f,soft)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.style.cssText='min-height:46px;padding:10px 18px;border-radius:99px;border:1px solid '+(soft?'#a8926a':'#a8382f')+';background:'+(soft?'transparent':'rgba(168,56,47,.16)')+';color:#2a231c;font:600 .95rem system-ui;cursor:pointer';b.onclick=f;return b};
   opciones(cer).forEach(k=>row.appendChild(btn(W(k),()=>fin(k))));
   const skip=btn(L({es:'Seguir sin elegir',en:'Continue without choosing',ja:'選ばずに進む'}),()=>fin(null),true);skip.style.fontSize='.85rem';skip.style.opacity='.85';
   const note=document.createElement('div');note.style.cssText='font:500 .74rem system-ui;opacity:.6';note.textContent=L({es:'Se queda solo en este dispositivo.',en:'Stays only on this device.',ja:'この端末にだけ保存されます。'});

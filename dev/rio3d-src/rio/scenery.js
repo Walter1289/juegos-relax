@@ -88,7 +88,7 @@ export function updateMassifs(ps){const c0=Math.floor((ps-260)/MC),c1=Math.floor
    Sampán de 5,2 m hecho por secciones (proa y popa levantadas), con piso, bancos, cesta, red y farol de proa que se enciende de noche.
    Dos oficios: el pescador de caña, sentado, que de vez en cuando da un tirón al sedal; y el que boga de pie con el ro (remo largo de popa).
    Cuerpo torneado con kasa y mino de paja, a la misma escala que el lanchero; los brazos siguen de verdad la caña o el remo. */
-const farBoats=[],FBM=new THREE.MeshToonMaterial({gradientMap:toonGrad,vertexColors:true,side:THREE.DoubleSide});
+export const farBoats=[],FBM=new THREE.MeshToonMaterial({gradientMap:toonGrad,vertexColors:true,side:THREE.DoubleSide});
 const _fa=new THREE.Vector3(),_fb=new THREE.Vector3(),_fq=new THREE.Quaternion(),_fy=new THREE.Vector3(0,1,0),_fe=new THREE.Euler(0,0,0,'YXZ');
 const hullGeos=(()=>{const N=12,pos=[],uv=[],idx=[],fp=[],fuv=[],fi=[];
   for(let i=0;i<=N;i++){const u=i/N,z=2.3-5.2*u,e=2*u-1,e4=e*e*e*e,b=.66*Math.pow(Math.sin(Math.PI*(.06+.88*u)),.75),k=-.14+.42*e4*(u>.5?1.25:.8),hh=.3+.5*e4*(u>.5?1.3:.75);
@@ -165,4 +165,9 @@ function placeFarBoat(b,ps){const s=ps+90+Math.random()*160,e=(Math.random()*2-1
 farBoats.forEach(b=>placeFarBoat(b,40+Math.random()*100));
 export function updateFarBoats(dt,ps){for(const b of farBoats){const u=b.userData;if(b.position.z>P.pz+30||-b.position.z>ps+300){placeFarBoat(b,ps);continue}
   const sp=u.row?.42:.12;b.position.x+=Math.sin(u.hd+Math.PI)*sp*dt;b.position.z-=Math.cos(u.hd+Math.PI)*sp*dt;b.position.y=Math.sin(P.t*.8+u.ph)*.03+Math.sin(P.t*.47+u.ph*2)*.012;b.rotation.set(Math.sin(P.t*.6+u.ph)*.02,-u.hd+Math.PI,Math.sin(P.t*.7+u.ph)*.02+Math.sin(P.t*.31+u.ph)*.012);
+  /* ceden el paso: si la canoa se acerca, bogan hacia el lado contrario (sin salirse del cauce); si aun así se tocan, se aparta el bote, nunca la canoa */
+  {const dxp=b.position.x-P.px,dzp=b.position.z-P.pz,d=Math.hypot(dxp,dzp);let want=0;
+    if(d<16){const sb=-b.position.z,eb=b.position.x-cx(sb),ep=P.px-cx(-P.pz),lim=hw(sb)-3.5;let dir=eb>=ep?1:-1;if(dir*eb>lim)dir=Math.abs(eb-ep)<4?-dir:0;want=dir*2.1*clamp(1-(d-4)/12)*clamp(1-(Math.abs(eb-ep)-1)/5);
+      if(d<3.4&&d>.01){const p=(3.4-d)*Math.min(1,dt*6);b.position.x+=dxp/d*p;b.position.z+=dzp/d*p}}
+    u.dg=(u.dg||0)+(want-(u.dg||0))*Math.min(1,dt*1.6);if(Math.abs(u.dg)>.01){const ta=tanAng(-b.position.z);b.position.x+=Math.cos(ta)*u.dg*dt;b.position.z+=Math.sin(ta)*u.dg*dt}}
   animFarBoat(b,dt)}}

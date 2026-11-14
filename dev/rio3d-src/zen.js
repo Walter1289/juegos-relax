@@ -5,12 +5,12 @@ export function addZenTexts(ux){ux.add([['Jardín zen','Zen garden','禅の庭']
 export const zenUnlocked=(state,n)=>{const l=state.ltr||{};for(let i=0;i<(n||11);i++)if(!l[i])return false;return true};
 export function openZen(o){
   const tr=o.tr||(s=>s),ov=document.createElement('div');
-  ov.style.cssText='position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(226,215,192,.94);color:#2a231c;font:500 .9rem system-ui;padding:12px';
+  ov.style.cssText='position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(205,192,162,.94);color:#2a231c;font:500 .9rem system-ui;padding:12px';
   const tt=document.createElement('div');tt.textContent=tr('Jardín zen');tt.style.cssText='font:600 1.15rem system-ui';
-  const cv=document.createElement('canvas');cv.width=W;cv.height=H;cv.style.cssText='position:relative;inset:auto;display:block;height:auto;z-index:auto;width:min(94vw,640px);max-height:58vh;aspect-ratio:640/380;border-radius:18px;border:1px solid #b9a47c;touch-action:none;box-shadow:0 10px 40px rgba(0,0,0,.45);cursor:crosshair';
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;cv.style.cssText='position:relative;inset:auto;display:block;height:auto;z-index:auto;width:min(94vw,640px);max-height:58vh;aspect-ratio:640/380;border-radius:18px;border:1px solid #a8926a;touch-action:none;box-shadow:0 10px 40px rgba(0,0,0,.45);cursor:crosshair';
   const hint=document.createElement('div');hint.textContent=tr('Arrastra el dedo sobre la arena. No hay prisa ni forma correcta.');hint.style.cssText='opacity:.7;font-size:.8rem;text-align:center;max-width:90vw';
   const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;flex-wrap:wrap;justify-content:center';
-  const mk=(t,f)=>{const b=document.createElement('button');b.type='button';b.textContent=tr(t);b.style.cssText='min-height:44px;padding:8px 16px;border-radius:99px;border:1px solid #b9a47c;background:#f3ebd9;color:#2a231c;font:inherit;cursor:pointer';b.onclick=f;row.appendChild(b);return b};
+  const mk=(t,f)=>{const b=document.createElement('button');b.type='button';b.textContent=tr(t);b.style.cssText='min-height:44px;padding:8px 16px;border-radius:99px;border:1px solid #a8926a;background:#e6dabf;color:#2a231c;font:inherit;cursor:pointer';b.onclick=f;row.appendChild(b);return b};
   ov.append(tt,cv,hint,row);document.body.appendChild(ov);
   const g=cv.getContext('2d'),sand=document.createElement('canvas');sand.width=W;sand.height=H;const sg=sand.getContext('2d');
   const base=()=>{sg.fillStyle='#d9c9a3';sg.fillRect(0,0,W,H);for(let i=0;i<2400;i++){sg.fillStyle='rgba('+(i%2?'120,100,70':'255,245,215')+',.07)';sg.fillRect(Math.random()*W,Math.random()*H,1.4,1.4)}};

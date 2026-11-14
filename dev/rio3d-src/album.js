@@ -22,15 +22,15 @@ export const albumCount=()=>Object.keys(get()).length;
 export function claimAlbum(state){state.cnt=state.cnt||{};const n=Math.max(0,albumCount()-(state.cnt.alb||0));if(n)state.cnt.alb=albumCount();return n}
 export function openAlbum(tr){
   tr=tr||(window.UX?UX.tr:(s=>s));const seen=get();
-  const ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(226,215,192,.88);padding:12px';
-  const b=document.createElement('div');b.style.cssText='background:#f3ebd9;color:#2a231c;border:1px solid #b9a47c;border-radius:16px;padding:18px 20px;max-width:min(92vw,460px);max-height:82vh;overflow:auto;font:15px/1.45 system-ui';
+  const ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(205,192,162,.88);padding:12px';
+  const b=document.createElement('div');b.style.cssText='background:#e6dabf;color:#2a231c;border:1px solid #a8926a;border-radius:16px;padding:18px 20px;max-width:min(92vw,460px);max-height:82vh;overflow:auto;font:15px/1.45 system-ui';
   const h=document.createElement('h2');h.style.cssText='margin:0 0 4px;font:600 1.15rem system-ui';h.textContent=tr('Cuaderno del río');
   const s=document.createElement('div');s.style.cssText='opacity:.65;font-size:.8rem;margin-bottom:12px';s.textContent=tr('Se llena solo, a su ritmo. No hay prisa.');
   b.append(h,s);
-  ALB.forEach(a=>{const k=!!seen[a[0]],p=document.createElement('div');p.style.cssText='margin:0 0 12px;padding:10px 12px;border-radius:12px;background:'+(k?'rgba(197,70,59,.10)':'rgba(42,35,28,.04)')+';'+(k?'':'opacity:.55');
+  ALB.forEach(a=>{const k=!!seen[a[0]],p=document.createElement('div');p.style.cssText='margin:0 0 12px;padding:10px 12px;border-radius:12px;background:'+(k?'rgba(168,56,47,.10)':'rgba(42,35,28,.04)')+';'+(k?'':'opacity:.55');
     const n=document.createElement('div');n.style.cssText='font-weight:600';n.textContent=(k?'✦ ':'· ')+(k?tr(a[1]):'?');const d=document.createElement('div');d.style.cssText='font-size:.88em;opacity:.85';d.textContent=k?tr(a[4]):tr('Aún no lo has visto');p.append(n,d);b.appendChild(p)});
   {const h2=document.createElement('div');h2.style.cssText='font-weight:600;margin:14px 0 6px';h2.textContent=tr('Farolillos del día')+' · '+dayTotal();b.appendChild(h2);const lg=dayLog().slice().reverse();
     if(!lg.length){const e=document.createElement('div');e.style.cssText='opacity:.55;font-size:.88em;margin-bottom:12px';e.textContent=tr('Aún no recoges ninguno');b.appendChild(e)}
-    lg.forEach(x=>{const p=document.createElement('div');p.style.cssText='margin:0 0 8px;padding:8px 12px;border-radius:12px;background:rgba(197,70,59,.08);font-size:.88em';p.textContent='🏮 '+tr(DAYS[x[1]][0]);b.appendChild(p)})}
-  const c=document.createElement('button');c.type='button';c.textContent=tr('Cerrar');c.style.cssText='min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #b9a47c;background:#ece2cc;color:#2a231c;font:inherit;cursor:pointer';c.onclick=()=>ov.remove();b.appendChild(c);ov.appendChild(b);ov.onclick=e=>{if(e.target===ov)ov.remove()};document.body.appendChild(ov);
+    lg.forEach(x=>{const p=document.createElement('div');p.style.cssText='margin:0 0 8px;padding:8px 12px;border-radius:12px;background:rgba(168,56,47,.08);font-size:.88em';p.textContent='🏮 '+tr(DAYS[x[1]][0]);b.appendChild(p)})}
+  const c=document.createElement('button');c.type='button';c.textContent=tr('Cerrar');c.style.cssText='min-height:44px;padding:8px 18px;border-radius:99px;border:1px solid #a8926a;background:#dccfb1;color:#2a231c;font:inherit;cursor:pointer';c.onclick=()=>ov.remove();b.appendChild(c);ov.appendChild(b);ov.onclick=e=>{if(e.target===ov)ov.remove()};document.body.appendChild(ov);
 }

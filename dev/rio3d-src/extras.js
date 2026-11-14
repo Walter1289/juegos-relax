@@ -16,8 +16,8 @@ export function initExtras(C){
   const st=document.createElement('style');
   st.textContent=`
   .xp{position:fixed;z-index:9;background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(8px);color:var(--ink);font:500 .85rem system-ui,sans-serif}
-  .xm{inset:0;display:grid;place-items:center;background:rgba(236,226,204,.62);padding:16px;border:0;border-radius:0}
-  .xm>div{width:min(640px,100%);max-height:88vh;overflow:auto;background:rgba(243,235,217,.97);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+  .xm{inset:0;display:grid;place-items:center;background:rgba(220,207,177,.62);padding:16px;border:0;border-radius:0}
+  .xm>div{width:min(640px,100%);max-height:88vh;overflow:auto;background:rgba(230,218,191,.97);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
   .xm h2{margin:0 0 10px;font:700 1.25rem 'Hiragino Mincho ProN','Iowan Old Style','Palatino Linotype',Georgia,serif;letter-spacing:.02em}   .xm .row>button{background:rgba(42,35,28,.08);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font:600 .85rem system-ui,sans-serif;cursor:pointer;min-height:36px}
   .xm .row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0}
   .xm select,.xm button.q{background:rgba(42,35,28,.08);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:600 .85rem system-ui,sans-serif}
@@ -29,12 +29,12 @@ export function initExtras(C){
   .xcard b{display:block;color:var(--ink);font-size:.85rem}
   .xcard.no{opacity:.55}
   #lantB{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));z-index:6;background:var(--panel);border:1px solid var(--lamp);color:var(--lamp);border-radius:99px;padding:9px 16px;font:700 .85rem system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(6px)}
-  #xph{background:rgba(243,235,217,.55);left:0;right:0;bottom:0;padding:10px max(12px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));border-radius:18px 18px 0 0;display:flex;flex-direction:column;gap:9px;align-items:center}
+  #xph{background:rgba(230,218,191,.55);left:0;right:0;bottom:0;padding:10px max(12px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));border-radius:18px 18px 0 0;display:flex;flex-direction:column;gap:9px;align-items:center}
   #xph .fr{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
   #xph .chip2{padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:rgba(42,35,28,.06);color:var(--muted);font:600 .8rem system-ui,sans-serif;cursor:pointer}
   #xph .chip2.on{color:#f6efe1;background:var(--lamp);border-color:var(--lamp)}
   #xph label{display:flex;gap:8px;align-items:center;font-size:.78rem;color:var(--muted)}
-  #xph input[type=range]{width:min(34vw,200px);accent-color:#c5463b}
+  #xph input[type=range]{width:min(34vw,200px);accent-color:#a8382f}
   #xshut{width:64px;height:64px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.28);cursor:pointer;flex:none}
   #xshut:active{background:#fff}
   #xclose{position:fixed;top:max(12px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:9;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:8px 16px;font:700 .85rem system-ui,sans-serif;cursor:pointer}
@@ -246,14 +246,14 @@ export function initExtras(C){
   };
 
   restB.onclick=()=>{
-    const m=modal('<h2>¿Volver al inicio del río?</h2><p style="color:var(--muted);margin:0 0 14px">Regresas al puente de madera. Conservas tu diario, tus fotos y las linternas que soltaste.</p><div class="row"><button class="q" id="xno">Cancelar</button><button class="q" id="xyes" style="background:#c5463b;color:#f6efe1">Reiniciar recorrido</button></div>');
+    const m=modal('<h2>¿Volver al inicio del río?</h2><p style="color:var(--muted);margin:0 0 14px">Regresas al puente de madera. Conservas tu diario, tus fotos y las linternas que soltaste.</p><div class="row"><button class="q" id="xno">Cancelar</button><button class="q" id="xyes" style="background:#a8382f;color:#f6efe1">Reiniciar recorrido</button></div>');
     m.querySelector('#xno').onclick=()=>m.remove();m.querySelector('#xyes').onclick=()=>{m.remove();C.restart()};
   };
   /* ---------- ajustes ---------- */
   setB.onclick=()=>{
     const m=modal(`<h2>Ajustes</h2>
     <div class="row"><span>Calidad<br><small style="color:var(--muted)" id="xql"></small></span><select id="xq"><option value="auto">Automática</option><option value="hi">Alta</option><option value="mid">Media</option><option value="lo">Baja (más fluida)</option></select></div>
-    <div class="row"><span>Volumen</span><input type="range" id="xv" min="0" max="1" step=".05" style="width:55%;accent-color:#c5463b"></div>
+    <div class="row"><span>Volumen</span><input type="range" id="xv" min="0" max="1" step=".05" style="width:55%;accent-color:#a8382f"></div>
     <div class="row"><span>Controles táctiles<br><small style="color:var(--muted)">Estándar: izquierda dirige, derecha mira, ✕ ○ □ △ y Start. Clásico: el control anterior</small></span><select id="xctl"><option value="std">Estándar</option><option value="classic">Clásico</option></select></div>
     <div class="row"><span>Mostrar rendimiento<br><small style="color:var(--muted)">Fps y carga, abajo a la izquierda</small></span><select id="xperf"><option value="0">No</option><option value="1">Sí</option></select></div>
     <div class="row"><span>Estación<br><small style="color:var(--muted)">Cambiarla recarga el río</small></span><select id="xs"><option value="auto">Según la fecha</option><option value="0">Primavera</option><option value="1">Verano</option><option value="2">Otoño</option><option value="3">Invierno</option></select></div>

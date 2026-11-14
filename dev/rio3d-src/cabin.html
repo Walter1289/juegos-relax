@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#ece2cc">
+<meta name="theme-color" content="#dccfb1">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
 <title>Cabaña 3D · Tomoshibi</title>
@@ -19,7 +19,7 @@
 <link rel="icon" href="../icons/icon-192.png">
 <script src="../shared/guard.js"></script>
 <style>
-:root{--bg:#ece2cc;--panel:rgba(243,235,217,.88);--ink:#2a231c;--muted:#6b5e4f;--lamp:#c5463b;--line:#b9a47c}
+:root{--bg:#dccfb1;--panel:rgba(230,218,191,.88);--ink:#2a231c;--muted:#5a4e40;--lamp:#a8382f;--line:#a8926a}
 [hidden]{display:none!important}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;overflow:hidden;overscroll-behavior:none}
@@ -28,9 +28,9 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:
 #top>*{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 13px;border-radius:99px;font:600 .85rem/1 system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(6px)}
 #top button{cursor:pointer}
 .bar{flex:1;min-width:120px;max-width:340px;height:10px;padding:0!important;overflow:hidden}
-#fill{height:100%;width:0;background:linear-gradient(90deg,#c5463b,#f5a3b8)}
+#fill{height:100%;width:0;background:linear-gradient(90deg,#a8382f,#f5a3b8)}
 #mats{color:var(--lamp)}
-#panel{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:8px max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,rgba(236,226,204,.92) 30%);overflow-x:auto}
+#panel{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:8px max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(transparent,rgba(220,207,177,.92) 30%);overflow-x:auto}
 #chips{display:flex;gap:14px;align-items:flex-start;min-width:max-content}
 .grp{display:flex;gap:6px;align-items:stretch;flex-wrap:nowrap}
 .lab{align-self:center;font:700 .62rem/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);writing-mode:vertical-rl;transform:rotate(180deg)}
@@ -38,14 +38,14 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:
 .chip b{font-size:.8rem}.chip small{font-size:.68rem;color:var(--muted)}
 .chip.ready{border-color:var(--lamp);box-shadow:0 0 0 1px var(--lamp) inset}.chip.ready small{color:var(--lamp)}
 .chip.done{opacity:.6}
-.loot{align-self:center;font-size:.72rem;padding:5px 9px;border-radius:99px;background:rgba(42,35,28,.07);color:var(--muted);white-space:nowrap}.loot.on{background:rgba(197,70,59,.2);color:var(--lamp)}
+.loot{align-self:center;font-size:.72rem;padding:5px 9px;border-radius:99px;background:rgba(42,35,28,.07);color:var(--muted);white-space:nowrap}.loot.on{background:rgba(168,56,47,.2);color:var(--lamp)}
 #hint,#toast{position:fixed;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);padding:9px 16px;border-radius:99px;font-size:.88rem;text-align:center;max-width:92%;z-index:6;pointer-events:none;transition:opacity .6s}
 #hint{bottom:calc(100px + env(safe-area-inset-bottom))}
 #toast{top:62px;opacity:0}#toast.show{opacity:1}
-#breath{position:fixed;inset:0;display:grid;place-items:center;z-index:8;background:rgba(236,226,204,.55);pointer-events:none}
+#breath{position:fixed;inset:0;display:grid;place-items:center;z-index:8;background:rgba(220,207,177,.55);pointer-events:none}
 #bcircle{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,#ffe9c2,#f5a3b8 70%);transform:scale(.7);opacity:.85}
-#btxt{position:absolute;font:600 1.2rem system-ui;color:#ece2cc}
-#start{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:radial-gradient(120% 90% at 50% 0%,rgba(243,235,217,.93),rgba(243,235,217,.97) 65%);z-index:10}
+#btxt{position:absolute;font:600 1.2rem system-ui;color:#dccfb1}
+#start{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:var(--grain),radial-gradient(120% 90% at 50% 0%,rgba(230,218,191,.93),rgba(230,218,191,.97) 65%);z-index:10}
 #start .card{max-width:440px;display:flex;flex-direction:column;gap:13px}
 h1{margin:0;font:700 clamp(1.7rem,6vw,2.3rem)/1.1 'Hiragino Mincho ProN','Iowan Old Style','Palatino Linotype',Georgia,serif;letter-spacing:.02em}
 p{margin:0;color:var(--muted);line-height:1.55}
@@ -70,6 +70,11 @@ body.hand-r #nextb{right:max(10px,env(safe-area-inset-right))!important;left:aut
 body.hand-l #nextb{left:max(10px,env(safe-area-inset-left))!important;right:auto!important}
 body.hand-r #hint,body.hand-l #hint{bottom:auto;top:max(12px,env(safe-area-inset-top));max-width:70%}
 body.hand-r #toast,body.hand-l #toast{top:max(64px,calc(env(safe-area-inset-top) + 52px))}
+
+/* papel con grano y fibra (misma textura en portada, paneles y menús) */
+:root{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .33 0 0 0 0 .25 0 0 0 0 .14 0 0 0 .2 0'/%3E%3C/filter%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .16 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E")}
+body,#menu,.xm,.modal,.panel,[role=dialog],[role=dialog]>div:not(.pg),#more-menu,.menu,.sheet{background-image:var(--grain)!important;background-size:240px 240px!important}
+body{background-color:var(--bg)}
 </style>
 </head>
 <body>

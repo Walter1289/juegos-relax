@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ece2cc">
+<meta name="theme-color" content="#dccfb1">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,9 +21,9 @@
 <script src="shared/guard.js"></script>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-:root{--bg:#ece2cc;--panel:#f3ebd9;--ink:#2a231c;--muted:#6b5e4f;--lamp:#c5463b;--line:#b9a47c}
+:root{--bg:#dccfb1;--panel:#e6dabf;--ink:#2a231c;--muted:#5a4e40;--lamp:#a8382f;--line:#a8926a}
 *{box-sizing:border-box}
-body{margin:0;min-height:100dvh;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .27 0 0 0 0 .16 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E"),radial-gradient(120% 90% at 50% 0%,#f6efe1,var(--bg) 60%);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;display:grid;place-items:center;padding:24px 16px}
+body{margin:0;min-height:100dvh;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .33 0 0 0 0 .25 0 0 0 0 .14 0 0 0 .2 0'/%3E%3C/filter%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .16 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E"),radial-gradient(130% 100% at 50% 100%,rgba(120,92,52,.16),rgba(120,92,52,0) 55%),radial-gradient(120% 90% at 50% 0%,#e7dcc2,var(--bg) 60%);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;display:grid;place-items:center;padding:24px 16px}
 main{width:100%;max-width:720px;display:flex;flex-direction:column;gap:22px}
 h1{font:700 clamp(1.9rem,5.4vw,2.6rem)/1.1 'Shippori Mincho','Hiragino Mincho ProN',Georgia,serif;margin:0;letter-spacing:.02em}
 p{margin:0;color:var(--muted);line-height:1.55}
@@ -37,11 +37,12 @@ a.card i{font-style:normal;color:var(--lamp);font-weight:700;margin-top:4px}
 small{color:var(--muted);opacity:.8}
 #legal{font-size:.85rem;color:var(--muted)}#legal a{color:var(--lamp);display:inline-block;padding:10px 4px}
 #lg button{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:99px;padding:8px 16px;font:700 .85rem Nunito,system-ui,sans-serif;cursor:pointer}
+a.card{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .33 0 0 0 0 .25 0 0 0 0 .14 0 0 0 .2 0'/%3E%3C/filter%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .16 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E");background-size:240px 240px}
 </style>
 </head>
 <body>
 <main>
-  <div><img src="icons/icon-192.png" alt="" width="92" height="92" style="display:block;width:92px;height:92px;border-radius:22px;margin:0 0 12px;box-shadow:0 6px 16px rgba(90,70,40,.22);border:1px solid #b9a47c"><h1>Tomoshibi</h1><p id="tag" style="margin:2px 0 10px;font-size:.95rem;opacity:.8">ともしび · Luz de lámpara · Juegos Sin Prisa</p><p>Cuatro juegos tranquilos, sin puntaje ni tiempo, para soltar la mente al final del día.</p></div>
+  <div><img src="icons/icon-192.png" alt="" width="92" height="92" style="display:block;width:92px;height:92px;border-radius:22px;margin:0 0 12px;box-shadow:0 6px 16px rgba(90,70,40,.22);border:1px solid #a8926a"><h1>Tomoshibi</h1><p id="tag" style="margin:2px 0 10px;font-size:.95rem;opacity:.8">ともしび · Luz de lámpara · Juegos Sin Prisa</p><p>Cuatro juegos tranquilos, sin puntaje ni tiempo, para soltar la mente al final del día.</p></div>
   <div class="grid">
     <a class="card" href="rio/"><b>Río de Linternas</b><span>Guía una canoa por un río infinito, enciende linternas y descubre lugares mientras cae la noche.</span><i>Jugar →</i></a>
     <a class="card" href="cabana/"><b>Cabaña del Acantilado</b><span>Limpia y repara poco a poco una cabaña en lo alto de la montaña, de noche y con lámparas.</span><i>Jugar →</i></a>
@@ -99,7 +100,7 @@ small{color:var(--muted);opacity:.8}
       if(!UX.subsOn())return;
       const n=performance.now(),l=UX._cl||(UX._cl={});if(l[k]&&n-l[k]<(gap||9000))return;l[k]=n;
       let e=document.getElementById('uxcap');
-      if(!e){e=document.createElement('div');e.id='uxcap';e.setAttribute('aria-live','polite');e.style.cssText='position:fixed;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 50px));transform:translateX(-50%);background:rgba(243,235,217,.84);color:#2a231c;padding:6px 14px;border-radius:8px;font:600 .86rem system-ui,sans-serif;opacity:0;transition:opacity .4s;z-index:20;pointer-events:none;max-width:86%;text-align:center';document.body.appendChild(e)}
+      if(!e){e=document.createElement('div');e.id='uxcap';e.setAttribute('aria-live','polite');e.style.cssText='position:fixed;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 50px));transform:translateX(-50%);background:rgba(230,218,191,.84);color:#2a231c;padding:6px 14px;border-radius:8px;font:600 .86rem system-ui,sans-serif;opacity:0;transition:opacity .4s;z-index:20;pointer-events:none;max-width:86%;text-align:center';document.body.appendChild(e)}
       e.textContent='['+UX.tr(k)+']';e.style.opacity=1;clearTimeout(UX._ct);UX._ct=setTimeout(()=>e.style.opacity=0,2600);
     },
     /* botones de ajustes para el menú «Más». opts.hand=true añade el modo una mano (clases hand-r / hand-l en body). */

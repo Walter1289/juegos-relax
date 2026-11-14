@@ -168,8 +168,8 @@ export function pintaSello(cv,t,nivel){
   c.globalCompositeOperation='destination-out';const g=rnd(31+t),n=300*(cv.height/k)*.11;for(let i=0;i<n;i++){c.globalAlpha=.1+g()*.3;c.fillRect(g()*300,g()*cv.height/k,.7+g()*.9,.7+g()*.9)}
   c.globalCompositeOperation='source-over';c.globalAlpha=1}
 /** Mosaico de papel con fibra (dataURL) para el fondo del pergamino. */
-export function papel(){const s=160,cv=document.createElement('canvas');cv.width=cv.height=s;const x=cv.getContext('2d'),g=rnd(5);x.fillStyle='#efe6d2';x.fillRect(0,0,s,s);
-  for(let i=0;i<2600;i++){x.fillStyle=g()<.5?'rgba(255,252,240,.5)':'rgba(120,96,60,.07)';x.fillRect(g()*s,g()*s,1+g()*1.6,1+g()*1.6)}
+export function papel(){const s=160,cv=document.createElement('canvas');cv.width=cv.height=s;const x=cv.getContext('2d'),g=rnd(5);x.fillStyle='#e7dcc4';x.fillRect(0,0,s,s);
+  for(let i=0;i<2600;i++){x.fillStyle=g()<.5?'rgba(255,250,236,.32)':'rgba(120,96,60,.07)';x.fillRect(g()*s,g()*s,1+g()*1.6,1+g()*1.6)}
   x.strokeStyle='rgba(130,104,66,.1)';x.lineWidth=.6;for(let i=0;i<46;i++){const a=g()*s,b=g()*s,t=g()*6.28,l=5+g()*14;x.beginPath();x.moveTo(a,b);x.quadraticCurveTo(a+Math.cos(t)*l*.5+2,b+Math.sin(t)*l*.5,a+Math.cos(t)*l,b+Math.sin(t)*l);x.stroke()}
   return cv.toDataURL('image/png')}
 
